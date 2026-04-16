@@ -129,7 +129,7 @@ void FAnimInstanceProxy::UpdateAnimationNode_WithRoot(const FAnimationUpdateCont
 
 	TRACE_SCOPED_ANIM_GRAPH(InContext)
 	TRACE_SCOPED_ANIM_NODE(InContext)
-	
+
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 	if(InRootNode != nullptr)
 	{
@@ -158,7 +158,7 @@ void FAnimInstanceProxy::UpdateAnimationNode_WithRoot(const FAnimationUpdateCont
 void FAnimInstanceProxy::AddReferencedObjects(UAnimInstance* InAnimInstance, FReferenceCollector& Collector)
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
-	
+
 	Sync.AddReferencedObjects(InAnimInstance, Collector);
 }
 
@@ -282,7 +282,7 @@ void FAnimInstanceProxy::InitializeCachedClassData()
 			FAnimNode_StateMachine* StateMachine = Property->ContainerPtrToValuePtr<FAnimNode_StateMachine>(AnimInstanceObject);
 			StateMachine->CacheMachineDescription(AnimClassInterface);
 		}
-		
+
 		// Cache any preupdate nodes
 		for (const FStructProperty* Property : AnimClassInterface->GetPreUpdateNodeProperties())
 		{
@@ -297,7 +297,7 @@ void FAnimInstanceProxy::InitializeCachedClassData()
 			DynamicResetNodes.Add(AnimNode);
 		}
 
-		// Cache default linked input pose 
+		// Cache default linked input pose
 		for(const FAnimBlueprintFunction& AnimBlueprintFunction : AnimClassInterface->GetAnimBlueprintFunctions())
 		{
 			if(AnimBlueprintFunction.Name == NAME_AnimGraph)
@@ -321,7 +321,7 @@ void FAnimInstanceProxy::InitializeRootNode(bool bInDeferRootNodeInitialization)
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 
 	InitializeCachedClassData();
-	
+
 	if(AnimClassInterface)
 	{
 		// Init any nodes that need non-relevancy based initialization
@@ -386,7 +386,7 @@ void FAnimInstanceProxy::InitializeRootNode_WithRoot(FAnimNode_Base* InRootNode)
 	{
 		FAnimationUpdateSharedContext SharedContext;
 		FAnimationInitializeContext InitContext(this, &SharedContext);
-		
+
 		if(InRootNode == RootNode)
 		{
 			InitializationCounter.Increment();
@@ -629,13 +629,13 @@ void FAnimInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 		}
 	}
 #endif
-	
+
 	// Copy slot information to main instance if we are using the main instance's montage evaluation data.
 	// Note that linked anim instance's proxies PostUpdate() will be called before the main instance's proxy PostUpdate().
 	if (bUseMainInstanceMontageEvaluationData && GetMainInstanceProxy() && GetMainInstanceProxy() != this)
 	{
 		FAnimInstanceProxy& MainProxy = *GetMainInstanceProxy();
-		
+
 		for (const TTuple<FName, int> & LinkedSlotTrackerPair : SlotNameToTrackerIndex)
 		{
 			const int* MainTrackerIndexPtr = MainProxy.SlotNameToTrackerIndex.Find(LinkedSlotTrackerPair.Key);
@@ -651,16 +651,16 @@ void FAnimInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 			{
 				const FMontageActiveSlotTracker & LinkedTracker = SlotWeightTracker[GetBufferReadIndex()][LinkedSlotTrackerPair.Value];
 				FMontageActiveSlotTracker& MainTracker = MainProxy.SlotWeightTracker[MainProxy.GetBufferWriteIndex()][*MainTrackerIndexPtr];
-				
+
 				MainTracker.MontageLocalWeight = FMath::Max(MainTracker.MontageLocalWeight, LinkedTracker.MontageLocalWeight);
 				MainTracker.NodeGlobalWeight = FMath::Max(MainTracker.NodeGlobalWeight, LinkedTracker.NodeGlobalWeight);
-				
+
 				MainTracker.bIsRelevantThisTick = MainTracker.bIsRelevantThisTick || LinkedTracker.bIsRelevantThisTick;
 				MainTracker.bWasRelevantOnPreviousTick = MainTracker.bWasRelevantOnPreviousTick || LinkedTracker.bWasRelevantOnPreviousTick;
 			}
 		}
 	}
-	
+
 	InAnimInstance->NotifyQueue.Append(NotifyQueue);
 	InAnimInstance->NotifyQueue.ApplyMontageNotifies(*this);
 
@@ -725,7 +725,7 @@ void FAnimInstanceProxy::PostEvaluate(UAnimInstance* InAnimInstance)
 		DebugData->RecordNodeAttributeMaps(NodeInputAttributesThisFrame, NodeOutputAttributesThisFrame);
 	}
 #endif
-	
+
 	ClearObjects();
 
 #if ENABLE_ANIM_DRAW_DEBUG
@@ -851,14 +851,14 @@ void FAnimInstanceProxy::MakeSequenceTickRecord(FAnimTickRecord& TickRecord, cla
 }
 
 void FAnimInstanceProxy::MakeBlendSpaceTickRecord(
-	FAnimTickRecord& TickRecord, class UBlendSpace* BlendSpace, const FVector& BlendInput, TArray<FBlendSampleData>& BlendSampleDataCache, FBlendFilter& BlendFilter, 
+	FAnimTickRecord& TickRecord, class UBlendSpace* BlendSpace, const FVector& BlendInput, TArray<FBlendSampleData>& BlendSampleDataCache, FBlendFilter& BlendFilter,
 	bool bLooping, float PlayRate, float FinalBlendWeight, float& CurrentTime, FMarkerTickRecord& MarkerTickRecord) const
 {
 	TickRecord.SourceAsset = BlendSpace;
 	TickRecord.BlendSpace.BlendSpacePositionX = BlendInput.X;
 	TickRecord.BlendSpace.BlendSpacePositionY = BlendInput.Y;
 	// This way of making a tick record is deprecated, so just set to defaults here rather than changing the API
-	TickRecord.BlendSpace.bTeleportToTime = false; 
+	TickRecord.BlendSpace.bTeleportToTime = false;
 	TickRecord.BlendSpace.BlendSampleDataCache = &BlendSampleDataCache;
 	TickRecord.BlendSpace.BlendFilter = &BlendFilter;
 	TickRecord.TimeAccumulator = &CurrentTime;
@@ -976,7 +976,7 @@ void FAnimInstanceProxy::ReinitializeSlotNodes()
 	SlotNameToTrackerIndex.Reset();
 	SlotWeightTracker[0].Reset();
 	SlotWeightTracker[1].Reset();
-	
+
 	// Increment counter
 	SlotNodeInitializationCounter.Increment();
 }
@@ -1179,6 +1179,7 @@ void FAnimInstanceProxy::RecalcRequiredBones(USkeletalMeshComponent* Component, 
 	RequiredBones = Component->GetSharedRequiredBones();
 
 	// The first anim instance will initialize the required bones, all others will re-use it
+	// 第一个动画实例会初始化 RequiredBones，其他实例会复用它
 	if (!RequiredBones->IsValid())
 	{
 		RequiredBones->InitializeTo(Component->RequiredBones, Component->GetCurveFilterSettings(), *Asset);
@@ -1192,7 +1193,7 @@ void FAnimInstanceProxy::RecalcRequiredBones(USkeletalMeshComponent* Component, 
 	if (DefaultLinkedInstanceInputNode)
 	{
 		DefaultLinkedInstanceInputNode->CachedInputPose.SetBoneContainer(RequiredBones.Get());
-		
+
 		// SetBoneContainer allocates space for bone data but leaves it uninitalized.
 		DefaultLinkedInstanceInputNode->bIsCachedInputPoseInitialized = false;
 	}
@@ -1266,7 +1267,7 @@ void FAnimInstanceProxy::UpdateAnimation_WithRoot(const FAnimationUpdateContext&
 			});
 			bInitializeSubsystems = false;
 		}
-		
+
 		if(bDeferRootNodeInitialization)
 		{
 			InitializeRootNode_WithRoot(RootNode);
@@ -1341,7 +1342,7 @@ void FAnimInstanceProxy::UpdateAnimation_WithRoot(const FAnimationUpdateContext&
 					return EAnimSubsystemEnumeration::Continue;
 				});
 			}
-			
+
 			FrameCounterForUpdate = GFrameCounter;
 		}
 	}
@@ -1356,7 +1357,7 @@ void FAnimInstanceProxy::UpdateAnimation_WithRoot(const FAnimationUpdateContext&
 		// We only enable syncing here for the main instance or post process instance
 		// We also fall back to enabling this sync scope if there is not one already enabled (there must always be one)
 		const bool bEnableSyncScope =	GetAnimInstanceObject() == GetSkelMeshComponent()->GetAnimInstance() ||
-										GetAnimInstanceObject() == GetSkelMeshComponent()->GetPostProcessInstance() || 
+										GetAnimInstanceObject() == GetSkelMeshComponent()->GetPostProcessInstance() ||
 										InContext.GetMessage<UE::Anim::FAnimSyncGroupScope>() == nullptr;
 		UE::Anim::TOptionalScopedGraphMessage<UE::Anim::FAnimSyncGroupScope> Message(bEnableSyncScope, InContext, InContext);
 
@@ -1503,7 +1504,7 @@ void FAnimInstanceProxy::EvaluateAnimationNode_WithRoot(FPoseContext& Output, FA
 		}
 
 		TRACE_SCOPED_ANIM_NODE(Output);
-		
+
 		InRootNode->Evaluate_AnyThread(Output);
 	}
 	else
@@ -1662,7 +1663,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 					PerBoneWeightTotalsAdditive[BoneIndex] += PerBoneWeights[CurrentPoseIndex][BoneIndex];
 				}
 			}
-			
+
 			CurrentPoseIndex++;
 		} // If montage slot is valid.
 	} // For all montage eval data.
@@ -1684,7 +1685,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 		PoseIndices.Add(SourcePoseIndex);
 		CurrentPoseIndex++;
 	}
-	
+
 	// Normalize non additive weights.
 	const float NormalizeThreshold = bHasSourcePose ? (1.0f + ZERO_ANIMWEIGHT_THRESH) : ZERO_ANIMWEIGHT_THRESH;
 	const int32 NumPosesToNormalize = Poses.Num();
@@ -1804,7 +1805,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 
 		BlendedPose.NormalizeRotations();
 	}
-	
+
 	// Additive blends.
 	for (int32 PoseIndex = 0; PoseIndex < AdditivePoses.Num(); ++PoseIndex)
 	{
@@ -1836,7 +1837,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 
 		BlendedPose.NormalizeRotations();
 	} // For each additive pose.
-	
+
 	//------------------------------------------
 	// Blend curves and attributes.
 	//------------------------------------------
@@ -1868,7 +1869,7 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 	const FCompactPose& SourcePose = SourceAnimationPoseData.GetPose();
 	const FBlendedCurve& SourceCurve = SourceAnimationPoseData.GetCurve();
 	const UE::Anim::FStackAttributeContainer& SourceAttributes = SourceAnimationPoseData.GetAttributes();
-	
+
 	FCompactPose& BlendedPose = OutBlendedAnimationPoseData.GetPose();
 	FBlendedCurve& BlendedCurve = OutBlendedAnimationPoseData.GetCurve();
 	UE::Anim::FStackAttributeContainer& BlendedAttributes = OutBlendedAnimationPoseData.GetAttributes();
@@ -1904,7 +1905,7 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 	TArray<const UE::Anim::FStackAttributeContainer*, TInlineAllocator<8>>& BlendingAttributes = BlendProfileScratchData.BlendingAttributes;
 	check(BlendProfileScratchData.IsEmpty());
 
-	// first pass we go through collect weights and valid montages. 
+	// first pass we go through collect weights and valid montages.
 #if DEBUG_MONTAGEINSTANCE_WEIGHT
 	float TotalWeight = 0.f;
 #endif // DEBUG_MONTAGEINSTANCE_WEIGHT
@@ -1929,13 +1930,13 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 			FAnimTrack const* const AnimTrack = Montage->GetAnimationData(SlotNodeName);
 
 			// Find out additive type for pose.
-			EAdditiveAnimationType const AdditiveAnimType = AnimTrack->IsAdditive() 
+			EAdditiveAnimationType const AdditiveAnimType = AnimTrack->IsAdditive()
 				? (AnimTrack->IsRotationOffsetAdditive() ? AAT_RotationOffsetMeshSpace : AAT_LocalSpaceBase)
 				: AAT_None;
 
 			const float MontageWeight = EvalState.BlendInfo.GetBlendedValue();
 			FSlotEvaluationPose NewPose(MontageWeight, AdditiveAnimType);
-			
+
 			// Bone array has to be allocated prior to calling GetPoseFromAnimTrack
 			NewPose.Pose.SetBoneContainer(RequiredBones.Get());
 			NewPose.Curve.InitFrom(*RequiredBones);
@@ -1947,7 +1948,7 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 			FAnimationPoseData NewAnimationPoseData(NewPose);
 			AnimTrack->GetAnimationPose(NewAnimationPoseData, ExtractionContext);
 
-			// add montage curves 
+			// add montage curves
 			FBlendedCurve MontageCurve;
 			MontageCurve.InitFrom(*RequiredBones);
 			Montage->EvaluateCurveData(MontageCurve, ExtractionContext);
@@ -2029,9 +2030,9 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 			}
 			else
 			{
-				BlendedPose.ResetToRefPose(); 
+				BlendedPose.ResetToRefPose();
 			}
-		}		
+		}
 		else // Otherwise we need to blend non additive poses together
 		{
 			const int32 NumPoses = NonAdditivePoses.Num() + ((SourceWeight > ZERO_ANIMWEIGHT_THRESH) ? 1 : 0);
@@ -2081,7 +2082,7 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 
 void FAnimInstanceProxy::GetSlotWeight(const FName& SlotNodeName, float& out_SlotNodeWeight, float& out_SourceWeight, float& out_TotalNodeWeight) const
 {
-	// node total weight 
+	// node total weight
 	float NewSlotNodeWeight = 0.f;
 	// this is required to track, because it will be 1-SourceWeight
 	// if additive, it can be applied more
@@ -2106,7 +2107,7 @@ void FAnimInstanceProxy::GetSlotWeight(const FName& SlotNodeName, float& out_Slo
 					NonAdditiveTotalWeight += MontageWeight;
 				}
 
-#if DEBUGMONTAGEWEIGHT			
+#if DEBUGMONTAGEWEIGHT
 				TotalDesiredWeight += EvalState->DesiredWeight;
 #endif
 #if ENABLE_ANIM_LOGGING
@@ -2202,7 +2203,7 @@ void FAnimInstanceProxy::GatherDebugData_WithRoot(FNodeDebugData& DebugData, FAn
 	// Gather debug data for Root Node
 	if(InRootNode != nullptr)
 	{
-		 InRootNode->GatherDebugData(DebugData); 
+		 InRootNode->GatherDebugData(DebugData);
 	}
 
 	// Gather debug data for Cached Poses.
@@ -2493,7 +2494,7 @@ float FAnimInstanceProxy::GetInstanceStateWeight(int32 MachineIndex, int32 State
 	{
 		return GetRecordedStateWeight(MachineInstance->StateMachineIndexInClass, StateIndex);
 	}
-	
+
 	return 0.0f;
 }
 
@@ -2639,7 +2640,7 @@ bool FAnimInstanceProxy::WasAnimNotifyStateActiveInAnyState(TSubclassOf<UAnimNot
 	for (const FAnimNotifyEventReference& Ref : ActiveAnimNotifiesSinceLastTick)
 	{
 		const FAnimNotifyEvent* NotifyEvent = Ref.GetNotify();
-		if (NotifyEvent && NotifyEvent->NotifyStateClass 
+		if (NotifyEvent && NotifyEvent->NotifyStateClass
 			&& NotifyEvent->NotifyStateClass->IsA(AnimNotifyStateType))
 		{
 			return true;
@@ -2701,7 +2702,7 @@ bool FAnimInstanceProxy::WasAnimNotifyNameTriggeredInSourceState(int32 MachineIn
 				const FName* MirroredName = Ref.GetMirrorDataTable()->AnimNotifyToMirrorAnimNotifyMap.Find(LookupName);
 				if (MirroredName)
 				{
-					LookupName = *MirroredName; 
+					LookupName = *MirroredName;
 				}
 			}
 			if(LookupName == NotifyName)
@@ -2752,7 +2753,7 @@ bool FAnimInstanceProxy::WasAnimNotifyNameTriggeredInAnyState(FName NotifyName) 
 				const FName* MirroredName = Ref.GetMirrorDataTable()->AnimNotifyToMirrorAnimNotifyMap.Find(LookupName);
 				if (MirroredName)
 				{
-					LookupName = *MirroredName; 
+					LookupName = *MirroredName;
 				}
 			}
 			if(LookupName == NotifyName)
@@ -2761,7 +2762,7 @@ bool FAnimInstanceProxy::WasAnimNotifyNameTriggeredInAnyState(FName NotifyName) 
 			}
 		}
 	}
-	return false; 
+	return false;
 }
 
 bool FAnimInstanceProxy::WasAnimNotifyNameTriggeredInStateMachine(int32 MachineIndex, FName NotifyName)
@@ -2777,7 +2778,7 @@ bool FAnimInstanceProxy::WasAnimNotifyNameTriggeredInStateMachine(int32 MachineI
 				const FName* MirroredName = Ref.GetMirrorDataTable()->AnimNotifyToMirrorAnimNotifyMap.Find(LookupName);
 				if (MirroredName)
 				{
-					LookupName = *MirroredName; 
+					LookupName = *MirroredName;
 				}
 			}
 			if(LookupName == NotifyName)
@@ -2797,7 +2798,7 @@ bool FAnimInstanceProxy::RequestTransitionEvent(const FName& EventName, const do
 	{
 		return false;
 	}
-	
+
 	ForEachStateMachine([NewTransitionEvent](FAnimNode_StateMachine& StateMachine)
 	{
 		StateMachine.RequestTransitionEvent(NewTransitionEvent);
@@ -2909,7 +2910,7 @@ void FAnimInstanceProxy::AddNativeStateEntryBinding(const FName& MachineName, co
 {
 	NativeStateEntryBindings.Add(FNativeStateBinding(MachineName, StateName, NativeEnteredDelegate, BindingName));
 }
-	
+
 bool FAnimInstanceProxy::HasNativeStateEntryBinding(const FName& MachineName, const FName& StateName, FName& OutBindingName)
 {
 	for(const auto& Binding : NativeStateEntryBindings)
@@ -3153,7 +3154,7 @@ int32 FAnimInstanceProxy::GetStateMachineIndex(FAnimNode_StateMachine* StateMach
 			}
 		}
 	}
-	return INDEX_NONE; 	
+	return INDEX_NONE;
 }
 
 void FAnimInstanceProxy::GetStateMachineIndexAndDescription(FName InMachineName, int32& OutNodeIndex, const FBakedAnimationStateMachine** OutMachineDescription) const
@@ -3341,7 +3342,7 @@ TArray<FAnimNode_AssetPlayerBase*> FAnimInstanceProxy::GetMutableInstanceAssetPl
 {
 	TArray<FAnimNode_AssetPlayerBase*> Nodes;
 
-	// Retrieve all asset player nodes from the (named) Animation Layer Graph	
+	// Retrieve all asset player nodes from the (named) Animation Layer Graph
 	if (AnimClassInterface)
 	{
 		const TMap<FName, FGraphAssetPlayerInformation>& GrapInformationMap = AnimClassInterface->GetGraphAssetPlayerInformation();
@@ -3386,7 +3387,7 @@ TArray<FAnimNode_AssetPlayerRelevancyBase*> FAnimInstanceProxy::GetMutableInstan
 {
 	TArray<FAnimNode_AssetPlayerRelevancyBase*> Nodes;
 
-	// Retrieve all asset player nodes from the (named) Animation Layer Graph	
+	// Retrieve all asset player nodes from the (named) Animation Layer Graph
 	if (AnimClassInterface)
 	{
 		const TMap<FName, FGraphAssetPlayerInformation>& GrapInformationMap = AnimClassInterface->GetGraphAssetPlayerInformation();
@@ -3584,7 +3585,7 @@ void FAnimInstanceProxy::UpdateCurvesToEvaluationContext(const FAnimationEvaluat
 		AnimationCurves[(uint8)EAnimCurveType::AttributeCurve].Add(InCurveElement.Name, InCurveElement.Value);
 	});
 
-	UE::Anim::FNamedValueArrayUtils::Intersection(InContext.Curve, RequiredBones->GetCurveFlags(), 
+	UE::Anim::FNamedValueArrayUtils::Intersection(InContext.Curve, RequiredBones->GetCurveFlags(),
 		[this](const UE::Anim::FCurveElement& InCurveElement, const UE::Anim::FCurveElementFlags& InCurveFlagsElement)
 		{
 			if(EnumHasAnyFlags(InCurveFlagsElement.Flags | InCurveElement.Flags, UE::Anim::ECurveElementFlags::MorphTarget))
@@ -3640,13 +3641,13 @@ void FAnimInstanceProxy::AddCurveValue(const FName& CurveName, float Value, bool
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 
-	// save curve value, it will overwrite if same exists, 
+	// save curve value, it will overwrite if same exists,
 	//CurveValues.Add(CurveName, Value);
 	float* CurveValPtr = AnimationCurves[(uint8)EAnimCurveType::AttributeCurve].Find(CurveName);
 	if ( CurveValPtr )
 	{
 		// sum up, in the future we might normalize, but for now this just sums up
-		// this won't work well if all of them have full weight - i.e. additive 
+		// this won't work well if all of them have full weight - i.e. additive
 		*CurveValPtr = Value;
 	}
 	else
@@ -3660,7 +3661,7 @@ void FAnimInstanceProxy::AddCurveValue(const FName& CurveName, float Value, bool
 		if (CurveValPtr)
 		{
 			// sum up, in the future we might normalize, but for now this just sums up
-			// this won't work well if all of them have full weight - i.e. additive 
+			// this won't work well if all of them have full weight - i.e. additive
 			*CurveValPtr = Value;
 		}
 		else
@@ -3780,4 +3781,3 @@ TOptional<EAnimInterpolationType> FAnimInstanceProxy::GetInterpolationOverride()
 }
 
 #undef LOCTEXT_NAMESPACE
-

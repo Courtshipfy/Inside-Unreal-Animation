@@ -27,3 +27,11 @@ Build/
 *.unsuccessfulbuild
 *.tmp
 *.temp
+
+# Translation Tools and Generated Files
+translation_tools/
+comments_to_translate.json
+comments_translated.json
+translation_progress.json
+batch_*_to_translate.json
+batch_*_translated.json

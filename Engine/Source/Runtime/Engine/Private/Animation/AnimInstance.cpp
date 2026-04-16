@@ -291,6 +291,7 @@ void UAnimInstance::InitializeAnimation(bool bInDeferRootNodeInitialization)
 		LifeTimer = 0.0;
 		CurrentLifeTimerScrubPosition = 0.0;
 
+		// 当动画实例初始化时，如果这个实例正在被编辑器调试，则清空之前记录的调试快照数据，准备记录新的调试信息。
 		if (UAnimBlueprint* Blueprint = Cast<UAnimBlueprint>(Cast<UAnimBlueprintGeneratedClass>(AnimBlueprintClass)->ClassGeneratedBy))
 		{
 			if (Blueprint->GetObjectBeingDebugged() == this)
@@ -303,6 +304,7 @@ void UAnimInstance::InitializeAnimation(bool bInDeferRootNodeInitialization)
 	}
 
 	// before initialize, need to recalculate required bone list
+	// 初始化之前，获得工作线程上的Animinstanceproxy，让其从USkeletalMeshComponent上获得骨骼信息并缓存下来
 	RecalcRequiredBones();
 
 	GetProxyOnGameThread<FAnimInstanceProxy>().Initialize(this);

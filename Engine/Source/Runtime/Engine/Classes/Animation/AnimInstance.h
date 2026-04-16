@@ -344,7 +344,7 @@ struct FMontageActiveSlotTracker
 		: MontageLocalWeight(0.f)
 		, NodeGlobalWeight(0.f)
 		, bIsRelevantThisTick(false)
-		, bWasRelevantOnPreviousTick(false) 
+		, bWasRelevantOnPreviousTick(false)
 	{}
 };
 
@@ -369,7 +369,7 @@ class UAnimInstance : public UObject
 	 * Allows this anim instance to update its native update, blend tree, montages and asset players on
 	 * a worker thread. This flag is propagated from the UAnimBlueprint to this instance by the compiler.
 	 * The compiler will attempt to pick up any issues that may occur with threaded update.
-	 * For updates to run in multiple threads both this flag and the project setting "Allow Multi Threaded 
+	 * For updates to run in multiple threads both this flag and the project setting "Allow Multi Threaded
 	 * Animation Update" should be set.
 	 */
 	UPROPERTY(meta=(BlueprintCompilerGeneratedDefaults))
@@ -401,14 +401,14 @@ private:
 	// Should UpdateAnimation be called
 	uint8 bUpdateAnimationEnabled;
 
-	/** True when Montages are being ticked, and Montage Events should be queued. 
+	/** True when Montages are being ticked, and Montage Events should be queued.
 	 * When Montage are being ticked, we queue AnimNotifies and Events. We trigger notifies first, then Montage events. */
 	UPROPERTY(Transient)
 	uint8 bQueueMontageEvents : 1;
 
 	/** Flag used to query if the animation instance has been uninitialized via UninitializeAnimation() call. */
 	uint8 bUninitialized : 1;
-	
+
 #if DO_CHECK
 	/** Guard flag used for checking whether we are in user callbacks for initialization */
 	uint8 bInitializing : 1;
@@ -429,7 +429,7 @@ public:
 	* Note: this is the weight of the node, not the weight of any potential montage it is playing. */
 	ENGINE_API float GetSlotNodeGlobalWeight(const FName& SlotNodeName) const;
 
-	// Should Extract Root Motion or not. Return true if we do. 
+	// Should Extract Root Motion or not. Return true if we do.
 	bool ShouldExtractRootMotion() const { return RootMotionMode == ERootMotionMode::RootMotionFromEverything || RootMotionMode == ERootMotionMode::IgnoreRootMotion; }
 
 	/** Get Global weight of any montages this slot node is playing.
@@ -448,13 +448,13 @@ public:
 
 	// kismet event functions
 
-	UFUNCTION(BlueprintCallable, Category = "Animation") 
+	UFUNCTION(BlueprintCallable, Category = "Animation")
 	ENGINE_API virtual APawn* TryGetPawnOwner() const;
 
-	/** 
+	/**
 	 * Takes a snapshot of the current skeletal mesh component pose & saves it internally.
-	 * This snapshot can then be retrieved by name in the animation blueprint for blending. 
-	 * The snapshot is taken at the current LOD, so if for example you took the snapshot at LOD1 and then used it at LOD0 any bones not in LOD1 will use the reference pose 
+	 * This snapshot can then be retrieved by name in the animation blueprint for blending.
+	 * The snapshot is taken at the current LOD, so if for example you took the snapshot at LOD1 and then used it at LOD0 any bones not in LOD1 will use the reference pose
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Pose")
 	ENGINE_API virtual void SavePoseSnapshot(FName SnapshotName);
@@ -471,12 +471,12 @@ public:
 
 	/**
 	 * Takes a snapshot of the current skeletal mesh component pose and saves it to the specified snapshot.
-	 * The snapshot is taken at the current LOD, so if for example you took the snapshot at LOD1 
-	 * and then used it at LOD0 any bones not in LOD1 will use the reference pose 
+	 * The snapshot is taken at the current LOD, so if for example you took the snapshot at LOD1
+	 * and then used it at LOD0 any bones not in LOD1 will use the reference pose
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Pose")
 	ENGINE_API virtual void SnapshotPose(UPARAM(ref) FPoseSnapshot& Snapshot);
-	
+
 	/** Get the sync group we are currently reading from */
 	ENGINE_API const TMap<FName, FAnimGroupInstance>& GetSyncGroupMapRead() const;
 
@@ -500,7 +500,7 @@ public:
 
 	// Get whether we have initialized our animation instance or not. This will return false if UninitializeAnimation() has been called.
 	ENGINE_API bool IsInitialized() const;
-	
+
 	/** Get whether to process notifies from any linked anim instances */
 	UFUNCTION(BlueprintPure, Category = "Animation|Notifies")
 	bool GetReceiveNotifiesFromLinkedInstances() const { return bReceiveNotifiesFromLinkedInstances; }
@@ -531,7 +531,7 @@ public:
 	/** Returns the owning actor of this AnimInstance */
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 	ENGINE_API AActor* GetOwningActor() const;
-	
+
 	// Returns the skeletal mesh component that has created this AnimInstance
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 	ENGINE_API USkeletalMeshComponent* GetOwningComponent() const;
@@ -567,7 +567,7 @@ public:
 	ENGINE_API void BlueprintThreadSafeUpdateAnimation(float DeltaTime);
 
 	ENGINE_API bool CanTransitionSignature() const;
-	
+
 	/*********************************************************************************************
 	* SlotAnimation
 	********************************************************************************************* */
@@ -599,11 +599,11 @@ public:
 	/** Return true if this instance has an active montage in the given slot. A UAnimMontage that is playing in the slot and blending out is not determined to be "active". */
 	UFUNCTION(BlueprintPure, Category="Animation|Montage", meta=(BlueprintThreadSafe))
 	ENGINE_API bool IsSlotActive(FName SlotNodeName) const;
-	
+
 	/** Get local weight of any montages this slot node is playing. If this slot is not currently playing a montage, it will return 0. */
 	UFUNCTION(BlueprintPure, Category="Animation|Montage", meta=(BlueprintThreadSafe, DisplayName="GetSlotLocalWeight"))
 	ENGINE_API float Blueprint_GetSlotMontageLocalWeight(FName SlotNodeName) const;
-	
+
 	/*********************************************************************************************
 	 * AnimMontage
 	 ********************************************************************************************* */
@@ -654,13 +654,13 @@ public:
 	ENGINE_API void Montage_JumpToSectionsEnd(FName SectionName, const UAnimMontage* Montage = NULL);
 
 	/** Relink new next section AFTER SectionNameToChange in run-time
-	 *	You can link section order the way you like in editor, but in run-time if you'd like to change it dynamically, 
+	 *	You can link section order the way you like in editor, but in run-time if you'd like to change it dynamically,
 	 *	use this function to relink the next section
 	 *	For example, you can have Start->Loop->Loop->Loop.... but when you want it to end, you can relink
-	 *	next section of Loop to be End to finish the montage, in which case, it stops looping by Loop->End. 
-	 
+	 *	next section of Loop to be End to finish the montage, in which case, it stops looping by Loop->End.
+
 	 * @param SectionNameToChange : This should be the name of the Montage Section after which you want to insert a new next section
-	 * @param NextSection	: new next section 
+	 * @param NextSection	: new next section
 	 */
 	UFUNCTION(BlueprintCallable, Category="Animation|Montage")
 	ENGINE_API void Montage_SetNextSection(FName SectionNameToChange, FName NextSection, const UAnimMontage* Montage = NULL);
@@ -673,7 +673,7 @@ public:
 	UFUNCTION(BlueprintPure, Category="Animation|Montage")
 	ENGINE_API bool Montage_IsActive(const UAnimMontage* Montage) const;
 
-	/** Returns true if the animation montage is currently active and playing. 
+	/** Returns true if the animation montage is currently active and playing.
 	If reference is NULL, it will return true is ANY montage is currently active and playing. */
 	UFUNCTION(BlueprintPure, Category="Animation|Montage")
 	ENGINE_API bool Montage_IsPlaying(const UAnimMontage* Montage) const;
@@ -685,11 +685,11 @@ public:
 	/** Get Current Montage Position */
 	UFUNCTION(BlueprintPure, Category = "Animation|Montage")
 	ENGINE_API float Montage_GetPosition(const UAnimMontage* Montage) const;
-	
+
 	/** Set position. */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Montage")
 	ENGINE_API void Montage_SetPosition(const UAnimMontage* Montage, float NewPosition);
-	
+
 	/** return true if Montage is not currently active. (not valid or blending out) */
 	UFUNCTION(BlueprintPure, Category = "Animation|Montage")
 	ENGINE_API bool Montage_GetIsStopped(const UAnimMontage* Montage) const;
@@ -735,7 +735,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Animation|Montage")
 	ENGINE_API bool IsAnyMontagePlaying() const;
 
-	/** Get a current Active Montage in this AnimInstance. 
+	/** Get a current Active Montage in this AnimInstance.
 		Note that there might be multiple Active at the same time. This will only return the first active one it finds. **/
 	UFUNCTION(BlueprintPure, Category = "Animation|Montage")
 	ENGINE_API UAnimMontage* GetCurrentActiveMontage() const;
@@ -747,7 +747,7 @@ public:
 	/** Called when a montage finishes blending in */
 	UPROPERTY(BlueprintAssignable)
 	FOnMontageBlendedInEndedMCDelegate OnMontageBlendedIn;
-	
+
 	/** Called when a montage has started */
 	UPROPERTY(BlueprintAssignable)
 	FOnMontageStartedMCDelegate OnMontageStarted;
@@ -763,31 +763,31 @@ public:
 	/** Called when a montage section changes */
 	UPROPERTY(BlueprintAssignable)
 	FOnMontageSectionChangedMCDelegate OnMontageSectionChanged;
-	
+
 	/*********************************************************************************************
 	* AnimMontage native C++ interface
 	********************************************************************************************* */
-public:	
+public:
 	ENGINE_API void Montage_SetEndDelegate(FOnMontageEnded & InOnMontageEnded, UAnimMontage* Montage = NULL);
 
 	/** Get pointer to Ended delegate for Montage.
 	    If Montage reference is NULL, it will pick the first active montage found.*/
 	ENGINE_API FOnMontageEnded* Montage_GetEndedDelegate(UAnimMontage* Montage = nullptr);
-	
+
 	ENGINE_API void Montage_SetBlendingOutDelegate(FOnMontageBlendingOutStarted& InOnMontageBlendingOut, UAnimMontage* Montage = NULL);
 
 	ENGINE_API void Montage_SetBlendedInDelegate(FOnMontageBlendedInEnded& InOnMontageBlendingIn, UAnimMontage* Montage = nullptr);
-	
+
 	/** Get pointer to BlendingOutStarted delegate for Montage.
 	If Montage reference is NULL, it will pick the first active montage found. */
 	ENGINE_API FOnMontageBlendingOutStarted* Montage_GetBlendingOutDelegate(UAnimMontage* Montage = NULL);
 
 	ENGINE_API void Montage_SetSectionChangedDelegate(FOnMontageSectionChanged& InOnMontageSectionChanged, UAnimMontage* Montage = NULL);
-	
+
 	/** Get pointer to SectionChanged delegate for Montage.
 	If Montage reference is NULL, it will pick the first active montage found. */
 	ENGINE_API FOnMontageSectionChanged* Montage_GetSectionChangedDelegate(UAnimMontage* Montage = NULL);
-	
+
 	/** Get next sectionID for given section ID */
 	ENGINE_API int32 Montage_GetNextSectionID(const UAnimMontage* Montage, int32 const & CurrentSectionID) const;
 
@@ -818,7 +818,7 @@ public:
 	UE_DEPRECATED(4.24, "Function renamed, please use GetLinkedInputPoseNode")
 	FAnimNode_LinkedInputPose* GetSubInputNode(FName InSubInput = NAME_None, FName InGraph = NAME_None) { return GetLinkedInputPoseNode(InSubInput, InGraph); }
 
-	/** 
+	/**
 	 * Get a linked input pose node by name, given a named graph.
 	 * @param	InSubInput	The name of the linked input pose. If this is NAME_None, then we assume that the desired input is FAnimNode_LinkedInputPose::DefaultInputPoseName.
 	 * @param	InGraph		The name of the graph in which to find the linked input. If this is NAME_None, then we assume that the desired graph is "AnimGraph", the default.
@@ -911,7 +911,7 @@ public:
 		FAnimSubsystemInstance* Subsystem = FindSubsystem(SubsystemType::StaticStruct());
 		return static_cast<SubsystemType*>(Subsystem);
 	}
-	
+
 	// Get a subsystem's instance-resident data. If no subsystem of the type exists this will assert.
 	template<typename SubsystemType>
 	SubsystemType& GetSubsystem()
@@ -928,7 +928,7 @@ private:
 protected:
 	/** Map between Active Montages and their FAnimMontageInstance */
 	TMap<class UAnimMontage*, struct FAnimMontageInstance*> ActiveMontagesMap;
-	
+
 
 	UE_DEPRECATED(5.5, "This property is deprecated. Please use SlotGroupInertializationRequestDataMap instead")
 	TMap<FName, UE::Anim::FSlotInertializationRequest> SlotGroupInertializationRequestMap;
@@ -954,7 +954,7 @@ protected:
 
 public:
 
-	/** Flush completed montages when animation tick is paused. 
+	/** Flush completed montages when animation tick is paused.
 		This can be used to prevent montages from infinitely stacking up when not ticking. */
 	ENGINE_API void ConditionalFlushCompletedMontages();
 
@@ -979,7 +979,7 @@ public:
 
 	/** Queue a Montage Section Changed Event to be triggered. */
 	ENGINE_API void QueueMontageSectionChangedEvent(const FQueuedMontageSectionChangedEvent& MontageSectionChangedEvent);
-	
+
 private:
 	/** Trigger queued Montage events. */
 	ENGINE_API void TriggerQueuedMontageEvents();
@@ -995,7 +995,7 @@ private:
 
 	/** Queued Montage Section Changed Events */
 	TArray<FQueuedMontageSectionChangedEvent> QueuedMontageSectionChangedEvents;
-	
+
 	/** Trigger a Montage BlendingOut event */
 	ENGINE_API void TriggerMontageBlendingOutEvent(const FQueuedMontageBlendingOutEvent& MontageBlendingOutEvent);
 
@@ -1007,7 +1007,7 @@ private:
 
 	/** Trigger a Montage Ended event */
 	ENGINE_API void TriggerMontageSectionChangedEvent(const FQueuedMontageSectionChangedEvent& MontageSectionChangedEvent);
-	
+
 public:
 
 #if DO_CHECK
@@ -1022,7 +1022,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Animation|Root Motion")
 	ENGINE_API void SetRootMotionMode(TEnumAsByte<ERootMotionMode::Type> Value);
 
-	/** 
+	/**
 	 * NOTE: Derived anim getters
 	 *
 	 * Anim getter functions can be defined for any instance deriving UAnimInstance.
@@ -1135,7 +1135,7 @@ public:
 	/** Get whether the given state machine triggered the animation notify with the specified name last tick. */
 	UFUNCTION(BlueprintPure, Category = "Animation|State Machines", meta = (BlueprintInternalUseOnly = "true", AnimGetter = "true", GetterContext = "Transition", BlueprintThreadSafe, Keywords = "Window,TransitionWindow,NotifyState,NotifyStateTransition"))
     ENGINE_API bool WasAnimNotifyNameTriggeredInStateMachine(int32 MachineIndex, FName NotifyName);
-	
+
 	/**  Get whether an animation notify of a given type was triggered last tick. */
 	UFUNCTION(BlueprintPure, Category = "Animation|State Machines", meta = (BlueprintInternalUseOnly = "true", AnimGetter = "true", GetterContext = "Transition", BlueprintThreadSafe, Keywords = "Window,TransitionWindow,NotifyState,NotifyStateTransition"))
     ENGINE_API bool WasAnimNotifyTriggeredInAnyState(TSubclassOf<UAnimNotify> AnimNotifyType);
@@ -1143,7 +1143,7 @@ public:
 	/** Get whether the animation notify with the specified name triggered last tick. */
 	UFUNCTION(BlueprintPure, Category = "Animation|State Machines", meta = (BlueprintInternalUseOnly = "true", AnimGetter = "true", GetterContext = "Transition", BlueprintThreadSafe, Keywords = "Window,TransitionWindow,NotifyState,NotifyStateTransition"))
     ENGINE_API bool WasAnimNotifyNameTriggeredInAnyState(FName NotifyName);
-	
+
 	/** Gets the runtime instance of the specified state machine by Name */
 	ENGINE_API const FAnimNode_StateMachine* GetStateMachineInstanceFromName(FName MachineName) const;
 
@@ -1161,7 +1161,7 @@ public:
 	/** Gets the runtime instance of the specified state machine */
 	ENGINE_API const FAnimNode_StateMachine* GetStateMachineInstance(int32 MachineIndex) const;
 
-	/** 
+	/**
 	 * Get the index of the specified instance asset player. Useful to pass to GetInstanceAssetPlayerLength (etc.).
 	 * Passing NAME_None to InstanceName will return the first (assumed only) player instance index found.
 	 */
@@ -1195,16 +1195,16 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 
 public:
-	
+
 	/** Returns a blend profile by name from our current skeleton. Null if not found. */
 	UFUNCTION(BlueprintPure, Category="Animation|Skeleton", meta=(BlueprintThreadSafe))
 	ENGINE_API const UBlendProfile* GetBlendProfileByName(FName InBlendProfileName) const;
-	
+
 	/** Returns the value of a named curve. */
 	UFUNCTION(BlueprintPure, Category="Animation|Curves", meta=(BlueprintThreadSafe))
 	ENGINE_API float GetCurveValue(FName CurveName) const;
 
-	/** 
+	/**
 	* Returns whether a named curve was found, its value, and a default value when it's not found.
 	* @param	AnimInstance	The anim instance to find this curve value for.
 	* @param	CurveName		The name of the curve.
@@ -1316,9 +1316,9 @@ public:
 	UE_DEPRECATED(4.22, "This function is deprecated, please use OnUROPreInterpolation_AnyThread")
 	virtual void OnUROPreInterpolation() {}
 
-	/** 
+	/**
 	 * Called before URO interpolation is performed. Useful for modifying bone space transforms etc. before interpolation is performed.
-	 * Note that this can be called on a worker thread. 
+	 * Note that this can be called on a worker thread.
 	 */
 	virtual void OnUROPreInterpolation_AnyThread(FAnimationEvaluationContext& InOutContext) {}
 
@@ -1370,10 +1370,10 @@ public:
 	// the below functions are the native overrides for each phase
 	// Native initialization override point
 	ENGINE_API virtual void NativeInitializeAnimation();
-	// Native update override point. It is usually a good idea to simply gather data in this step and 
+	// Native update override point. It is usually a good idea to simply gather data in this step and
 	// for the bulk of the work to be done in NativeThreadSafeUpdateAnimation.
 	ENGINE_API virtual void NativeUpdateAnimation(float DeltaSeconds);
-	// Native thread safe update override point. Executed on a worker thread just prior to graph update 
+	// Native thread safe update override point. Executed on a worker thread just prior to graph update
 	// for linked anim instances, only called when the hosting node(s) are relevant
 	ENGINE_API virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds);
 	// Native Post Evaluate override point
@@ -1399,7 +1399,7 @@ public:
 
 	// Sets up a native state entry delegate from state with StateName, in the state machine with name MachineName.
 	ENGINE_API void AddNativeStateEntryBinding(const FName& MachineName, const FName& StateName, const FOnGraphStateChanged& NativeEnteredDelegate);
-	
+
 	// Check for whether a native entry delegate is bound to the specified state
 	ENGINE_API bool HasNativeStateEntryBinding(const FName& MachineName, const FName& StateName, FName& OutBindingName);
 
@@ -1422,7 +1422,7 @@ public:
 	UE_DEPRECATED(4.20, "Please use ResetDynamics with a ETeleportType argument")
 	ENGINE_API void ResetDynamics();
 
-	/** 
+	/**
 	 * Get the 'animation' LOD level, which by default is the PredictedLODLevel of this anim instance's skeletal mesh component.
 	 * This function is used by the anim graph to determine the LOD level at which to run.
 	 * @return the current LOD level
@@ -1432,7 +1432,7 @@ public:
 
 public:
 	/** Access a read only version of the Updater Counter from the AnimInstanceProxy on the GameThread. */
-	ENGINE_API const FGraphTraversalCounter& GetUpdateCounter() const; 
+	ENGINE_API const FGraphTraversalCounter& GetUpdateCounter() const;
 
 	/** Access the required bones array */
 	ENGINE_API FBoneContainer& GetRequiredBones();
@@ -1454,12 +1454,12 @@ public:
 
 	UPROPERTY(transient)
 	TArray<FAnimNotifyEventReference> ActiveAnimNotifyEventReference;
-	
+
 private:
 	/** Reset Animation Curves */
 	ENGINE_API void ResetAnimationCurves();
 
-public: 
+public:
 	/** Pushes blended heap curve to output curves in the proxy using required bones cached data */
 	ENGINE_API void UpdateCurvesToEvaluationContext(const FAnimationEvaluationContext& InOutContext);
 
@@ -1487,8 +1487,8 @@ public:
 	/** Get the current delta time */
 	UFUNCTION(BlueprintPure, Category="Animation", meta=(BlueprintThreadSafe))
 	ENGINE_API float GetDeltaSeconds() const;
-	
-	/** 
+
+	/**
 	 * Append the type of curve to the OutCurveList specified by Curve Flags
 	 */
 	ENGINE_API void AppendAnimationCurveList(EAnimCurveType Type, TMap<FName, float>& InOutCurveList) const;
@@ -1497,7 +1497,7 @@ public:
 	UE_DEPRECATED(4.19, "This function is deprecated. Use AppendAnimationCurveList instead.")
 	ENGINE_API void GetAnimationCurveList(EAnimCurveType Type, TMap<FName, float>& InOutCurveList) const;
 	/**
-	 *	Return the list of curves that are specified by type 
+	 *	Return the list of curves that are specified by type
 	 */
 	ENGINE_API const TMap<FName, float>& GetAnimationCurveList(EAnimCurveType Type) const;
 
@@ -1514,9 +1514,9 @@ public:
 
 private:
 
-	// Used to prevent indefinitely flushing montages on a single frame. 
+	// Used to prevent indefinitely flushing montages on a single frame.
 	uint32 LastMontageFlushFrame = 0u;
-	
+
 	TMap<FName, FMontageActiveSlotTracker> SlotWeightTracker;
 	TMap<FName, FSimpleMulticastDelegate> ExternalNotifyHandlers;
 
@@ -1527,7 +1527,7 @@ public:
 	// Gets the last frame any completed montages where flushed. Only important if a.Montage.FlushCompletedMontagesOnPlay is enabled.
 	uint32 GetLastMontageFlushFrame() const;
 
-	/** 
+	/**
 	 * Recalculate Required Bones [RequiredBones]
 	 * Is called when bRequiredBonesUpToDate = false
 	 */
@@ -1537,7 +1537,7 @@ public:
 	* Recalculate Required Curves based on Required Bones [RequiredBones]
 	*/
 	ENGINE_API void RecalcRequiredCurves(const UE::Anim::FCurveFilterSettings& CurveFilterSettings);
-	
+
 	UE_DEPRECATED(5.3, "Please use RecalcRequiredCurves that takes a FCurveFilterSettings.")
 	ENGINE_API void RecalcRequiredCurves(const FCurveEvaluationOption& CurveEvalOption);
 
@@ -1552,10 +1552,10 @@ public:
 	/** Trigger AnimNotifies **/
 	ENGINE_API void TriggerAnimNotifies(float DeltaSeconds);
 
-	/** Trigger an AnimNotify.  Note that this version does not provide any context for the event **/ 
+	/** Trigger an AnimNotify.  Note that this version does not provide any context for the event **/
 	ENGINE_API void TriggerSingleAnimNotify(const FAnimNotifyEvent* AnimNotifyEvent);
 
-	/** Trigger an AnimNotify using an EventReference that provide context used in derived notify events**/ 
+	/** Trigger an AnimNotify using an EventReference that provide context used in derived notify events**/
 	ENGINE_API void TriggerSingleAnimNotify(FAnimNotifyEventReference& EventReference);
 
 	/** Triggers end on active notify states and clears the array */
@@ -1569,8 +1569,8 @@ public:
 
 	/** Given a machine index, record a state machine weight for this frame */
 	ENGINE_API void RecordMachineWeight(const int32 InMachineClassIndex, const float InMachineWeight);
-	
-	/** 
+
+	/**
 	 * Add curve float data, using a curve name.
 	 */
 	ENGINE_API void AddCurveValue(const FName& CurveName, float Value, bool bMorphtarget = false, bool bMaterial = false);
@@ -1601,8 +1601,8 @@ public:
 	/** Get current accumulated root motion, removing it from the AnimInstance in the process */
 	ENGINE_API FRootMotionMovementParams ConsumeExtractedRootMotion(float Alpha);
 
-	/**  
-	 * Queue blended root motion. This is used to blend in root motion transforms according to 
+	/**
+	 * Queue blended root motion. This is used to blend in root motion transforms according to
 	 * the correctly-updated slot weight (after the animation graph has been updated).
 	 */
 	ENGINE_API void QueueRootMotionBlend(const FTransform& RootTransform, const FName& SlotName, float Weight);
@@ -1625,8 +1625,8 @@ private:
 		float Weight;
 	};
 
-	/** 
-	 * Blend queue for blended root motion. This is used to blend in root motion transforms according to 
+	/**
+	 * Blend queue for blended root motion. This is used to blend in root motion transforms according to
 	 * the correctly-updated slot weight (after the animation graph has been updated).
 	 */
 	TArray<FQueuedRootMotionBlend> RootMotionBlendQueue;
@@ -1655,7 +1655,7 @@ protected:
 	/** Override point for derived classes to destroy their own proxy objects (allows custom allocation) */
 	ENGINE_API virtual void DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy);
 
-	/** Access the proxy but block if a task is currently in progress as it wouldn't be safe to access it 
+	/** Access the proxy but block if a task is currently in progress as it wouldn't be safe to access it
 	 *	This is protected static member for allowing derived to access
 	 */
 	template <typename T /*= FAnimInstanceProxy*/>	// @TODO: Cant default parameters to this function on Xbox One until we move off the VS2012 compiler
@@ -1740,7 +1740,7 @@ protected:
 	friend struct FAnimNode_LinkedAnimGraph;
 	friend struct FAnimNode_LinkedAnimLayer;
 	friend struct FAnimInstanceProxy;
-	
+
 public:
 	/** Return whether this AnimNotifyState should be triggered */
 	ENGINE_API virtual bool ShouldTriggerAnimNotifyState(const UAnimNotifyState* AnimNotifyState) const;
@@ -1765,7 +1765,7 @@ public:
 
 	/** Clear AnimEvents (AnimNotifies, Montage Events) queued. Note this is mainly needed for very specific scenarios where our notify queue is populated more than once per tick, avoid calling it if not needed. */
 	ENGINE_API void ClearQueuedAnimEvents(bool bShouldUpdateActiveAnimNotifiesSinceLastTick);
-	
+
 #if WITH_EDITOR
 	// Helper function to handle reinstancing in editor
 	ENGINE_API virtual void HandleObjectsReinstanced(const TMap<UObject*, UObject*>& OldToNewInstanceMap);
