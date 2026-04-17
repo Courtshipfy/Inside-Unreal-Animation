@@ -8,7 +8,19 @@
       "Bash(awk '{print $9}')",
       "Bash(pip install *)",
       "Bash(ls *)",
-      "Bash(grep -A 1 \"//\")"
+      "Bash(grep -A 1 \"//\")",
+      "Bash(git rm:*)",
+      "Bash(rm -rf Engine)",
+      "Bash(git submodule:*)",
+      "Bash(bash:*)",
+      "Bash(git ls-remote:*)",
+      "Bash(git reset:*)",
+      "Bash(git clean:*)",
+      "Bash(rm -rf Engine .git/modules/*)",
+      "Bash(rm -rf .git/modules/Engine .git/modules/UnrealEngine Engine .gitmodules)",
+      "Bash(rm -rf .git/modules/Engine .git/modules/UnrealEngine)",
+      "Bash(awk '{print $2}')",
+      "Bash(xargs kill *)"
     ]
   }
 }

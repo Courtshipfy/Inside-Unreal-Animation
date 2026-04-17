@@ -1,7 +1,0 @@
-﻿[
-  {
-    "directory": "C:\Inside-Unreal-Animation",
-    "command": "clang++ -IC:\Inside-Unreal-Animation/Engine/Source/Runtime/Engine/Public/Animation -IC:\Inside-Unreal-Animation/Engine/Source/Runtime/Engine/Classes/Animation -IC:\Inside-Unreal-Animation/Engine/Source/Runtime/AnimationCore/Public -IC:\Inside-Unreal-Animation/Engine/Source/Runtime/AnimGraphRuntime/Public -DUE_ENABLE_ICU=0 -DENGINE_API= -DCORE_API= -c",
-    "file": "C:\Inside-Unreal-Animation/Engine/Source/Runtime/Engine/Private/Animation/AnimInstance.cpp"
-  }
-]
