@@ -10,6 +10,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_ScaleChainLength
+// FAnimNode_ScaleChainLength
 
 FAnimNode_ScaleChainLength::FAnimNode_ScaleChainLength()
 	: DefaultChainLength(0.0f)
@@ -43,6 +44,7 @@ void FAnimNode_ScaleChainLength::CacheBones_AnyThread(const FAnimationCacheBones
 	InputPose.CacheBones(Context);
 
 	// LOD change, recache bone indices.
+	// LOD 更改，重新缓存骨骼索引。
 	bBoneIndicesCached = false;
 }
 
@@ -52,6 +54,7 @@ void FAnimNode_ScaleChainLength::Evaluate_AnyThread(FPoseContext& Output)
 	ANIM_MT_SCOPE_CYCLE_COUNTER_VERBOSE(ScaleChainLength, !IsInGameThread());
 
 	// Evaluate incoming pose into our output buffer.
+	// 评估传入的姿势进入我们的输出缓冲区。
 	InputPose.Evaluate(Output);
 
 	if (!FAnimWeight::IsRelevant(ActualAlpha))
@@ -70,7 +73,9 @@ void FAnimNode_ScaleChainLength::Evaluate_AnyThread(FPoseContext& Output)
 		ChainBoneIndices.Reset();
 
 		// Make sure we have valid start/end bones, and that end is a child of start.
+		// 确保我们有有效的开始/结束骨骼，并且该结束是开始的子级。
 		// Cache this, so we only evaluate on init and LOD changes.
+		// 缓存它，所以我们只评估 init 和 LOD 更改。
 		const bool bBoneSetupIsValid = ChainStartBone.IsValidToEvaluate(BoneContainer) && ChainEndBone.IsValidToEvaluate(BoneContainer) &&
 			BoneContainer.BoneIsChildOf(ChainEndBone.GetCompactPoseIndex(BoneContainer), ChainStartBone.GetCompactPoseIndex(BoneContainer));
 
@@ -94,6 +99,7 @@ void FAnimNode_ScaleChainLength::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// Need at least Start/End bones to be valid.
+	// 至少需要开始/结束骨骼才有效。
 	if (ChainBoneIndices.Num() < 2)
 	{
 		return;
@@ -102,6 +108,7 @@ void FAnimNode_ScaleChainLength::Evaluate_AnyThread(FPoseContext& Output)
 	const FVector TargetLocationCompSpace = Output.AnimInstanceProxy->GetComponentTransform().InverseTransformPosition(TargetLocation);
 
 	// Allocate transforms to get component space transform of chain start bone.
+	// 分配变换以获得链起始骨骼的组件空间变换。
 	FCSPose<FCompactPose> CSPose;
 	CSPose.InitPose(Output.Pose);
 
@@ -113,16 +120,19 @@ void FAnimNode_ScaleChainLength::Evaluate_AnyThread(FPoseContext& Output)
 	const double ChainLengthScaleWithAlpha = FMath::LerpStable(1.0, ChainLengthScale, ActualAlpha);
 
 	// If we're not going to scale anything, early out.
+	// 如果我们不打算扩大规模，那就尽早退出。
 	if (FMath::IsNearlyEqual(ChainLengthScaleWithAlpha, 1.0))
 	{
 		return;
 	}
 
 	// Scale translation of all bones in local space.
+	// 局部空间中所有骨骼的缩放平移。
 	FCompactPose& LSPose = Output.Pose;
 	for (const FCompactPoseBoneIndex& BoneIndex : ChainBoneIndices)
 	{
 		// Get bone space transform, scale transition.
+		// 获取骨骼空间变换、尺度过渡。
 		LSPose[BoneIndex].ScaleTranslation(ChainLengthScaleWithAlpha);
 	}
 }
@@ -150,6 +160,7 @@ double FAnimNode_ScaleChainLength::GetInitialChainLength(FCompactPose& InLSPose,
 	};
 
 	// Fallback is using fixed value DefaultChainLength.
+	// 后备使用固定值 DefaultChainLength。
 	return DefaultChainLength;
 }
 

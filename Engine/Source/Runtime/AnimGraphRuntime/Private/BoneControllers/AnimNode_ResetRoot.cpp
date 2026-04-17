@@ -9,6 +9,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_ResetRoot
+// FAnimNode_ResetRoot
 
 FAnimNode_ResetRoot::FAnimNode_ResetRoot()
 {
@@ -38,6 +39,7 @@ void FAnimNode_ResetRoot::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseC
 	const FBoneContainer& BoneContainer = CSPose.GetPose().GetBoneContainer();
 
 	// Reset Root
+	// 重置根目录
 	const FCompactPoseBoneIndex RootBoneIndex = FCompactPoseBoneIndex(0);
 	const FTransform RootTransform = BoneContainer.GetRefPoseTransform(RootBoneIndex);
 	
@@ -64,6 +66,7 @@ void FAnimNode_ResetRoot::InitializeBoneReferences(const FBoneContainer& Require
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(InitializeBoneReferences)
 	// Gather all direct Children of the Root.
+	// 聚集所有直接的根源之子。
 	RootChildren.Reset();
 
 	const int32 NumCompactPoseBones = RequiredBones.GetCompactPoseNumBones();

@@ -31,6 +31,7 @@ TAutoConsoleVariable<float> CVarGravityScale(TEXT("p.AnimDynamics.GravityScale")
 TAutoConsoleVariable<bool>  CVarDisableWorldSpace(TEXT("p.AnimDynamics.DisableWorldSpace"), false, TEXT("Disable World Sapce transform and override it to component space on all Anim Dynamics Nodes."));
 
 // FSimSpaceSettingsWithControl forced overrides for testing
+// FSimSpaceSettingsWithControl 强制覆盖以进行测试
 bool bAnimDynamics_SimSpace_EnableOverride = false;
 FAnimPhysSimSpaceSettings AnimDynamics_SimSpaceOverride;
 FAutoConsoleVariableRef CVarAnimDynamicsSpaceOverride(TEXT("p.AnimDynamics.Space.Override"), bAnimDynamics_SimSpace_EnableOverride, TEXT("Force-enable the advanced simulation space movement forces"), ECVF_Default);
@@ -39,8 +40,10 @@ FAutoConsoleVariableRef CVarAnimDynamicsSpaceMaxCompAngVel(TEXT("p.AnimDynamics.
 FAutoConsoleVariableRef CVarAnimDynamicsSpaceMaxCompAngAcc(TEXT("p.AnimDynamics.Space.MaxAngularAcceleration"), AnimDynamics_SimSpaceOverride.MaxAngularAcceleration, TEXT("AnimDynamics SimSpaceSettings overrides"), ECVF_Default);
 
 // FindChainBones
+// 寻找链骨
 // 
 // Returns an ordered list of the names of all the bones in a chain between BeginBoneName and EndBoneName.
+// 返回 BeginBoneName 和 EndBoneName 之间的链中所有骨骼名称的有序列表。
 //
 void FindChainBones(const FName BeginBoneName, const FName EndBoneName, TFunctionRef< FName (const FName) > GetParentBoneName, TArray<FName>& OutChainBoneNames)
 {
@@ -51,9 +54,12 @@ void FindChainBones(const FName BeginBoneName, const FName EndBoneName, TFunctio
 		const uint32 OutputStartIndex = OutChainBoneNames.Num();
 
 		// Add the end of the chain. We have to walk from the bottom upwards to find a chain
+		// 添加链的末端。我们必须从下往上走才能找到一条链条
 		// as walking downwards doesn't guarantee a single end point.
+		// 因为向下行走并不能保证有一个终点。
 
 		// Walk up the chain until we either find the top or hit the root bone
+		// 沿着链条向上走，直到找到顶部或到达根骨
 		FName ParentBoneName = EndBoneName;
 		for (; !ParentBoneName.IsNone() && (ParentBoneName != BeginBoneName); ParentBoneName = GetParentBoneName(ParentBoneName))
 		{
@@ -65,6 +71,7 @@ void FindChainBones(const FName BeginBoneName, const FName EndBoneName, TFunctio
 			UE_LOG(LogAnimation, Error, TEXT("AnimDynamics: Attempted to find bone chain starting at %s and ending at %s but failed."), *BeginBoneName.ToString(), *EndBoneName.ToString());
 
 			// Remove any accumulated chain bone names beyond the start bone from output.
+			// 从输出中删除起始骨骼之外的任何累积的链骨骼名称。
 			OutChainBoneNames.RemoveAt(OutputStartIndex, OutChainBoneNames.Num() - OutputStartIndex);
 		}
 	}
@@ -278,7 +285,9 @@ bool FAnimNode_AnimDynamics::IsAnimDynamicsSystemEnabledFor(int32 InLOD)
 	bool bEnabledForLod = RestrictToLOD >= 0 ? InLOD == RestrictToLOD : true;
 
 	// note this doesn't check LODThreshold of global value here. That's checked in
+	// 请注意，此处不会检查全局值的 LODThreshold。已签入
 	// GetLODThreshold per node
+	// 每个节点的 GetLODThreshold
 	return (CVarEnableDynamics.GetValueOnAnyThread() == 1 && bEnabledForLod);
 }
 
@@ -356,12 +365,14 @@ void FAnimNode_AnimDynamics::CalculateSimulationSpaceMotion(
 	SpaceAngularAcc = FVector::ZeroVector;
 
 	// If the system is disabled, nothing else to do
+	// 如果系统被禁用，则无需执行其他操作
 	if ((Settings.SimSpaceAngularAlpha == 0.0f) || (Dt < UE_SMALL_NUMBER))
 	{
 		return;
 	}
 
 	// If the simulation is in world space, the simulation space is stationary
+	// 如果模拟在世界空间中，则模拟空间是静止的
 	if (Space == AnimPhysSimSpaceType::World && !CVarDisableWorldSpace.GetValueOnAnyThread())
 	{
 		SpaceAngularVel = SimSpaceSettings.ExternalAngularVelocity;
@@ -371,6 +382,7 @@ void FAnimNode_AnimDynamics::CalculateSimulationSpaceMotion(
 	const FTransform CurrentSimSpaceTM = GetSimToWorldSpaceTransform(SimulationSpace, Output);
 
 	// World-space component angular velocity and acceleration
+	// 世界空间分量角速度和加速度
 	SpaceAngularVel = Chaos::FRotation3::CalculateAngularVelocity(PreviousSimSpaceTM.GetRotation(), CurrentSimSpaceTM.GetRotation(), Dt);
 	SpaceAngularAcc = (SpaceAngularVel - PreviousSimSpaceAngularVelocity) / Dt;
 
@@ -378,14 +390,17 @@ void FAnimNode_AnimDynamics::CalculateSimulationSpaceMotion(
 	PreviousSimSpaceTM = CurrentSimSpaceTM;
 
 	// Clamped world-space motion of the simulation space
+	// 模拟空间的固定世界空间运动
 	SpaceAngularVel = SpaceAngularVel.GetClampedToMaxSize(Settings.MaxAngularVelocity) + Settings.ExternalAngularVelocity;
 	SpaceAngularAcc = SpaceAngularAcc.GetClampedToMaxSize(Settings.MaxAngularAcceleration);
 
 	// Transform world-space motion into simulation space
+	// 将世界空间运动转换为模拟空间
 	SpaceAngularVel = CurrentSimSpaceTM.InverseTransformVectorNoScale(SpaceAngularVel);
 	SpaceAngularAcc = CurrentSimSpaceTM.InverseTransformVectorNoScale(SpaceAngularAcc);
 
 	// Apply WorldAlpha to simulation space rotation (usually to reduce it)
+	// 将WorldAlpha应用于模拟空间旋转（通常是为了减少它）
 	SpaceAngularVel *= Settings.SimSpaceAngularAlpha;
 	SpaceAngularAcc *= Settings.SimSpaceAngularAlpha;
 
@@ -404,12 +419,16 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 		if(LastSimSpace != SimulationSpace)
 		{
 			// Our sim space has been changed since our last update, we need to convert all of our
+			// 自上次更新以来，我们的 sim 空间已更改，我们需要转换所有
 			// body transforms into the new space.
+			// 身体转变到新的空间。
 			ConvertSimulationSpace(Output, LastSimSpace, SimulationSpace);
 		}
 
 		// Pretty nasty - but there isn't really a good way to get clean bone transforms (without the modification from
+		// 相当令人讨厌 - 但实际上并没有一个好的方法来获得干净的骨骼变换（无需修改）
 		// previous runs) so we have to initialize here, checking often so we can restart a simulation in the editor.
+		// 之前的运行），所以我们必须在这里初始化，经常检查，以便我们可以在编辑器中重新启动模拟。
 		if (InitTeleportType != ETeleportType::None)
 		{
 			InitPhysics(Output);
@@ -423,6 +442,7 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 			if(SimWorldTransform.GetScale3D() != PreviousSimSpaceTM.GetScale3D())
 			{
 				// If the scaling of the sim space has changed, update the bodies to the proper scale
+				// 如果模拟空间的缩放比例已更改，请将主体更新为正确的比例
 				const FBoneContainer& BoneContainer = Output.Pose.GetPose().GetBoneContainer();
 				for (int32 ActiveIndex : ActiveBoneIndices)
 				{
@@ -430,6 +450,7 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 					const FBoneReference& CurrentBoneRef = PhysicsBodyDef.BoundBone;
 
 					// If our bone isn't valid, move on
+					// 如果我们的骨头无效，请继续
 					if (!CurrentBoneRef.IsValidToEvaluate(BoneContainer))
 					{
 						continue;
@@ -491,6 +512,7 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 		if (ShouldDoPhysicsUpdate() && NextTimeStep > AnimPhysicsMinDeltaTime)
 		{
 			// Calculate gravity direction
+			// 计算重力方向
 			SimSpaceGravityDirection = TransformWorldVectorToSimSpace(Output, FVector(0.0f, 0.0f, -1.0f));
 
 			FVector OrientedExternalForce = ExternalForce;
@@ -500,6 +522,7 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 			}
 
 			// We don't send any bodies that don't have valid bones to the simulation
+			// 我们不会将任何没有有效骨骼的身体发送到模拟中
 			TArray<FAnimPhysRigidBody*>& SimBodies = FSimBodiesScratch::Get().SimBodies;
 			SimBodies.Empty(SimBodies.Num());
 			for(int32& ActiveIndex : ActiveBoneIndices)
@@ -538,6 +561,7 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 			if (SimulationSpace != AnimPhysSimSpaceType::World || CVarDisableWorldSpace.GetValueOnAnyThread())
 			{
 				// Transform Gravity Override into simulation space
+				// 将重力覆盖转换到模拟空间
 				if (bUseGravityOverride && !bGravityOverrideInSimSpace)
 				{
 					SimSpaceGravityOverride = TransformWorldVectorToSimSpace(Output, SimSpaceGravityOverride);
@@ -546,10 +570,12 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 				FTransform CurrentTransform = Output.AnimInstanceProxy->GetComponentTransform();
 
 				// Calc linear velocity
+				// 计算线速度
 				const FVector ComponentDeltaLocation =  CurrentTransform.GetTranslation() - PreviousCompWorldSpaceTM.GetTranslation();
 				const FVector ComponentLinearVelocity = (ComponentDeltaLocation / NextTimeStep);
 
 				// Apply acceleration that opposed velocity (basically 'drag')
+				// 应用与速度相反的加速度（基本上是“阻力”）
 				if(bScalingEnabled)
 				{
 					ComponentLinearAcc += TransformWorldVectorToSimSpaceScaled(Output, -ComponentLinearVelocity) * ComponentLinearVelScale;
@@ -560,9 +586,11 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 				}
 
 				// Calc linear acceleration
+				// 计算线性加速度
 				const FVector ComponentLinearAcceleration = (ComponentLinearVelocity - PreviousComponentLinearVelocity) / NextTimeStep;
 				PreviousComponentLinearVelocity = ComponentLinearVelocity;
 				// Apply opposite acceleration to bodies
+				// 对物体施加相反的加速度
 				if (bScalingEnabled)
 				{
 					ComponentLinearAcc += TransformWorldVectorToSimSpaceScaled(Output, -ComponentLinearAcceleration) * ComponentLinearAccScale;
@@ -573,6 +601,7 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 				}
 
 				// Clamp ComponentLinearAcc to desired strength.	
+				// 将 ComponentLinearAcc 夹紧到所需的强度。
 				FVector LinearAccClamp = ComponentAppliedLinearAccClamp;
 
 				const float LinearAccClampOverride = CVarComponentAppliedLinearAccClampOverride.GetValueOnAnyThread();
@@ -585,6 +614,7 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 			}
 
 			// Update gravity.
+			// 更新重力。
 			{
 				const float ExternalGravityScale = CVarGravityScale.GetValueOnAnyThread();
 
@@ -604,17 +634,22 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 				float FixedTimeStep = MaxSubstepDeltaTime * CurrentTimeDilation;
 
 				// Clamp the fixed timestep down to max physics tick time.
+				// 将固定时间步长限制为最大物理滴答时间。
 				// at high speeds the simulation will not converge as the delta time is too high, this will
+				// 在高速下，由于增量时间太高，模拟将不会收敛，这将
 				// help to keep constraints together at a cost of physical accuracy
+				// 有助于以物理精度为代价将约束保持在一起
 				FixedTimeStep = FMath::Clamp(FixedTimeStep, 0.0f, MaxPhysicsDeltaTime);
 
 				// Calculate number of substeps we should do.
+				// 计算我们应该执行的子步骤数。
 				int32 NumIters = FMath::TruncToInt((NextTimeStep + (TimeDebt * CurrentTimeDilation)) / FixedTimeStep);
 				NumIters = FMath::Clamp(NumIters, 0, MaxSubsteps);
 
 				SET_DWORD_STAT(STAT_AnimDynamicsSubSteps, NumIters);
 
 				// Store the remaining time as debt for later frames
+				// 将剩余时间存储为后续帧的债务
 				TimeDebt = (NextTimeStep + TimeDebt) - (NumIters * FixedTimeStep);
 				TimeDebt = FMath::Clamp(TimeDebt, 0.0f, MaxTimeDebt);
 
@@ -629,6 +664,7 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 			else
 			{
 				// Do variable frame-time update
+				// 进行可变帧时间更新
 				const float MaxDeltaTime = MaxPhysicsDeltaTime;
 
 				NextTimeStep = FMath::Min(NextTimeStep, MaxDeltaTime);
@@ -657,6 +693,7 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 				FAnimPhysRigidBody& CurrentBody = Bodies[Idx].RigidBody.PhysBody;
 
 				// Skip invalid bones
+				// 跳过无效骨骼
 				if(!CurrentChainBone.IsValidToEvaluate(BoneContainer))
 				{
 					continue;
@@ -665,6 +702,7 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 				FCompactPoseBoneIndex BoneIndex = CurrentChainBone.GetCompactPoseIndex(BoneContainer);
 
 				// Calculate target bone transform from physics body.
+				// 从物理体计算目标骨骼变换。
 
 				FTransform NewBoneTransform;
 				
@@ -712,9 +750,11 @@ void FAnimNode_AnimDynamics::EvaluateSkeletalControl_AnyThread(FComponentSpacePo
 		}
 
 		// Store our sim space in case it changes
+		// 存储我们的 sim 空间以防万一发生变化
 		LastSimSpace = SimulationSpace;
 
 		// Store previous component and actor space transform
+		// 存储先前的组件和参与者空间变换
 		PreviousCompWorldSpaceTM = Output.AnimInstanceProxy->GetComponentTransform();
 		PreviousActorWorldSpaceTM = Output.AnimInstanceProxy->GetActorTransform();
 	}
@@ -748,6 +788,7 @@ void FAnimNode_AnimDynamics::ValidateChainPhysicsBodyDefinitions(const FReferenc
 	FindChainBoneNames(ReferenceSkeleton, ChainBoneNames);
 
 	// If another array of physics bodies has been pasted over this one we may have too many entries (in which case SetNum will truncate the array) or we may have too few (in which case SetNum will padd with default constucted body defs).
+	// 如果另一个物理体数组被粘贴到这个数组上，我们可能有太多条目（在这种情况下 SetNum 将截断该数组），或者我们可能有太少（在这种情况下 SetNum 将用默认构造的物体定义填充）。
 	PhysicsBodyDefinitions.SetNum(ChainBoneNames.Num());
 
 	for (uint32 BodyIndex = 0, BodyIndexMax = FMath::Min(ChainBoneNames.Num(), PhysicsBodyDefinitions.Num()); BodyIndex < BodyIndexMax; ++BodyIndex)
@@ -763,6 +804,7 @@ void FAnimNode_AnimDynamics::UpdateChainPhysicsBodyDefinitions(const FReferenceS
 	check(ChainBoneNames.Num() > 0);
 
 	// If there was only one physics body then copy its values to all new chain bodies (emulating legacy behaviour), otherwise use values from default construction.
+	// 如果只有一个物理体，则将其值复制到所有新的链体（模拟遗留行为），否则使用默认构造中的值。
 	FAnimPhysBodyDefinition PrototypePhysBodyDef;
 
 	if (PhysicsBodyDefinitions.Num() == 1)
@@ -772,10 +814,12 @@ void FAnimNode_AnimDynamics::UpdateChainPhysicsBodyDefinitions(const FReferenceS
 
 
 	// Remove any bodies for bones that are not in the chain.
+	// 移除不在链中的所有骨骼实体。
 	PhysicsBodyDefinitions.RemoveAll([&ChainBoneNames](const FAnimPhysBodyDefinition& Value) { return ChainBoneNames.Find(Value.BoundBone.BoneName) == INDEX_NONE;});
 	PhysicsBodyDefinitions.Reserve(ChainBoneNames.Num());
 
 	// Create a new Physics Body Def for any new bones in the chain and add them before or after the existing bodies as appropriate to maintain the order of the chain bones.
+	// 为链中的任何新骨骼创建一个新的物理主体定义，并根据需要将它们添加到现有主体之前或之后，以维持链骨骼的顺序。
 	{
 		uint32 PhysicsBodyDefIndex = 0;
 
@@ -784,6 +828,7 @@ void FAnimNode_AnimDynamics::UpdateChainPhysicsBodyDefinitions(const FReferenceS
 			if (!PhysicsBodyDefinitions.FindByPredicate([BoneName](const FAnimPhysBodyDefinition& Value) { return Value.BoundBone.BoneName == BoneName; }))
 			{
 				// Add the new bone to the chain.
+				// 将新骨骼添加到链中。
 				PhysicsBodyDefinitions.Insert(PrototypePhysBodyDef, PhysicsBodyDefIndex);
 				PhysicsBodyDefinitions[PhysicsBodyDefIndex].BoundBone.BoneName = BoneName;
 			}
@@ -819,6 +864,7 @@ void FAnimNode_AnimDynamics::InitializeBoneReferences(const FBoneContainer& Requ
 	}
 	
 	// If we're currently simulating (LOD change etc.)
+	// 如果我们当前正在模拟（LOD 更改等）
 	bool bSimulating = ActiveBoneIndices.Num() > 0;
 
 	const int32 NumRefs = PhysicsBodyDefinitions.Num();
@@ -832,7 +878,9 @@ void FAnimNode_AnimDynamics::InitializeBoneReferences(const FBoneContainer& Requ
 			if(BoneRef.IsValidToEvaluate(RequiredBones) && !ActiveBoneIndices.Contains(BoneRefIdx))
 			{
 				// This body is inactive and needs to be reset to bone position
+				// 该主体处于非活动状态，需要重置为骨骼位置
 				// as it is now required for the current LOD
+				// 因为当前 LOD 现在需要它
 				BodiesToReset.Add(&Bodies[BoneRefIdx]);
 			}
 		}
@@ -846,6 +894,7 @@ void FAnimNode_AnimDynamics::InitializeBoneReferences(const FBoneContainer& Requ
 		LinkedBody.RigidBody.BoundBone.Initialize(RequiredBones);
 
 		// If this bone is active in this LOD, add to the active list.
+		// 如果该骨骼在此 LOD 中处于活动状态，则添加到活动列表中。
 		if(LinkedBody.RigidBody.BoundBone.IsValidToEvaluate(RequiredBones))
 		{
 			ActiveBoneIndices.Add(BodyIdx);
@@ -877,6 +926,7 @@ bool FAnimNode_AnimDynamics::IsValidToEvaluate(const USkeleton* Skeleton, const 
 		if(!bChainEndValid)
 		{
 			// Check for LOD subchain
+			// 检查 LOD 子链
 			int32 NumValidBonesFromRoot = 0;
 			for(const FAnimPhysBodyDefinition& PhysicsBodyDef : PhysicsBodyDefinitions)
 			{
@@ -924,6 +974,7 @@ FVector FAnimNode_AnimDynamics::GetBodyLocalJointOffset(const int32 BodyIndex) c
 void FAnimNode_AnimDynamics::RequestInitialise(ETeleportType InTeleportType)
 { 
 	// Request an initialization. Teleport type can only go higher - i.e. if we have requested a reset, then a teleport will still reset fully
+	// 请求初始化。传送类型只能更高 - 即，如果我们请求重置，那么传送仍然会完全重置
 	InitTeleportType = ((InTeleportType > InitTeleportType) ? InTeleportType : InitTeleportType); 
 }
 
@@ -936,6 +987,7 @@ void FAnimNode_AnimDynamics::InitPhysics(FComponentSpacePoseContext& Output)
 	case ETeleportType::ResetPhysics:
 	{
 		// Clear up any existing physics data
+		// 清除任何现有的物理数据
 		TermPhysics();
 
 		const FBoneContainer& BoneContainer = Output.Pose.GetPose().GetBoneContainer();
@@ -946,6 +998,7 @@ void FAnimNode_AnimDynamics::InitPhysics(FComponentSpacePoseContext& Output)
 		}
 
 		// Transform GravityOverride to simulation space if necessary.
+		// 如有必要，将 GravityOverride 变换到模拟空间。
 		const FVector GravityOverrideSimSpace = (bUseGravityOverride && !bGravityOverrideInSimSpace) ? TransformWorldVectorToSimSpace(Output, GravityOverride) : GravityOverride;
 		const float ExternalGravityScale = CVarGravityScale.GetValueOnAnyThread();
 
@@ -1025,19 +1078,23 @@ void FAnimNode_AnimDynamics::InitPhysics(FComponentSpacePoseContext& Output)
 			if (Bodies.Num() > 0)
 			{
 				// Link to parent
+				// 链接到父级
 				NewChainBody.ParentBody = &Bodies.Last().RigidBody;
 
 				// Calculate constraint offset positions in the space of each body.
+				// 计算每个物体空间中的约束偏移位置。
 				const FVector ConstaintLocationSimSpace = (BodyTransform.GetTranslation() - PreviousBodyTransformSimSpace.GetTranslation()) * 0.5f;
 				ConstraintOffsets.Add(FAnimConstraintOffsetPair(PreviousBodyTransformSimSpace.GetRotation().UnrotateVector(ConstaintLocationSimSpace), BodyTransform.GetRotation().UnrotateVector(-ConstaintLocationSimSpace)));
 			}
 			else
 			{
 				// The first physics body is constrained to the location of it's bound bone.
+				// 第一个物理体被限制在其绑定骨骼的位置。
 				ConstraintOffsets.Add(FAnimConstraintOffsetPair(FVector::ZeroVector, -PhysicsBodyDef.LocalJointOffset)); // Offset is the vector from the physics body to its associated bone in the bodies local space.
 			}
 
 			// Set up transient constraint data
+			// 设置瞬态约束数据
 			const bool bXAxisLocked = PhysicsBodyDef.ConstraintSetup.LinearXLimitType != AnimPhysLinearConstraintType::Free && PhysicsBodyDef.ConstraintSetup.LinearAxesMin.X - PhysicsBodyDef.ConstraintSetup.LinearAxesMax.X == 0.0f;
 			const bool bYAxisLocked = PhysicsBodyDef.ConstraintSetup.LinearYLimitType != AnimPhysLinearConstraintType::Free && PhysicsBodyDef.ConstraintSetup.LinearAxesMin.Y - PhysicsBodyDef.ConstraintSetup.LinearAxesMax.Y == 0.0f;
 			const bool bZAxisLocked = PhysicsBodyDef.ConstraintSetup.LinearZLimitType != AnimPhysLinearConstraintType::Free && PhysicsBodyDef.ConstraintSetup.LinearAxesMin.Z - PhysicsBodyDef.ConstraintSetup.LinearAxesMax.Z == 0.0f;
@@ -1057,6 +1114,7 @@ void FAnimNode_AnimDynamics::InitPhysics(FComponentSpacePoseContext& Output)
 		}
 
 		// Cache physics settings to avoid accessing UPhysicsSettings continuously
+		// 缓存物理设置以避免连续访问 UPhysicsSettings
 		if (UPhysicsSettings* Settings = UPhysicsSettings::Get())
 		{
 			AnimPhysicsMinDeltaTime = Settings->AnimPhysicsMinDeltaTime;
@@ -1079,18 +1137,22 @@ void FAnimNode_AnimDynamics::InitPhysics(FComponentSpacePoseContext& Output)
 	case ETeleportType::TeleportPhysics:
 	{
 		// Clear any external forces
+		// 清除任何外力
 		ExternalForce = FVector::ZeroVector;
 
 		// Move any active bones
+		// 移动任何活动骨骼
 		for (const int32& BodyIndex : ActiveBoneIndices)
 		{
 			FAnimPhysRigidBody& Body = Bodies[BodyIndex].RigidBody.PhysBody;
 
 			// Get old comp space transform
+			// 获取旧的比较空间变换
 			FTransform BodyTransform(Body.Pose.Orientation, Body.Pose.Position - Body.Pose.Orientation.RotateVector(PhysicsBodyDefinitions[BodyIndex].LocalJointOffset));
 			BodyTransform = GetComponentSpaceTransformFromSimSpace(SimulationSpace, Output, BodyTransform, PreviousCompWorldSpaceTM, PreviousActorWorldSpaceTM);
 
 			// move to new space
+			// 搬到新空间
 			BodyTransform = GetSimSpaceTransformFromComponentSpace(SimulationSpace, Output, BodyTransform);
 
 			Body.Pose.Orientation = BodyTransform.GetRotation();
@@ -1131,6 +1193,7 @@ void FAnimNode_AnimDynamics::UpdateLimits(FComponentSpacePoseContext& Output)
 	CONDITIONAL_SCOPE_CYCLE_COUNTER(STAT_AnimDynamicsLimitUpdate, FAnimPhys::bEnableDetailedStats);
 
 	// We're always going to use the same number so don't realloc
+	// 我们总是会使用相同的号码，所以不要重新分配
 	LinearLimits.Empty(LinearLimits.Num());
 	AngularLimits.Empty(AngularLimits.Num());
 	Springs.Empty(Springs.Num());
@@ -1143,6 +1206,7 @@ void FAnimNode_AnimDynamics::UpdateLimits(FComponentSpacePoseContext& Output)
 		const FBoneReference& CurrentBoneRef = PhysicsBodyDef.BoundBone;
 
 		// If our bone isn't valid, move on
+		// 如果我们的骨头无效，请继续
 		if(!CurrentBoneRef.IsValidToEvaluate(BoneContainer))
 		{
 			continue;
@@ -1158,6 +1222,7 @@ void FAnimNode_AnimDynamics::UpdateLimits(FComponentSpacePoseContext& Output)
 		}
 
 		// Get joint transform
+		// 获取联合变换
 		FCompactPoseBoneIndex BoneIndex = CurrentBoneRef.GetCompactPoseIndex(BoneContainer);
 		FTransform BoundBoneTransform = GetBoneTransformInSimSpace(Output, BoneIndex);
 
@@ -1169,11 +1234,13 @@ void FAnimNode_AnimDynamics::UpdateLimits(FComponentSpacePoseContext& Output)
 		}
 
 		// Local offset to joint for Body1
+		// Body1 关节的局部偏移
 		const FVector Body1JointOffset = ConstraintOffsets[ActiveIndex].Body1Offset;
 
 		if (PhysicsBodyDef.ConstraintSetup.bLinearFullyLocked)
 		{
 			// Rather than calculate prismatic limits, just lock the transform (1 limit instead of 6)
+			// 无需计算棱柱限制，只需锁定变换（1 个限制而不是 6 个限制）
 			FAnimPhys::ConstrainPositionNailed(NextTimeStep, LinearLimits, PrevBody, ShapeTransform.GetTranslation(), &RigidBody, Body1JointOffset);
 		}
 		else
@@ -1198,6 +1265,7 @@ void FAnimNode_AnimDynamics::UpdateLimits(FComponentSpacePoseContext& Output)
 		{
 #if WITH_EDITOR
 			// Check the ranges are valid when running in the editor, log if something is wrong
+			// 在编辑器中运行时检查范围是否有效，如果有问题则记录
 			if(PhysicsBodyDef.ConstraintSetup.AngularLimitsMin.X > PhysicsBodyDef.ConstraintSetup.AngularLimitsMax.X ||
 			   PhysicsBodyDef.ConstraintSetup.AngularLimitsMin.Y > PhysicsBodyDef.ConstraintSetup.AngularLimitsMax.Y ||
 			   PhysicsBodyDef.ConstraintSetup.AngularLimitsMin.Z > PhysicsBodyDef.ConstraintSetup.AngularLimitsMax.Z)
@@ -1207,6 +1275,7 @@ void FAnimNode_AnimDynamics::UpdateLimits(FComponentSpacePoseContext& Output)
 #endif
 
 			// Add angular limits. any limit with 360+ degree range is ignored and left free.
+			// 添加角度限制。任何 360+ 度范围的限制都将被忽略并保持自由。
 			FAnimPhys::ConstrainAngularRange(NextTimeStep, AngularLimits, PrevBody, &RigidBody, ShapeTransform.GetRotation(), PhysicsBodyDef.ConstraintSetup.TwistAxis, PhysicsBodyDef.ConstraintSetup.AngularLimitsMin, PhysicsBodyDef.ConstraintSetup.AngularLimitsMax, bOverrideAngularBias ? AngularBiasOverride : AnimPhysicsConstants::JointBiasFactor);
 		}
 		else
@@ -1263,6 +1332,7 @@ void FAnimNode_AnimDynamics::UpdateLimits(FComponentSpacePoseContext& Output)
 		}
 
 		// Add spring if we need spring forces
+		// 如果我们需要弹簧力，请添加弹簧
 		if (bAngularSpring || bLinearSpring)
 		{
 			FAnimPhys::CreateSpring(Springs, PrevBody, ShapeTransform.GetTranslation(), &RigidBody, FVector::ZeroVector);
@@ -1295,6 +1365,7 @@ bool FAnimNode_AnimDynamics::HasPreUpdate() const
 void FAnimNode_AnimDynamics::PreUpdate(const UAnimInstance* InAnimInstance)
 {
 	// If dynamics are disabled, skip all this work as it'll never get used
+	// 如果动态被禁用，请跳过所有这些工作，因为它永远不会被使用
 	if(CVarEnableDynamics.GetValueOnAnyThread() == 0)
 	{
 		return;
@@ -1303,6 +1374,7 @@ void FAnimNode_AnimDynamics::PreUpdate(const UAnimInstance* InAnimInstance)
 	if(!InAnimInstance)
 	{
 		// No anim instance, won't be able to find our world.
+		// 没有动画实例，将无法找到我们的世界。
 		return;
 	}
 	
@@ -1311,6 +1383,7 @@ void FAnimNode_AnimDynamics::PreUpdate(const UAnimInstance* InAnimInstance)
 	if(!SkelComp || !SkelComp->GetWorld())
 	{
 		// Can't find our world.
+		// 找不到我们的世界。
 		return;
 	}
 
@@ -1329,10 +1402,12 @@ void FAnimNode_AnimDynamics::PreUpdate(const UAnimInstance* InAnimInstance)
 				FSceneInterface* Scene = World->Scene;
 
 				// Unused by our simulation but needed for the call to GetWindParameters below
+				// 我们的模拟未使用，但需要调用下面的 GetWindParameters
 				float WindMinGust;
 				float WindMaxGust;
 
 				// Setup wind data
+				// 设置风数据
 				Body->bWindEnabled = true;
 				Scene->GetWindParameters_GameThread(SkelComp->GetComponentTransform().TransformPosition(Body->Pose.Position), Body->WindData.WindDirection, Body->WindData.WindSpeed, WindMinGust, WindMaxGust);
 
@@ -1409,6 +1484,7 @@ FTransform FAnimNode_AnimDynamics::GetComponentSpaceTransformFromSimSpace(AnimPh
 	switch(SimSpace)
 	{
 		// Change nothing, already in component space
+		// 不做任何更改，已经在组件空间中
 	case AnimPhysSimSpaceType::Component:
 	{
 		break;
@@ -1492,6 +1568,7 @@ FTransform FAnimNode_AnimDynamics::GetSimSpaceTransformFromComponentSpace(AnimPh
 	switch(SimSpace)
 	{
 		// Change nothing, already in component space
+		// 不做任何更改，已经在组件空间中
 	case AnimPhysSimSpaceType::Component:
 	{
 		break;
@@ -1533,6 +1610,7 @@ FTransform FAnimNode_AnimDynamics::GetSimSpaceTransformFromComponentSpace(AnimPh
 	case AnimPhysSimSpaceType::World:
 	{
 		// Out to world space
+		// 进入世界空间
 		ResultTransform *= Output.AnimInstanceProxy->GetComponentTransform();
 	}
 
@@ -1548,6 +1626,7 @@ FVector FAnimNode_AnimDynamics::TransformWorldVectorToSimSpace(FComponentSpacePo
 	FVector OutVec = InVec;
 
 	// If Disable World Space cVar is enabled act like it is in component space
+	// 如果禁用世界空间 cVar 已启用，则就像在组件空间中一样
 	if (SimulationSpace == AnimPhysSimSpaceType::World && CVarDisableWorldSpace.GetValueOnAnyThread())
 	{
 		OutVec = Output.AnimInstanceProxy->GetComponentTransform().InverseTransformVectorNoScale(OutVec);
@@ -1611,6 +1690,7 @@ FVector FAnimNode_AnimDynamics::TransformWorldVectorToSimSpaceScaled(FComponentS
 	FVector OutVec = InVec;
 
 	// If Disable World Space cVar is enabled act like it is in component space
+	// 如果禁用世界空间 cVar 已启用，则就像在组件空间中一样
 	if (SimulationSpace == AnimPhysSimSpaceType::World && CVarDisableWorldSpace.GetValueOnAnyThread())
 	{
 		OutVec = Output.AnimInstanceProxy->GetComponentTransform().InverseTransformVector(OutVec);
@@ -1679,13 +1759,17 @@ void FAnimNode_AnimDynamics::ConvertSimulationSpace(FComponentSpacePoseContext& 
 		}
 
 		// Get transform
+		// 获取变换
 		FTransform BodyTransform(Body->Pose.Orientation, Body->Pose.Position);
 		// Out to component space
+		// 输出到组件空间
 		BodyTransform = GetComponentSpaceTransformFromSimSpace(LastSimSpace, Output, BodyTransform);
 		// In to new space
+		// 进入新空间
 		BodyTransform = GetSimSpaceTransformFromComponentSpace(SimulationSpace, Output, BodyTransform);
 
 		// Push back to body
+		// 推回身体
 		Body->Pose.Orientation = BodyTransform.GetRotation();
 		Body->Pose.Position = BodyTransform.GetTranslation();
 	}

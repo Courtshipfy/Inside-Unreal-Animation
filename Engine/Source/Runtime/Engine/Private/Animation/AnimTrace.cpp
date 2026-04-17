@@ -307,15 +307,19 @@ FAutoConsoleVariable CVarRecordExternalMorphTargets(
 );
 
 // Object annotations used for tracing
+// 用于跟踪的对象注释
 FUObjectAnnotationSparseBool GSkeletalMeshTraceAnnotations;
 
 // Map used for unique name output
+// 用于唯一名称输出的地图
 TMap<FName, uint32> GAnimTraceNames;
 
 // Global unique name index
+// [翻译失败: Global unique name index]
 uint32 GAnimTraceCurrentNameId = 1;
 
 // Critical section used to lock global name map & index
+// 用于锁定全局名称映射和索引的关键部分
 FCriticalSection GAnimTraceNameCriticalSection;
 
 void FAnimTrace::Reset()
@@ -326,16 +330,20 @@ void FAnimTrace::Reset()
 }
 
 // Scratch buffers for various traces to avoid allocation churn.
+// 为各种跟踪暂存缓冲区以避免分配混乱。
 // These can be removed when lambda support is added for array fields to remove a memcpy.
+// 当为数组字段添加 lambda 支持以删除 memcpy 时，可以删除这些内容。
 struct FAnimTraceScratchBuffers : public TThreadSingleton<FAnimTraceScratchBuffers>
 {
 	// Curve values/IDs for skeletal mesh component
+	// 骨架网格物体组件的曲线值/ID
 	TArray<float> CurveValues;
 	TArray<uint32> CurveIds;
 	TArray<float> ExternalMorphTargetWeights;
 	TArray<int32> ExternalMorphTargetWeightCounts;
 
 	// Parent indices for skeletal meshes
+	// 骨架网格物体的父索引
 	TArray<int32> ParentIndices;
 };
 
@@ -608,6 +616,7 @@ void FAnimTrace::OutputSkeletalMeshComponent(const USkeletalMeshComponent* InCom
 	}
 
 	// Get the external morph target sets.
+	// 获取外部变形目标集。
 	const int32 LOD = InComponent->GetPredictedLODLevel();
 	
 	FExternalMorphSets* ExternalMorphSet = nullptr;
@@ -648,6 +657,7 @@ void FAnimTrace::OutputSkeletalMeshComponent(const USkeletalMeshComponent* InCom
 		ExternalMorphTraceWeightCounts.Reset();
 
 		// Get the weights for all external morph sets.
+		// 获取所有外部变形集的权重。
 		if (ExternalMorphSet && !ExternalMorphSet->IsEmpty())
 		{
 			const FExternalMorphWeightData& ExternalMorphWeightData = InComponent->GetExternalMorphWeights(LOD);
@@ -656,6 +666,7 @@ void FAnimTrace::OutputSkeletalMeshComponent(const USkeletalMeshComponent* InCom
 			if (!ExternalMorphWeightData.MorphSets.IsEmpty() && NumMorphDataSets == NumMorphWeightSets)
 			{
 				// Allocate enough data in the scratch buffer.
+				// [翻译失败: Allocate enough data in the scratch buffer.]
 				ExternalMorphTraceWeightCounts.SetNumZeroed(NumMorphDataSets);
 
 				int32 SetIndex = 0;

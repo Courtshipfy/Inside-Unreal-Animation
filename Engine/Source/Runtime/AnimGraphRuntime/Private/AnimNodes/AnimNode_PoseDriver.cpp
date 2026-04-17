@@ -38,6 +38,7 @@ void FAnimNode_PoseDriver::Initialize_AnyThread(const FAnimationInitializeContex
 void FAnimNode_PoseDriver::RebuildPoseList(const FBoneContainer& InBoneContainer, const UPoseAsset* InPoseAsset)
 {
 	// Cache UIDs for driving curves
+	// 用于驾驶曲线的缓存 UID
 	PoseExtractContext.PoseCurves.Reset();
 	const USkeleton* Skeleton = InPoseAsset->GetSkeleton();
 	if (Skeleton)
@@ -49,6 +50,7 @@ void FAnimNode_PoseDriver::RebuildPoseList(const FBoneContainer& InBoneContainer
 			if (PoseIndex != INDEX_NONE)
 			{
 				// we keep pose index as that is the fastest way to search when extracting pose asset
+				// 我们保留姿势索引，因为这是提取姿势资产时最快的搜索方式
 				PoseTarget.PoseCurveIndex = PoseExtractContext.PoseCurves.Add(FPoseCurve(PoseIndex, PoseNames[PoseIndex], 0.f));
 			}
 			else
@@ -65,11 +67,13 @@ void FAnimNode_PoseDriver::CacheBones_AnyThread(const FAnimationCacheBonesContex
 	FAnimNode_PoseHandler::CacheBones_AnyThread(Context);
 
 	// Init pose input
+	// 初始化姿势输入
 	SourcePose.CacheBones(Context);
 
 	const FBoneContainer& BoneContainer = Context.AnimInstanceProxy->GetRequiredBones();
 
 	// Init bone refs
+	// 初始化骨骼参考
 	for (FBoneReference& SourceBoneRef : SourceBones)
 	{
 		SourceBoneRef.Initialize(BoneContainer);
@@ -83,6 +87,7 @@ void FAnimNode_PoseDriver::CacheBones_AnyThread(const FAnimationCacheBonesContex
 	EvalSpaceBone.Initialize(BoneContainer);
 
 	// Don't want to modify SourceBones, set weight to zero (if weight array is allocated)
+	// 不想修改 SourceBones，将权重设置为零（如果分配了权重数组）
 	for (FBoneReference& SourceBoneRef : SourceBones)
 	{
 		const FCompactPoseBoneIndex SourceCompactIndex = SourceBoneRef.GetCompactPoseIndex(BoneContainer);
@@ -93,6 +98,7 @@ void FAnimNode_PoseDriver::CacheBones_AnyThread(const FAnimationCacheBonesContex
 	}
 
 	// Check if there are valid OnlyDriveBones, since there might be a None entry.
+	// 检查是否有有效的 OnlyDriveBones，因为可能有 None 条目。
 	bHasOnlyDriveBones = false;
 	for (const FBoneReference& BoneRef : OnlyDriveBones)
 	{
@@ -104,16 +110,19 @@ void FAnimNode_PoseDriver::CacheBones_AnyThread(const FAnimationCacheBonesContex
 	}
 
 	// If we are filtering for only specific bones, set blend weight to zero for unwanted bones, and remember which bones to filter
+	// 如果我们仅过滤特定骨骼，请将不需要的骨骼的混合权重设置为零，并记住要过滤的骨骼
 	BonesToFilter.Reset();
 	if (bHasOnlyDriveBones && CurrentPoseAsset.IsValid())
 	{
 		// Super call above should init BoneBlendWeights to compact pose size if CurrentPoseAsset is valid
+		// 如果 CurrentPoseAsset 有效，上面的超级调用应该初始化 BoneBlendWeights 以压缩姿势大小
 		check(BoneBlendWeights.Num() == BoneContainer.GetBoneIndicesArray().Num());
 
 		const TArray<FName> TrackNames = CurrentPoseAsset.Get()->GetTrackNames();
 		for (const auto& TrackName : TrackNames)
 		{
 			// Check if bone in OnlyDriveBones
+			// 检查OnlyDriveBones中是否有骨骼
 			if (!IsBoneDriven(TrackName))
 			{
 				int32 MeshBoneIndex = BoneContainer.GetPoseBoneIndexForBoneName(TrackName);
@@ -172,13 +181,16 @@ void FAnimNode_PoseDriver::GetRBFTargets(TArray<FRBFTarget>& OutTargets, const F
 	OutTargets.AddZeroed(PoseTargets.Num());
 
 	// Create entry for each target
+	// 为每个目标创建条目
 	for (int32 TargetIdx = 0; TargetIdx < PoseTargets.Num(); TargetIdx++)
 	{
 		FRBFTarget& RBFTarget = OutTargets[TargetIdx];
 		const FPoseDriverTarget& PoseTarget = PoseTargets[TargetIdx];
 
 		// We want to make sure we always have the right number of Values in our RBFTarget. 
+		// 我们希望确保 RBFTarget 中始终具有正确数量的值。
 		// If bone entries are missing, we fill with zeroes
+		// 如果骨骼条目丢失，我们用零填充
 		for (int32 SourceIdx = 0; SourceIdx < SourceBones.Num(); SourceIdx++)
 		{
 			if (PoseTarget.BoneTransforms.IsValidIndex(SourceIdx))
@@ -186,6 +198,7 @@ void FAnimNode_PoseDriver::GetRBFTargets(TArray<FRBFTarget>& OutTargets, const F
 				const FPoseDriverTransform& BoneTransform = PoseTarget.BoneTransforms[SourceIdx];
 
 				// Get Ref Transform
+				// 获取参考变换
 				FTransform RefBoneTransform = FTransform::Identity;
 				if (bEvalFromRefPose && BoneContainer)
 				{
@@ -201,9 +214,11 @@ void FAnimNode_PoseDriver::GetRBFTargets(TArray<FRBFTarget>& OutTargets, const F
 				}
 
 				// Target Translation
+				// 目标翻译
 				if (DriveSource == EPoseDriverSource::Translation)
 				{
 					// Make translation relative to its Ref
+					// 相对于其 Ref 进行翻译
 					if (bEvalFromRefPose)
 					{
 						RBFTarget.AddFromVector(RefBoneTransform.Inverse().TransformPosition(BoneTransform.TargetTranslation));
@@ -215,9 +230,11 @@ void FAnimNode_PoseDriver::GetRBFTargets(TArray<FRBFTarget>& OutTargets, const F
 				}
 
 				// Target Rotation
+				// 目标旋转
 				else
 				{
 					// Make rotation relative to its Ref
+					// 相对于其 Ref 进行旋转
 					if (bEvalFromRefPose)
 					{	
 						const FQuat TargetRotation = BoneTransform.TargetRotation.Quaternion();
@@ -259,6 +276,7 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 	SourcePose.Evaluate(SourceData);
 
 	// Udpate DrivenIDs if needed
+	// 如果需要，更新 DrivenID
 	if (bCachedDrivenIDsAreDirty)
 	{
 		if (CurrentPoseAsset.IsValid())
@@ -268,6 +286,7 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// Get the index of the source bone
+	// 获取源骨骼的索引
 	const FBoneContainer& BoneContainer = SourceData.Pose.GetBoneContainer();
 
 	RBFInput.Values.Reset();
@@ -282,6 +301,7 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 		if (SourceCompactIndex.GetInt() != INDEX_NONE)
 		{
 			// If evaluating in alternative bone space, have to build component space pose
+			// 如果在替代骨骼空间中进行评估，则必须构建组件空间姿势
 			if (EvalSpaceBone.IsValidToEvaluate(BoneContainer))
 			{
 				FCSPose<FCompactPose> CSPose;
@@ -294,9 +314,11 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 				SourceBoneTM = SourceBoneCompSpace.GetRelativeTransform(EvalSpaceCompSpace);
 			}
 			// If just evaluating in local space, just grab from local space pose
+			// 如果只是在局部空间中评估，只需从局部空间姿势中抓取
 			else
 			{
 				// Relative to Ref Pose
+				// 相对于参考位姿
 				if (bEvalFromRefPose && SourceCompactIndex.GetInt() < BoneContainer.GetCompactPoseNumBones())
 				{
 					SourceBoneTM = SourceData.Pose[SourceCompactIndex].GetRelativeTransform(BoneContainer.GetRefPoseTransform(SourceCompactIndex));
@@ -312,6 +334,7 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 
 
 		// Build RBFInput entry
+		// 构建 RBFInput 条目
 		if (DriveSource == EPoseDriverSource::Translation)
 		{
 			RBFInput.AddFromVector(SourceBoneTM.GetTranslation());
@@ -322,10 +345,12 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 		}
 
 		// Record this so we can use it for drawing in edit mode
+		// 记录下来，以便我们可以在编辑模式下使用它进行绘图
 		SourceBoneTMs.Add(SourceBoneTM);
 	}
 
 	// Do nothing if bone is no bones are found/all LOD-ed out
+	// 如果骨头不存在，则不执行任何操作 未找到骨头/所有 LOD 均已删除
 	if (!bFoundAnyBone)
 	{
 		Output = SourceData;
@@ -337,6 +362,7 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 	OutputWeights.Reset();
 	
 	// Use SoloTarget, no need to Solve
+	// 使用SoloTarget，无需Solve
 #if WITH_EDITORONLY_DATA
 	if (PoseTargets.IsValidIndex(SoloTargetIndex))
 	{
@@ -345,8 +371,10 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 	else
 #endif
 	// Solve Weights
+	// 求解权重
 	{
 		// Get target array as RBF types
+		// 获取 RBF 类型的目标数组
 		GetRBFTargets(RBFTargets, &BoneContainer);
 
 		if (!SolverData.IsValid() || !FRBFSolver::IsSolverDataValid(*SolverData, RBFParams, RBFTargets))
@@ -355,30 +383,37 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 		}
 
 		// Run RBF solver
+		// 运行 RBF 求解器
 		FRBFSolver::Solve(*SolverData, RBFParams, RBFTargets, RBFInput, OutputWeights);
 	}
 
 	// Track if we have filled Output with valid pose
+	// 跟踪我们是否已用有效姿势填充输出
 	bool bHaveValidPose = false;
 
 	// Process active targets (if any)
+	// 处理活动目标（如果有）
 	if (OutputWeights.Num() > 0)
 	{
 		// Drive Poses from PoseAsset
+		// 从 PoseAsset 驱动姿势
 		if (DriveOutput == EPoseDriverOutput::DrivePoses)
 		{
 			const UPoseAsset* CachedPoseAsset = CurrentPoseAsset.Get();
 				
 			// Check if PoseAsset is assignedand and compatible
+			// 检查 PoseAsset 是否已分配且兼容
 			if (CachedPoseAsset && CachedPoseAsset->GetSkeleton() != nullptr)
 			{
 				// clear the value before setting it. 
+				// 设置前先清除该值。
 				for (int32 PoseIndex = 0; PoseIndex < PoseExtractContext.PoseCurves.Num(); ++PoseIndex)
 				{
 					PoseExtractContext.PoseCurves[PoseIndex].Value = 0.f;
 				}
 
 				// Then fill in weight for any driven poses
+				// 然后填写任何驱动姿势的重量
 				for (const FRBFOutputWeight& Weight : OutputWeights)
 				{
 					const FPoseDriverTarget& PoseTarget = PoseTargets[Weight.TargetIndex];
@@ -393,14 +428,17 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 				FAnimationPoseData CurrentAnimationPoseData(CurrentPose);
 
 				// Evaluate PoseAsset
+				// 评估 PoseAsset
 				if (CachedPoseAsset->GetAnimationPose(CurrentAnimationPoseData, PoseExtractContext))
 				{
 					// If Additive, Set Source and OnlyDrive Bones to Zero and Accumulate Pose
+					// 如果是累加性的，则将源骨骼和仅驱动骨骼设置为零并累积姿势
 					if (CurrentPoseAsset->IsValidAdditive())
 					{
 						const FTransform AdditiveIdentity(FQuat::Identity, FVector::ZeroVector, FVector::ZeroVector);
 
 						// Don't want to modify SourceBones, set additive offset to zero (not identity transform, as need zero scale)
+						// 不想修改 SourceBones，将附加偏移设置为零（不是恒等变换，因为需要零比例）
 						for (const FBoneReference& SourceBoneRef : SourceBones)
 						{
 							const FCompactPoseBoneIndex SourceCompactIndex = SourceBoneRef.GetCompactPoseIndex(BoneContainer);
@@ -408,6 +446,7 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 						}
 
 						// If filtering for specific bones, filter out bones using BonesToFilter array
+						// 如果过滤特定骨骼，请使用 BonesToFilter 数组过滤掉骨骼
 						if (bHasOnlyDriveBones)
 						{
 							for (FCompactPoseBoneIndex BoneIndex : BonesToFilter)
@@ -417,6 +456,7 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 						}
 
 						// Start by copying input
+						// 从复制输入开始
 						Output = SourceData;
 
 						FAnimationPoseData AccumulatedAnimationPoseData(Output); // out
@@ -424,6 +464,7 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 					}
 
 					// If Non-Additive, Blend between Source and Current filtering with OnlyDrive Bones
+					// 如果非相加，则使用 OnlyDrive Bones 在源过滤和当前过滤之间进行混合
 					else
 					{
 						const FAnimationPoseData SourceAnimationPoseData(SourceData);
@@ -437,12 +478,15 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 		}
 
 		// Drive curves (morphs, materials etc)
+		// 驱动曲线（变形、材质等）
 		else if (DriveOutput == EPoseDriverOutput::DriveCurves)
 		{
 			// Start by copying input
+			// 从复制输入开始
 			Output = SourceData;
 
 			// Then set curves based on target weights
+			// 然后根据目标权重设置曲线
 			FBlendedCurve DrivenCurves;
 			for (const FRBFOutputWeight& Weight : OutputWeights)
 			{
@@ -454,6 +498,7 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 			}
 
 			// Merge driven curves into output
+			// 将驱动曲线合并到输出中
 			UE::Anim::FNamedValueArrayUtils::Union(Output.Curve, DrivenCurves, [](UE::Anim::FCurveElement& InOutElement, const UE::Anim::FCurveElement& InElement0, UE::Anim::ENamedValueUnionFlags InFlags)
 			{
 				if(EnumHasAnyFlags(InFlags, UE::Anim::ENamedValueUnionFlags::ValidArg1))
@@ -468,6 +513,7 @@ void FAnimNode_PoseDriver::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// No valid pose, just pass through
+	// 没有有效的姿势，只是通过
 	if (!bHaveValidPose)
 	{
 		Output = SourceData;

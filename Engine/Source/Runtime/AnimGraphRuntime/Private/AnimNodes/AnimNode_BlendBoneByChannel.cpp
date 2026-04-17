@@ -10,6 +10,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_BlendBoneByChannel
+// FAnimNode_BlendBoneByChannel
 
 void FAnimNode_BlendBoneByChannel::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -27,6 +28,7 @@ void FAnimNode_BlendBoneByChannel::CacheBones_AnyThread(const FAnimationCacheBon
 	B.CacheBones(Context);
 
 	// Pre-validate bone entries, so we don't waste cycles every frame figuring it out.
+	// 预先验证骨骼条目，这样我们就不会浪费每一帧的周期来解决它。
 	ValidBoneEntries.Reset();
 	const FBoneContainer& BoneContainer = Context.AnimInstanceProxy->GetRequiredBones();
 	for (FBlendBoneByChannelEntry& Entry : BoneDefinitions)
@@ -75,6 +77,7 @@ void FAnimNode_BlendBoneByChannel::Evaluate_AnyThread(FPoseContext& Output)
 		B.Evaluate(PoseB);
 
 		// Faster code path in local space
+		// 本地空间中更快的代码路径
 		if (TransformsSpace == EBoneControlSpace::BCS_BoneSpace)
 		{
 			const FCompactPose& SourcePose = PoseB.Pose;
@@ -89,10 +92,12 @@ void FAnimNode_BlendBoneByChannel::Evaluate_AnyThread(FPoseContext& Output)
 				FTransform& TargetTransform = TargetPose[TargetBoneIndex];
 
 				// Blend Transforms.
+				// 混合变换。
 				FTransform BlendedTransform;
 				BlendedTransform.Blend(TargetTransform, SourceTransform, InternalBlendAlpha);
 
 				// Filter through channels
+				// 通过渠道过滤
 				{
 					if (Entry.bBlendTranslation)
 					{
@@ -112,6 +117,7 @@ void FAnimNode_BlendBoneByChannel::Evaluate_AnyThread(FPoseContext& Output)
 			}
 		}
 		// Slower code path where local transforms have to be converted to a different space.
+		// 较慢的代码路径，其中局部转换必须转换到不同的空间。
 		else
 		{
 			FCSPose<FCompactPose> TargetPoseCmpntSpace;
@@ -133,14 +139,17 @@ void FAnimNode_BlendBoneByChannel::Evaluate_AnyThread(FPoseContext& Output)
 				FTransform TargetTransform = TargetPoseCmpntSpace.GetComponentSpaceTransform(TargetBoneIndex);
 
 				// Convert Transforms to correct space.
+				// 将变换转换为正确的空间。
 				FAnimationRuntime::ConvertCSTransformToBoneSpace(ComponentTransform, SourcePoseCmpntSpace, SourceTransform, SourceBoneIndex, TransformsSpace);
 				FAnimationRuntime::ConvertCSTransformToBoneSpace(ComponentTransform, TargetPoseCmpntSpace, TargetTransform, TargetBoneIndex, TransformsSpace);
 
 				// Blend Transforms.
+				// 混合变换。
 				FTransform BlendedTransform;
 				BlendedTransform.Blend(TargetTransform, SourceTransform, InternalBlendAlpha);
 
 				// Filter through channels
+				// 通过渠道过滤
 				{
 					if (Entry.bBlendTranslation)
 					{
@@ -159,22 +168,28 @@ void FAnimNode_BlendBoneByChannel::Evaluate_AnyThread(FPoseContext& Output)
 				}
 
 				// Convert blended and filtered result back in component space.
+				// 将混合和过滤的结果转换回组件空间。
 				FAnimationRuntime::ConvertBoneSpaceTransformToCS(ComponentTransform, TargetPoseCmpntSpace, TargetTransform, TargetBoneIndex, TransformsSpace);
 
 				// Queue transform to be applied after all transforms have been created.
+				// 创建所有转换后要应用的队列转换。
 				// So we don't have parent bones affecting children bones.
+				// 所以我们没有父骨骼影响子骨骼。
 				QueuedModifiedBoneTransforms.Add(FBoneTransform(TargetBoneIndex, TargetTransform));
 			}
 
 			if (QueuedModifiedBoneTransforms.Num() > 0)
 			{
 				// Sort OutBoneTransforms so indices are in increasing order.
+				// 对 OutBoneTransforms 进行排序，使索引按升序排列。
 				QueuedModifiedBoneTransforms.Sort(FCompareBoneTransformIndex());
 
 				// Apply transforms
+				// 应用变换
 				TargetPoseCmpntSpace.SafeSetCSBoneTransforms(QueuedModifiedBoneTransforms);
 
 				// Turn Component Space poses back into local space.
+				// 将组件空间姿势转回到局部空间。
 				FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(TargetPoseCmpntSpace), Output.Pose);
 			}
 		}

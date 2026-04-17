@@ -33,6 +33,7 @@ void FLoadedAnimationChunk::CleanUpIORequest()
 
 ////////////////////////
 // FStreamingAnimationData //
+// [翻译失败: FStreamingAnimationData //]
 ////////////////////////
 
 FStreamingAnimationData::FStreamingAnimationData()
@@ -50,6 +51,7 @@ FStreamingAnimationData::~FStreamingAnimationData()
 void FStreamingAnimationData::FreeResources()
 {
 	// Make sure there are no pending requests in flight.
+	// 确保没有正在处理的待处理请求。
 	for (int32 Pass = 0; Pass < 3; Pass++)
 	{
 		BlockTillAllRequestsFinished();
@@ -82,6 +84,7 @@ bool FStreamingAnimationData::Initialize(UAnimStreamable* InStreamableAnim, FAni
 	AnimationStreamingManager = InAnimationStreamingManager;
 
 	// Always get the first chunk of data so we can play immediately
+	// 始终获取第一块数据，以便我们可以立即播放
 	check(LoadedChunks.Num() == 0);
 	check(LoadedChunkIndices.Num() == 0);
 
@@ -99,15 +102,18 @@ bool FStreamingAnimationData::UpdateStreamingStatus()
 	}
 
 	//Handle Failed Chunks first
+	//首先处理失败的块
 	for (int32 LoadedChunkIndex = 0; LoadedChunkIndex < LoadedChunks.Num(); ++LoadedChunkIndex)
 	{
 		FLoadedAnimationChunk& LoadedChunk = LoadedChunks[LoadedChunkIndex];
 		if (LoadFailedChunks.Contains(LoadedChunk.Index))
 		{
 			// Mark as not loaded
+			// 标记为未加载
 			LoadedChunkIndices.Remove(LoadedChunk.Index);
 
 			// Remove this chunk
+			// 删除这个块
 			FreeLoadedChunk(LoadedChunk);
 			
 			FScopeLock LoadedChunksLock(&LoadedChunksCritcalSection);
@@ -125,6 +131,7 @@ bool FStreamingAnimationData::UpdateStreamingStatus()
 	if (HasPendingRequests(IndicesToLoad, IndicesToFree))
 	{
 		// could maybe iterate over the things we know are done, but I couldn't tell if that was IndicesToLoad or not.
+		// 也许可以迭代我们知道已经完成的事情，但我无法判断这是否是 IndicesToLoad 。
 		for (FLoadedAnimationChunk& LoadedChunk : LoadedChunks)
 		{
 			if (LoadedChunk.IORequest)
@@ -154,6 +161,7 @@ bool FStreamingAnimationData::HasPendingRequests(TArray<uint32>& IndicesToLoad, 
 	IndicesToFree.Reset();
 
 	// Find indices that aren't loaded
+	// 查找未加载的索引
 	for (uint32 NeededIndex : RequestedChunks)
 	{
 		if (!LoadedChunkIndices.Contains(NeededIndex))
@@ -163,6 +171,7 @@ bool FStreamingAnimationData::HasPendingRequests(TArray<uint32>& IndicesToLoad, 
 	}
 
 	// Find indices that aren't needed anymore
+	// 查找不再需要的索引
 	for (uint32 CurrentIndex : LoadedChunkIndices)
 	{
 		if (!RequestedChunks.Contains(CurrentIndex))
@@ -179,6 +188,7 @@ void FStreamingAnimationData::BeginPendingRequests(const TArray<uint32>& Indices
 	TArray<uint32> FreeChunkIndices;
 
 	// Mark Chunks for removal in case they can be reused
+	// 将块标记为移除，以便可以重复使用
 	{
 		for (uint32 Index : IndicesToFree)
 		{
@@ -198,6 +208,7 @@ void FStreamingAnimationData::BeginPendingRequests(const TArray<uint32>& Indices
 	}
 
 	// Set off all IO Requests
+	// 关闭所有IO请求
 
 	const EAsyncIOPriorityAndFlags AsyncIOPriority = AIOP_CriticalPath; //Set to Crit temporarily as emergency speculative fix for streaming issue
 
@@ -319,6 +330,7 @@ SIZE_T FStreamingAnimationData::GetMemorySize() const
 
 ////////////////////////////
 // FAnimationStreamingManager //
+// FAnimationStreamingManager //
 ////////////////////////////
 
 FAnimationStreamingManager::FAnimationStreamingManager()
@@ -332,6 +344,7 @@ FAnimationStreamingManager::~FAnimationStreamingManager()
 void FAnimationStreamingManager::OnAsyncFileCallback(FStreamingAnimationData* StreamingAnimData, int32 ChunkIndex, int64 ReadSize, IBulkDataIORequest* ReadRequest, bool bWasCancelled)
 {
 	// Check to see if we successfully managed to load anything
+	// 检查我们是否成功加载任何内容
 	uint8* Mem = ReadRequest->GetReadResults();
 
 	FScopeLock Lock(&StreamingAnimData->LoadedChunksCritcalSection);
@@ -476,6 +489,7 @@ void FAnimationStreamingManager::AddStreamingAnim(UAnimStreamable* Anim)
 		else
 		{
 			// Failed to initialize, don't add to list of streaming sound waves
+			// 初始化失败，不添加到流式声波列表
 			delete NewStreamingAnim;
 		}
 	}
@@ -490,6 +504,7 @@ bool FAnimationStreamingManager::RemoveStreamingAnim(UAnimStreamable* Anim)
 		StreamingAnimations.Remove(Anim);
 
 		// Free the resources of the streaming wave data. This blocks pending IO requests
+		// 释放流式波形数据的资源。这会阻止待处理的 IO 请求
 		AnimData->FreeResources();
 		delete AnimData;
 		return true;
@@ -500,12 +515,14 @@ bool FAnimationStreamingManager::RemoveStreamingAnim(UAnimStreamable* Anim)
 const FCompressedAnimSequence* FAnimationStreamingManager::GetLoadedChunk(const UAnimStreamable* Anim, uint32 ChunkIndex, bool bTrackAsRequested) const
 {
 	// Check for the spoof of failing to load a stream chunk
+	// 检查是否存在无法加载流块的欺骗行为
 	if (SpoofFailedAnimationChunkLoad > 0)
 	{
 		return nullptr;
 	}
 
 	// If we fail at getting the critical section here, early out.
+	// 如果我们未能在这里找到关键部分，请尽早退出。
 	FScopeLock MapLock(&CriticalSection);
 
 	FStreamingAnimationData* AnimData = StreamingAnimations.FindRef(Anim);

@@ -9,6 +9,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_RotationMultiplier
+// FAnimNode_RotationMultiplier
 
 FAnimNode_RotationMultiplier::FAnimNode_RotationMultiplier()
 	: Multiplier(0.0f)
@@ -47,10 +48,12 @@ FVector GetAxisVector(const EBoneAxis Axis)
 FQuat FAnimNode_RotationMultiplier::ExtractAngle(const FTransform& RefPoseTransform, const FTransform& LocalBoneTransform, const EBoneAxis Axis)
 {
 	// local bone transform with reference rotation
+	// 带有参考旋转的局部骨骼变换
 	FTransform ReferenceBoneTransform = RefPoseTransform;
 	ReferenceBoneTransform.SetTranslation(LocalBoneTransform.GetTranslation());
 
 	// find delta angle between the two quaternions X Axis.
+	// 求两个四元数 X 轴之间的 delta 角度。
 	const FVector RotationAxis = GetAxisVector(Axis);
 	const FVector LocalRotationVector = LocalBoneTransform.GetRotation().RotateVector(RotationAxis);
 	const FVector ReferenceRotationVector = ReferenceBoneTransform.GetRotation().RotateVector(RotationAxis);
@@ -59,12 +62,16 @@ FQuat FAnimNode_RotationMultiplier::ExtractAngle(const FTransform& RefPoseTransf
 	checkSlow( LocalToRefQuat.IsNormalized() );
 
 	// Rotate parent bone atom from position in local space to reference skeleton
+	// 将父骨原子从局部空间中的位置旋转到参考骨架
 	// Since our rotation rotates both vectors with shortest arc
+	// 由于我们的旋转以最短弧度旋转两个向量
 	// we're essentially left with a quaternion that has angle difference with reference skeleton version
+	// 我们基本上留下了一个与参考骨架版本有角度差异的四元数
 	const FQuat BoneQuatAligned = LocalToRefQuat* LocalBoneTransform.GetRotation();
 	checkSlow( BoneQuatAligned.IsNormalized() );
 
 	// Find that delta angle
+	// 找到那个 Delta 角
 	const FQuat DeltaQuat = (ReferenceBoneTransform.GetRotation().Inverse()) * BoneQuatAligned;
 	checkSlow( DeltaQuat.IsNormalized() );
 
@@ -94,9 +101,11 @@ FQuat FAnimNode_RotationMultiplier::ExtractAngle(const FTransform& RefPoseTransf
 FQuat FAnimNode_RotationMultiplier::MultiplyQuatBasedOnSourceIndex(const FTransform& RefPoseTransform, const FTransform& LocalBoneTransform, const EBoneAxis Axis, float InMultiplier, const FQuat& ReferenceQuat)
 {
 	// Find delta angle for source bone.
+	// 查找源骨骼的增量角。
 	FQuat DeltaQuat = ExtractAngle(RefPoseTransform, LocalBoneTransform, Axis);
 
 	// Turn to Axis and Angle
+	// 转向轴和角度
 	FVector RotationAxis;
 	float	RotationAngle;
 	DeltaQuat.ToAxisAndAngle(RotationAxis, RotationAngle);
@@ -104,6 +113,7 @@ FQuat FAnimNode_RotationMultiplier::MultiplyQuatBasedOnSourceIndex(const FTransf
 	const FVector DefaultAxis = GetAxisVector(Axis);
 
 	// See if we need to invert angle - shortest path
+	// 看看我们是否需要反转角度 - 最短路径
 	if( (RotationAxis | DefaultAxis) < 0.f )
 	{
 		RotationAxis = -RotationAxis;
@@ -111,11 +121,14 @@ FQuat FAnimNode_RotationMultiplier::MultiplyQuatBasedOnSourceIndex(const FTransf
 	}
 
 	// Make sure it is the shortest angle.
+	// 确保它是最短的角度。
 	RotationAngle = FMath::UnwindRadians(RotationAngle);
 
 	// New bone rotation
+	// 新骨旋转
 	FQuat OutQuat = ReferenceQuat * FQuat(RotationAxis, RotationAngle* InMultiplier);
 	// Normalize resulting quaternion.
+	// 标准化生成的四元数。
 	OutQuat.Normalize();
 
 #if 0 //DEBUG_TWISTBONECONTROLLER
@@ -137,6 +150,7 @@ void FAnimNode_RotationMultiplier::EvaluateSkeletalControl_AnyThread(FComponentS
 	if ( Multiplier != 0.f )
 	{
 		// Reference bone
+		// 参考骨
 		const FBoneContainer& BoneContainer = Output.Pose.GetPose().GetBoneContainer();
 		const FCompactPoseBoneIndex TargetBoneIndex = TargetBone.GetCompactPoseIndex(BoneContainer);
 		const FCompactPoseBoneIndex SourceBoneIndex = SourceBone.GetCompactPoseIndex(BoneContainer);
@@ -175,6 +189,7 @@ void FAnimNode_RotationMultiplier::EvaluateSkeletalControl_AnyThread(FComponentS
 bool FAnimNode_RotationMultiplier::IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) 
 {
 	// if both bones are valid
+	// 如果两个骨头都有效
 	return (TargetBone.IsValidToEvaluate(RequiredBones) && (TargetBone==SourceBone || SourceBone.IsValidToEvaluate(RequiredBones)));
 }
 

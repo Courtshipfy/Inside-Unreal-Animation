@@ -24,6 +24,7 @@ void Attributes::GetAttributeValue(FStackAttributeContainer& OutAttributes, cons
 void Attributes::GetAttributeValue(FStackAttributeContainer& OutAttributes, const FCompactPoseBoneIndex& PoseBoneIndex, const FAnimatedBoneAttribute& Attribute, double CurrentTime)
 {
 	// Evaluating a single attribute into a stack-based container
+	// 评估基于堆栈的容器中的单个属性
 	if (Attribute.Identifier.IsValid())
 	{
 		uint8* AttributeDataPtr = OutAttributes.FindOrAdd(Attribute.Identifier.GetType(), FAttributeId(Attribute.Identifier.GetName(), PoseBoneIndex));
@@ -110,6 +111,7 @@ void Attributes::OverrideAttributes(const FStackAttributeContainer& SourceAttrib
 		const IAttributeBlendOperator* Operator = AttributeTypes::GetTypeOperator(WeakScriptStruct);
 
 		// Initialise blend data with uniform float weight
+		// 使用统一的浮点权重初始化混合数据
 		FAttributeBlendData AttributeBlendData = FAttributeBlendData::SingleContainerUniformWeighted(Array, Weight, WeakScriptStruct.Get());
 		Operator->Override(AttributeBlendData, &OutAttributes);
 	}
@@ -145,6 +147,7 @@ void Attributes::ConvertToAdditive(const FStackAttributeContainer& BaseAttribute
 		const IAttributeBlendOperator* Operator = AttributeTypes::GetTypeOperator(WeakScriptStruct);
 
 		// Subtract is simply an accumulate with -1.f blend weight
+		// 减法只是用 -1.f 混合权重进行累加
 		FAttributeBlendData AttributeBlendData = FAttributeBlendData::SingleContainerUniformWeighted(Array, 1.f, WeakScriptStruct.Get());
 		Operator->ConvertToAdditive(AttributeBlendData, &OutAdditiveAttributes);
 	}
@@ -164,12 +167,14 @@ void Attributes::CopyAndRemapAttributes(const FMeshAttributeContainer& SourceAtt
 			const TArray<FAttributeId, FDefaultAllocator>& AttributeIds = SourceAttributes.GetKeys(TypeIndex);
 
 			// Try and remap all the source attributes to their respective new bone indices
+			// 尝试将所有源属性重新映射到各自的新骨骼索引
 			for (int32 EntryIndex = 0; EntryIndex < AttributeIds.Num(); ++EntryIndex)
 			{
 				const FAttributeId& AttributeId = AttributeIds[EntryIndex];
 
 				const int32* Value = BoneMapToSource.Find(AttributeId.GetIndex());
 				// If there is no remapping the attribute will be dropped
+				// 如果没有重新映射，该属性将被删除
 				if (Value)
 				{
 					const FMeshPoseBoneIndex MeshPoseIndex(*Value);
@@ -220,6 +225,7 @@ void Attributes::InterpolateAttributes(FMeshAttributeContainer& FromAttributes, 
 	}
 
 	// Handle unique types first
+	// 首先处理独特的类型
 	{
 		// From
 		for (const TWeakObjectPtr<UScriptStruct>& WeakScriptStruct : FromUniqueStructs)
@@ -236,6 +242,7 @@ void Attributes::InterpolateAttributes(FMeshAttributeContainer& FromAttributes, 
 				ensure(OutAttributeData);
 
 				// Interpolate, from default value to stored value
+				// 插值，从默认值到存储值
 				Operator->Interpolate(Values[EntryIndex].GetPtr<void>(), DefaultValue.GetPtr<void>(), 1.f - Alpha, (void*)OutAttributeData);
 			}
 		}
@@ -262,6 +269,7 @@ void Attributes::InterpolateAttributes(FMeshAttributeContainer& FromAttributes, 
 	}
 
 	// Overlapping types	
+	// 重叠类型
 	for (const TWeakObjectPtr<UScriptStruct>& WeakScriptStruct : OverlappingStructs)
 	{
 		const int32 FromTypeIndex = FromAttributes.FindTypeIndex(WeakScriptStruct.Get());
@@ -288,12 +296,14 @@ void Attributes::InterpolateAttributes(FMeshAttributeContainer& FromAttributes, 
 			if (ToValueIndex != INDEX_NONE)
 			{
 				// Exists in both
+				// 两者都存在
 				ToAttributeData = ToAttributes.Find(WeakScriptStruct.Get(), ToIdentifiers[ToValueIndex]);
 				ensure(ToAttributeData);
 			}
 			else
 			{
 				// Exists in From only
+				// 仅存在于 From 中
 				ToAttributeData = DefaultValue.GetPtr<uint8>();
 			}
 
@@ -309,6 +319,7 @@ void Attributes::InterpolateAttributes(FMeshAttributeContainer& FromAttributes, 
 			if (FromValueIndex == INDEX_NONE)
 			{
 				// Exists only in to
+				// 仅存在于
 				const uint8* ToAttributeData = ToAttributes.Find(WeakScriptStruct.Get(), ToIdentifiers[ToValueIndex]);
 				ensure(ToAttributeData);
 
@@ -348,6 +359,7 @@ void Attributes::BlendAttributesPerBone(TArrayView<const FStackAttributeContaine
 	}
 
 	// In case there are no per-bone weights the attributes can be blended with container-level weights
+	// 如果没有每个骨骼的权重，则可以将属性与容器级权重混合
 	const bool bContainsPerBoneWeights = BlendSampleDataCache[0].PerBoneBlendData.Num() > 0;
 	if (bContainsPerBoneWeights)
 	{
@@ -388,6 +400,7 @@ void Attributes::BlendAttributesPerBone(TArrayView<const FStackAttributeContaine
 	}
 
 	// In case there are no per-bone weights the attributes can be blended with container-level weights
+	// 如果没有每个骨骼的权重，则可以将属性与容器级权重混合
 	const bool bContainsPerBoneWeights = BlendSampleDataCache[0].PerBoneBlendData.Num() > 0;
 	if (bContainsPerBoneWeights)
 	{
@@ -450,9 +463,11 @@ void Attributes::MirrorAttributes(FStackAttributeContainer& CustomAttributes, co
 	struct FMirrorSet
 	{
 		/** Pointers to attribute values */
+		/** 指向属性值的指针 */
 		TArray<uint8*, FAnimStackAllocator> DataPtrsA;
 		TArray<uint8*, FAnimStackAllocator> DataPtrsB;
 		/** Identifier of the attribute */
+		/** 属性的标识符 */
 		TArray <const FAttributeId*, FAnimStackAllocator> IdentifiersA;
 		TArray <const FAttributeId*, FAnimStackAllocator> IdentifiersB;
 		int32 MirrorIndexA;
@@ -479,6 +494,7 @@ void Attributes::MirrorAttributes(FStackAttributeContainer& CustomAttributes, co
 	};
 
 	// @todo: initialize this array with a properly sized TInlineAllocator
+	// @todo：使用适当大小的 TInlineAllocator 初始化此数组
 	TArray<int32> SortedBoneIndices;
 	for (const TWeakObjectPtr<UScriptStruct>& WeakScriptStruct : CustomAttributes.GetUniqueTypes())
 	{
@@ -495,6 +511,7 @@ void Attributes::MirrorAttributes(FStackAttributeContainer& CustomAttributes, co
 			    for (int32 CurBoneIndex : UniqueBoneIndices)
 			    {
 				    // only handle simple swaps - both entries exist and are different
+				    // 只处理简单的交换 - 两个条目都存在并且不同
 				    if (CompactPoseMirrorBones.IsValidIndex(CurBoneIndex))
 				    {
 					    int32 MirrorBoneIndex = CompactPoseMirrorBones[CurBoneIndex].GetInt();
@@ -512,13 +529,16 @@ void Attributes::MirrorAttributes(FStackAttributeContainer& CustomAttributes, co
             else
             {
 				// Deprecated behaviour support, remove when deleting other signature
+				// 已弃用的行为支持，删除其他签名时删除
 			    for (int32 CurBoneIndex : UniqueBoneIndices)
 			    {
 				    // Mirror tables are stored using skeleton indices, but are assumed to be used interchangeably with compact pose indices here.
+				    // 镜像表使用骨架索引存储，但此处假设与紧凑姿态索引互换使用。
 				    int32 MirrorBoneIndex = MirrorTable.BoneToMirrorBoneIndex[CurBoneIndex].GetInt();
 				    int32 SwapCheckBoneIndex = MirrorTable.BoneToMirrorBoneIndex[MirrorBoneIndex].GetInt();
     
 				    // only handle simple swaps - both entries exist and are different
+				    // 只处理简单的交换 - 两个条目都存在并且不同
 				    if (MirrorBoneIndex != INDEX_NONE && CurBoneIndex != INDEX_NONE && CurBoneIndex != MirrorBoneIndex &&
 					    SwapCheckBoneIndex == CurBoneIndex && Algo::BinarySearch(SortedBoneIndices, MirrorBoneIndex))
 				    {
@@ -531,6 +551,7 @@ void Attributes::MirrorAttributes(FStackAttributeContainer& CustomAttributes, co
 			const TConstArrayView<FAttributeId> AttributeIdentifiers = CustomAttributes.GetKeys(TypeIndex);
 
 			// gather attributes that are on mirrored bones 
+			// 收集镜像骨骼上的属性
 			for (int32 AttributeIndex = 0; AttributeIndex < AttributeIdentifiers.Num(); ++AttributeIndex)
 			{
 				const FAttributeId& AttributeIdentifier = AttributeIdentifiers[AttributeIndex];

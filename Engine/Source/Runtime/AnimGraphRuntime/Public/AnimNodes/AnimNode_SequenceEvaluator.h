@@ -14,17 +14,23 @@ namespace ESequenceEvalReinit
 	enum Type : int
 	{
 		/** Do not reset InternalTimeAccumulator */
+		/** 不要重置InternalTimeAccumulator */
 		NoReset,
 		/** Reset InternalTimeAccumulator to StartPosition */
+		/** 将内部时间累加器重置为开始位置 */
 		StartPosition,
 		/** Reset InternalTimeAccumulator to ExplicitTime */
+		/** 将 InternalTimeAccumulator 重置为 ExplicitTime */
 		ExplicitTime,
 	};
 }
 
 // Abstract base class. Evaluates a point in an anim sequence, using a specific time input rather than advancing time internally.
+// 抽象基类。使用特定的时间输入而不是在内部提前时间来评估动画序列中的点。
 // Typically the playback position of the animation for this node will represent something other than time, like jump height.
+// 通常，该节点的动画播放位置将表示时间以外的其他内容，例如跳跃高度。
 // This node will not trigger any notifies present in the associated sequence.
+// 该节点不会触发关联序列中存在的任何通知。
 USTRUCT(BlueprintInternalUseOnly)
 struct FAnimNode_SequenceEvaluatorBase : public FAnimNode_AssetPlayerBase
 {
@@ -35,52 +41,67 @@ private:
 
 public:
 	// FAnimNode_AssetPlayerBase interface
+	// FAnimNode_AssetPlayerBase接口
 	ANIMGRAPHRUNTIME_API virtual float GetCurrentAssetTime() const override;
 	ANIMGRAPHRUNTIME_API virtual float GetCurrentAssetLength() const override;
 	// End of FAnimNode_AssetPlayerBase interface
+	// FAnimNode_AssetPlayerBase接口结束
 
 	// FAnimNode_Base interface
+	// FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void UpdateAssetPlayer(const FAnimationUpdateContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
+	// FAnimNode_Base接口结束
 
 	// FAnimNode_AssetPlayerBase Interface
+	// FAnimNode_AssetPlayerBase接口
 	virtual float GetAccumulatedTime() const override {return GetExplicitTime();}
 	virtual void SetAccumulatedTime(float NewTime) override { SetExplicitTime(NewTime); }
 	virtual UAnimationAsset* GetAnimAsset() const override { return GetSequence(); }
 	// End of FAnimNode_AssetPlayerBase Interface
+	// FAnimNode_AssetPlayerBase接口结束
 
 	void SetExplicitPreviousTime(float PreviousTime) { InternalTimeAccumulator = PreviousTime; }
 
 	// Get the effective delta time between the previous and current frame internal time
+	// 获取前一帧内部时间与当前帧内部时间之间的有效增量时间
 	ANIMGRAPHRUNTIME_API virtual float GetEffectiveDeltaTime(float ExplicitTime, float PrevExplicitTime) const;
 
 	// Set the animation sequence asset to evaluate
+	// 设置要评估的动画序列资源
 	virtual bool SetSequence(UAnimSequenceBase* InSequence) { return false; }
 
 	// Set the time at which to evaluate the associated sequence
+	// 设置评估关联序列的时间
 	virtual bool SetExplicitTime(float InTime) { return false; }
 
 	// Set whether to teleport to explicit time when it is set
+	// 设置时是否瞬移到明确的时间
 	virtual void SetTeleportToExplicitTime(bool bInTeleport) {}
 
 	/** Set what to do when SequenceEvaluator is reinitialized */
+	/** 设置重新初始化 SequenceEvaluator 时要执行的操作 */
 	virtual void SetReinitializationBehavior(TEnumAsByte<ESequenceEvalReinit::Type> InBehavior) {}
 
 	// The animation sequence asset to evaluate
+	// 要评估的动画序列资产
 	virtual UAnimSequenceBase* GetSequence() const { return nullptr; }
 
 	// The time at which to evaluate the associated sequence
+	// 评估关联序列的时间
 	virtual float GetExplicitTime() const { return 0.0f; }
 
 	/** This only works if bTeleportToExplicitTime is false OR this node is set to use SyncGroup */
+	/** 仅当 bTeleportToExplicitTime 为 false 或此节点设置为使用 SyncGroup 时才有效 */
 	UE_DEPRECATED(5.3, "Please use IsLooping instead.")
 	virtual bool GetShouldLoop() const final { return IsLooping(); }
 
 	// Set the animation to continue looping when it reaches the end
+	// 设置动画到达结束时继续循环
 	virtual bool SetShouldLoop(bool bInShouldLoop) { return false; }
 
 	/** If true, teleport to explicit time, does NOT advance time (does not trigger notifies, does not extract Root Motion, etc.)
@@ -89,17 +110,21 @@ public:
 	virtual bool GetTeleportToExplicitTime() const { return true; }
 
 	/** What to do when SequenceEvaluator is reinitialized */
+	/** 重新初始化 SequenceEvaluator 时做什么 */
 	virtual TEnumAsByte<ESequenceEvalReinit::Type> GetReinitializationBehavior() const { return ESequenceEvalReinit::ExplicitTime; }
 
 	// The start up position, it only applies when ReinitializationBehavior == StartPosition. Only used when bTeleportToExplicitTime is false.
+	// 启动位置，仅在ReinitializationBehavior == StartPosition时适用。仅当 bTeleportToExplicitTime 为 false 时使用。
 	virtual float GetStartPosition() const { return 0.0f; }
 
 	// Called after executing the input pins, split for subclass convenience.
+	// 在执行输入引脚后调用，为了子类方便而拆分。
 	ANIMGRAPHRUNTIME_API void PostExposedInputsUpdateAssetPlayer(const FAnimationUpdateContext& Context);
 
 };
 
 // Sequence evaluator node that can be used with constant folding
+// 可与常量折叠一起使用的序列评估器节点
 USTRUCT(BlueprintInternalUseOnly)
 struct FAnimNode_SequenceEvaluator : public FAnimNode_SequenceEvaluatorBase
 {
@@ -110,38 +135,47 @@ private:
 
 #if WITH_EDITORONLY_DATA
 	// The group name that we synchronize with (NAME_None if it is not part of any group). 
+	// 我们与之同步的组名称（如果不属于任何组，则为 NAME_None）。
 	UPROPERTY(EditAnywhere, Category=Sync, meta=(FoldProperty))
 	FName GroupName = NAME_None;
 
 	// The role this node can assume within the group (ignored if GroupName is not set)
+	// 该节点在组内可以承担的角色（如果未设置 GroupName，则忽略）
 	UPROPERTY(EditAnywhere, Category=Sync, meta=(FoldProperty))
 	TEnumAsByte<EAnimGroupRole::Type> GroupRole = EAnimGroupRole::CanBeLeader;
 
 	// How this node will synchronize with other animations.
+	// 该节点如何与其他动画同步。
 	UPROPERTY(EditAnywhere, Category=Sync, meta=(FoldProperty))
 	EAnimSyncMethod Method = EAnimSyncMethod::DoNotSync;
 
 	// If true, "Relevant anim" nodes that look for the highest weighted animation in a state will ignore this node
+	// 如果为 true，则在某个状态中查找权重最高的动画的“相关动画”节点将忽略此节点
 	UPROPERTY(EditAnywhere, Category=Relevancy, meta=(FoldProperty, PinHiddenByDefault))
 	bool bIgnoreForRelevancyTest = false;
 	
 	// The animation sequence asset to evaluate
+	// 要评估的动画序列资产
 	UPROPERTY(EditAnywhere, Category = Settings, meta = (PinHiddenByDefault, FoldProperty))
 	TObjectPtr<UAnimSequenceBase> Sequence = nullptr;
 
 	// The time at which to evaluate the associated sequence
+	// 评估关联序列的时间
 	UPROPERTY(EditAnywhere, Category=Settings, meta=(PinShownByDefault, FoldProperty, EditCondition="!bUseExplicitFrame"))
 	float ExplicitTime = 0.0f;
 
 	// Whether to use ExplicitFrame (true) or ExplicitTime (false) when evaluating the associated sequence
+	// 评估关联序列时是否使用 ExplicitFrame (true) 或 ExplicitTime (false)
 	UPROPERTY(EditAnywhere, Category=Settings, meta=(NeverAsPin, FoldProperty))
 	bool bUseExplicitFrame = false;
 
 	// The frame at which to evaluate the associated sequence
+	// 评估关联序列的帧
 	UPROPERTY(EditAnywhere, Category=Settings, meta=(PinHiddenByDefault, FoldProperty, EditCondition="bUseExplicitFrame"))
 	int32 ExplicitFrame = 0;
 
 	/** This only works if bTeleportToExplicitTime is false OR this node is set to use SyncGroup */
+	/** 仅当 bTeleportToExplicitTime 为 false 或此节点设置为使用 SyncGroup 时才有效 */
 	UPROPERTY(EditAnywhere, Category = Settings, meta = (PinHiddenByDefault, FoldProperty))
 	bool bShouldLoop = true;
 
@@ -152,16 +186,19 @@ private:
 	bool bTeleportToExplicitTime = true;
 
 	/** What to do when SequenceEvaluator is reinitialized */
+	/** 重新初始化 SequenceEvaluator 时做什么 */
 	UPROPERTY(EditAnywhere, Category = Settings, meta=(DisplayAfter="StartPosition", FoldProperty))
 	TEnumAsByte<ESequenceEvalReinit::Type> ReinitializationBehavior = ESequenceEvalReinit::ExplicitTime;
 
 	// The start up position, it only applies when ReinitializationBehavior == StartPosition. Only used when bTeleportToExplicitTime is false.
+	// 启动位置，仅在ReinitializationBehavior == StartPosition时适用。仅当 bTeleportToExplicitTime 为 false 时使用。
 	UPROPERTY(EditAnywhere, Category = Settings, meta = (PinHiddenByDefault, FoldProperty))
 	float StartPosition = 0.0f;
 #endif
 
 public:
 	// FAnimNode_SequenceEvaluatorBase interface
+	// FAnimNode_SequenceEvaluatorBase接口
 	ANIMGRAPHRUNTIME_API virtual bool SetSequence(UAnimSequenceBase* InSequence) override;
 	ANIMGRAPHRUNTIME_API virtual UAnimSequenceBase* GetSequence() const override;
 	ANIMGRAPHRUNTIME_API virtual float GetExplicitTime() const override;
@@ -172,6 +209,7 @@ public:
 	ANIMGRAPHRUNTIME_API virtual float GetStartPosition() const override;
 
 	// FAnimNode_AssetPlayerBase interface
+	// FAnimNode_AssetPlayerBase接口
 	ANIMGRAPHRUNTIME_API virtual FName GetGroupName() const override;
 	ANIMGRAPHRUNTIME_API virtual EAnimGroupRole::Type GetGroupRole() const override;
 	ANIMGRAPHRUNTIME_API virtual EAnimSyncMethod GetGroupMethod() const override;
@@ -189,6 +227,7 @@ public:
 };
 
 // Sequence evaluator node that can be used standalone (without constant folding)
+// 可以独立使用的序列评估器节点（无需常量折叠）
 USTRUCT(BlueprintInternalUseOnly)
 struct FAnimNode_SequenceEvaluator_Standalone : public FAnimNode_SequenceEvaluatorBase
 {
@@ -196,26 +235,32 @@ struct FAnimNode_SequenceEvaluator_Standalone : public FAnimNode_SequenceEvaluat
 
 private:
 	// The group name that we synchronize with (NAME_None if it is not part of any group). 
+	// 我们与之同步的组名称（如果不属于任何组，则为 NAME_None）。
 	UPROPERTY(EditAnywhere, Category=Sync)
 	FName GroupName = NAME_None;
 
 	// The role this node can assume within the group (ignored if GroupName is not set)
+	// 该节点在组内可以承担的角色（如果未设置 GroupName，则忽略）
 	UPROPERTY(EditAnywhere, Category=Sync)
 	TEnumAsByte<EAnimGroupRole::Type> GroupRole = EAnimGroupRole::CanBeLeader;
 
 	// How this node will synchronize with other animations.
+	// 该节点如何与其他动画同步。
 	UPROPERTY(EditAnywhere, Category=Sync)
 	EAnimSyncMethod Method = EAnimSyncMethod::DoNotSync;
 
 	// If true, "Relevant anim" nodes that look for the highest weighted animation in a state will ignore this node
+	// 如果为 true，则在某个状态中查找权重最高的动画的“相关动画”节点将忽略此节点
 	UPROPERTY(EditAnywhere, Category=Relevancy, meta=(PinHiddenByDefault))
 	bool bIgnoreForRelevancyTest = false;
 	
 	// The animation sequence asset to evaluate
+	// 要评估的动画序列资产
 	UPROPERTY(EditAnywhere, Category = Settings, meta = (PinHiddenByDefault))
 	TObjectPtr<UAnimSequenceBase> Sequence = nullptr;
 
 	// The time at which to evaluate the associated sequence
+	// 评估关联序列的时间
 	UPROPERTY(EditAnywhere, Category=Settings, meta=(PinShownByDefault, EditCondition="!bUseFrame"))
 	float ExplicitTime = 0.0f;
 
@@ -226,6 +271,7 @@ private:
 	int32 ExplicitFrame = 0;
 
 	/** This only works if bTeleportToExplicitTime is false OR this node is set to use SyncGroup */
+	/** 仅当 bTeleportToExplicitTime 为 false 或此节点设置为使用 SyncGroup 时才有效 */
 	UPROPERTY(EditAnywhere, Category = Settings, meta = (PinHiddenByDefault))
 	bool bShouldLoop = true;
 
@@ -236,15 +282,18 @@ private:
 	bool bTeleportToExplicitTime = true;
 
 	/** What to do when SequenceEvaluator is reinitialized */
+	/** 重新初始化 SequenceEvaluator 时做什么 */
 	UPROPERTY(EditAnywhere, Category = Settings, meta=(DisplayAfter="StartPosition"))
 	TEnumAsByte<ESequenceEvalReinit::Type> ReinitializationBehavior = ESequenceEvalReinit::ExplicitTime;
 
 	// The start up position, it only applies when ReinitializationBehavior == StartPosition. Only used when bTeleportToExplicitTime is false.
+	// 启动位置，仅在ReinitializationBehavior == StartPosition时适用。仅当 bTeleportToExplicitTime 为 false 时使用。
 	UPROPERTY(EditAnywhere, Category = Settings, meta = (PinHiddenByDefault))
 	float StartPosition = 0.0f;
 
 public:
 	// FAnimNode_SequenceEvaluatorBase interface
+	// FAnimNode_SequenceEvaluatorBase接口
 	virtual bool SetSequence(UAnimSequenceBase* InSequence) override { Sequence = InSequence; return true; }
 	virtual bool SetExplicitTime(float InTime) override { ExplicitTime = InTime; return true; }
 	virtual void SetTeleportToExplicitTime(bool bInTeleport) override { bTeleportToExplicitTime = bInTeleport; }
@@ -268,6 +317,7 @@ public:
 	virtual float GetStartPosition() const override { return StartPosition; }
 
 	// FAnimNode_AssetPlayerBase interface
+	// FAnimNode_AssetPlayerBase接口
 	virtual FName GetGroupName() const override { return GroupName; }
 	virtual EAnimGroupRole::Type GetGroupRole() const override { return GroupRole; }
 	virtual EAnimSyncMethod GetGroupMethod() const override { return Method; }

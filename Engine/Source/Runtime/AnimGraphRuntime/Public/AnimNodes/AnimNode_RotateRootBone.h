@@ -9,6 +9,7 @@
 #include "AnimNode_RotateRootBone.generated.h"
 
 //@TODO: Comment
+//@TODO：评论
 USTRUCT(BlueprintInternalUseOnly)
 struct FAnimNode_RotateRootBone : public FAnimNode_Base
 {
@@ -33,6 +34,7 @@ struct FAnimNode_RotateRootBone : public FAnimNode_Base
 	FRotator MeshToComponent;
 
 	// If enabled, rotating the root bone using this node will also rotate the direction of the root motion custom attribute
+	// 如果启用，使用此节点旋转根骨骼也会旋转根运动自定义属性的方向
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Advanced)
 	bool bRotateRootMotionAttribute;
 
@@ -44,10 +46,12 @@ public:
 	ANIMGRAPHRUNTIME_API FAnimNode_RotateRootBone();
 
 	// FAnimNode_Base interface
+	// FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
+	// FAnimNode_Base接口结束
 };

@@ -15,6 +15,7 @@ static TAutoConsoleVariable<bool> CVarAnimHandIKRetargetingEnable(TEXT("a.AnimNo
 
 /////////////////////////////////////////////////////
 // FAnimNode_HandIKRetargeting
+// FAnimNode_HandIK重定位
 
 FAnimNode_HandIKRetargeting::FAnimNode_HandIKRetargeting()
 : PerAxisAlpha(1.f,1.f,1.f)
@@ -52,6 +53,7 @@ void FAnimNode_HandIKRetargeting::EvaluateSkeletalControl_AnyThread(FComponentSp
 	}
 #endif 
 	// Early exit if alpha is zero
+	// 如果 alpha 为零则提前退出
 	if (PerAxisAlpha.IsNearlyZero())
 	{
 		return;
@@ -93,6 +95,7 @@ void FAnimNode_HandIKRetargeting::EvaluateSkeletalControl_AnyThread(FComponentSp
 		const FVector LeftHandIKLocation = Output.Pose.GetComponentSpaceTransform(LeftHandIKBoneIndex).GetTranslation();
 
 		// Compute weight FK and IK hand location. And translation from IK to FK.
+		// 计算重量 FK 和 IK 手位置。以及从 IK 到 FK 的翻译。
 		FKLocation = FMath::Lerp<FVector>(LeftHandFKLocation, RightHandFKLocation, HandFKWeight);
 		IKLocation = FMath::Lerp<FVector>(LeftHandIKLocation, RightHandIKLocation, HandFKWeight);
 	}
@@ -100,9 +103,11 @@ void FAnimNode_HandIKRetargeting::EvaluateSkeletalControl_AnyThread(FComponentSp
 	const FVector IK_To_FK_Translation = (FKLocation - IKLocation) * PerAxisAlpha;
 
 	// If we're not translating, don't send any bones to update.
+	// 如果我们不翻译，请不要发送任何骨骼进行更新。
 	if (!IK_To_FK_Translation.IsNearlyZero())
 	{
 		// Move desired bones
+		// 移动所需的骨骼
 		for (const FBoneReference& BoneReference : IKBonesToMove)
 		{
 			if (BoneReference.IsValidToEvaluate(BoneContainer))
@@ -134,6 +139,7 @@ bool FAnimNode_HandIKRetargeting::IsValidToEvaluate(const USkeleton* Skeleton, c
 		&& LeftHandIK.IsValidToEvaluate(RequiredBones))
 	{
 		// we need at least one bone to move valid.
+		// 我们至少需要一根骨头才能有效移动。
 		for (int32 BoneIndex = 0; BoneIndex < IKBonesToMove.Num(); BoneIndex++)
 		{
 			if (IKBonesToMove[BoneIndex].IsValidToEvaluate(RequiredBones))

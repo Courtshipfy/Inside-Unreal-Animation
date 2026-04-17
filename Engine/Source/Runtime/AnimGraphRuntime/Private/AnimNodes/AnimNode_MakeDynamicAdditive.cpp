@@ -9,6 +9,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_MakeDynamicAdditive
+// FAnimNode_MakeDynamicAdditive
 
 FAnimNode_MakeDynamicAdditive::FAnimNode_MakeDynamicAdditive()
 	: bMeshSpaceAdditive(false)

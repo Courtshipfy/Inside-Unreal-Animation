@@ -100,6 +100,7 @@ private:
 };
 
 /** Per foot definitions */
+/** 每英尺定义 */
 USTRUCT()
 struct FAnimLegIKDefinition
 {
@@ -120,18 +121,22 @@ struct FAnimLegIKDefinition
 	float MinRotationAngle;
 
 	/** Forward Axis for Foot bone. */
+	/** 足骨的前轴。 */
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	TEnumAsByte<EAxis::Type> FootBoneForwardAxis;
 
 	/** Hinge Bones Rotation Axis. This is essentially the plane normal for (hip - knee - foot). */
+	/** 铰链骨旋转轴。这本质上是（臀部 - 膝盖 - 脚）的平面法线。 */
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	TEnumAsByte<EAxis::Type> HingeRotationAxis;
 
 	/** If enabled, we prevent the leg from bending backwards and enforce a min compression angle */
+	/** 如果启用，我们会防止腿部向后弯曲并强制执行最小压缩角度 */
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	bool bEnableRotationLimit;
 
 	/** Enable Knee Twist correction, by comparing Foot FK with Foot IK orientation. */
+	/** 通过比较脚 FK 与脚 IK 方向来启用膝盖扭曲校正。 */
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	bool bEnableKneeTwistCorrection;
 
@@ -153,6 +158,7 @@ struct FAnimLegIKDefinition
 };
 
 /** Runtime foot data after validation, we guarantee these bones to exist */
+/** 运行时足部数据经过验证后，我们保证这些骨骼存​​在 */
 USTRUCT()
 struct FAnimLegIKData
 {
@@ -189,10 +195,12 @@ struct FAnimNode_LegIK : public FAnimNode_SkeletalControlBase
 	ANIMGRAPHRUNTIME_API FAnimNode_LegIK();
 
 	/** Tolerance for reaching IK Target, in unreal units. */
+	/** 达到 IK 目标的容差（以虚幻单位表示）。 */
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	float ReachPrecision;
 
 	/** Max Number of Iterations. */
+	/** 最大迭代次数。 */
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	int32 MaxIterations;
 
@@ -203,6 +211,7 @@ struct FAnimNode_LegIK : public FAnimNode_SkeletalControlBase
 	float SoftPercentLength;
 
 	/** Default is 1.0 (full). Range is 0 to 1. Blends the effect of the "softness" on/off. */
+	/** 默认值为 1.0（完整）。范围是 0 到 1。混合“柔和度”开/关的效果。 */
 	UPROPERTY(EditAnywhere, Category = "Settings", meta = (PinHiddenByDefault, UIMin = "0.0", UIMax = "1", ClampMin = "0.0", ClampMax = "1"))
 	float SoftAlpha;
 
@@ -215,14 +224,18 @@ struct FAnimNode_LegIK : public FAnimNode_SkeletalControlBase
 
 public:
 	// FAnimNode_Base interface
+	// FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
+	// FAnimNode_Base接口结束
 
 	// FAnimNode_SkeletalControlBase interface
+	// FAnimNode_SkeletalControlBase接口
 	ANIMGRAPHRUNTIME_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void EvaluateSkeletalControl_AnyThread(FComponentSpacePoseContext& Output, TArray<FBoneTransform>& OutBoneTransforms) override;
 	ANIMGRAPHRUNTIME_API virtual bool IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) override;
 	// End of FAnimNode_SkeletalControlBase interface
+	// FAnimNode_SkeletalControlBase接口结束
 
 	ANIMGRAPHRUNTIME_API bool OrientLegTowardsIK(FAnimLegIKData& InLegData);
 	ANIMGRAPHRUNTIME_API bool DoLegReachIK(FAnimLegIKData& InLegData);
@@ -230,6 +243,8 @@ public:
 
 private:
 	// FAnimNode_SkeletalControlBase interface
+	// FAnimNode_SkeletalControlBase接口
 	ANIMGRAPHRUNTIME_API virtual void InitializeBoneReferences(const FBoneContainer& RequiredBones) override;
 	// End of FAnimNode_SkeletalControlBase interface
+	// FAnimNode_SkeletalControlBase接口结束
 };

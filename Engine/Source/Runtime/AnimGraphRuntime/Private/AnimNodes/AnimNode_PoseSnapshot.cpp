@@ -11,6 +11,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_PoseSnapshot
+// FAnimNode_PoseSnapshot
 
 FAnimNode_PoseSnapshot::FAnimNode_PoseSnapshot()
 	: SnapshotName(NAME_None)
@@ -24,6 +25,7 @@ FAnimNode_PoseSnapshot::FAnimNode_PoseSnapshot()
 void FAnimNode_PoseSnapshot::PreUpdate(const UAnimInstance* InAnimInstance)
 {
 	// cache the currently used skeletal mesh's bone names
+	// 缓存当前使用的骨架网格物体的骨骼名称
 	USkeletalMesh* CurrentSkeletalMesh = nullptr;
 	if (InAnimInstance->GetSkelMeshComponent() && InAnimInstance->GetSkelMeshComponent()->IsRegistered())
 	{
@@ -35,6 +37,7 @@ void FAnimNode_PoseSnapshot::PreUpdate(const UAnimInstance* InAnimInstance)
 		if (TargetBoneNameMesh != CurrentSkeletalMesh->GetFName())
 		{
 			// cache bone names for the target mesh
+			// 缓存目标网格物体的骨骼名称
 			TargetBoneNames.Reset();
 			TargetBoneNames.AddDefaulted(CurrentSkeletalMesh->GetRefSkeleton().GetNum());
 
@@ -56,6 +59,7 @@ void FAnimNode_PoseSnapshot::Update_AnyThread(const FAnimationUpdateContext& Con
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Update_AnyThread)
 	// Evaluate any BP logic plugged into this node
+	// 评估插入此节点的任何 BP 逻辑
 	GetEvaluateGraphExposedInputs().Execute(Context);
 
 	TRACE_ANIM_NODE_VALUE(Context, TEXT("Snapshot Name"), Snapshot.SnapshotName);
@@ -106,6 +110,7 @@ void FAnimNode_PoseSnapshot::ApplyPose(const FPoseSnapshot& PoseSnapshot, FCompa
 	else
 	{
 		// per-bone matching required
+		// 需要每块骨骼匹配
 		CacheBoneMapping(PoseSnapshot.SkeletalMeshName, TargetBoneNameMesh, PoseSnapshot.BoneNames, TargetBoneNames);
 
 		for (FCompactPoseBoneIndex PoseBoneIndex : OutPose.ForEachBoneIndex())

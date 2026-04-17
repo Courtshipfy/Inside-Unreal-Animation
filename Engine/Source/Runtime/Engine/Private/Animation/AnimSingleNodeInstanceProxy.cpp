@@ -31,12 +31,14 @@ void FAnimSingleNodeInstanceProxy::Initialize(UAnimInstance* InAnimInstance)
 	UpdateCounter.Reset();
 
 	// it's already doing it when evaluate
+	// 评估时它已经在这样做了
 	BlendSpacePosition = FVector::ZeroVector;
 
 	CurrentTime = 0.f;
 	DeltaTimeRecord = FDeltaTimeRecord();
 
 	// initialize node manually 
+	// 手动初始化节点
 	FAnimationInitializeContext InitContext(this);
 	SingleNode.Initialize_AnyThread(InitContext);
 }
@@ -83,6 +85,7 @@ void FAnimSingleNodeInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) con
 	FAnimInstanceProxy::PostUpdate(InAnimInstance);
 
 	// sync up playing state for active montage instances
+	// 同步活动蒙太奇实例的播放状态
 	int32 EvaluationDataIndex = 0;
 	const TArray<FMontageEvaluationState>& EvaluationData = GetMontageEvaluationData();
 	for (FAnimMontageInstance* MontageInstance : InAnimInstance->MontageInstances)
@@ -90,6 +93,7 @@ void FAnimSingleNodeInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) con
 		if (MontageInstance->Montage && MontageInstance->GetWeight() > ZERO_ANIMWEIGHT_THRESH)
 		{
 			// sanity check we are playing the same montage
+			// 健全性检查，我们正在播放相同的蒙太奇
 			check(MontageInstance->Montage == EvaluationData[EvaluationDataIndex].Montage);
 			MontageInstance->bPlaying = EvaluationData[EvaluationDataIndex].bIsPlaying;
 			EvaluationDataIndex++;
@@ -102,14 +106,20 @@ void FAnimSingleNodeInstanceProxy::PreUpdate(UAnimInstance* InAnimInstance, floa
 	FAnimInstanceProxy::PreUpdate(InAnimInstance, DeltaSeconds);
 #if WITH_EDITOR
 	// @fixme only do this in pose asset
+	// @fixme 仅在姿势资源中执行此操作
 // 	// copy data to PreviewPoseOverride
+// 	[翻译失败: // copy data to PreviewPoseOverride]
 // 	TMap<FName, float> PoseCurveList;
+// 	[翻译失败: TMap<FName, float> PoseCurveList;]
 // 
 // 	InAnimInstance->GetAnimationCurveList(ACF_DrivesPose, PoseCurveList);
+// 	[翻译失败: InAnimInstance->GetAnimationCurveList(ACF_DrivesPose, PoseCurveList);]
 // 
 // 	if (PoseCurveList.Num() > 0)
+// 	[翻译失败: if (PoseCurveList.Num() > 0)]
 // 	{
 // 		PreviewPoseOverride.Append(PoseCurveList);
+// 		[翻译失败: PreviewPoseOverride.Append(PoseCurveList);]
 // 	}
 #endif // WITH_EDITOR
 }
@@ -139,7 +149,9 @@ void FAnimSingleNodeInstanceProxy::SetPreviewCurveOverride(const FName& PoseName
 		if (CurveValPtr)
 		{
 			// sum up, in the future we might normalize, but for now this just sums up
+			// [翻译失败: sum up, in the future we might normalize, but for now this just sums up]
 			// this won't work well if all of them have full weight - i.e. additive 
+			// [翻译失败: this won't work well if all of them have full weight - i.e. additive]
 			*CurveValPtr = Value;
 		}
 		else
@@ -148,10 +160,13 @@ void FAnimSingleNodeInstanceProxy::SetPreviewCurveOverride(const FName& PoseName
 		}
 	}
 	// if less than ZERO_ANIMWEIGHT_THRESH
+	// [翻译失败: if less than ZERO_ANIMWEIGHT_THRESH]
 	// no reason to keep them on the list
+	// [翻译失败: no reason to keep them on the list]
 	else 
 	{
 		// remove if found
+		// [翻译失败: remove if found]
 		PreviewCurveOverride.Remove(PoseName);
 	}
 }
@@ -194,6 +209,7 @@ void FAnimSingleNodeInstanceProxy::InternalBlendSpaceEvaluatePose(class UBlendSp
 #endif // WITH_EDITORONLY_DATA
 		{
 			// otherwise, get ref pose
+			// [翻译失败: otherwise, get ref pose]
 			OutPose.ResetToRefPose();
 		}
 
@@ -256,10 +272,15 @@ void FAnimSingleNodeInstanceProxy::SetReverse(bool bInReverse)
 	}
 
 // reverse support is a bit tricky for montage
+// 反向支持对于蒙太奇来说有点棘手
 // since we don't have delegate when it reached to the beginning
+// 因为当它到达开始时我们没有委托
 // for now I comment this out and do not support
+// 现在我将此注释掉并且不支持
 // I'd like the buttons to be customizable per asset types -
+// 我希望按钮可以根据资产类型进行自定义 -
 // 	TTP 233456	ANIM: support different scrub controls per asset type
+// 	TTP 233456 ANIM：支持每种资产类型的不同清理控制
 /*
 	FAnimMontageInstance * CurMontageInstance = GetActiveMontageInstance();
 	if ( CurMontageInstance )
@@ -315,6 +336,7 @@ void FAnimNode_SingleNode::Evaluate_AnyThread(FPoseContext& Output)
 		FAnimationPoseData OutputAnimationPoseData(Output);
 
 		//@TODO: animrefactor: Seems like more code duplication than we need
+		//@TODO：animrefactor：似乎代码重复比我们需要的更多
 		if (UBlendSpace* BlendSpace = Cast<UBlendSpace>(Proxy->CurrentAsset))
 		{
 			Proxy->InternalBlendSpaceEvaluatePose(BlendSpace, Proxy->BlendSampleData, Output);
@@ -354,12 +376,14 @@ void FAnimNode_SingleNode::Evaluate_AnyThread(FPoseContext& Output)
 			else
 			{
 				// if SkeletalMesh isn't there, we'll need to use skeleton
+				// 如果SkeletalMesh不存在，我们需要使用骨骼
 				Sequence->GetAnimationPose(OutputAnimationPoseData, ExtractionContext);
 			}
 		}
 		else if (UAnimStreamable* Streamable = Cast<UAnimStreamable>(Proxy->CurrentAsset))
 		{
 			// No Additive support yet
+			// 尚无添加剂支持
 			/*if (Streamable->IsValidAdditive())
 			{
 				FAnimExtractContext ExtractionContext(Proxy->CurrentTime, Streamable->bEnableRootMotion);
@@ -385,6 +409,7 @@ void FAnimNode_SingleNode::Evaluate_AnyThread(FPoseContext& Output)
 			else*/
 			{
 				// if SkeletalMesh isn't there, we'll need to use skeleton
+				// 如果SkeletalMesh不存在，我们需要使用骨骼
 				FAnimExtractContext Context(static_cast<double>(Proxy->CurrentTime), Streamable->bEnableRootMotion, Proxy->DeltaTimeRecord, Proxy->bLooping);
 				Context.InterpolationOverride = Proxy->InterpolationOverride;
 				Streamable->GetAnimationPose(OutputAnimationPoseData, Context);
@@ -397,6 +422,7 @@ void FAnimNode_SingleNode::Evaluate_AnyThread(FPoseContext& Output)
 			const FAnimTrack& AnimTrack = Composite->AnimationTrack;
 
 			// find out if this is additive animation
+			// 看看这是否是附加动画
 			if (AnimTrack.IsAdditive())
 			{
 #if WITH_EDITORONLY_DATA
@@ -408,6 +434,7 @@ void FAnimNode_SingleNode::Evaluate_AnyThread(FPoseContext& Output)
 #endif
 				{
 					// get base pose - for now we only support ref pose as base
+					// 获取基础姿势 - 目前我们只支持参考姿势作为基础
 					Output.Pose.ResetToRefPose();
 				}
 
@@ -427,13 +454,16 @@ void FAnimNode_SingleNode::Evaluate_AnyThread(FPoseContext& Output)
 			else
 			{
 				//doesn't handle additive yet
+				//尚不处理添加剂
 				Composite->GetAnimationPose(OutputAnimationPoseData, ExtractionContext);
 			}
 		}
 		else if (UAnimMontage* Montage = Cast<UAnimMontage>(Proxy->CurrentAsset))
 		{
 			// for now only update first slot
+			// 现在只更新第一个槽
 			// in the future, add option to see which slot to see
+			// 将来，添加选项以查看要查看的插槽
 			if (Montage->SlotAnimTracks.Num() > 0)
 			{
 				FCompactPose LocalSourcePose;
@@ -448,6 +478,7 @@ void FAnimNode_SingleNode::Evaluate_AnyThread(FPoseContext& Output)
 				{
 #if WITH_EDITORONLY_DATA
 					// if montage is additive, we need to have base pose for the slot pose evaluate
+					// 如果蒙太奇是可加的，我们需要有用于插槽姿势评估的基本姿势
 					if (bCanProcessAdditiveAnimationsLocal && Montage->PreviewBasePose && Montage->GetPlayLength() > 0.f)
 					{
 						FAnimationPoseData LocalAnimationPoseData = { LocalSourcePose, LocalSourceCurve, LocalSourceAttributes };
@@ -473,15 +504,19 @@ void FAnimNode_SingleNode::Evaluate_AnyThread(FPoseContext& Output)
 		else
 		{
 			// pose asset is handled by preview instance : pose blend node
+			// 姿势资源由预览实例处理：姿势混合节点
 			// and you can't drag pose asset to level to create single node instance. 
+			// 并且您无法将姿势资源拖动到级别来创建单个节点实例。
 			Output.ResetToRefPose();
 		}
 
 #if WITH_EDITORONLY_DATA
 		// have to propagate output curve before pose asset as it can use pose curve data
+		// 必须在姿势资源之前传播输出曲线，因为它可以使用姿势曲线数据
 		Proxy->PropagatePreviewCurve(Output);
 
 		// if it has a preview pose asset, we have to handle that after we do all animation
+		// 如果它有预览姿势资源，我们必须在完成所有动画后处理它
 		if (const UPoseAsset* PoseAsset = Proxy->CurrentAsset->PreviewPoseAsset)
 		{
 			if (PoseAsset->GetSkeleton() != nullptr)
@@ -539,6 +574,7 @@ void FAnimNode_SingleNode::Evaluate_AnyThread(FPoseContext& Output)
 						}
 
 						// once we get it, we have to blend by weight
+						// 一旦我们得到它，我们必须按重量混合
 						FAnimationPoseData AnimationPoseData = { Output.Pose, Output.Curve, Output.CustomAttributes };
 
 						const FAnimationPoseData SourceAnimationPoseData(LocalSourcePose);
@@ -559,6 +595,7 @@ void FAnimNode_SingleNode::Evaluate_AnyThread(FPoseContext& Output)
 		Output.ResetToRefPose();
 #if WITH_EDITORONLY_DATA
 		// even if you don't have any asset curve, we want to output this curve values
+		// 即使你没有任何资产曲线，我们也想输出该曲线值
 		Proxy->PropagatePreviewCurve(Output);
 #endif // WITH_EDITORONLY_DATA
 	}
@@ -572,6 +609,7 @@ void FAnimNode_SingleNode::Update_AnyThread(const FAnimationUpdateContext& Conte
 	if (Proxy->bPlaying == false)
 	{
 		// we still have to tick animation when bPlaying is false because 
+		// 当 bPlaying 为 false 时，我们仍然需要勾选动画，因为
 		NewPlayRate = 0.f;
 	}
 
@@ -603,6 +641,7 @@ void FAnimNode_SingleNode::Update_AnyThread(const FAnimationUpdateContext& Conte
 			TRACE_ANIM_TICK_RECORD(Context, TickRecord);
 
 			// if it's not looping, just set play to be false when reached to end
+			// 如果不循环，只需在到达结束时将 play 设置为 false
 			if (!Proxy->bLooping)
 			{
 				const float CombinedPlayRate = NewPlayRate*Sequence->RateScale;
@@ -622,6 +661,7 @@ void FAnimNode_SingleNode::Update_AnyThread(const FAnimationUpdateContext& Conte
 			TRACE_ANIM_TICK_RECORD(Context, TickRecord);
 
 			// if it's not looping, just set play to be false when reached to end
+			// 如果不循环，只需在到达结束时将 play 设置为 false
 			if (!Proxy->bLooping)
 			{
 				const float CombinedPlayRate = NewPlayRate * Streamable->RateScale;
@@ -641,6 +681,7 @@ void FAnimNode_SingleNode::Update_AnyThread(const FAnimationUpdateContext& Conte
 			TRACE_ANIM_TICK_RECORD(Context, TickRecord);
 
 			// if it's not looping, just set play to be false when reached to end
+			// 如果不循环，只需在到达结束时将 play 设置为 false
 			if (!Proxy->bLooping)
 			{
 				const float CombinedPlayRate = NewPlayRate*Composite->RateScale;
@@ -653,12 +694,15 @@ void FAnimNode_SingleNode::Update_AnyThread(const FAnimationUpdateContext& Conte
 		else if (UAnimMontage * Montage = Cast<UAnimMontage>(Proxy->CurrentAsset))
 		{
 			// Full weight , if you don't have slot track, you won't be able to see animation playing
+			// 全权重，如果没有插槽轨道，将看不到动画播放
 			if ( Montage->SlotAnimTracks.Num() > 0 )
 			{
 				Proxy->UpdateMontageWeightForSlot(ActiveMontageSlot, 1.f);
 			}
 			// get the montage position
+			// 获取蒙太奇位置
 			// @todo anim: temporarily just choose first slot and show the location
+			// @todo anim：暂时只选择第一个插槽并显示位置
 			const FMontageEvaluationState* ActiveMontageEvaluationState = Proxy->GetActiveMontageEvaluationState();
 			if (ActiveMontageEvaluationState)
 			{

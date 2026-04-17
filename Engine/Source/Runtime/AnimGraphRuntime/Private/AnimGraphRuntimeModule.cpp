@@ -12,6 +12,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 // FAnimGraphRuntimeModule
+// FAnimGraph运行时模块
 
 class FAnimGraphRuntimeModule : public IModuleInterface
 {

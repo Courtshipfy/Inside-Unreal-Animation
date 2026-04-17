@@ -22,25 +22,31 @@ class UAnimSequencerInstance : public UAnimInstance, public ISequencerAnimationS
 public:
 
 	/** Update an animation sequence player in this instance */
+	/** 在此实例中更新动画序列播放器 */
 	ANIMGRAPHRUNTIME_API virtual void UpdateAnimTrack(UAnimSequenceBase* InAnimSequence, int32 SequenceId, float InPosition, float Weight, bool bFireNotifies);
 	ANIMGRAPHRUNTIME_API virtual void UpdateAnimTrack(UAnimSequenceBase* InAnimSequence, int32 SequenceId, float InFromPosition, float InToPosition, float Weight, bool bFireNotifies);
 
 	/** Update with Root Motion*/
+	/** 使用根运动更新*/
 	UE_DEPRECATED(5.1, "Please use the UpdateAnimTrackWithRootMotion that takes FAnimSequencerData")
 	ANIMGRAPHRUNTIME_API void UpdateAnimTrackWithRootMotion(UAnimSequenceBase* InAnimSequence, int32 SequenceId,const TOptional<FRootMotionOverride>& RootMotion, float InFromPosition, float InToPosition, float Weight, bool bFireNotifies, UMirrorDataTable* InMirrorDataTable);
 	
 	ANIMGRAPHRUNTIME_API void UpdateAnimTrackWithRootMotion(const FAnimSequencerData& InAnimSequencerData);
 
 	/** Construct all nodes in this instance */
+	/** 构造该实例中的所有节点 */
 	ANIMGRAPHRUNTIME_API virtual void ConstructNodes() override;
 
 	/** Reset all nodes in this instance */
+	/** 重置此实例中的所有节点 */
 	ANIMGRAPHRUNTIME_API virtual void ResetNodes() override;
 
 	/** Reset the pose for this instance*/
+	/** 重置此实例的姿势*/
 	ANIMGRAPHRUNTIME_API virtual void ResetPose() override;
 
 	/** Saved the named pose to restore after */
+	/** 保存命名姿势后恢复 */
 	ANIMGRAPHRUNTIME_API virtual void SavePose() override;
 
 	virtual UAnimInstance* GetSourceAnimInstance() override { return this; }
@@ -49,6 +55,7 @@ public:
 
 protected:
 	// UAnimInstance interface
+	// UAnimInstance接口
 	ANIMGRAPHRUNTIME_API virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
 
 

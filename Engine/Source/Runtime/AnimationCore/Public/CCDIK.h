@@ -13,6 +13,7 @@
 #include "CCDIK.generated.h"
 
 /** Transient structure for CCDIK node evaluation */
+/** CCDIK节点评估的瞬态结构 */
 USTRUCT()
 struct FCCDIKChainLink
 {
@@ -20,12 +21,15 @@ struct FCCDIKChainLink
 
 public:
 	/** Transform of bone in component space. */
+	/** 组件空间中骨骼的变换。 */
 	FTransform Transform;
 
 	/** Transform of bone in local space. This is mutable as their component space changes or parents*/
+	/** 局部空间中骨骼的变换。当它们的组件空间或父级发生变化时，这是可变的*/
 	FTransform LocalTransform;
 
 	/** Transform Index that this control will output */
+	/** 该控件将输出的变换索引 */
 	int32 TransformIndex;
 
 	/** Child bones which are overlapping this bone. 

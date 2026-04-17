@@ -8,6 +8,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimPoseByNameNode
+// FAnimPose按名称节点
 
 void FAnimNode_PoseHandler::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -24,6 +25,7 @@ void FAnimNode_PoseHandler::CacheBoneBlendWeights(FAnimInstanceProxy* InstancePr
 	const FBoneContainer& BoneContainer = InstanceProxy->GetRequiredBones();
 
 	// this has to update bone blending weight
+	// 这必须更新骨骼混合权重
 	if (CurrentPoseAsset.IsValid() && BoneContainer.IsValid())
 	{
 		const UPoseAsset* CurrentAsset = CurrentPoseAsset.Get();
@@ -69,6 +71,7 @@ void FAnimNode_PoseHandler::RebuildPoseList(const FBoneContainer& InBoneContaine
 			const FName& PoseName = PoseNames[PoseIndex];
 
 			// we keep pose index as that is the fastest way to search when extracting pose asset
+			// 我们保留姿势索引，因为这是提取姿势资产时最快的搜索方式
 			PoseExtractContext.PoseCurves.Add(FPoseCurve(PoseIndex, PoseName, 0.f));
 		}
 	}
@@ -79,6 +82,7 @@ void FAnimNode_PoseHandler::UpdateAssetPlayer(const FAnimationUpdateContext& Con
 	GetEvaluateGraphExposedInputs().Execute(Context);
 
 	// update pose asset if it's not valid
+	// 如果姿势资产无效，则更新它
 	if (CurrentPoseAsset.IsValid() == false || CurrentPoseAsset.Get() != PoseAsset)
 	{
 		UpdatePoseAssetProperty(Context.AnimInstanceProxy);

@@ -17,6 +17,7 @@ class UAnimSequence;
 class USkeletalMesh;
 
 /** This is a mapping table between each bone in a particular skeletal mesh and the tracks of this animation set. */
+/** 这是特定骨架网格物体中的每个骨骼与该动画集的轨迹之间的映射表。 */
 USTRUCT()
 struct FAnimSetMeshLinkup
 {
@@ -33,6 +34,7 @@ struct FAnimSetMeshLinkup
 
 
 		/** Reset this linkup and re-create between the provided skeletal mesh and anim set. */
+		/** 重置此链接并在提供的骨架网格物体和动画集之间重新创建。 */
 		void BuildLinkup(USkeletalMesh* InSkelMesh, class UAnimSet* InAnimSet);
 	
 };
@@ -53,18 +55,22 @@ private:
 
 public:
 	/** Bone name that each track relates to. TrackBoneName.Num() == Number of tracks. */
+	/** 每个轨道相关的骨骼名称。 TrackBoneName.Num() == 轨道数。 */
 	UPROPERTY()
 	TArray<FName> TrackBoneNames;
 
 #if WITH_EDITORONLY_DATA
 	/** Actual animation sequence information. */
+	/** 实际的动画序列信息。 */
 	UPROPERTY()
 	TArray<TObjectPtr<class UAnimSequence>> Sequences;
 
 #endif // WITH_EDITORONLY_DATA
 private:
 	/** Non-serialised cache of linkups between different skeletal meshes and this AnimSet. */
+	/** 不同骨架网格物体和此 AnimSet 之间链接的非序列化缓存。 */
 	// Do not change private - they will go away
+	// 不要改变私人 - 他们会消失
 	UPROPERTY(transient)
 	TArray<struct FAnimSetMeshLinkup> LinkupCache;
 
@@ -74,30 +80,39 @@ private:
 	 *	Size matches the number of tracks.
 	 */
 	// Do not change private - they will go away
+	// 不要改变私人 - 他们会消失
 	UPROPERTY(transient)
 	TArray<uint8> BoneUseAnimTranslation;
 
 	/** Cooked down version of ForceMeshTranslationBoneNames */
+	/** ForceMeshTranslationBoneNames 的简化版本 */
 	// Do not change private - they will go away
+	// 不要改变私人 - 他们会消失
 	UPROPERTY(transient)
 	TArray<uint8> ForceUseMeshTranslation;
 
 	/** Names of bones that should use translation from the animation, if bAnimRotationOnly is set. */
+	/** 如果设置了 bAnimRotationOnly，则应使用动画翻译的骨骼名称。 */
 	// Do not change private - they will go away
+	// 不要改变私人 - 他们会消失
 	UPROPERTY(EditAnywhere, Category=AnimSet)
 	TArray<FName> UseTranslationBoneNames;
 
 	/** List of bones which are ALWAYS going to use their translation from the mesh and not the animation. */
+	/** 总是使用网格物体而不是动画的翻译的骨骼列表。 */
 	// Do not change private - they will go away
+	// 不要改变私人 - 他们会消失
 	UPROPERTY(EditAnywhere, Category=AnimSet)
 	TArray<FName> ForceMeshTranslationBoneNames;
 
 public:
 	/** In the AnimSetEditor, when you switch to this AnimSet, it sees if this skeletal mesh is loaded and if so switches to it. */
+	/** 在 AnimSetEditor 中，当您切换到此 AnimSet 时，它会查看此骨架网格物体是否已加载，如果已加载，则切换到它。 */
 	UPROPERTY()
 	FName PreviewSkelMeshName;
 
 	/** Holds the name of the skeletal mesh whose reference skeleton best matches the TrackBoneName array. */
+	/** 保存其参考骨架与 TrackBoneName 数组最匹配的骨架网格物体的名称。 */
 	UPROPERTY()
 	FName BestRatioSkelMeshName;
 
@@ -113,14 +128,19 @@ public:
 
 public:
 	/** Runtime built mapping table between SkeletalMeshes, and LinkupCache array indices. */
+	/** 运行时在 SkeletalMeshes 和 LinkupCache 数组索引之间构建映射表。 */
 	// Do change private - they will go away
+	// 一定要改变私人 - 他们会消失
 	TMap<FName,int32> SkelMesh2LinkupCache;
 
 	//~ Begin UObject Interface
+	//~ 开始 UObject 接口
 	virtual void PostLoad() override;
 	//~ End UObject Interface
+	//~ 结束 UObject 接口
 	
 	//~ Begin UAnimSet Interface
+	//~ 开始 UAnimSet 界面
 	/**
 	 * See if we can play sequences from this AnimSet on the provided USkeletalMesh.
 	 * Returns true if there is a bone in SkelMesh for every track in the AnimSet,
@@ -132,6 +152,7 @@ public:
 	bool CanPlayOnSkeletalMesh(USkeletalMesh* SkelMesh) const;
 
 	/** Get Ratio of how much that mesh fits that animation set */
+	/** 获取网格与动画集的拟合程度的比率 */
 	float GetSkeletalMeshMatchRatio(USkeletalMesh* SkelMesh) const;
 
 	/**
@@ -162,6 +183,7 @@ public:
 	bool RemoveAnimSequenceFromAnimSet(UAnimSequence* AnimSeq);
 
 	/** Util that finds all AnimSets and flushes their LinkupCache, then calls InitAnimTree on all SkeletalMeshComponents. */
+	/** 找到所有 AnimSet 并刷新其 LinkupCache 的 Util，然后在所有 SkeletalMeshComponent 上调用 InitAnimTree。 */
 	static void ClearAllAnimSetLinkupCaches();
 
 	friend struct FAnimSetMeshLinkup;

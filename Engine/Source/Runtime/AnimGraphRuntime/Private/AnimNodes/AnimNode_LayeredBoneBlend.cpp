@@ -11,6 +11,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_LayeredBoneBlend
+// FAnimNode_LayeredBoneBlend
 
 void FAnimNode_LayeredBoneBlend::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -21,6 +22,7 @@ void FAnimNode_LayeredBoneBlend::Initialize_AnyThread(const FAnimationInitialize
 	checkSlow(BlendWeights.Num() == NumPoses);
 
 	// initialize children
+	// 初始化孩子
 	BasePose.Initialize(Context);
 
 	if (NumPoses > 0)
@@ -82,6 +84,7 @@ void FAnimNode_LayeredBoneBlend::UpdateCachedBoneData(const FBoneContainer& Requ
 	}
 	
 	// build desired bone weights
+	// 建立所需的骨骼重量
 	const TArray<FBoneIndexType>& RequiredBoneIndices = RequiredBones.GetBoneIndicesArray();
 	const int32 NumRequiredBones = RequiredBoneIndices.Num();
 	DesiredBoneBlendWeights.SetNumZeroed(NumRequiredBones);
@@ -98,11 +101,14 @@ void FAnimNode_LayeredBoneBlend::UpdateCachedBoneData(const FBoneContainer& Requ
 	CurrentBoneBlendWeights.AddZeroed(DesiredBoneBlendWeights.Num());
 
 	//Reinitialize bone blend weights now that we have cleared them
+	//现在我们已经清除了骨骼混合权重，请重新初始化它们
 	FAnimationRuntime::UpdateDesiredBoneWeight(DesiredBoneBlendWeights, CurrentBoneBlendWeights, BlendWeights);
 
 	// Build curve source indices
+	// 构建曲线源索引
 	{
 		// Get the original Reserve value
+		// 获取原始储备值
 		int32 OriginalReserve = CurvePoseSourceIndices.Max();
 		CurvePoseSourceIndices.Empty();
 
@@ -123,7 +129,9 @@ void FAnimNode_LayeredBoneBlend::UpdateCachedBoneData(const FBoneContainer& Requ
 		});
 
 		// Shrink afterwards to exactly what was used if the Reserve increased, to save memory.  Eventually the reserve will
+		// 之后缩小到预留增加时所使用的大小，以节省内存。  最终储备金将
 		// stabilize at the maximum number of nodes actually used in practice for this specific anim node.
+		// 稳定在该特定动画节点实际使用的最大节点数。
 		if (CurvePoseSourceIndices.Num() > OriginalReserve)
 		{
 			CurvePoseSourceIndices.Shrink();
@@ -166,9 +174,11 @@ void FAnimNode_LayeredBoneBlend::Update_AnyThread(const FAnimationUpdateContext&
 				if (bHasRelevantPoses == false)
 				{
 					// Update cached data now we know we might be valid
+					// 现在更新缓存的数据，我们知道我们可能是有效的
 					UpdateCachedBoneData(Context.AnimInstanceProxy->GetRequiredBones(), Context.AnimInstanceProxy->GetSkeleton());
 
 					// Update weights
+					// 更新权重
 					FAnimationRuntime::UpdateDesiredBoneWeight(DesiredBoneBlendWeights, CurrentBoneBlendWeights, BlendWeights);
 					bHasRelevantPoses = true;
 
@@ -190,6 +200,7 @@ void FAnimNode_LayeredBoneBlend::Update_AnyThread(const FAnimationUpdateContext&
 	}
 
 	// initialize children
+	// 初始化孩子
 	const float BaseRootMotionWeight = 1.f - RootMotionWeight;
 
 	if (BaseRootMotionWeight < ZERO_ANIMWEIGHT_THRESH)
@@ -219,6 +230,7 @@ void FAnimNode_LayeredBoneBlend::Evaluate_AnyThread(FPoseContext& Output)
 		FPoseContext BasePoseContext(Output);
 
 		// evaluate children
+		// 评价孩子
 		BasePose.Evaluate(BasePoseContext);
 
 		TArray<FCompactPose, TMemStackAllocator<>> TargetBlendPoses;
@@ -249,20 +261,24 @@ void FAnimNode_LayeredBoneBlend::Evaluate_AnyThread(FPoseContext& Output)
 		}
 
 		// filter to make sure it only includes curves that are linked to the correct bone filter
+		// 过滤器以确保它仅包含链接到正确骨骼过滤器的曲线
 		UE::Anim::FNamedValueArrayUtils::RemoveByPredicate(BasePoseContext.Curve, CurvePoseSourceIndices,
 			[](const UE::Anim::FCurveElement& InOutBasePoseElement, const UE::Anim::FCurveElementIndexed& InSourceIndexElement)
 			{
 				// if source index is set, remove base pose curve value
+				// 如果设置了源索引，则删除基本姿态曲线值
 				return (InSourceIndexElement.Index != INDEX_NONE);
 			});
 
 		// Filter child pose curves
+		// 过滤儿童姿势曲线
 		for (int32 ChildIndex = 0; ChildIndex < NumPoses; ++ChildIndex)
 		{
 			UE::Anim::FNamedValueArrayUtils::RemoveByPredicate(TargetBlendCurves[ChildIndex], CurvePoseSourceIndices,
 				[ChildIndex](const UE::Anim::FCurveElement& InOutBasePoseElement, const UE::Anim::FCurveElementIndexed& InSourceIndexElement)
 				{
 					// if not source, remove it
+					// 如果不是来源，请将其删除
 					return (InSourceIndexElement.Index != INDEX_NONE) && (InSourceIndexElement.Index != ChildIndex);
 				});
 		}

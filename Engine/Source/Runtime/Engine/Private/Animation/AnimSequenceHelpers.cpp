@@ -58,6 +58,7 @@ void EvaluateFloatCurvesFromModel(const IAnimationDataModel* Model, FBlendedCurv
 	check(Model);
 
 	// Evaluate into a temporary curve, then filter by enabled curves
+	// 评估临时曲线，然后按启用的曲线进行过滤
 	const TArray<FFloatCurve>& ModelCurves = Model->GetFloatCurves();
 	const int32 NumCurves = ModelCurves.Num();
 
@@ -81,13 +82,16 @@ void EvaluateTransformCurvesFromModel(const IAnimationDataModel* Model, TMap<FNa
 		for (const FTransformCurve& Curve : Model->GetTransformCurves())
 		{
 			// if disabled, do not handle
+			// 如果禁用，则不处理
 			if (Curve.GetCurveTypeFlag(AACF_Disabled))
 			{
 				continue;
 			}
 
 			// Add or retrieve curve
+			// 添加或检索曲线
 			// note we're not checking Curve.GetCurveTypeFlags() yet
+			// 请注意，我们还没有检查 Curve.GetCurveTypeFlags()
 			FTransform& Value = OutCurves.FindOrAdd(Curve.GetName());
 			Value = Curve.Evaluate(Time, BlendWeight);
 		}
@@ -125,6 +129,7 @@ void GetBoneTransformFromModel(const IAnimationDataModel* Model, FTransform& Out
 void CopyCurveDataToModel(const FRawCurveTracks& CurveData, const USkeleton* Skeleton, IAnimationDataController& Controller)
 {
 	// Populate float curve data
+	// 填充浮点曲线数据
 	for (const FFloatCurve& FloatCurve : CurveData.FloatCurves)
 	{
 		const FAnimationCurveIdentifier CurveId = UAnimationCurveIdentifierExtensions::FindCurveIdentifier(Skeleton, FloatCurve.GetName(), ERawCurveTrackTypes::RCT_Float);
@@ -142,6 +147,7 @@ void CopyCurveDataToModel(const FRawCurveTracks& CurveData, const USkeleton* Ske
 	}
 
 	// Populate transform curve data
+	// 填充变换曲线数据
 	for (const FTransformCurve& TransformCurve : CurveData.TransformCurves)
 	{
 		const FAnimationCurveIdentifier CurveId = UAnimationCurveIdentifierExtensions::FindCurveIdentifier(Skeleton, TransformCurve.GetName(), ERawCurveTrackTypes::RCT_Transform);
@@ -150,6 +156,7 @@ void CopyCurveDataToModel(const FRawCurveTracks& CurveData, const USkeleton* Ske
 			Controller.AddCurve(CurveId, TransformCurve.GetCurveTypeFlags());
 
 			// Set each individual channel rich curve keys, to account for any custom tangents etc.
+			// 设置每个单独通道的丰富曲线键，以考虑任何自定义切线等。
 			for (int32 SubCurveIndex = 0; SubCurveIndex < 3; ++SubCurveIndex)
 			{
 				const ETransformCurveChannel Channel = (ETransformCurveChannel)SubCurveIndex;
@@ -171,6 +178,7 @@ void CopyCurveDataToModel(const FRawCurveTracks& CurveData, const USkeleton* Ske
  void ExtractBoneTransform(const FRawAnimSequenceTrack& RawTrack, FTransform& OutTransform, int32 KeyIndex)
 {
 	// Bail out (with rather wacky data) if data is empty for some reason.
+	// 如果由于某种原因数据为空，则退出（使用相当古怪的数据）。
 	if (RawTrack.PosKeys.Num() == 0 || RawTrack.RotKeys.Num() == 0)
 	{
 		UE_LOG(LogAnimation, Log, TEXT("GetBoneTransform : No anim data in track!"));
@@ -215,6 +223,7 @@ FTransform ExtractRootMotionFromAnimationAsset(const UAnimationAsset* Animation,
 	}
 
 	// Note: Adapted from 'UAnimSequence::ExtractRootMotion' - since anim sequence doesn't know about MirrorDataTable
+	// 注意：改编自 'UAnimSequence::ExtractRootMotion' - 因为动画序列不知道 MirrorDataTable
 	FRootMotionMovementParams RootMotionParams;
 
 	if (DeltaTime != 0.f)
@@ -228,15 +237,18 @@ FTransform ExtractRootMotionFromAnimationAsset(const UAnimationAsset* Animation,
 		do
 		{
 			// Disable looping here. Advance to desired position, or beginning / end of animation 
+			// 此处禁用循环。前进到所需位置，或动画的开始/结束
 			const ETypeAdvanceAnim AdvanceType = FAnimationRuntime::AdvanceTime(false, DesiredDeltaMove, CurrentPosition, Animation->GetPlayLength());
 
 			// Verify position assumptions
+			// 验证位置假设
 			ensureMsgf(bPlayingBackwards ? (CurrentPosition <= PreviousPosition) : (CurrentPosition >= PreviousPosition), TEXT("in Animation %s(Skeleton %s) : bPlayingBackwards(%d), PreviousPosition(%0.2f), Current Position(%0.2f)"),
 				*Animation->GetName(), *GetNameSafe(Animation->GetSkeleton()), bPlayingBackwards, PreviousPosition, CurrentPosition);
 			
 			RootMotionParams.Accumulate(UE::Anim::ExtractRootMotionFromAnimationAsset(Animation, MirrorDataTable, PreviousPosition, CurrentPosition));
 
 			// If we've hit the end of the animation, and we're allowed to loop, keep going.
+			// 如果我们已经到达动画的结尾，并且允许循环，请继续。
 			if ((AdvanceType == ETAA_Finished) && bAllowLooping)
 			{
 				const double ActualDeltaMove = (CurrentPosition - PreviousPosition);
@@ -324,9 +336,11 @@ FTransform ExtractRootTransformFromAnimationAsset(const UAnimationAsset* Animati
 	}
 
 	// Use old calculation if needed.
+	// 如果需要，请使用旧的计算。
 	if (bUseNormalizedRootMotionScale)
 	{
 		//Clear scale as it will muck up GetRelativeTransform
+		//清除比例，因为它会弄乱 GetRelativeTransform
 		Result.SetScale3D(FVector(1.f));
 	}
 	else if (Animation)
@@ -338,6 +352,7 @@ FTransform ExtractRootTransformFromAnimationAsset(const UAnimationAsset* Animati
 	}
 
 	// Transform to Component Space
+	// 变换到组件空间
 	const FTransform RootToComponent = RootTransformRefPose.Inverse();
 	Result = RootToComponent * Result;
 
@@ -398,19 +413,24 @@ void Retargeting::RetargetPose(FCompactPose& InOutPose, const FName& RetargetSou
 bool CopyNotifies(const UAnimSequenceBase* SourceAnimSeq, UAnimSequenceBase* DestAnimSeq, bool bShowDialogs, bool bDeleteNotifies)
 {
 	// Abort if source == destination.
+	// 如果源 == 目标则中止。
 	if (SourceAnimSeq == DestAnimSeq)
 	{
 		return true;
 	}
 
 	// If the destination sequence is shorter than the source sequence, we'll be dropping notifies that
+	// 如果目标序列比源序列短，我们将删除通知
 	// occur at later times than the dest sequence is long.  Give the user a chance to abort if we
+	// 发生的时间晚于 dest 序列的长度。  如果我们这样做的话，给用户一个中止的机会
 	// find any notifies that won't be copied over.
+	// 找到任何不会被复制的通知。
 	if (DestAnimSeq->GetPlayLength() < SourceAnimSeq->GetPlayLength())
 	{
 		for (int32 NotifyIndex = 0; NotifyIndex < SourceAnimSeq->Notifies.Num(); ++NotifyIndex)
 		{
 			// If a notify is found which occurs off the end of the destination sequence, prompt the user to continue.
+			// 如果发现目标序列末尾处出现通知，则提示用户继续。
 			const FAnimNotifyEvent& SrcNotifyEvent = SourceAnimSeq->Notifies[NotifyIndex];
 			if (SrcNotifyEvent.GetTriggerTime() > DestAnimSeq->GetPlayLength())
 			{
@@ -430,7 +450,9 @@ bool CopyNotifies(const UAnimSequenceBase* SourceAnimSeq, UAnimSequenceBase* Des
 	}
 
 	// If the destination sequence contains any notifies, ask the user if they'd like
+	// 如果目标序列包含任何通知，请询问用户是否愿意
 	// to delete the existing notifies before copying over from the source sequence.
+	// 在从源序列复制之前删除现有通知。
 	if (DestAnimSeq->Notifies.Num() > 0)
 	{
 		const bool bDeleteExistingNotifies = bDeleteNotifies || (bShowDialogs && EAppReturnType::Yes == FMessageDialog::Open(EAppMsgType::YesNo, FText::Format(
@@ -445,6 +467,7 @@ bool CopyNotifies(const UAnimSequenceBase* SourceAnimSeq, UAnimSequenceBase* Des
 	}
 
 	// Do the copy.
+	// [翻译失败: Do the copy.]
 	int32 NumNotifiesThatWereNotCopied = 0;
 
 	for (int32 NotifyIndex = 0; NotifyIndex < SourceAnimSeq->Notifies.Num(); ++NotifyIndex)
@@ -452,6 +475,7 @@ bool CopyNotifies(const UAnimSequenceBase* SourceAnimSeq, UAnimSequenceBase* Des
 		const FAnimNotifyEvent& SrcNotifyEvent = SourceAnimSeq->Notifies[NotifyIndex];
 
 		// Skip notifies which occur at times later than the destination sequence is long.
+		// [翻译失败: Skip notifies which occur at times later than the destination sequence is long.]
 		if (SrcNotifyEvent.GetTriggerTime() > DestAnimSeq->GetPlayLength())
 		{
 			++NumNotifiesThatWereNotCopied;
@@ -459,6 +483,7 @@ bool CopyNotifies(const UAnimSequenceBase* SourceAnimSeq, UAnimSequenceBase* Des
 		}
 
 		// Copy notify tracks from src to dest if they are missing
+		// 如果通知曲目丢失，则将通知曲目从 src 复制到 dest
 		if (SrcNotifyEvent.TrackIndex >= DestAnimSeq->AnimNotifyTracks.Num())
 		{
 			for (int32 TrackIndex = DestAnimSeq->AnimNotifyTracks.Num(); TrackIndex <= SrcNotifyEvent.TrackIndex; ++TrackIndex)
@@ -468,15 +493,18 @@ bool CopyNotifies(const UAnimSequenceBase* SourceAnimSeq, UAnimSequenceBase* Des
 		}
 
 		// Track the location of the new notify.
+		// 跟踪新通知的位置。
 		int32 NewNotifyIndex = DestAnimSeq->Notifies.AddDefaulted();
 		FAnimNotifyEvent& NotifyEvent = DestAnimSeq->Notifies[NewNotifyIndex];
 
 		// Copy properties of the NotifyEvent
+		// 复制 NotifyEvent 的属性
 		NotifyEvent.TrackIndex = SrcNotifyEvent.TrackIndex;
 		NotifyEvent.NotifyName = SrcNotifyEvent.NotifyName;
 		NotifyEvent.Duration = SrcNotifyEvent.Duration;
 
 		// Copy the notify itself, and point the new one at it.
+		// 复制通知本身，并将新通知指向它。
 		if (SrcNotifyEvent.Notify)
 		{
 			DestAnimSeq->Notifies[NewNotifyIndex].Notify = static_cast<UAnimNotify*>(StaticDuplicateObject(SrcNotifyEvent.Notify, DestAnimSeq, NAME_None, RF_AllFlags, nullptr, EDuplicateMode::Normal, ~EInternalObjectFlags::RootSet));
@@ -496,15 +524,18 @@ bool CopyNotifies(const UAnimSequenceBase* SourceAnimSeq, UAnimSequenceBase* Des
 		}
 
 		// Copy notify timing
+		// 复制通知时间
 		NotifyEvent.Link(DestAnimSeq, SrcNotifyEvent.GetTriggerTime());
 		NotifyEvent.TriggerTimeOffset = GetTriggerTimeOffsetForType(DestAnimSeq->CalculateOffsetForNotify(NotifyEvent.GetTriggerTime()));
 
 		// Make sure editor knows we've changed something.
+		// 确保编辑知道我们改变了一些东西。
 		DestAnimSeq->MarkPackageDirty();
 		DestAnimSeq->RefreshCacheData();
 	}
 
 	// Inform the user if some notifies weren't copied.
+	// 如果某些通知未复制，则通知用户。
 	if (bShowDialogs && NumNotifiesThatWereNotCopied > 0)
 	{
 		FMessageDialog::Open(EAppMsgType::Ok, FText::Format(
@@ -524,6 +555,7 @@ bool Compression::CompressAnimationDataTracks(TArray<FRawAnimSequenceTrack>& Raw
 	if (ensureMsgf(RawAnimationData.Num() > 0, TEXT("%s is trying to compress while raw animation is missing"), * ErrorName.ToString()))
 	{
 		// This removes trivial keys, and this has to happen before the removing tracks
+		// 这会删除琐碎的键，并且必须在删除轨道之前发生
 		for (int32 TrackIndex = 0; TrackIndex < RawAnimationData.Num(); TrackIndex++)
 		{
 			bRemovedKeys |= CompressRawAnimSequenceTrack(RawAnimationData[TrackIndex], NumberOfKeys, ErrorName, MaxPosDiff, MaxAngleDiff, MaxScaleDiff);
@@ -541,6 +573,7 @@ bool Compression::CompressAnimationDataTracks(const USkeleton* Skeleton, const T
 	if (ensureMsgf(RawAnimationData.Num() > 0, TEXT("%s is trying to compress while raw animation is missing"), * ErrorName.ToString()))
 	{
 		// This removes trivial keys, and this has to happen before the removing tracks
+		// 这会删除琐碎的键，并且必须在删除轨道之前发生
 		for (int32 TrackIndex = 0; TrackIndex < RawAnimationData.Num(); TrackIndex++)
 		{
 			bRemovedKeys |= CompressRawAnimSequenceTrack(RawAnimationData[TrackIndex], NumberOfKeys, ErrorName, MaxPosDiff, MaxAngleDiff, MaxScaleDiff);
@@ -560,6 +593,7 @@ bool Compression::CompressRawAnimSequenceTrack(FRawAnimSequenceTrack& RawTrack, 
 	bool bRemovedKeys = false;
 
 	// First part is to make sure we have valid input
+	// 第一部分是确保我们有有效的输入
 	bool const bPosTrackIsValid = (RawTrack.PosKeys.Num() == 1 || RawTrack.PosKeys.Num() == NumberOfKeys);
 	if (!bPosTrackIsValid)
 	{
@@ -581,6 +615,7 @@ bool Compression::CompressRawAnimSequenceTrack(FRawAnimSequenceTrack& RawTrack, 
 	}
 
 	// scale keys can be empty, and that is valid 
+	// 比例键可以为空，且有效
 	bool const bScaleTrackIsValid = (RawTrack.ScaleKeys.Num() == 0 || RawTrack.ScaleKeys.Num() == 1 || RawTrack.ScaleKeys.Num() == NumberOfKeys);
 	if (!bScaleTrackIsValid)
 	{
@@ -592,8 +627,10 @@ bool Compression::CompressRawAnimSequenceTrack(FRawAnimSequenceTrack& RawTrack, 
 	}
 
 	// Second part is actual compression.
+	// 第二部分是实际压缩。
 
 	// Check variation of position keys
+	// 检查位置键的变化
 	if ((RawTrack.PosKeys.Num() > 1) && (MaxPosDiff >= 0.0f))
 	{
 		FVector3f FirstPos = RawTrack.PosKeys[0];
@@ -607,6 +644,7 @@ bool Compression::CompressRawAnimSequenceTrack(FRawAnimSequenceTrack& RawTrack, 
 		}
 
 		// If all keys are the same, remove all but first frame
+		// 如果所有关键帧都相同，则删除除第一帧之外的所有帧
 		if (bFramesIdentical)
 		{
 			bRemovedKeys = true;
@@ -617,6 +655,7 @@ bool Compression::CompressRawAnimSequenceTrack(FRawAnimSequenceTrack& RawTrack, 
 	}
 
 	// Check variation of rotational keys
+	// 检查旋转钥匙的变化
 	if ((RawTrack.RotKeys.Num() > 1) && (MaxAngleDiff >= 0.0f))
 	{
 		FQuat4f FirstRot = RawTrack.RotKeys[0];
@@ -630,6 +669,7 @@ bool Compression::CompressRawAnimSequenceTrack(FRawAnimSequenceTrack& RawTrack, 
 		}
 
 		// If all keys are the same, remove all but first frame
+		// 如果所有关键帧都相同，则删除除第一帧之外的所有帧
 		if (bFramesIdentical)
 		{
 			bRemovedKeys = true;
@@ -640,6 +680,7 @@ bool Compression::CompressRawAnimSequenceTrack(FRawAnimSequenceTrack& RawTrack, 
 	}
 
 	// Check variation of Scaleition keys
+	// 检查 Scaleition 键的变化
 	if ((RawTrack.ScaleKeys.Num() > 1) && (MaxScaleDiff >= 0.0f))
 	{
 		FVector3f FirstScale = RawTrack.ScaleKeys[0];
@@ -653,6 +694,7 @@ bool Compression::CompressRawAnimSequenceTrack(FRawAnimSequenceTrack& RawTrack, 
 		}
 
 		// If all keys are the same, remove all but first frame
+		// 如果所有关键帧都相同，则删除除第一帧之外的所有帧
 		if (bFramesIdentical)
 		{
 			bRemovedKeys = true;
@@ -668,8 +710,11 @@ bool Compression::CompressRawAnimSequenceTrack(FRawAnimSequenceTrack& RawTrack, 
 void Compression::SanitizeRawAnimSequenceTrack(FRawAnimSequenceTrack& RawTrack)
 {
 	// if scale is too small, zero it out. Cause it hard to retarget when compress
+	// 如果比例太小，请将其归零。导致压缩时很难重定向
 	// inverse scale is applied to translation, and causing translation to be huge to retarget, but
+	// 反比例应用于翻译，并导致翻译巨大以重新定位，但是
 	// compression can't handle that much precision. 
+	// 压缩无法处理那么高的精度。
 	for (auto& Scale3D : RawTrack.ScaleKeys)
 	{
 		if (FMath::IsNearlyZero(Scale3D.X))
@@ -703,6 +748,7 @@ void Compression::SanitizeRawAnimSequenceTrack(FRawAnimSequenceTrack& RawTrack)
 	}
 
 	// make sure Rotation part is normalized before compress
+	// 确保旋转部分在压缩前标准化
 	for (auto& Rotation : RawTrack.RotKeys)
 	{
 		if (!Rotation.IsNormalized())
@@ -753,9 +799,11 @@ bool AnimationData::AddLoopingInterpolation(UAnimSequence* InSequence)
 	if (NumTracks > 0 && NumKeys > 0)
 	{
 		// now I need to calculate back to new animation data
+		// 现在我需要计算回新的动画数据
 		auto LoopKeyData = [&](auto& KeyData)
 		{
 			// Need at least a single 
+			// 至少需要一个
 			if (KeyData.Num() > 1)
 			{
 				auto FirstKey = KeyData[0];
@@ -794,6 +842,7 @@ bool AnimationData::AddLoopingInterpolation(UAnimSequence* InSequence)
 		}
 
 		// New number of frames is equal to current number of keys, as we'll be adding one frame (Number of Frames + 1 == Number of Keys)
+		// 新的帧数等于当前的键数，因为我们将添加一帧（帧数 + 1 == 键数）
 		Controller.SetNumberOfFrames(NumKeys);
 
 		return true;
@@ -814,12 +863,14 @@ bool AnimationData::Trim(UAnimSequence* InSequence, TRange<FFrameNumber> TrimRan
 	{
 		const FFrameRate& FrameRate = DataModel->GetFrameRate();
 		// if there is only one key, there is nothing to trim away
+		// 如果只有一把钥匙，就没有什么可以修剪的
 		if (NumKeys <= 1)
 		{
 			return false;
 		}
 
 		// Convert frame range to key indices
+		// 将帧范围转换为关键索引
 		const int32 StartTrimFrameIndex = TrimRange.GetLowerBound().IsInclusive() ? TrimRange.GetLowerBound().GetValue().Value : TrimRange.GetLowerBound().GetValue().Value + 1;
 		const int32 EndTrimFrameIndex = TrimRange.GetUpperBound().IsInclusive() ? TrimRange.GetUpperBound().GetValue().Value : TrimRange.GetUpperBound().GetValue().Value - 1;
 		const int32 NumTrimmedFrames = (EndTrimFrameIndex - StartTrimFrameIndex) + 1;
@@ -866,6 +917,7 @@ void AnimationData::DuplicateKeys(UAnimSequence* InSequence, int32 StartKeyIndex
 	const FFrameRate& FrameRate = Model->GetFrameRate();
 
 	// Ensure that the index at which keys will be inserted, and the source key index for the duplicates is valid as well
+	// 确保将插入键的索引以及重复项的源键索引也有效
 	if (StartKeyIndex >= 0 && StartKeyIndex <= NumberOfKeys && NumDuplicates >= 1)
 	{
 		const int32 CopyKeyIndex = SourceKeyIndex == INDEX_NONE ? StartKeyIndex : SourceKeyIndex;
@@ -937,6 +989,7 @@ void AnimationData::DuplicateKeys(UAnimSequence* InSequence, int32 StartKeyIndex
 			}
 
 			// The number of keys has changed, which means that the sequence length and number of frames should be updated as well
+			// 键的数量发生了变化，这意味着序列长度和帧数也应该更新
 			const int32 NewNumKeys = NumberOfKeys + NumDuplicates;
 			const int32 NewNumFrames = NewNumKeys - 1;
 			const float NewSequenceLength = FrameRate.AsSeconds(NewNumFrames);
@@ -945,6 +998,7 @@ void AnimationData::DuplicateKeys(UAnimSequence* InSequence, int32 StartKeyIndex
 			const float InsertedTime = FrameRate.AsInterval() * NumDuplicates;
 
 			// Notify will happen with time slice that was inserted
+			// 通知将随着插入的时间片而发生
 			Controller.ResizeInFrames(NewNumFrames, StartKeyIndex, StartKeyIndex + NumDuplicates);
 		}
 	}
@@ -966,6 +1020,7 @@ void AnimationData::RemoveKeys(UAnimSequence* InSequence, int32 StartKeyIndex, i
 		auto ShrinkKeys = [&](auto& KeyData)
 		{
 			// Dont allow us to trim below 2 keys (1 frame)
+			// 不允许我们修剪低于 2 个关键点（1 帧）
 			int32 NumKeyDataToRemove = NumKeysToRemove;
 			if((KeyData.Num() - NumKeysToRemove) < 2)
 			{
@@ -1024,6 +1079,7 @@ void AnimationData::RemoveKeys(UAnimSequence* InSequence, int32 StartKeyIndex, i
 
 		const int32 StartFrame = FMath::Max(StartKeyIndex - 1, 0);
 		// Notify will happen with time slice that was removed
+		// 通知将在删除的时间片上发生
 		Controller.ResizeInFrames(NewNumberOfFrames, StartFrame, StartFrame + NumKeysToRemove);
 	}
 }
@@ -1037,20 +1093,24 @@ FName AnimationData::FindFirstChildTrackName(const UAnimSequence* InSequence, co
 	if (BoneIndex == INDEX_NONE)
 	{
 		// get out, nothing to do
+		// [翻译失败: get out, nothing to do]
 		return NAME_None;
 	}
 
 	// find children
+	// [翻译失败: find children]
 	TArray<int32> ChildBoneIndices;
 	if (Skeleton->GetChildBones(BoneIndex, ChildBoneIndices) > 0)
 	{
 		// first look for direct children
+		// [翻译失败: first look for direct children]
 		for (const int32 ChildBoneIndex : ChildBoneIndices)
 		{
 			const FName ChildBoneName = RefSkeleton.GetBoneName(ChildBoneIndex);
 			if (DataModel->IsValidBoneTrackName(ChildBoneName))
 			{
 				// found the new track
+				// [翻译失败: found the new track]
 				return ChildBoneName;
 			}
 		}
@@ -1058,10 +1118,12 @@ FName AnimationData::FindFirstChildTrackName(const UAnimSequence* InSequence, co
 		int32 BestGrandChildIndex = INDEX_NONE;
 		FName BestGrandChildName = NAME_None;
 		// if you didn't find yet, now you have to go through all children
+		// 如果你还没有找到，现在你必须遍历所有的孩子
 		for (const int32 ChildBoneIndex : ChildBoneIndices)
 		{
 			const FName ChildBoneName = RefSkeleton.GetBoneName(ChildBoneIndex);
 			// now I have to go through all childrewn and find who is earliest since I don't know which one might be the closest one
+			// 现在我必须遍历所有的孩子并找出谁是最早的，因为我不知道哪一个可能是最接近的
 			const FName GrandChildName = FindFirstChildTrackName(InSequence, Skeleton, ChildBoneName);
 			if (GrandChildName != NAME_None)
 			{
@@ -1074,6 +1136,7 @@ FName AnimationData::FindFirstChildTrackName(const UAnimSequence* InSequence, co
 				else if (BestGrandChildIndex > GrandChildIndex)
 				{
 					// best should be earlier track index
+					// 最好应该是更早的轨道索引
 					BestGrandChildIndex = GrandChildIndex;
 					BestGrandChildName = GrandChildName;
 				}

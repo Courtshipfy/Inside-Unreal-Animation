@@ -144,7 +144,9 @@ void FAnimInstanceProxy::UpdateAnimationNode_WithRoot(const FAnimationUpdateCont
 		InRootNode->Update_AnyThread(InContext);
 
 		// We've updated the graph, now update the fractured saved pose sections
+		// 我们已经更新了图表，现在更新已保存的断裂姿势部分
 		// Note SavedPoseQueueMap can be empty if we have no cached poses in use
+		// 注意如果我们没有使用缓存的姿势，SavedPoseQueueMap 可以为空
 		if(TArray<FAnimNode_SaveCachedPose*>* SavedPoseQueue = SavedPoseQueueMap.Find(InLayerName))
 		{
 			for(FAnimNode_SaveCachedPose* PoseNode : *SavedPoseQueue)
@@ -167,6 +169,7 @@ void FAnimInstanceProxy::Initialize(UAnimInstance* InAnimInstance)
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 
 	// copy anim instance object if it has not already been set up
+	// 如果尚未设置，则复制动画实例对象
 	AnimInstanceObject = InAnimInstance;
 
 	AnimClassInterface = IAnimClassInterface::GetFromClass(InAnimInstance->GetClass());
@@ -178,6 +181,7 @@ void FAnimInstanceProxy::Initialize(UAnimInstance* InAnimInstance)
 		const TArray<FStructProperty*>& AnimNodeProperties = AnimClassInterface->GetAnimNodeProperties();
 
 		// Grab a pointer to the default root node, if any
+		// 获取指向默认根节点的指针（如果有）
 		RootNode = nullptr;
 		if(AnimClassInterface->GetAnimBlueprintFunctions().Num() > 0)
 		{
@@ -188,6 +192,7 @@ void FAnimInstanceProxy::Initialize(UAnimInstance* InAnimInstance)
 		}
 
 		// Initialise the pose node list
+		// 初始化位姿节点列表
 		const TMap<FName, FCachedPoseIndices>& PoseNodeIndicesMap = AnimClassInterface->GetOrderedSavedPoseNodeIndicesMap();
 		SavedPoseQueueMap.Reset();
 		for(const TPair<FName, FCachedPoseIndices>& Pair : PoseNodeIndicesMap)
@@ -202,12 +207,14 @@ void FAnimInstanceProxy::Initialize(UAnimInstance* InAnimInstance)
 		}
 
 		// if no mesh, use Blueprint Skeleton
+		// 如果没有网格，则使用蓝图骨架
 		if (Skeleton == nullptr)
 		{
 			Skeleton = AnimClassInterface->GetTargetSkeleton();
 		}
 
 		// Initialize state buffers
+		// 初始化状态缓冲区
 		int32 NumStates = 0;
 		const TArray<FBakedAnimationStateMachine>& BakedMachines = AnimClassInterface->GetBakedStateMachines();
 		const int32 NumMachines = BakedMachines.Num();
@@ -231,6 +238,7 @@ void FAnimInstanceProxy::Initialize(UAnimInstance* InAnimInstance)
 		if (UAnimBlueprint* Blueprint = Cast<UAnimBlueprint>(InAnimInstance->GetClass()->ClassGeneratedBy))
 		{
 			// If our blueprint is in an error or dirty state upon initialization, anim graph shouldn't run
+			// 如果我们的蓝图在初始化时处于错误或脏状态，则动画图不应运行
 			if ((Blueprint->Status == BS_Error) || (Blueprint->Status == BS_Dirty))
 			{
 				RootNode = nullptr;
@@ -277,6 +285,7 @@ void FAnimInstanceProxy::InitializeCachedClassData()
 	if(AnimClassInterface)
 	{
 		// cache any state machine descriptions we have
+		// 缓存我们拥有的任何状态机描述
 		for (const FStructProperty* Property : AnimClassInterface->GetStateMachineNodeProperties())
 		{
 			FAnimNode_StateMachine* StateMachine = Property->ContainerPtrToValuePtr<FAnimNode_StateMachine>(AnimInstanceObject);
@@ -284,6 +293,7 @@ void FAnimInstanceProxy::InitializeCachedClassData()
 		}
 
 		// Cache any preupdate nodes
+		// [翻译失败: Cache any preupdate nodes]
 		for (const FStructProperty* Property : AnimClassInterface->GetPreUpdateNodeProperties())
 		{
 			FAnimNode_Base* AnimNode = Property->ContainerPtrToValuePtr<FAnimNode_Base>(AnimInstanceObject);
@@ -291,6 +301,7 @@ void FAnimInstanceProxy::InitializeCachedClassData()
 		}
 
 		// Cache any dynamic reset nodes
+		// [翻译失败: Cache any dynamic reset nodes]
 		for (const FStructProperty* Property : AnimClassInterface->GetDynamicResetNodeProperties())
 		{
 			FAnimNode_Base* AnimNode = Property->ContainerPtrToValuePtr<FAnimNode_Base>(AnimInstanceObject);
@@ -298,6 +309,7 @@ void FAnimInstanceProxy::InitializeCachedClassData()
 		}
 
 		// Cache default linked input pose
+		// 缓存默认链接输入姿势
 		for(const FAnimBlueprintFunction& AnimBlueprintFunction : AnimClassInterface->GetAnimBlueprintFunctions())
 		{
 			if(AnimBlueprintFunction.Name == NAME_AnimGraph)
@@ -325,6 +337,7 @@ void FAnimInstanceProxy::InitializeRootNode(bool bInDeferRootNodeInitialization)
 	if(AnimClassInterface)
 	{
 		// Init any nodes that need non-relevancy based initialization
+		// 初始化任何需要基于非相关性初始化的节点
 		UAnimInstance* AnimInstance = CastChecked<UAnimInstance>(GetAnimInstanceObject());
 		for (const FStructProperty* Property : AnimClassInterface->GetInitializationNodeProperties())
 		{
@@ -353,6 +366,7 @@ void FAnimInstanceProxy::InitializeRootNode(bool bInDeferRootNodeInitialization)
 		};
 
 		//We have a custom root node, so get the associated nodes and initialize them
+		//我们有一个自定义的根节点，因此获取关联的节点并初始化它们
 		TArray<FAnimNode_Base*> CustomNodes;
 		GetCustomNodes(CustomNodes);
 		for(FAnimNode_Base* Node : CustomNodes)
@@ -497,6 +511,7 @@ void FAnimInstanceProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSec
 	if (SkeletalMeshComponent)
 	{
 		// Save off LOD level that we're currently using.
+		// 保存我们当前使用的 LOD 级别。
 		const int32 PreviousLODLevel = LODLevel;
 		LODLevel = InAnimInstance->GetLODLevel();
 		if (LODLevel != PreviousLODLevel)
@@ -513,12 +528,14 @@ void FAnimInstanceProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSec
 
 #if ENABLE_ANIM_LOGGING
 	//Reset logged update messages
+	//重置记录的更新消息
 	LoggedMessagesMap.FindOrAdd(NAME_Update).Reset();
 #endif
 
 	ClearSlotNodeWeights();
 
 	// Reset the synchronizer
+	// 重置同步器
 	Sync.Reset();
 
 	TArray<float>& StateWeights = StateWeightArrays[GetBufferWriteIndex()];
@@ -545,6 +562,7 @@ void FAnimInstanceProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSec
 	ActorTransform = SkeletalMeshComponent->GetOwner() ? SkeletalMeshComponent->GetOwner()->GetActorTransform() : FTransform::Identity;
 
 	// run preupdate calls
+	// 运行更新前调用
 	for (FAnimNode_Base* Node : GameThreadPreUpdateNodes)
 	{
 		Node->PreUpdate(InAnimInstance);
@@ -556,10 +574,13 @@ void FAnimInstanceProxy::OnPreUpdateLODChanged(const int32 PreviousLODIndex, con
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 
 	// Decrease detail, see which nodes need to be disabled.
+	// 减少细节，看看哪些节点需要禁用。
 	if (NewLODIndex > PreviousLODIndex)
 	{
 		// Calling PreUpdate on GameThreadPreUpdateNodes is expensive, it triggers a cache miss.
+		// 在 GameThreadPreUpdateNodes 上调用 PreUpdate 的成本很高，它会触发缓存未命中。
 		// So remove nodes from this array if they're going to get culled by LOD.
+		// 因此，如果节点将被 LOD 剔除，请从该数组中删除节点。
 		for (int32 NodeIndex = 0; NodeIndex < GameThreadPreUpdateNodes.Num(); NodeIndex++)
 		{
 			FAnimNode_Base* AnimNodePtr = static_cast<FAnimNode_Base*>(GameThreadPreUpdateNodes[NodeIndex]);
@@ -575,6 +596,7 @@ void FAnimInstanceProxy::OnPreUpdateLODChanged(const int32 PreviousLODIndex, con
 		}
 	}
 	// Increase detail, see which nodes need to be enabled.
+	// 增加细节，看看需要启用哪些节点。
 	else
 	{
 		for (int32 NodeIndex = 0; NodeIndex < LODDisabledGameThreadPreUpdateNodes.Num(); NodeIndex++)
@@ -631,7 +653,9 @@ void FAnimInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 #endif
 
 	// Copy slot information to main instance if we are using the main instance's montage evaluation data.
+	// 如果我们使用主实例的蒙太奇评估数据，请将插槽信息复制到主实例。
 	// Note that linked anim instance's proxies PostUpdate() will be called before the main instance's proxy PostUpdate().
+	// 请注意，链接动画实例的代理 PostUpdate() 将在主实例的代理 PostUpdate() 之前调用。
 	if (bUseMainInstanceMontageEvaluationData && GetMainInstanceProxy() && GetMainInstanceProxy() != this)
 	{
 		FAnimInstanceProxy& MainProxy = *GetMainInstanceProxy();
@@ -641,6 +665,7 @@ void FAnimInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 			const int* MainTrackerIndexPtr = MainProxy.SlotNameToTrackerIndex.Find(LinkedSlotTrackerPair.Key);
 
 			// Ensure slot tracker exists for main instance.
+			// 确保主实例存在插槽跟踪器。
 			if (!MainTrackerIndexPtr)
 			{
 				MainProxy.RegisterSlotNodeWithAnimInstance(LinkedSlotTrackerPair.Key);
@@ -648,6 +673,7 @@ void FAnimInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 			}
 
 			// Update slot information for main instance.
+			// 更新主实例的槽信息。
 			{
 				const FMontageActiveSlotTracker & LinkedTracker = SlotWeightTracker[GetBufferReadIndex()][LinkedSlotTrackerPair.Value];
 				FMontageActiveSlotTracker& MainTracker = MainProxy.SlotWeightTracker[MainProxy.GetBufferWriteIndex()][*MainTrackerIndexPtr];
@@ -765,6 +791,7 @@ void FAnimInstanceProxy::InitializeObjects(UAnimInstance* InAnimInstance)
 	}
 
 	// Calculate the number of skipped frames after this one due to URO and store it on our evaluation and update counters
+	// 计算这一帧之后由于 URO 而跳帧的数量，并将其存储在我们的评估和更新计数器中
 	const FAnimUpdateRateParameters* RateParams = SkeletalMeshComponent->AnimUpdateRateParams;
 
 	NumUroSkippedFrames_Update = 0;
@@ -858,6 +885,7 @@ void FAnimInstanceProxy::MakeBlendSpaceTickRecord(
 	TickRecord.BlendSpace.BlendSpacePositionX = BlendInput.X;
 	TickRecord.BlendSpace.BlendSpacePositionY = BlendInput.Y;
 	// This way of making a tick record is deprecated, so just set to defaults here rather than changing the API
+	// 这种制作刻度记录的方式已被弃用，因此只需在此处设置为默认值，而不是更改 API
 	TickRecord.BlendSpace.bTeleportToTime = false;
 	TickRecord.BlendSpace.BlendSampleDataCache = &BlendSampleDataCache;
 	TickRecord.BlendSpace.BlendFilter = &BlendFilter;
@@ -978,13 +1006,16 @@ void FAnimInstanceProxy::ReinitializeSlotNodes()
 	SlotWeightTracker[1].Reset();
 
 	// Increment counter
+	// 增量计数器
 	SlotNodeInitializationCounter.Increment();
 }
 
 void FAnimInstanceProxy::RegisterSlotNodeWithAnimInstance(const FName& SlotNodeName)
 {
 	// verify if same slot node name exists
+	// 验证是否存在相同的槽节点名称
 	// then warn users, this is invalid
+	// 然后警告用户，这是无效的
 	if (SlotNameToTrackerIndex.Contains(SlotNodeName))
 	{
 		UClass* ActualAnimClass = IAnimClassInterface::GetActualAnimClass(GetAnimClassInterface());
@@ -992,6 +1023,7 @@ void FAnimInstanceProxy::RegisterSlotNodeWithAnimInstance(const FName& SlotNodeN
 		if (IsInGameThread())
 		{
 			// message log access means we need to run this in the game thread
+			// 消息日志访问意味着我们需要在游戏线程中运行它
 		FMessageLog("AnimBlueprintLog").Warning(FText::Format(LOCTEXT("AnimInstance_SlotNode", "SLOTNODE: '{0}' in animation instance class {1} already exists. Remove duplicates from the animation graph for this class."), FText::FromString(SlotNodeName.ToString()), FText::FromString(ClassNameString)));
 		}
 		else
@@ -1018,6 +1050,7 @@ void FAnimInstanceProxy::UpdateSlotNodeWeight(const FName& SlotNodeName, float I
 		Tracker.NodeGlobalWeight = InNodeGlobalWeight;
 
 		// Count as relevant if we are weighted in
+		// [翻译失败: Count as relevant if we are weighted in]
 		Tracker.bIsRelevantThisTick = Tracker.bIsRelevantThisTick || FAnimWeight::IsRelevant(InMontageLocalWeight);
 	}
 }
@@ -1176,29 +1209,36 @@ void FAnimInstanceProxy::RecalcRequiredBones(USkeletalMeshComponent* Component, 
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 
 	// Use the shared bone container
+	// [翻译失败: Use the shared bone container]
 	RequiredBones = Component->GetSharedRequiredBones();
 
 	// The first anim instance will initialize the required bones, all others will re-use it
+	// 第一个动画实例将初始化所需的骨骼，所有其他实例将重用它
 	// 第一个动画实例会初始化 RequiredBones，其他实例会复用它
 	if (!RequiredBones->IsValid())
 	{
 		RequiredBones->InitializeTo(Component->RequiredBones, Component->GetCurveFilterSettings(), *Asset);
 
 		// If there is a ref pose override, we want to replace ref pose in RequiredBones
+		// 如果存在参考姿势覆盖，我们要替换RequiredBones中的参考姿势
 		// Update ref pose in required bones structure (either set it, or clear it, depending on if one is set on the Component)
+		// 更新所需骨骼结构中的参考姿势（设置或清除它，具体取决于组件上是否设置了）
 		RequiredBones->SetRefPoseOverride(Component->GetRefPoseOverride());
 	}
 
 	// If this instance can accept input poses, initialise the input pose container
+	// 如果该实例可以接受输入姿势，则初始化输入姿势容器
 	if (DefaultLinkedInstanceInputNode)
 	{
 		DefaultLinkedInstanceInputNode->CachedInputPose.SetBoneContainer(RequiredBones.Get());
 
 		// SetBoneContainer allocates space for bone data but leaves it uninitalized.
+		// SetBoneContainer 为骨骼数据分配空间，但未初始化。
 		DefaultLinkedInstanceInputNode->bIsCachedInputPoseInitialized = false;
 	}
 
 	// When RequiredBones mapping has changed, AnimNodes need to update their bones caches.
+	// 当RequiredBones映射发生变化时，AnimNodes需要更新它们的骨骼缓存。
 	bBoneCachesInvalidated = true;
 }
 
@@ -1237,6 +1277,7 @@ void FAnimInstanceProxy::UpdateAnimation()
 	UpdateAnimation_WithRoot(Context, RootNode, NAME_AnimGraph);
 
 	// Tick syncing
+	// 勾选同步
 	Sync.TickAssetPlayerInstances(*this, CurrentDeltaSeconds);
 }
 
@@ -1275,6 +1316,7 @@ void FAnimInstanceProxy::UpdateAnimation_WithRoot(const FAnimationUpdateContext&
 			if(AnimClassInterface)
 			{
 				// Initialize linked sub graphs
+				// 初始化链接子图
 				for(const FStructProperty* LayerNodeProperty : AnimClassInterface->GetLinkedAnimLayerNodeProperties())
 				{
 					if(FAnimNode_LinkedAnimLayer* LayerNode = LayerNodeProperty->ContainerPtrToValuePtr<FAnimNode_LinkedAnimLayer>(AnimInstanceObject))
@@ -1294,6 +1336,7 @@ void FAnimInstanceProxy::UpdateAnimation_WithRoot(const FAnimationUpdateContext&
 		}
 
 		// Call the correct override point if this is the root node
+		// 如果这是根节点，则调用正确的覆盖点
 		CacheBones();
 	}
 	else
@@ -1302,10 +1345,13 @@ void FAnimInstanceProxy::UpdateAnimation_WithRoot(const FAnimationUpdateContext&
 	}
 
 	// update native update
+	// [翻译失败: update native update]
 	if(!bUpdatingRoot)
 	{
 		// Make sure we only update this once the first time we update, as we can re-call this function
+		// [翻译失败: Make sure we only update this once the first time we update, as we can re-call this function]
 		// from other linked instances with grouped layers
+		// [翻译失败: from other linked instances with grouped layers]
 		if(FrameCounterForUpdate != GFrameCounter)
 		{
 			if(AnimClassInterface)
@@ -1348,23 +1394,31 @@ void FAnimInstanceProxy::UpdateAnimation_WithRoot(const FAnimationUpdateContext&
 	}
 
 	// Update root
+	// 更新根目录
 	{
 		// We re-enter this function when we call layer graphs linked to the main graph. In these cases we
+		// 当我们调用链接到主图的图层图时，我们重新进入这个函数。在这些情况下我们
 		// dont want to perform duplicate work
+		// 不想做重复的工作
 		TGuardValue<bool> ScopeGuard(bUpdatingRoot, true);
 
 		// Anything syncing within this scope is subject to sync groups.
+		// 在此范围内同步的任何内容都受同步组的约束。
 		// We only enable syncing here for the main instance or post process instance
+		// 我们仅在此处为主实例或后处理实例启用同步
 		// We also fall back to enabling this sync scope if there is not one already enabled (there must always be one)
+		// 如果还没有启用此同步范围（必须始终有一个），我们也会回退到启用此同步范围
 		const bool bEnableSyncScope =	GetAnimInstanceObject() == GetSkelMeshComponent()->GetAnimInstance() ||
 										GetAnimInstanceObject() == GetSkelMeshComponent()->GetPostProcessInstance() ||
 										InContext.GetMessage<UE::Anim::FAnimSyncGroupScope>() == nullptr;
 		UE::Anim::TOptionalScopedGraphMessage<UE::Anim::FAnimSyncGroupScope> Message(bEnableSyncScope, InContext, InContext);
 
 		// update all nodes
+		// 更新所有节点
 		if(InRootNode == RootNode)
 		{
 			// Call the correct override point if this is the root node
+			// 如果这是根节点，则调用正确的覆盖点
 			UpdateAnimationNode(InContext);
 		}
 		else
@@ -1381,8 +1435,11 @@ void FAnimInstanceProxy::PreEvaluateAnimation(UAnimInstance* InAnimInstance)
 	InitializeObjects(InAnimInstance);
 
 	// Re-cache Component Transforms if needed
+	// 如果需要，重新缓存组件转换
 	// When playing root motion is the CharacterMovementComp who triggers the animation update and this happens before root motion is consumed and the position of the character is updated for this frame
+	// 播放根运动时，CharacterMovementComp 会触发动画更新，这发生在消耗根运动并且更新该帧的角色位置之前
 	// which means that at the point ComponentTransform is cached in the PreUpdate function it contain the previous frame transform
+	// 这意味着 ComponentTransform 缓存在 PreUpdate 函数中，它包含前一帧变换
 	if (SkeletalMeshComponent && SkeletalMeshComponent->IsPlayingRootMotion())
 	{
 		ComponentTransform = SkeletalMeshComponent->GetComponentTransform();
@@ -1410,6 +1467,7 @@ void FAnimInstanceProxy::EvaluateAnimation_WithRoot(FPoseContext& Output, FAnimN
 	if(InRootNode == RootNode)
 	{
 		// Call the correct override point if this is the root node
+		// 如果这是根节点，则调用正确的覆盖点
 		CacheBones();
 	}
 	else
@@ -1418,6 +1476,7 @@ void FAnimInstanceProxy::EvaluateAnimation_WithRoot(FPoseContext& Output, FAnimN
 	}
 
 	// Evaluate native code if implemented, otherwise evaluate the node graph
+	// 如果已实现，则评估本机代码，否则评估节点图
 	if (!Evaluate_WithRoot(Output, InRootNode))
 	{
 		EvaluateAnimationNode_WithRoot(Output, InRootNode);
@@ -1431,6 +1490,7 @@ void FAnimInstanceProxy::CacheBones()
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 
 	// If bone caches have been invalidated, have AnimNodes refresh those.
+	// 如果骨骼缓存已失效，请让 AnimNode 刷新它们。
 	if (bBoneCachesInvalidated && RootNode)
 	{
 		CacheBonesRecursionCounter++;
@@ -1458,6 +1518,7 @@ void FAnimInstanceProxy::CacheBones_WithRoot(FAnimNode_Base* InRootNode)
 	LLM_SCOPE_BYNAME(TEXT("Animation/Graph"));
 
 	// If bone caches have been invalidated, have AnimNodes refresh those.
+	// 如果骨骼缓存已失效，请让 AnimNode 刷新它们。
 	if (bBoneCachesInvalidated && InRootNode)
 	{
 		CacheBonesRecursionCounter++;
@@ -1514,6 +1575,7 @@ void FAnimInstanceProxy::EvaluateAnimationNode_WithRoot(FPoseContext& Output, FA
 	}
 }
 
+// 现在禁用，因为它不适用于单节点实例
 // for now disable because it will not work with single node instance
 #if (UE_BUILD_SHIPPING || UE_BUILD_TEST)
 #define DEBUG_MONTAGEINSTANCE_WEIGHT 0
@@ -1549,6 +1611,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 		return;
 	}
 
+	// 获取每个骨骼重量总计的数组。
 	// Get the array of per bone weight totals.
 	FBlendProfileScratchData& BlendProfileScratchData = FBlendProfileScratchData::Get();
 	TArray<TArray<float>>& PerBoneWeights = BlendProfileScratchData.PerBoneWeights;
@@ -1567,9 +1630,12 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 	PerBoneWeights.Reset(GetMontageEvaluationData().Num());
 
 	//------------------------------------------
+	// 弄清楚我们需要混合哪些姿势。
 	// Figure out what poses we need to blend.
 	//------------------------------------------
+	// 列出使用我们感兴趣的插槽的所有蒙太奇。
 	// Make a list of all the montages that use the slot we're interested in.
+	// 将其分为附加列表和非附加列表。
 	// Split this in an additive and non additive list.
 	check(GetMontageEvaluationData().Num() < 255); // Make sure we're in limits and not blending more than 255 poses (that would indicate another issue anyway)
 	TArray<FSlotEvaluationPose>& Poses = BlendProfileScratchData.Poses;
@@ -1581,6 +1647,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 	TArray<const FBlendedCurve*, TInlineAllocator<8>>& BlendingCurves = BlendProfileScratchData.BlendingCurves;
 	TArray<const UE::Anim::FStackAttributeContainer*, TInlineAllocator<8>>& BlendingAttributes = BlendProfileScratchData.BlendingAttributes;
 
+	// [翻译失败: Gather all the poses we're interested in.]
 	// Gather all the poses we're interested in.
 	int32 CurrentPoseIndex = 0;
 	float NonAdditiveTotalWeight = 0.0f;
@@ -1597,17 +1664,20 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 				? (AnimTrack->IsRotationOffsetAdditive() ? AAT_RotationOffsetMeshSpace : AAT_LocalSpaceBase)
 				: AAT_None;
 
+			// 必须在调用 GetPoseFromAnimTrack 之前分配骨骼数组。
 			// Bone array has to be allocated prior to calling GetPoseFromAnimTrack.
 			FSlotEvaluationPose NewPose(EvalState.BlendInfo.GetBlendedValue(), AdditiveAnimType);
 			NewPose.Pose.SetBoneContainer(RequiredBones.Get());
 			NewPose.Curve.InitFrom(*RequiredBones);
 
+			// 从轨迹中提取姿势。
 			// Extract pose from Track.
 			FAnimExtractContext ExtractionContext(static_cast<double>(EvalState.MontagePosition), Montage->HasRootMotion() && RootMotionMode != ERootMotionMode::NoRootMotionExtraction, EvalState.DeltaTimeRecord);
 			ExtractionContext.InterpolationOverride = InterpolationOverride;
 			FAnimationPoseData NewAnimationPoseData(NewPose);
 			AnimTrack->GetAnimationPose(NewAnimationPoseData, ExtractionContext);
 
+			// 添加蒙太奇曲线。
 			// Add montage curves.
 			FBlendedCurve MontageCurve;
 			MontageCurve.InitFrom(*RequiredBones);
@@ -1615,6 +1685,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 			Montage->EvaluateCurveData(MontageCurve, Context);
 			NewPose.Curve.Combine(MontageCurve);
 
+			// 仅在非累加通道中捕获非累加姿势。
 			// Capture non-additive poses only in the non-additive pass.
 			if (AdditiveAnimType == AAT_None)
 			{
@@ -1649,6 +1720,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 				}
 			}
 
+			// 总结每块骨头的总重量。
 			// Sum up the total weights per bone.
 			if (AdditiveAnimType == AAT_None)
 			{
@@ -1669,6 +1741,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 		} // If montage slot is valid.
 	} // For all montage eval data.
 
+	// 如果有源姿势，请注册，但不要将其包含在我们的标准化中。
 	// Register the source pose if we have any, but don't include it in our normalizations.
 	const float SourceWeight = FMath::Clamp(InSourceWeight, 0.0f, 1.0f);
 	const bool bHasSourcePose = (SourceWeight > ZERO_ANIMWEIGHT_THRESH);
@@ -1687,6 +1760,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 		CurrentPoseIndex++;
 	}
 
+	// 标准化非相加权重。
 	// Normalize non additive weights.
 	const float NormalizeThreshold = bHasSourcePose ? (1.0f + ZERO_ANIMWEIGHT_THRESH) : ZERO_ANIMWEIGHT_THRESH;
 	const int32 NumPosesToNormalize = Poses.Num();
@@ -1710,6 +1784,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 		}
 	}
 
+	// 计算源姿态权重。
 	// Calculate the source pose weights.
 	if (bHasSourcePose)
 	{
@@ -1726,6 +1801,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 		}
 	}
 
+	// 标准化非加性姿势权重，因为我们需要它们来混合曲线和属性。
 	// Normalize non additive pose weights, as we need them for blending curves and attributes.
 	if (NonAdditiveTotalWeight > 1.0f + ZERO_ANIMWEIGHT_THRESH)
 	{
@@ -1735,9 +1811,11 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 		}
 	}
 
+	// 注意：我们不会标准化附加姿势。
 	// NOTE: we don't normalize the additive poses.
 
 	//----------------------------------
+	// 构建混合数组。
 	// Build the blend arrays.
 	//----------------------------------
 	const int32 NumPoses = Poses.Num() + (bHasSourcePose ? 1 : 0); // Include the source input pose when doing non-additive blends.
@@ -1754,6 +1832,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 		BlendingWeights[Index] = Poses[Index].Weight;
 	}
 
+	// 将源姿势添加到混合中。
 	// Add the source pose to the blends.
 	if (bHasSourcePose)
 	{
@@ -1765,6 +1844,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 	}
 
 	//------------------------------------------
+	// 混合变换。
 	// Blend the transforms.
 	//------------------------------------------
 	if (Poses.Num() == 0) // There are only additive poses.
@@ -1776,6 +1856,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 	}
 	else
 	{
+		// 执行实际的骨骼变换混合。
 		// Perform the actual bone transform blending.
 		for (int32 PoseIndex = 0; PoseIndex < NumPoses; ++PoseIndex)
 		{
@@ -1807,6 +1888,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 		BlendedPose.NormalizeRotations();
 	}
 
+	// 添加剂混合物。
 	// Additive blends.
 	for (int32 PoseIndex = 0; PoseIndex < AdditivePoses.Num(); ++PoseIndex)
 	{
@@ -1816,6 +1898,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 		{
 			FAnimationRuntime::ConvertPoseToMeshRotation(BlendedPose);
 
+			// 使用添加剂。
 			// Apply additive.
 			for (int32 BoneIndex = 0; BoneIndex < NumBones; ++BoneIndex)
 			{
@@ -1840,8 +1923,10 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 	} // For each additive pose.
 
 	//------------------------------------------
+	// 混合曲线和属性。
 	// Blend curves and attributes.
 	//------------------------------------------
+	// 无添加剂。
 	// Non-additives.
 	if (BlendingCurves.Num() > 0)
 	{
@@ -1853,6 +1938,7 @@ void FAnimInstanceProxy::SlotEvaluatePoseWithBlendProfiles(const FName& SlotNode
 		UE::Anim::Attributes::BlendAttributes(BlendingAttributes, BlendingWeights, OutBlendedAnimationPoseData.GetAttributes());
 	}
 
+	// 添加剂。
 	// Additives.
 	for (int32 PoseIndex = 0; PoseIndex < AdditivePoses.Num(); ++PoseIndex)
 	{
@@ -1875,8 +1961,11 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 	FBlendedCurve& BlendedCurve = OutBlendedAnimationPoseData.GetCurve();
 	UE::Anim::FStackAttributeContainer& BlendedAttributes = OutBlendedAnimationPoseData.GetAttributes();
 
+	// 从此函数访问 MontageInstances 并不安全（因为可以在并行动画评估期间调用此函数！
 	// Accessing MontageInstances from this function is not safe (as this can be called during Parallel Anim Evaluation!
+	// 您需要添加的任何蒙太奇数据都应该是 MontageEvaluationData 的一部分
 	// Any montage data you need to add should be part of MontageEvaluationData
+	// 无需混合，只需将其取出即可
 	// nothing to blend, just get it out
 	if (InBlendWeight <= ZERO_ANIMWEIGHT_THRESH)
 	{
@@ -1886,6 +1975,7 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 		return;
 	}
 
+	// 检查我们是否使用混合配置文件来混合蒙太奇，如果是，则为此采用特殊的代码路径。
 	// Check if we are blending a montage using a blend profile, if so take a special code path for this.
 	for (const FMontageEvaluationState& EvalState : GetMontageEvaluationData())
 	{
@@ -1896,6 +1986,7 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 		}
 	}
 
+	// 将我们的数据分为加性数据和非加性数据。
 	// Split our data into additive and non additive.
 	FBlendProfileScratchData& BlendProfileScratchData = FBlendProfileScratchData::Get();
 	TArray<FSlotEvaluationPose>& AdditivePoses = BlendProfileScratchData.Poses;
@@ -1906,14 +1997,18 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 	TArray<const UE::Anim::FStackAttributeContainer*, TInlineAllocator<8>>& BlendingAttributes = BlendProfileScratchData.BlendingAttributes;
 	check(BlendProfileScratchData.IsEmpty());
 
+	// 第一遍我们收集权重和有效的蒙太奇。
 	// first pass we go through collect weights and valid montages.
 #if DEBUG_MONTAGEINSTANCE_WEIGHT
 	float TotalWeight = 0.f;
 #endif // DEBUG_MONTAGEINSTANCE_WEIGHT
 	for (const FMontageEvaluationState& EvalState : GetMontageEvaluationData())
 	{
+		// 如果 MontageEvaluationData 不再有效，则传递 AnimSlot。
 		// If MontageEvaluationData is not valid anymore, pass-through AnimSlot.
+		// 如果 InitAnim 在未渲染时推送 RefreshBoneTransforms，则可能会发生这种情况，
 		// This can happen if InitAnim pushes a RefreshBoneTransforms when not rendered,
+		// 设置 EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered。
 		// with EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered set.
 		if (!EvalState.Montage.IsValid())
 		{
@@ -1930,6 +2025,7 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 		{
 			FAnimTrack const* const AnimTrack = Montage->GetAnimationData(SlotNodeName);
 
+			// 找出姿势的附加类型。
 			// Find out additive type for pose.
 			EAdditiveAnimationType const AdditiveAnimType = AnimTrack->IsAdditive()
 				? (AnimTrack->IsRotationOffsetAdditive() ? AAT_RotationOffsetMeshSpace : AAT_LocalSpaceBase)
@@ -1938,10 +2034,12 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 			const float MontageWeight = EvalState.BlendInfo.GetBlendedValue();
 			FSlotEvaluationPose NewPose(MontageWeight, AdditiveAnimType);
 
+			// 必须在调用 GetPoseFromAnimTrack 之前分配骨骼数组
 			// Bone array has to be allocated prior to calling GetPoseFromAnimTrack
 			NewPose.Pose.SetBoneContainer(RequiredBones.Get());
 			NewPose.Curve.InitFrom(*RequiredBones);
 
+			// [翻译失败: Extract pose from Track]
 			// Extract pose from Track
 			FAnimExtractContext ExtractionContext(static_cast<double>(EvalState.MontagePosition), Montage->HasRootMotion() && RootMotionMode != ERootMotionMode::NoRootMotionExtraction, EvalState.DeltaTimeRecord);
 			ExtractionContext.InterpolationOverride = InterpolationOverride;
@@ -1949,6 +2047,7 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 			FAnimationPoseData NewAnimationPoseData(NewPose);
 			AnimTrack->GetAnimationPose(NewAnimationPoseData, ExtractionContext);
 
+			// 添加蒙太奇曲线
 			// add montage curves
 			FBlendedCurve MontageCurve;
 			MontageCurve.InitFrom(*RequiredBones);
@@ -1992,7 +2091,9 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 		} // if IsValidSlot
 	} // for all MontageEvaluationData
 
+	// 分配用于混合
 	// allocate for blending
+	// 如果源有任何权重，请将其添加到混合数组中。
 	// If source has any weight, add it to the blend array.
 	float const SourceWeight = FMath::Clamp<float>(InSourceWeight, 0.f, 1.f);
 
@@ -2002,11 +2103,13 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 	ensure (InTotalNodeWeight > ZERO_ANIMWEIGHT_THRESH);
 	if (InTotalNodeWeight > (1.f + ZERO_ANIMWEIGHT_THRESH))
 	{
+		// 重新标准化附加姿势
 		// Re-normalize additive poses
 		for (int32 Index = 0; Index < AdditivePoses.Num(); Index++)
 		{
 			AdditivePoses[Index].Weight /= InTotalNodeWeight;
 		}
+		// 重新规范化非相加姿势
 		// Re-normalize non-additive poses
 		for (int32 Index = 0; Index < NonAdditivePoses.Num(); Index++)
 		{
@@ -2014,14 +2117,18 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 		}
 	}
 
+	// 确保我们这里至少有一个蒙太奇。
 	// Make sure we have at least one montage here.
 	ensure((AdditivePoses.Num() > 0) || (NonAdditivePoses.Num() > 0));
 
+	// 第二遍，将非相加姿势混合在一起
 	// Second pass, blend non additive poses together
 	{
+		// 如果我们只播放附加动画，只需复制基本姿势的源即可。
 		// If we're only playing additive animations, just copy source for base pose.
 		if (NonAdditivePoses.Num() == 0)
 		{
+			// 如果源权重为0，SourcePose将未初始化，无法使用
 			// If the source weight is 0, SourcePose will be uninitialized and cannot be used
 			if (InSourceWeight > ZERO_ANIMWEIGHT_THRESH)
 			{
@@ -2059,11 +2166,13 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 				BlendingWeights[SourceIndex] = SourceWeight;
 			}
 
+			// 混合所有蒙太奇。
 			// Blend all montages.
 			FAnimationRuntime::BlendPosesTogetherIndirect(BlendingPoses, BlendingCurves, BlendingAttributes, BlendingWeights, OutBlendedAnimationPoseData);
 		}
 	}
 
+	// 第三遍，加权附加姿势分层。
 	// Third pass, layer on weighted additive poses.
 	if (AdditivePoses.Num() > 0)
 	{
@@ -2078,14 +2187,18 @@ void FAnimInstanceProxy::SlotEvaluatePose(const FName& SlotNodeName, const FAnim
 	BlendProfileScratchData.Reset();
 }
 
+//调试蒙太奇权重
 //to debug montage weight
 #define DEBUGMONTAGEWEIGHT 0
 
 void FAnimInstanceProxy::GetSlotWeight(const FName& SlotNodeName, float& out_SlotNodeWeight, float& out_SourceWeight, float& out_TotalNodeWeight) const
 {
+	// 节点总权重
 	// node total weight
 	float NewSlotNodeWeight = 0.f;
+	// 这是跟踪所必需的，因为它将是 1-SourceWeight
 	// this is required to track, because it will be 1-SourceWeight
+	// 如果是添加剂的话可以多涂一些
 	// if additive, it can be applied more
 	float NonAdditiveTotalWeight = 0.f;
 
@@ -2093,6 +2206,7 @@ void FAnimInstanceProxy::GetSlotWeight(const FName& SlotNodeName, float& out_Slo
 	float TotalDesiredWeight = 0.f;
 #endif
 
+	// 首先获取该槽节点拥有的所有蒙太奇实例权重
 	// first get all the montage instance weight this slot node has
 	for (const FMontageEvaluationState& EvalState : GetMontageEvaluationData())
 	{
@@ -2119,29 +2233,43 @@ void FAnimInstanceProxy::GetSlotWeight(const FName& SlotNodeName, float& out_Slo
 		}
 	}
 
+	// 保存节点总权重，可以大于1
 	// save the total node weight, it can be more than 1
+	// 我们需要这个，以便当我们评估时，我们通过这个权重进行标准化
 	// we need this so that when we eval, we normalized by this weight
+	// 如果某些数据发生变化，计算可能会导致不一致
 	// calculating there can cause inconsistency if some data changes
 	out_TotalNodeWeight = NewSlotNodeWeight;
 
+	// 当它混合时或者当较新的动画以较短的混合时间进入时，可能会发生这种情况
 	// this can happen when it's blending in OR when newer animation comes in with shorter blendtime
+	// 说 #1 动画将时间与当前的混合时间 1.0 混合 #2 动画与 1.0（旧）混合，但与新的混合时间 0.2f 混合
 	// say #1 animation was blending out time with current blendtime 1.0 #2 animation was blending in with 1.0 (old) but got blend out with new blendtime 0.2f
+	// #3 动画与新的混合时间 0.2f 混合，#1、2、3 的总和将超过 1.f
 	// #3 animation was blending in with the new blendtime 0.2f, you'll have sum of #1, 2, 3 exceeds 1.f
 	if (NewSlotNodeWeight > 1.f)
 	{
+		// 您不想更改蒙太奇实例的权重，因为它可以播放多个插槽
 		// you don't want to change weight of montage instance since it can play multiple slots
+		// 如果您更改其中一项，它将应用于该蒙太奇中的所有插槽
 		// if you change one, it will apply to all slots in that montage
+		// 相反，我们应该在评估时重新规范化
 		// instead we should renormalize when we eval
+		// 这应该发生在评估阶段
 		// this should happen in the eval phase
 		NonAdditiveTotalWeight /= NewSlotNodeWeight;
+		// 自从我们正常化以来，我们重置了
 		// since we normalized, we reset
 		NewSlotNodeWeight = 1.f;
 	}
 #if DEBUGMONTAGEWEIGHT
 	else if (TotalDesiredWeight == 1.f && TotalSum < 1.f - ZERO_ANIMWEIGHT_THRESH)
 	{
+		// 当它混合时或者当较新的动画以较长的混合时间进入时，可能会发生这种情况
 		// this can happen when it's blending in OR when newer animation comes in with longer blendtime
+		// 说 #1 动画将时间与当前的混合时间 0.2 混合 #2 动画将与 0.2（旧）混合，但与新的混合时间 1.f 混合
 		// say #1 animation was blending out time with current blendtime 0.2 #2 animation was blending in with 0.2 (old) but got blend out with new blendtime 1.f
+		// #3 动画与新的混合时间 1.f 混合，您将得到 #1、2、3 的总和不满足 1.f
 		// #3 animation was blending in with the new blendtime 1.f, you'll have sum of #1, 2, 3 doesn't meet 1.f
 		UE_LOG(LogAnimation, Warning, TEXT("[%s] Montage has less weight. Blending in?(%f)"), *SlotNodeName.ToString(), TotalSum);
 	}
@@ -2153,6 +2281,7 @@ void FAnimInstanceProxy::GetSlotWeight(const FName& SlotNodeName, float& out_Slo
 
 const FMontageEvaluationState* FAnimInstanceProxy::GetActiveMontageEvaluationState() const
 {
+	// 从末尾开始，因为最近的实例被添加到队列的末尾。
 	// Start from end, as most recent instances are added at the end of the queue.
 	int32 const NumInstances = GetMontageEvaluationData().Num();
 	for (int32 InstanceIndex = NumInstances - 1; InstanceIndex >= 0; InstanceIndex--)
@@ -2201,12 +2330,14 @@ void FAnimInstanceProxy::GatherDebugData_WithRoot(FNodeDebugData& DebugData, FAn
 {
 	LLM_SCOPE_BYNAME(TEXT("Animation/Graph"));
 
+	// 收集根节点的调试数据
 	// Gather debug data for Root Node
 	if(InRootNode != nullptr)
 	{
 		 InRootNode->GatherDebugData(DebugData);
 	}
 
+	// 收集缓存姿势的调试数据。
 	// Gather debug data for Cached Poses.
 	if(TArray<FAnimNode_SaveCachedPose*>* SavedPoseQueue = SavedPoseQueueMap.Find(InLayerName))
 	{
@@ -2313,6 +2444,7 @@ void FAnimInstanceProxy::AnimDrawDebugLine(const FVector& StartLoc, const FVecto
 
 void FAnimInstanceProxy::AnimDrawDebugPlane(const FTransform& BaseTransform, float Radii, const FColor& Color, bool bPersistentLines /*= false*/, float LifeTime /*= -1.f*/, float Thickness /*= 0.f*/, ESceneDepthPriorityGroup DepthPriority)
 {
+	// 只需从 [-Radii,-Radii] 到 [Radii, Radii] 绘制两个三角形
 	// just draw two triangle from [-Radii,-Radii] to [Radii, Radii]
 	FQueuedDrawDebugItem DrawDebugItem;
 
@@ -2368,6 +2500,7 @@ void FAnimInstanceProxy::AnimDrawDebugCircle(const FVector& Center, float Radius
 	DrawDebugItem.Radius = Radius;
 	DrawDebugItem.Segments = Segments;
 	DrawDebugItem.Color = Color;
+	// 我们使用 EndLoc 作为方向单位向量。
 	// We're using EndLoc as our direction unit vector.
 	DrawDebugItem.EndLoc = UpVector.GetSafeNormal();
 	DrawDebugItem.bPersistentLines = bPersistentLines;
@@ -2387,6 +2520,7 @@ void FAnimInstanceProxy::AnimDrawDebugCone(const FVector& Center, float Length, 
 	DrawDebugItem.Length = Length;
 	DrawDebugItem.AngleWidth = AngleWidth;
 	DrawDebugItem.AngleHeight = AngleHeight;
+	// 我们使用 EndLoc 作为方向单位向量。
 	// We're using EndLoc as our direction unit vector.
 	DrawDebugItem.Direction = Direction.GetSafeNormal();
 	DrawDebugItem.Segments = Segments;
@@ -2957,6 +3091,7 @@ void FAnimInstanceProxy::BindNativeDelegates()
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 
+	// 如果我们没有根节点，我们通常会很早就犯错误
 	// if we have no root node, we are usually in error so early out
 	if(RootNode == nullptr)
 	{
@@ -2975,6 +3110,7 @@ void FAnimInstanceProxy::BindNativeDelegates()
 					const FBakedAnimationStateMachine* MachineDescription = GetMachineDescription(InAnimClassInterface, StateMachine);
 					if(MachineDescription && MachineName == MachineDescription->MachineName)
 					{
+						// 检查每个状态转换是否匹配
 						// check each state transition for a match
 						int32 StateIndex = 0;
 						for(const FBakedAnimationState& State : MachineDescription->States)
@@ -2993,6 +3129,7 @@ void FAnimInstanceProxy::BindNativeDelegates()
 
 	if (AnimClassInterface)
 	{
+		// 过渡代表
 		// transition delegates
 		for(const auto& Binding : NativeTransitionBindings)
 		{
@@ -3003,6 +3140,7 @@ void FAnimInstanceProxy::BindNativeDelegates()
 					{
 						if(TransitionExit.CanTakeDelegateIndex != INDEX_NONE)
 						{
+							// 如果状态机还没有初始化，我们需要重新获取desc
 							// In case the state machine hasn't been initialized, we need to re-get the desc
 							const FBakedAnimationStateMachine* MachineDesc = GetMachineDescription(AnimClassInterface, StateMachine);
 							const FAnimationTransitionBetweenStates& Transition = MachineDesc->Transitions[TransitionExit.TransitionIndex];
@@ -3021,24 +3159,28 @@ void FAnimInstanceProxy::BindNativeDelegates()
 				});
 		}
 
+		// 州入境代表
 		// state entry delegates
 		for(const auto& Binding : NativeStateEntryBindings)
 		{
 			ForEachStateLambda(AnimClassInterface, Binding.MachineName, Binding.StateName,
 				[&](FAnimNode_StateMachine* StateMachine, const FBakedAnimationState& State, int32 StateIndex)
 				{
+					// [翻译失败: allocate enough space for all our states we need so far]
 					// allocate enough space for all our states we need so far
 					StateMachine->OnGraphStatesEntered.SetNum(FMath::Max(StateIndex + 1, StateMachine->OnGraphStatesEntered.Num()));
 					StateMachine->OnGraphStatesEntered[StateIndex] = Binding.NativeStateDelegate;
 				});
 		}
 
+		// [翻译失败: state exit delegates]
 		// state exit delegates
 		for(const auto& Binding : NativeStateExitBindings)
 		{
 			ForEachStateLambda(AnimClassInterface, Binding.MachineName, Binding.StateName,
 				[&](FAnimNode_StateMachine* StateMachine, const FBakedAnimationState& State, int32 StateIndex)
 				{
+					// [翻译失败: allocate enough space for all our states we need so far]
 					// allocate enough space for all our states we need so far
 					StateMachine->OnGraphStatesExited.SetNum(FMath::Max(StateIndex + 1, StateMachine->OnGraphStatesExited.Num()));
 					StateMachine->OnGraphStatesExited[StateIndex] = Binding.NativeStateDelegate;
@@ -3320,6 +3462,7 @@ TArray<const FAnimNode_AssetPlayerBase*> FAnimInstanceProxy::GetInstanceAssetPla
 {
 	TArray<const FAnimNode_AssetPlayerBase*> Nodes;
 
+	// 从（命名的）动画层图中检索所有资源播放器节点
 	// Retrieve all asset player nodes from the (named) Animation Layer Graph
 	if (AnimClassInterface)
 	{
@@ -3343,6 +3486,7 @@ TArray<FAnimNode_AssetPlayerBase*> FAnimInstanceProxy::GetMutableInstanceAssetPl
 {
 	TArray<FAnimNode_AssetPlayerBase*> Nodes;
 
+	// 从（命名的）动画层图中检索所有资源播放器节点
 	// Retrieve all asset player nodes from the (named) Animation Layer Graph
 	if (AnimClassInterface)
 	{
@@ -3365,6 +3509,7 @@ TArray<const FAnimNode_AssetPlayerRelevancyBase*> FAnimInstanceProxy::GetInstanc
 {
 	TArray<const FAnimNode_AssetPlayerRelevancyBase*> Nodes;
 
+	// 从（命名的）动画层图中检索所有资源播放器节点
 	// Retrieve all asset player nodes from the (named) Animation Layer Graph
 	if (AnimClassInterface)
 	{
@@ -3388,6 +3533,7 @@ TArray<FAnimNode_AssetPlayerRelevancyBase*> FAnimInstanceProxy::GetMutableInstan
 {
 	TArray<FAnimNode_AssetPlayerRelevancyBase*> Nodes;
 
+	// 从（命名的）动画层图中检索所有资源播放器节点
 	// Retrieve all asset player nodes from the (named) Animation Layer Graph
 	if (AnimClassInterface)
 	{
@@ -3532,11 +3678,13 @@ FPoseSnapshot& FAnimInstanceProxy::AddPoseSnapshot(FName SnapshotName)
 	FPoseSnapshot* PoseSnapshot = PoseSnapshots.FindByPredicate([SnapshotName](const FPoseSnapshot& PoseData) { return PoseData.SnapshotName == SnapshotName; });
 	if (PoseSnapshot)
 	{
+		// 回收现有快照
 		// Recycle an existing snapshot
 		PoseSnapshot->Reset();
 	}
 	else
 	{
+		// 添加新的空快照
 		// Add a new empty snapshot
 		PoseSnapshot = &PoseSnapshots[PoseSnapshots.AddDefaulted()];
 	}
@@ -3572,6 +3720,7 @@ void FAnimInstanceProxy::UpdateCurvesToEvaluationContext(const FAnimationEvaluat
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 	SCOPE_CYCLE_COUNTER(STAT_UpdateCurvesToEvaluationContext);
 
+	// 跟踪我们上次设置的材质参数，以便我们可以在未再次设置它们时清除它们。
 	// Track material params we set last time round so we can clear them if they aren't set again.
 	MaterialParametersToClear.Reset();
 	for(auto Iter = AnimationCurves[(uint8)EAnimCurveType::MaterialCurve].CreateConstIterator(); Iter; ++Iter)
@@ -3608,17 +3757,21 @@ void FAnimInstanceProxy::UpdateCurvesPostEvaluation(USkeletalMeshComponent* Skel
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 	SCOPE_CYCLE_COUNTER(STAT_UpdateCurvesPostEvaluation);
 
+	// 添加曲线来重置我们之前设置但没有勾选此框的参数。
 	// Add curves to reset parameters that we have previously set but didn't tick this frame.
 	for(FName MaterialParameterToClear : MaterialParametersToClear)
 	{
+		// 重置后，我们回到默认值
 		// when reset, we go back to default value
 		float DefaultValue = SkelMeshComp->GetScalarParameterDefaultValue(MaterialParameterToClear);
 		AnimationCurves[(uint8)EAnimCurveType::MaterialCurve].Add(MaterialParameterToClear, DefaultValue);
 	}
 
+	// 将曲线更新为组件
 	// update curves to component
 	SkelMeshComp->ApplyAnimationCurvesToComponent(&AnimationCurves[(uint8)EAnimCurveType::MaterialCurve], &AnimationCurves[(uint8)EAnimCurveType::MorphTargetCurve]);
 
+	// [翻译失败: Remove cleared params now they have been pushed to the mesh]
 	// Remove cleared params now they have been pushed to the mesh
 	for(FName MaterialParameterToClear : MaterialParametersToClear)
 	{
@@ -3642,12 +3795,16 @@ void FAnimInstanceProxy::AddCurveValue(const FName& CurveName, float Value, bool
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_FUNC()
 
+	// [翻译失败: save curve value, it will overwrite if same exists,]
 	// save curve value, it will overwrite if same exists,
+	//[翻译失败: CurveValues.Add(CurveName, Value);]
 	//CurveValues.Add(CurveName, Value);
 	float* CurveValPtr = AnimationCurves[(uint8)EAnimCurveType::AttributeCurve].Find(CurveName);
 	if ( CurveValPtr )
 	{
+		// 总结一下，将来我们可能会正常化，但现在这只是总结
 		// sum up, in the future we might normalize, but for now this just sums up
+		// 如果它们都具有完整的权重（即附加的），那么这将无法正常工作
 		// this won't work well if all of them have full weight - i.e. additive
 		*CurveValPtr = Value;
 	}
@@ -3661,7 +3818,9 @@ void FAnimInstanceProxy::AddCurveValue(const FName& CurveName, float Value, bool
 		CurveValPtr = AnimationCurves[(uint8)EAnimCurveType::MorphTargetCurve].Find(CurveName);
 		if (CurveValPtr)
 		{
+			// 总结一下，将来我们可能会正常化，但现在这只是总结
 			// sum up, in the future we might normalize, but for now this just sums up
+			// 如果它们都具有完整的权重（即附加的），那么这将无法正常工作
 			// this won't work well if all of them have full weight - i.e. additive
 			*CurveValPtr = Value;
 		}

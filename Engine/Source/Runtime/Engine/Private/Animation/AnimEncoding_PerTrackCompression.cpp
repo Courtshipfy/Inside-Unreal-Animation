@@ -21,6 +21,7 @@ static_assert(sizeof(ispc::BoneTrackPair) == sizeof(BoneTrackPair), "sizeof(ispc
 #endif
 
 // Support run-time toggling on supported platforms in non-shipping configurations
+// 支持非发货配置中支持的平台上的运行时切换
 #if !INTEL_ISPC || UE_BUILD_SHIPPING
 static constexpr bool bAnim_PerTrackCompression_ISPC_Enabled = INTEL_ISPC && ANIM_PER_TRACK_COMPRESSION_ISPC_ENABLED_DEFAULT;
 #else
@@ -30,14 +31,19 @@ static FAutoConsoleVariableRef CVarAnimPerTrackCompressionISPCEnabled(TEXT("a.Pe
 #endif
 
 // This define controls whether scalar or vector code is used to decompress keys.  Note that not all key decompression code
+// 该定义控制是使用标量代码还是向量代码来解压缩密钥。  注意不是所有按键解压代码
 // is vectorized yet, so some (seldom used) formats will actually get slower (due to extra LHS stalls) when enabled.
+// 尚未矢量化，因此某些（很少使用）格式在启用时实际上会变慢（由于额外的 LHS 停顿）。
 // The code also relies on a flexible permute instruction being available (e.g., PPC vperm)
+// 该代码还依赖于可用的灵活置换指令（例如，PPC vperm）
 #define USE_VECTOR_PTC_DECOMPRESSOR 0
 
 #if USE_VECTOR_PTC_DECOMPRESSOR
 
 // 32767, stored in 1X, plus biasing is 0
+// 32767，存储在1X中，加上偏置为0
 // Perm_Zeros takes the first 4 bytes of the second argument (which should be VectorZero() for this table use)
+// Perm_Zeros 采用第二个参数的前 4 个字节（对于此表的使用，应该是 VectorZero()）
 #define Perm_Zeros 0x10111213
 
 #define Perm_X1 0x00010203
@@ -46,12 +52,15 @@ static FAutoConsoleVariableRef CVarAnimPerTrackCompressionISPCEnabled(TEXT("a.Pe
 #define Perm_W2 0x1C1D1E1F
 
 // One float96 key can be stored with implicit 0.0f components, this table (when indexed by format flags 0-3) plus one indicates how many bytes a key contains
+// 一个 float96 键可以用隐式 0.0f 分量存储，该表（当按格式标志 0-3 索引时）加 1 表示一个键包含多少个字节
 static const uint8 Float96KeyBytesMinusOne[16] = { 11, 3, 3, 7, 3, 7, 7, 11, 11, 3, 3, 7, 3, 7, 7, 11 };
 
 // One fixed48 key can be stored with implicit 0.0f components, this table (when indexed by format flags 0-3) plus one indicates how many bytes a key contains
+// 一个固定的 48 个密钥可以用隐式 0.0f 分量存储，该表（当按格式标志 0-3 索引时）加 1 表示一个密钥包含多少个字节
 static const uint8 Fixed48KeyBytesMinusOne[16] = { 5, 1, 1, 3, 1, 3, 3, 5, 5, 1, 1, 3, 1, 3, 3, 5 };
 
 // One float96 translation key can be stored with implicit 0.0f components, this table (when indexed by format flags 0-2) indicates how to swizzle the 16 bytes read into one float each in X,Y,Z, and 0.0f in W
+// 一个 float96 转换密钥可以与隐式 0.0f 组件一起存储，该表（当按格式标志 0-2 索引时）指示如何将读取的 16 个字节混合到 X、Y、Z 中的一个浮点数中，以及 W 中的 0.0f 中的一个浮点数
 static const VectorRegister Trans96OptionalFormatPermMasks[8] =
 {
 	MakeVectorRegister( Perm_X1, Perm_Y1, Perm_Z1, (uint32)Perm_W2 ),  // 0 = 7 = all three valid
@@ -71,14 +80,17 @@ static const VectorRegister Trans96OptionalFormatPermMasks[8] =
 #undef Perm_W2
 
 // Perm_Zeros takes the first 4 bytes of the second argument (which should be DecompressPTCConstants, resulting in integer 32767, which becomes 0.0f after scaling and biasing)
+// Perm_Zeros 取第二个参数的前 4 个字节（应该是 DecompressPTCConstants，结果是整数 32767，在缩放和偏置后变为 0.0f）
 #define Perm_Zeros 0x10111213
 
 // Each of these takes two bytes of source data, and two zeros from the W of the second argument (which should be DecompressPTCConstants) to pad it out to a 4 byte int32
+// 其中每个都需要两个字节的源数据，以及第二个参数（应该是 DecompressPTCConstants）的 W 中的两个零，以将其填充为 4 字节 int32
 #define Perm_Data1 0x1F1F0001
 #define Perm_Data2 0x1F1F0203
 #define Perm_Data3 0x1F1F0405
 
 // One fixed48 rotation key can be stored with implicit 0.0f components, this table (when indexed by format flags 0-2) indicates how to swizzle the 16 bytes read into one short each in X,Y,Z)
+// 一个固定的 48 旋转密钥可以与隐式 0.0f 组件一起存储，该表（当按格式标志 0-2 索引时）指示如何将读取的 16 个字节混合为 X、Y、Z 中的每个短值）
 static const VectorRegister Fix48FormatPermMasks[8] =
 {
 	MakeVectorRegister( Perm_Data1, Perm_Data2, Perm_Data3, (uint32)Perm_Zeros ),  // 0 = 7 = all three valid
@@ -97,20 +109,25 @@ static const VectorRegister Fix48FormatPermMasks[8] =
 #undef Perm_Data3
 
 // Constants used when decompressing fixed48 translation keys (pre-scale, pre-bias integer representation of a final output 0.0f)
+// 解压缩固定 48 个转换键时使用的常量（最终输出 0.0f 的预缩放、预偏置整数表示）
 static const VectorRegister DecompressPTCTransConstants = MakeVectorRegister( 255, 255, 255, (uint32)0 );
 
 // Constants used when decompressing fixed48 rotation keys (pre-scale, pre-bias integer representation of a final output 0.0f)
+// 解压缩固定48个旋转键时使用的常量（最终输出0.0f的预缩放、预偏置整数表示）
 static const VectorRegister DecompressPTCConstants = MakeVectorRegister( 32767, 32767, 32767, (uint32)0 );
 
 // Scale-bias factors for decompressing fixed48 data (both rotation and translation)
+// 用于解压缩固定48数据的比例偏差因子（旋转和平移）
 static const VectorRegister BiasFix48Data = MakeVectorRegister( -32767.0f, -32767.0f, -32767.0f, -32767.0f );
 static const VectorRegister ScaleRotData = MakeVectorRegister( 3.0518509475997192297128208258309e-5f, 3.0518509475997192297128208258309e-5f, 3.0518509475997192297128208258309e-5f, 1.0f );
 
 //@TODO: Looks like fixed48 for translation is basically broken right now (using 8 bits instead of 16 bits!).  The scale is omitted below because it's all 1's
+//[翻译失败: @TODO: Looks like fixed48 for translation is basically broken right now (using 8 bits instead of 16 bits!).  The scale is omitted below because it's all 1's]
 static const VectorRegister BiasTransData =  MakeVectorRegister( -255.0f, -255.0f, -255.0f, -255.0f );
 static const VectorRegister ScaleTransData = MakeVectorRegister( 1.0f, 1.0f, 1.0f, 1.0f );
 
 /** Decompress a single translation key from a single track that was compressed with the PerTrack codec (vectorized) */
+/** [翻译失败: Decompress a single translation key from a single track that was compressed with the PerTrack codec (vectorized)] */
 static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackTranslationVectorized(int32 Format, int32 FormatFlags, const uint8* RESTRICT TopOfStream, const uint8* RESTRICT KeyData)
 {
 	if( Format == ACF_Float96NoW )
@@ -128,6 +145,7 @@ static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackTranslationVec
 
 		const VectorRegister BiasedData = VectorAdd(FPKey, BiasTransData);
 		//const VectorRegister XYZ = VectorMultiply(BiasedData, ScaleTransData);
+		//[翻译失败: const VectorRegister XYZ = VectorMultiply(BiasedData, ScaleTransData);]
 		const VectorRegister XYZ = BiasedData;
 
 		return XYZ;
@@ -156,6 +174,7 @@ static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackTranslationVec
 		}
 
 		// This one is still used for ~4% of the cases, so making it faster would be nice
+		// [翻译失败: This one is still used for ~4% of the cases, so making it faster would be nice]
 		FVector Out;
 		((FVectorIntervalFixed32NoW*)KeyData)->ToVector(Out, Mins, Ranges);
 		return VectorLoadAligned(&Out);
@@ -165,6 +184,7 @@ static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackTranslationVec
 }
 
 /** Decompress a single Scale key from a single track that was compressed with the PerTrack codec (vectorized) */
+/** [翻译失败: Decompress a single Scale key from a single track that was compressed with the PerTrack codec (vectorized)] */
 static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackScaleVectorized(int32 Format, int32 FormatFlags, const uint8* RESTRICT TopOfStream, const uint8* RESTRICT KeyData)
 {
 	if( Format == ACF_Float96NoW )
@@ -182,6 +202,7 @@ static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackScaleVectorize
 
 		const VectorRegister BiasedData = VectorAdd(FPKey, BiasTransData);
 		//const VectorRegister XYZ = VectorMultiply(BiasedData, ScaleTransData);
+		//[翻译失败: const VectorRegister XYZ = VectorMultiply(BiasedData, ScaleTransData);]
 		const VectorRegister XYZ = BiasedData;
 
 		return XYZ;
@@ -210,6 +231,7 @@ static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackScaleVectorize
 		}
 
 		// This one is still used for ~4% of the cases, so making it faster would be nice
+		// [翻译失败: This one is still used for ~4% of the cases, so making it faster would be nice]
 		FVector Out;
 		((FVectorIntervalFixed32NoW*)KeyData)->ToVector(Out, Mins, Ranges);
 		return VectorLoadAligned(&Out);
@@ -219,6 +241,7 @@ static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackScaleVectorize
 }
 
 /** Decompress a single rotation key from a single track that was compressed with the PerTrack codec (vectorized) */
+/** 从使用 PerTrack 编解码器（矢量化）压缩的单个轨道中解压缩单个旋转密钥 */
 static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackRotationVectorized(int32 Format, int32 FormatFlags, const uint8* RESTRICT TopOfStream, const uint8* RESTRICT KeyData)
 {
 	if (Format == ACF_Fixed48NoW)
@@ -276,6 +299,7 @@ static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackRotationVector
 		}
 
 		// This one is still used for ~4% of the cases, so making it faster would be nice
+		// 这个仍然被用在大约 4% 的情况下，所以让它更快就好了
 		FQuat Out;
 		((FQuatIntervalFixed32NoW*)KeyData)->ToQuat( Out, Mins, Ranges );
 		return VectorLoadAligned(&Out);
@@ -283,6 +307,7 @@ static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackRotationVector
 	else if ( Format == ACF_Float32NoW )
 	{
 		// This isn't used for compression anymore so making it fast isn't very important
+		// 这不再用于压缩，因此使其快速并不是很重要
 		FQuat Out;
 		((FQuatFloat32NoW*)KeyData)->ToQuat( Out );
 		return VectorLoadAligned(&Out);
@@ -290,6 +315,7 @@ static FORCEINLINE_DEBUGGABLE VectorRegister DecompressSingleTrackRotationVector
 	else if (Format == ACF_Fixed32NoW)
 	{
 		// This isn't used for compression anymore so making it fast isn't very important
+		// 这不再用于压缩，因此使其快速并不是很重要
 		FQuat Out;
 		((FQuatFixed32NoW*)KeyData)->ToQuat(Out);
 		return VectorLoadAligned(&Out);
@@ -304,6 +330,7 @@ template<class TArchive>
 void AEFPerTrackCompressionCodec::ByteSwapOneTrack(FUECompressedAnimData& CompressedData, TArchive& MemoryStream, int32 BufferStart, int32 Offset)
 {
 	// Translation data.
+	// 翻译数据。
 	if (Offset != INDEX_NONE)
 	{
 		checkSlow( (Offset % 4) == 0 && "CompressedByteStream not aligned to four bytes" );
@@ -313,6 +340,7 @@ void AEFPerTrackCompressionCodec::ByteSwapOneTrack(FUECompressedAnimData& Compre
 		uint8* TrackData = CompressedData.CompressedByteStream.GetData() + Offset;
 
 		// Read the header
+		// 阅读标题
 		AC_UnalignedSwap(MemoryStream, TrackData, sizeof(int32));
 
 		const int32 Header = *(reinterpret_cast<int32*>(TrackData - sizeof(int32)));
@@ -333,12 +361,14 @@ void AEFPerTrackCompressionCodec::ByteSwapOneTrack(FUECompressedAnimData& Compre
 		check(KeyComponentSize != 0);
 
 		// Handle per-track metadata
+		// 处理每个轨道的元数据
 		for (int32 i = 0; i < FixedComponentCount; ++i)
 		{
 			AC_UnalignedSwap(MemoryStream, TrackData, FixedComponentSize);
 		}
 
 		// Handle keys
+		// 手柄钥匙
 		for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 		{
 			for (int32 i = 0; i < KeyComponentCount; ++i)
@@ -348,9 +378,11 @@ void AEFPerTrackCompressionCodec::ByteSwapOneTrack(FUECompressedAnimData& Compre
 		}
 
 		// Handle the key frame table if present
+		// 处理关键帧表（如果存在）
 		if ((FormatFlags & 0x8) != 0)
 		{
 			// Make sure the key->frame table is 4 byte aligned
+			// 确保关键帧表是 4 字节对齐的
 			PreservePadding(TrackData, MemoryStream);
 
 			const int32 FrameTableEntrySize = (CompressedData.CompressedNumberOfKeys <= 0xFF) ? sizeof(uint8) : sizeof(uint16);
@@ -361,6 +393,7 @@ void AEFPerTrackCompressionCodec::ByteSwapOneTrack(FUECompressedAnimData& Compre
 		}
 
 		// Make sure the next track is 4 byte aligned
+		// 确保下一个轨道是 4 字节对齐的
 		PreservePadding(TrackData, MemoryStream);
 	}
 }
@@ -378,6 +411,7 @@ template void AEFPerTrackCompressionCodec::ByteSwapOneTrack(FUECompressedAnimDat
 void AEFPerTrackCompressionCodec::PreservePadding(uint8*& TrackData, FMemoryArchive& MemoryStream)
 {
 	// Preserve padding
+	// 保留填充物
 	const PTRINT ByteStreamLoc = (PTRINT) TrackData;
 	const int32 PadCount = static_cast<int32>( Align(ByteStreamLoc, 4) - ByteStreamLoc );
 	if (MemoryStream.IsSaving())
@@ -486,10 +520,12 @@ void AEFPerTrackCompressionCodec::GetBoneAtomRotation(
 		FAnimationCompression_PerTrackUtils::DecomposeHeader(Header, /*OUT*/ KeyFormat, /*OUT*/ NumKeys, /*OUT*/ FormatFlags, /*OUT*/BytesPerKey, /*OUT*/ FixedBytes);
 
 		// Figure out the key indexes
+		// 找出关键指标
 		int32 Index0 = 0;
 		int32 Index1 = 0;
 
 		// Alpha is volatile to force the compiler to store it to memory immediately, so it is ready to be loaded into a vector register without a LHS after decompressing a track 
+		// Alpha 是易失性的，以强制编译器立即将其存储到内存中，因此在解压缩轨道后，无需 LHS 即可将其加载到向量寄存器中
 		volatile float Alpha = 0.0f;
 
 		if (NumKeys > 1)
@@ -506,6 +542,7 @@ void AEFPerTrackCompressionCodec::GetBoneAtomRotation(
 		}
 
 		// Unpack the first key
+		// 解压第一把钥匙
 		const uint8* RESTRICT KeyData0 = TrackData + FixedBytes + (Index0 * BytesPerKey);
 
 #if USE_VECTOR_PTC_DECOMPRESSOR
@@ -516,6 +553,7 @@ void AEFPerTrackCompressionCodec::GetBoneAtomRotation(
 #endif
 
 		// If there is a second key, figure out the lerp between the two of them
+		// [翻译失败: If there is a second key, figure out the lerp between the two of them]
 		if (Index0 != Index1)
 		{
 			const uint8* RESTRICT KeyData1 = TrackData + FixedBytes + (Index1 * BytesPerKey);
@@ -533,6 +571,7 @@ void AEFPerTrackCompressionCodec::GetBoneAtomRotation(
 			FAnimationCompression_PerTrackUtils::DecompressRotation(KeyFormat, FormatFlags, R1, TrackData, KeyData1);
 
 			// Fast linear quaternion interpolation.
+			// 快速线性四元数插值。
 			FQuat4f BlendedQuat = FQuat4f::FastLerp(R0, R1, Alpha);
 			OutAtom.SetRotation( FQuat(BlendedQuat) );
 			OutAtom.NormalizeRotation();
@@ -547,6 +586,7 @@ void AEFPerTrackCompressionCodec::GetBoneAtomRotation(
 	else
 	{
 		// Identity track
+		// 身份轨迹
 		OutAtom.SetRotation(FQuat::Identity);
 	}
 }
@@ -577,10 +617,12 @@ void AEFPerTrackCompressionCodec::GetBoneAtomTranslation(
 
 		checkf(KeyFormat < ACF_MAX, TEXT("[%s] contians invalid keyformat. NumKeys (%d), FormatFlags (%d), BytesPerKeys (%d), FixedBytes (%d), PosKeysOffset (%d), TrackIndex (%d)"), *DecompContext.AnimName.ToString(), NumKeys, FormatFlags, BytesPerKey, FixedBytes, PosKeysOffset, TrackIndex)
 		// Figure out the key indexes
+		// 找出关键指标
 		int32 Index0 = 0;
 		int32 Index1 = 0;
 
 		// Alpha is volatile to force the compiler to store it to memory immediately, so it is ready to be loaded into a vector register without a LHS after decompressing a track 
+		// Alpha 是易失性的，以强制编译器立即将其存储到内存中，因此在解压缩轨道后，无需 LHS 即可将其加载到向量寄存器中
 		volatile float Alpha = 0.0f;
 
 		if (NumKeys > 1)
@@ -597,6 +639,7 @@ void AEFPerTrackCompressionCodec::GetBoneAtomTranslation(
 		}
 
 		// Unpack the first key
+		// 解压第一把钥匙
 		const uint8* RESTRICT KeyData0 = TrackData + FixedBytes + (Index0 * BytesPerKey);
 
 #if USE_VECTOR_PTC_DECOMPRESSOR
@@ -607,6 +650,7 @@ void AEFPerTrackCompressionCodec::GetBoneAtomTranslation(
 #endif
 
 		// If there is a second key, figure out the lerp between the two of them
+		// 如果有第二把钥匙，找出它们之间的关系
 		if (Index0 != Index1)
 		{
 			const uint8* RESTRICT KeyData1 = TrackData + FixedBytes + (Index1 * BytesPerKey);
@@ -633,6 +677,7 @@ void AEFPerTrackCompressionCodec::GetBoneAtomTranslation(
 	else
 	{
 		// Identity track
+		// 身份轨迹
 #if USE_VECTOR_PTC_DECOMPRESSOR
 		OutAtom.SetTranslation(VectorZero());
 #else
@@ -663,10 +708,12 @@ void AEFPerTrackCompressionCodec::GetBoneAtomScale(
 		FAnimationCompression_PerTrackUtils::DecomposeHeader(Header, /*OUT*/ KeyFormat, /*OUT*/ NumKeys, /*OUT*/ FormatFlags, /*OUT*/BytesPerKey, /*OUT*/ FixedBytes);
 
 		// Figure out the key indexes
+		// 找出关键指标
 		int32 Index0 = 0;
 		int32 Index1 = 0;
 
 		// Alpha is volatile to force the compiler to store it to memory immediately, so it is ready to be loaded into a vector register without a LHS after decompressing a track 
+		// Alpha 是易失性的，以强制编译器立即将其存储到内存中，因此在解压缩轨道后，无需 LHS 即可将其加载到向量寄存器中
 		volatile float Alpha = 0.0f;
 
 		if (NumKeys > 1)
@@ -683,6 +730,7 @@ void AEFPerTrackCompressionCodec::GetBoneAtomScale(
 		}
 
 		// Unpack the first key
+		// 解压第一把钥匙
 		const uint8* RESTRICT KeyData0 = TrackData + FixedBytes + (Index0 * BytesPerKey);
 
 #if USE_VECTOR_PTC_DECOMPRESSOR
@@ -693,6 +741,7 @@ void AEFPerTrackCompressionCodec::GetBoneAtomScale(
 #endif
 
 		// If there is a second key, figure out the lerp between the two of them
+		// 如果有第二把钥匙，找出它们之间的关系
 		if (Index0 != Index1)
 		{
 			const uint8* RESTRICT KeyData1 = TrackData + FixedBytes + (Index1 * BytesPerKey);
@@ -719,6 +768,7 @@ void AEFPerTrackCompressionCodec::GetBoneAtomScale(
 	else
 	{
 		// Identity track
+		// 身份轨迹
 #if USE_VECTOR_PTC_DECOMPRESSOR
 		OutAtom.SetScale(VectorZero());
 #else

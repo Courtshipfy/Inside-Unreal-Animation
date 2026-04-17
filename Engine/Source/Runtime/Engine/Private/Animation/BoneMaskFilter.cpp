@@ -11,6 +11,7 @@
 
  /////////////////////////////////////////////////////
  // UBoneMaskFilter 
+ // UBoneMask过滤器
 
 UBoneMaskFilter::UBoneMaskFilter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

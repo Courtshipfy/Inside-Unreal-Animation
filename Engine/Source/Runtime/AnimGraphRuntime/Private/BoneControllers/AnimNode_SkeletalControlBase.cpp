@@ -21,6 +21,7 @@ DEFINE_LOG_CATEGORY(LogSkeletalControlBase);
 
 /////////////////////////////////////////////////////
 // FAnimNode_SkeletalControlBase
+// FAnimNode_SkeletalControlBase
 
 void FAnimNode_SkeletalControlBase::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -60,15 +61,23 @@ void FAnimNode_SkeletalControlBase::Update_AnyThread(const FAnimationUpdateConte
 {
 	//////////////////////////////////////////////////////////////////////////
 	// PERFORMANCE CRITICAL NOTE
+	// 性能关键说明
 	// 
 	// This function is called recursively as we traverse nodes, as such, it is critical to keep the
+	// 当我们遍历节点时，会递归地调用该函数，因此，保持
 	// amount of stack space used to a minimum as many nodes can be traversed. Using too much stack
+	// 将所使用的堆栈空间量降至最低，因为可以遍历的节点数尽可能多。使用过多的堆栈
 	// here can quickly lead to stack overflows.
+	// 这里很快就会导致堆栈溢出。
 	// 
 	// We explicitly disable inlineing for virtual calls. Normally, virtual calls are never inlined
+	// 我们明确禁用虚拟调用的内联。通常，虚拟调用永远不会内联
 	// but when PGO and LTO are enabled, the compiler can speculatively de-virtualize the calls. It does
+	// 但是当启用 PGO 和 LTO 时，编译器可以推测性地对调用进行去虚拟化。确实如此
 	// this by comparing the v-table pointer and inlineing the call directly in here with a static jump.
+	// 这是通过比较 v 表指针并通过静态跳转直接将调用内联到此处。
 	// As a result, it can significantly increase the amount of stack space used.
+	// 因此，它可以显着增加堆栈空间的使用量。
 	//////////////////////////////////////////////////////////////////////////
 
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Update_AnyThread)
@@ -80,6 +89,7 @@ void FAnimNode_SkeletalControlBase::Update_AnyThread(const FAnimationUpdateConte
 		GetEvaluateGraphExposedInputs().Execute(Context);
 
 		// Apply the skeletal control if it's valid
+		// 如果有效，则应用骨骼控制
 		switch (AlphaInputType)
 		{
 		case EAnimAlphaInputType::Float : 
@@ -97,6 +107,7 @@ void FAnimNode_SkeletalControlBase::Update_AnyThread(const FAnimationUpdateConte
 		};
 
 		// Make sure Alpha is clamped between 0 and 1.
+		// 确保 Alpha 限制在 0 和 1 之间。
 		ActualAlpha = FMath::Clamp<float>(ActualAlpha, 0.f, 1.f);
 
 		if (FAnimWeight::IsRelevant(ActualAlpha))
@@ -133,6 +144,7 @@ void FAnimNode_SkeletalControlBase::EvaluateComponentPose_AnyThread(FComponentSp
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(EvaluateComponentPose_AnyThread)
 	// Evaluate the input
+	// 评估输入
 	ComponentPose.EvaluateComponentSpace(Output);
 }
 
@@ -144,36 +156,48 @@ void FAnimNode_SkeletalControlBase::EvaluateComponentSpace_AnyThread(FComponentS
 {
 	//////////////////////////////////////////////////////////////////////////
 	// PERFORMANCE CRITICAL NOTE
+	// 性能关键说明
 	// 
 	// This function is called recursively as we traverse nodes, as such, it is critical to keep the
+	// 当我们遍历节点时，会递归地调用该函数，因此，保持
 	// amount of stack space used to a minimum as many nodes can be traversed. Using too much stack
+	// 将所使用的堆栈空间量降至最低，因为可以遍历的节点数尽可能多。使用过多的堆栈
 	// here can quickly lead to stack overflows.
+	// 这里很快就会导致堆栈溢出。
 	// 
 	// We explicitly disable inlineing for virtual calls. Normally, virtual calls are never inlined
+	// 我们明确禁用虚拟调用的内联。通常，虚拟调用永远不会内联
 	// but when PGO and LTO are enabled, the compiler can speculatively de-virtualize the calls. It does
+	// 但是当启用 PGO 和 LTO 时，编译器可以推测性地对调用进行去虚拟化。确实如此
 	// this by comparing the v-table pointer and inlineing the call directly in here with a static jump.
+	// 这是通过比较 v 表指针并通过静态跳转直接将调用内联到此处。
 	// As a result, it can significantly increase the amount of stack space used.
+	// 因此，它可以显着增加堆栈空间的使用量。
 	//////////////////////////////////////////////////////////////////////////
 
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(EvaluateComponentSpace_AnyThread)
 	ANIM_MT_SCOPE_CYCLE_COUNTER_VERBOSE(SkeletalControlBase, !IsInGameThread());
 
 	// Cache the incoming node IDs in a base context
+	// 将传入的节点 ID 缓存在基本上下文中
 	FAnimationBaseContext CachedContext(Output);
 
 	UE_DONT_INLINE_CALL EvaluateComponentPose_AnyThread(Output);
 
 #if WITH_EDITORONLY_DATA
 	// save current pose before applying skeletal control to compute the exact gizmo location in AnimGraphNode
+	// 在应用骨骼控制之前保存当前姿势以计算 AnimGraphNode 中的精确 Gizmo 位置
 	ForwardedPose.CopyPose(Output.Pose);
 #endif // #if WITH_EDITORONLY_DATA
 
 #if DO_CHECK
 	// this is to ensure Source data does not contain NaN
+	// 这是为了确保源数据不包含 NaN
 	ensure(Output.ContainsNaN() == false);
 #endif
 
 	// Apply the skeletal control if it's valid
+	// 如果有效，则应用骨骼控制
 	if (FAnimWeight::IsRelevant(ActualAlpha))
 	{
 		const USkeleton* Skeleton = Output.AnimInstanceProxy->GetSkeleton();
@@ -197,6 +221,7 @@ void FAnimNode_SkeletalControlBase::EvaluateComponentSpace_AnyThread(FComponentS
 			}
 
 			// we check NaN when you get out of this function in void FComponentSpacePoseLink::EvaluateComponentSpace(FComponentSpacePoseContext& Output)
+			// 当您在 void FComponentSpacePoseLink::EvaluateComponentSpace(FComponentSpacePoseContext& Output) 中退出此函数时，我们会检查 NaN
 		}
 	}
 }
@@ -239,6 +264,7 @@ void FAnimNode_SkeletalControlBase::InitializeAndValidateBoneRef(FBoneReference&
 #endif // WITH_EDITOR
 
 		// If the user specified a simulation root that is not used by the skelmesh, issue a warning 
+		// 如果用户指定了 skelmesh 未使用的模拟根，则发出警告
 		UE_LOG(LogSkeletalControlBase, Log, TEXT("%s"), *ErrorText.ToString());
 	}
 }

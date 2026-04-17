@@ -12,6 +12,7 @@
 #include "BuiltInAttributeTypes.generated.h"
 
 /** Attribute type supporting the legacy TVariant<float> atttributes */
+/** 支持旧版 TVariant<float> 属性的属性类型 */
 USTRUCT(BlueprintType)
 struct FFloatAnimationAttribute 
 {
@@ -45,6 +46,7 @@ struct FFloatAnimationAttribute
 };
 
 /** Attribute type supporting the legacy TVariant<int32> atttributes */
+/** 支持旧版 TVariant<int32> 属性的属性类型 */
 USTRUCT(BlueprintType)
 struct FIntegerAnimationAttribute
 {
@@ -78,6 +80,7 @@ struct FIntegerAnimationAttribute
 };
 
 /** Attribute type supporting the legacy TVariant<FString> attributes */
+/** 支持旧版 TVariant<FString> 属性的属性类型 */
 USTRUCT(BlueprintType)
 struct FStringAnimationAttribute
 {
@@ -93,6 +96,7 @@ inline uint32 GetTypeHash(const FStringAnimationAttribute& Key)
 }
 
 /** Attribute type supporting the legacy TVariant<FTransform> attributes */
+/** 支持旧版 TVariant<FTransform> 属性的属性类型 */
 USTRUCT(BlueprintType)
 struct FTransformAnimationAttribute
 {
@@ -103,6 +107,7 @@ struct FTransformAnimationAttribute
 
 	void Accumulate(const FTransformAnimationAttribute& Attribute, float Weight, EAdditiveAnimationType AdditiveType)
 	{
+		//if (FAnimWeight::IsRelevant(Weight))
 		//if (FAnimWeight::IsRelevant(Weight))
 		{
 			const ScalarRegister VBlendWeight(Weight);
@@ -163,6 +168,7 @@ struct FVectorAnimationAttribute
 	void Accumulate(const FVectorAnimationAttribute& Attribute, float Weight, EAdditiveAnimationType AdditiveType)
 	{
 		// if (FAnimWeight::IsRelevant(Weight))
+		// if (FAnimWeight::IsRelevant(Weight))
 		{
 			Value += Attribute.Value * Weight;
 		}
@@ -203,16 +209,22 @@ struct FQuaternionAnimationAttribute
 	void Accumulate(const FQuaternionAnimationAttribute& Attribute, float Weight, EAdditiveAnimationType AdditiveType)
 	{
 		// if (FAnimWeight::IsRelevant(Weight))
+		// if (FAnimWeight::IsRelevant(Weight))
 		{
 			if (AdditiveType == AAT_None)
 			{
 				const FQuat WeightedRotation = Attribute.Value * Weight;
 				
 				// From VectorAccumulateQuaternionShortestPath
+				// 来自 VectorAccumulateQuaternionShortestPath
 				// Blend rotation
+				// 混合旋转
 				//     To ensure the 'shortest route', we make sure the dot product between the both rotations is positive.
+				//     为了确保“最短路径”，我们确保两次旋转之间的点积为正。
 				//     const float Bias = (|A.B| >= 0 ? 1 : -1)
+				//     const float 偏差 = (|A.B| >= 0 ? 1 : -1)
 				//     return A + B * Bias;
+				//     返回 A + B * 偏差；
 				const FQuat::FReal DotResult = (Value | WeightedRotation);
 				const FQuat::FReal Bias = FMath::FloatSelect(DotResult, FQuat::FReal(1.0f), FQuat::FReal(-1.0f));
 				
@@ -221,6 +233,7 @@ struct FQuaternionAnimationAttribute
 			else
 			{
 				// Quaternion equivalent of FTransform::BlendFromIdentityAndAccumulate
+				// FTransform::BlendFromIdentityAndAccumulate 的四元数等效项
 				const FQuat WeightedRotation = FQuat::FastLerp(FQuat::Identity, Attribute.Value, Weight).GetNormalized();
 				Value = WeightedRotation * Value;
 			}
@@ -288,6 +301,7 @@ namespace UE
 	namespace Anim
 	{
 		/** Integer attribute is step-interpolated by default */
+		/** 默认情况下，整数属性是逐步插值的 */
 		template<>
 		struct TAttributeTypeTraits<FIntegerAnimationAttribute> : public TAttributeTypeTraitsBase<FIntegerAnimationAttribute>
 		{
@@ -298,6 +312,7 @@ namespace UE
 		};
 
 		/** String attribute is not blend-able by default */
+		/** 默认情况下，字符串属性不可混合 */
 		template<>
 		struct TAttributeTypeTraits<FStringAnimationAttribute> : public TAttributeTypeTraitsBase<FStringAnimationAttribute>
 		{
@@ -308,6 +323,7 @@ namespace UE
 		};
 
 		/** Transform attribute requires normalization */
+		/** 变换属性需要标准化 */
 		template<>
 		struct TAttributeTypeTraits<FTransformAnimationAttribute> : public TAttributeTypeTraitsBase<FTransformAnimationAttribute>
 		{
@@ -318,6 +334,7 @@ namespace UE
 		};
 
 		/** Quaternion attribute requires normalization */
+		/** 四元数属性需要标准化 */
 		template<>
 		struct TAttributeTypeTraits<FQuaternionAnimationAttribute> : public TAttributeTypeTraitsBase<FQuaternionAnimationAttribute>
 		{
@@ -328,6 +345,7 @@ namespace UE
 		};
 
 		/** Non blendable types*/
+		/** 不可混合类型*/
 		template<>
 		struct TAttributeTypeTraits<FNonBlendableQuaternionAnimationAttribute> : public TAttributeTypeTraitsBase<FNonBlendableQuaternionAnimationAttribute>
 		{
@@ -338,6 +356,7 @@ namespace UE
 		};
 
 		/** Non blendable types*/
+		/** 不可混合类型*/
 		template<>
 		struct TAttributeTypeTraits<FNonBlendableVectorAnimationAttribute> : public TAttributeTypeTraitsBase<FNonBlendableVectorAnimationAttribute>
 		{
@@ -348,6 +367,7 @@ namespace UE
 		};
 		
 		/** Non blendable types*/
+		/** 不可混合类型*/
 		template<>
 		struct TAttributeTypeTraits<FNonBlendableTransformAnimationAttribute> : public TAttributeTypeTraitsBase<FNonBlendableTransformAnimationAttribute>
 		{
@@ -377,6 +397,7 @@ namespace UE
 
 #if WITH_EDITOR
 		/** Helper functionality allowing the user to add an attribute with a typed value array */
+		/** 帮助程序功能允许用户添加带有类型化值数组的属性 */
 		template<typename AttributeType, typename ValueType>
 		bool AddTypedCustomAttribute(const FName& AttributeName, const FName& BoneName, UAnimSequenceBase* AnimSequenceBase, TArrayView<const float> Keys, TArrayView<const ValueType> Values, bool bShouldTransact = true)
 		{

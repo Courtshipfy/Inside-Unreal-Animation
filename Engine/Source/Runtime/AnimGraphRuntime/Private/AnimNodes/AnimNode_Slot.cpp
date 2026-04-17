@@ -12,6 +12,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_Slot
+// FAnimNode_Slot
 
 void FAnimNode_Slot::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -22,6 +23,7 @@ void FAnimNode_Slot::Initialize_AnyThread(const FAnimationInitializeContext& Con
 	WeightData.Reset();
 
 	// If this node has not already been registered with the AnimInstance, do it.
+	// 如果该节点尚未向 AnimInstance 注册，请进行注册。
 	if (!SlotNodeInitializationCounter.IsSynchronized_Counter(Context.AnimInstanceProxy->GetSlotNodeInitializationCounter()))
 	{
 		SlotNodeInitializationCounter.SynchronizeWith(Context.AnimInstanceProxy->GetSlotNodeInitializationCounter());
@@ -39,9 +41,11 @@ void FAnimNode_Slot::Update_AnyThread(const FAnimationUpdateContext& Context)
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Update_AnyThread)
 	// Update weights.
+	// 更新权重。
 	Context.AnimInstanceProxy->GetSlotWeight(SlotName, WeightData.SlotNodeWeight, WeightData.SourceWeight, WeightData.TotalNodeWeight);
 
 	// Update cache in AnimInstance.
+	// 更新 AnimInstance 中的缓存。
 	Context.AnimInstanceProxy->UpdateSlotNodeWeight(SlotName, WeightData.SlotNodeWeight, Context.GetFinalBlendWeight());
 
 	FInertializationRequest InertializationRequest;
@@ -86,6 +90,7 @@ void FAnimNode_Slot::Evaluate_AnyThread(FPoseContext & Output)
 	ANIM_MT_SCOPE_CYCLE_COUNTER_VERBOSE(Slot, !IsInGameThread());
 
 	// If not playing a montage, just pass through
+	// 如果不播放蒙太奇，则直接通过
 	if (WeightData.SlotNodeWeight <= ZERO_ANIMWEIGHT_THRESH)
 	{
 		Source.Evaluate(Output);

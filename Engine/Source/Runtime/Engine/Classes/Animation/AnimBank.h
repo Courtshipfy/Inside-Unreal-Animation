@@ -31,16 +31,20 @@ class FAnimBankBuildAsyncCacheTask;
 struct FSkinnedAssetMapping
 {
 	// Bone transforms in global pose.
+	// 骨骼在整体姿势中发生变化。
 	TArray<FTransform> MeshGlobalRefPose;
 	TArray<FTransform> AnimGlobalRefPose;
 
 	// A map to go from the mesh skeleton bone index to anim skeleton bone index.
+	// 从网格骨架骨骼索引到动画骨架骨骼索引的映射。
 	TArray<int32> MeshToAnimIndexMap;
 
 	// Retargeting table to go from the anim skeleton to the mesh skeleton.
+	// 重定向表从动画骨架到网格骨架。
 	TArray<TTuple<FQuat, FQuat>> RetargetingTable;
 
 	// Inverse global space transforms
+	// 逆全局空间变换
 	TArray<FVector3f> PositionKeys;
 	TArray<FQuat4f> RotationKeys;
 
@@ -223,6 +227,7 @@ public:
 	virtual void ReplaceReferredAnimations(const TMap<UAnimationAsset*, UAnimationAsset*>& ReplacementMap) override;
 
 	/** Returns whether or not the asset is currently being compiled */
+	/** 返回资产当前是否正在编译 */
 	bool IsCompiling() const override;
 
 	/** Try to cancel any pending async tasks.
@@ -231,6 +236,7 @@ public:
 	bool TryCancelAsyncTasks();
 
 	/** Returns false if there is currently an async task running */
+	/** 如果当前有异步任务正在运行，则返回 false */
 	bool IsAsyncTaskComplete() const;
 
 	/**
@@ -240,6 +246,7 @@ public:
 	bool WaitForAsyncTasks(float TimeLimitSeconds);
 
 	/** Make sure all async tasks are completed before returning */
+	/** 返回之前确保所有异步任务都已完成 */
 	void FinishAsyncTasks();
 
 	typedef FOnGPUDataChanged::FDelegate FOnRebuild;
@@ -260,6 +267,7 @@ private:
 	void EndCacheDerivedData(const FIoHash& KeyHash);
 
 	/** Synchronously cache and return derived data for the target platform. */
+	/** 同步缓存并返回目标平台的派生数据。 */
 	FAnimBankData& CacheDerivedData(const ITargetPlatform* TargetPlatform);
 #endif
 
@@ -579,12 +587,14 @@ struct FAnimBankRecord
 	int32 ReferenceCount = 0;
 
 	// TODO: De-dup using USkinnedAsset*
+	// TODO：使用 USkinnedAsset 进行重复数据删除*
 	FSkinnedAssetMapping AssetMapping;
 
 	TArray<FVector3f>	PositionKeys;
 	TArray<FQuat4f>		RotationKeys;
 
 	// Playback
+	// 回放
 	uint8				Playing : 1 = 0;
 	float				CurrentTime = 0.0f;
 	float				PreviousTime = 0.0f;
@@ -664,7 +674,9 @@ namespace UE::AnimBank
 {
 
 // Convert a list of transforms from bone/local space to mesh/global space by walking through the
+// 通过遍历将变换列表从骨骼/局部空间转换为网格/全局空间
 // hierarchy of a reference skeleton.
+// 参考骨架的层次结构。
 ENGINE_API void ConvertLocalToGlobalSpaceTransforms(
 	const FReferenceSkeleton& InRefSkeleton,
 	const TArray<FTransform>& InLocalSpaceTransforms,

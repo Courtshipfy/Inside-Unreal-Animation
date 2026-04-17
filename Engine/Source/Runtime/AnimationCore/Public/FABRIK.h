@@ -18,8 +18,10 @@ struct FBoneContainer;
 */
 
 /** Transient structure for FABRIK node evaluation */
+/** FABRIK 节点评估的瞬态结构 */
 
 /** Transient structure for FABRIK node evaluation */
+/** FABRIK 节点评估的瞬态结构 */
 USTRUCT()
 struct FFABRIKChainLink
 {
@@ -27,18 +29,23 @@ struct FFABRIKChainLink
 
 public:
 	/** Position of bone in component space. */
+	/** 骨骼在组件空间中的位置。 */
 	FVector Position;
 
 	/** Distance to its parent link. */
+	/** 到其父链接的距离。 */
 	double Length;
 
 	/** Bone Index in SkeletalMesh */
+	/** SkeletalMesh 中的骨骼索引 */
 	int32 BoneIndex;
 
 	/** Transform Index that this control will output */
+	/** 该控件将输出的变换索引 */
 	int32 TransformIndex;
 
 	/** Default Direction to Parent */
+	/** 父级的默认方向 */
 	FVector DefaultDirToParent;
 
 	/** Child bones which are overlapping this bone.

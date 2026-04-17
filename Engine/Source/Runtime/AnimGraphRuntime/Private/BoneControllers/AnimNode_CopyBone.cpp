@@ -10,6 +10,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_CopyBone
+// FAnimNode_CopyBone
 
 FAnimNode_CopyBone::FAnimNode_CopyBone()
 	: bCopyTranslation(false)
@@ -40,12 +41,14 @@ void FAnimNode_CopyBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseCo
 	check(OutBoneTransforms.Num() == 0);
 
 	// Pass through if we're not doing anything.
+	// 如果我们什么都不做就过去。
 	if( !bCopyTranslation && !bCopyRotation && !bCopyScale )
 	{
 		return;
 	}
 
 	// Get component space transform for source and current bone.
+	// 获取源骨骼和当前骨骼的组件空间变换。
 	const FBoneContainer& BoneContainer = Output.Pose.GetPose().GetBoneContainer();
 	FCompactPoseBoneIndex SourceBoneIndex = SourceBone.GetCompactPoseIndex(BoneContainer);
 	FCompactPoseBoneIndex TargetBoneIndex = TargetBone.GetCompactPoseIndex(BoneContainer);
@@ -56,11 +59,13 @@ void FAnimNode_CopyBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseCo
 	if(ControlSpace != BCS_ComponentSpace)
 	{
 		// Convert out to selected space
+		// 转换为选定的空间
 		FAnimationRuntime::ConvertCSTransformToBoneSpace(Output.AnimInstanceProxy->GetComponentTransform(), Output.Pose, SourceBoneTM, SourceBoneIndex, ControlSpace);
 		FAnimationRuntime::ConvertCSTransformToBoneSpace(Output.AnimInstanceProxy->GetComponentTransform(), Output.Pose, CurrentBoneTM, TargetBoneIndex, ControlSpace);
 	}
 	
 	// Copy individual components
+	// 复制单个组件
 	if (bCopyTranslation)
 	{
 		CurrentBoneTM.SetTranslation( SourceBoneTM.GetTranslation() );
@@ -79,10 +84,12 @@ void FAnimNode_CopyBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseCo
 	if(ControlSpace != BCS_ComponentSpace)
 	{
 		// Convert back out if we aren't operating in component space
+		// 如果我们不在组件空间中操作，则转换回来
 		FAnimationRuntime::ConvertBoneSpaceTransformToCS(Output.AnimInstanceProxy->GetComponentTransform(), Output.Pose, CurrentBoneTM, TargetBoneIndex, ControlSpace);
 	}
 
 	// Output new transform for current bone.
+	// 输出当前骨骼的新变换。
 	OutBoneTransforms.Add(FBoneTransform(TargetBoneIndex, CurrentBoneTM));
 
 	TRACE_ANIM_NODE_VALUE(Output, TEXT("Source Bone"), SourceBone.BoneName);
@@ -92,6 +99,7 @@ void FAnimNode_CopyBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseCo
 bool FAnimNode_CopyBone::IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) 
 {
 	// if both bones are valid
+	// 如果两个骨头都有效
 	return (TargetBone.IsValidToEvaluate(RequiredBones) && (TargetBone==SourceBone || SourceBone.IsValidToEvaluate(RequiredBones)));
 }
 

@@ -59,6 +59,7 @@ inline int32 GetIntFromComp(const FBoneIndexBase& InComp)
 	Type& operator=(const Type& Rhs) { BoneIndex = Rhs.BoneIndex; return *this; }
 
 // This represents a compact pose bone index. A compact pose is held by a bone container and can have a different ordering than either the skeleton or skeletal mesh.
+// 这代表紧凑的姿势骨骼指数。紧凑姿势由骨骼容器保存，并且可以具有与骨架或骨架网格物体不同的顺序。
 struct FCompactPoseBoneIndex : public FBoneIndexBase
 {
 public:
@@ -67,6 +68,7 @@ public:
 };
 
 // This represents a skeletal mesh bone index which may differ from the skeleton bone index it corresponds to.
+// 这表示骨骼网格的骨骼索引，可能与其对应的骨骼索引不同。
 struct FMeshPoseBoneIndex : public FBoneIndexBase
 {
 public:
@@ -75,6 +77,7 @@ public:
 };
 
 // This represents a skeleton bone index which may differ from the skeletal mesh bone index it corresponds to.
+// 这表示可能与其对应的骨骼网格物体骨骼索引不同的骨骼索引。
 struct FSkeletonPoseBoneIndex : public FBoneIndexBase
 {
 public:

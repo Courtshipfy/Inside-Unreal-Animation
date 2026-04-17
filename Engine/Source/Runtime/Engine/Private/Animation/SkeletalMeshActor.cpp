@@ -23,6 +23,7 @@ ASkeletalMeshActor::ASkeletalMeshActor(const FObjectInitializer& ObjectInitializ
 	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComponent0"));
 	SkeletalMeshComponent->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
 	// check BaseEngine.ini for profile setup
+	// 检查 BaseEngine.ini 的配置文件设置
 	SkeletalMeshComponent->SetCollisionProfileName(UCollisionProfile::PhysicsActor_ProfileName);
 	RootComponent = SkeletalMeshComponent;
 
@@ -40,6 +41,7 @@ void ASkeletalMeshActor::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > 
 }
 
 /** Check SkeletalMeshActor for errors. */
+/** 检查 SkeletalMeshActor 是否有错误。 */
 #if WITH_EDITOR
 void ASkeletalMeshActor::CheckForErrors()
 {
@@ -72,6 +74,7 @@ void ASkeletalMeshActor::CheckForErrors()
 			FFormatNamedArguments Arguments;
 			Arguments.Add(TEXT("DetailedInfo"), FText::FromString(GetDetailedInfo()));
 			// Large shadow casting objects that create preshadows will cause a massive performance hit, since preshadows are meant for small shadow casters.
+			// 创建预阴影的大型阴影投射对象将导致巨大的性能损失，因为预阴影适用于小型阴影投射器。
 			FMessageLog("MapCheck").PerformanceWarning()
 				->AddToken(FUObjectToken::Create(this))
 				->AddToken(FTextToken::Create(FText::Format(LOCTEXT("MapCheck_Message_ActorLargeShadowCaster", "{DetailedInfo} : Large actor casts a shadow and will cause an extreme performance hit unless shadow casting is disabled"), Arguments)))
@@ -118,12 +121,14 @@ void ASkeletalMeshActor::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	// grab the current mesh for replication
+	// 抓取当前网格进行复制
 	if (GetLocalRole() == ROLE_Authority && SkeletalMeshComponent)
 	{
 		ReplicatedMesh = SkeletalMeshComponent->GetSkeletalMeshAsset();
 	}
 
 	// Unfix bodies flagged as 'full anim weight'
+	// 取消标记为“完整动画重量”的身体
 	if (SkeletalMeshComponent)
 	{
 		ReplicatedPhysAsset = SkeletalMeshComponent->GetPhysicsAsset();
@@ -180,6 +185,7 @@ void ASkeletalMeshActor::EditorReplacedActor(AActor* OldActor)
 	if (ASkeletalMeshActor * OldSkelMeshActor = Cast<ASkeletalMeshActor>(OldActor))
 	{
 		// if no skeletal mesh set, take one from previous actor
+		// 如果没有设置骨架网格物体，则从前一个演员那里获取一个
 		if (SkeletalMeshComponent && OldSkelMeshActor->SkeletalMeshComponent &&
 			SkeletalMeshComponent->GetSkeletalMeshAsset() == NULL)
 		{

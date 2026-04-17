@@ -10,6 +10,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_ObserveBone
+// FAnimNode_ObserveBone
 
 FAnimNode_ObserveBone::FAnimNode_ObserveBone()
 	: DisplaySpace(BCS_ComponentSpace)
@@ -41,9 +42,11 @@ void FAnimNode_ObserveBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePos
 	FTransform BoneTM = Output.Pose.GetComponentSpaceTransform(BoneIndex);
 	
 	// Convert to the specific display space if necessary
+	// 如有必要，转换为特定的显示空间
 	FAnimationRuntime::ConvertCSTransformToBoneSpace(Output.AnimInstanceProxy->GetComponentTransform(), Output.Pose, BoneTM, BoneIndex, DisplaySpace);
 
 	// Convert to be relative to the ref pose if necessary
+	// 如有必要，转换为相对于参考姿势
 	if (bRelativeToRefPose)
 	{
 		const FTransform& SourceOrigRef = BoneContainer.GetRefPoseArray()[BoneToObserve.BoneIndex];
@@ -51,6 +54,7 @@ void FAnimNode_ObserveBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePos
 	}
 
 	// Cache off the values for display
+	// 缓存显示值
 	Translation = BoneTM.GetTranslation();
 	Rotation = BoneTM.GetRotation().Rotator();
 	Scale = BoneTM.GetScale3D();

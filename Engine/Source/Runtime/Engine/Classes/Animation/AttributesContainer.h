@@ -23,6 +23,7 @@ namespace UE
 	{
 		static FName BoneAttributeNamespace("bone");
 		/** Runtime identifier for an attribute */
+		/** 属性的运行时标识符 */
 		struct FAttributeId
 		{
 			FAttributeId(const FName& InName, const FCompactPoseBoneIndex& InCompactBoneIndex) : Namespace(BoneAttributeNamespace), Name(InName), Index(InCompactBoneIndex.GetInt()) {}
@@ -54,6 +55,7 @@ namespace UE
 			inline FMeshPoseBoneIndex MakeIndex(FCompactPoseBoneIndex BoneIndex, const FBoneContainer& BoneContainer)
 			{
 				// Guard against invalid compact-pose indexing
+				// 防止无效的紧凑姿势索引
 				const bool bValidBoneIndex = BoneContainer.GetBoneIndicesArray().IsValidIndex(BoneIndex.GetInt());
 				return bValidBoneIndex ? BoneContainer.MakeMeshPoseIndex(BoneIndex) : FMeshPoseBoneIndex(INDEX_NONE);
 			}
@@ -66,10 +68,12 @@ namespace UE
 		}
 
 		/** Runtime container for Animation Attributes, providing a TMap like interface. Used in FStack*/
+		/** 动画属性的运行时容器，提供类似 TMap 的接口。用于FStack*/
 		template<class BoneIndexType, typename InAllocator>
 		struct TAttributeContainer
 		{
 			/** Copies all contained data from another Container instance using another memory allocator */
+			/** 使用另一个内存分配器从另一个容器实例复制所有包含的数据 */
 			template <typename OtherAllocator>
 			void CopyFrom(const TAttributeContainer<BoneIndexType, OtherAllocator>& Other)
 			{
@@ -109,6 +113,7 @@ namespace UE
 					const TArray<TWrappedAttribute<OtherAllocator>>& OtherValuesArray = Other.Values[TypeIndex];					
 
 					// Populate an array entry for the type
+					// 填充类型的数组条目
 					TArray<FAttributeId>& TypeAttributeIdentifiers = AttributeIdentifiers.AddDefaulted_GetRef();
 					TArray<TWrappedAttribute<InAllocator>>& ValuesArray = Values.AddDefaulted_GetRef();
 					TArray<int32>& TypeBoneIndices = UniqueTypedBoneIndices.AddDefaulted_GetRef();
@@ -120,6 +125,7 @@ namespace UE
 						const TWrappedAttribute<OtherAllocator>& Value = OtherValuesArray[AttributeIndex];
 
 						// If the bone index was mapped successfully - add the remapped attribute
+						// 如果骨骼索引映射成功 - 添加重新映射的属性
 						if (const BoneIndexType* MyIndexPtr = IndexMapping.Find(OtherBoneIndexType(Id.GetIndex())))
 						{
 							FAttributeId MappedId(Id.GetName(), MyIndexPtr->GetInt(), Id.GetNamespace());
@@ -145,6 +151,7 @@ namespace UE
 				for (int32 TypeIndex = 0; TypeIndex < NumTypes; ++TypeIndex)
 				{
 					// Generate mapping for all contained unique bones to other container its index type
+					// 为所有包含的唯一骨骼生成到其索引类型的其他容器的映射
 					TMap<int32, BoneIndexType> IndexMapping;
 					const TArray<int32>& OtherTypeBoneIndices = Other.UniqueTypedBoneIndices[TypeIndex];
 					for (int32 Index : OtherTypeBoneIndices)
@@ -162,6 +169,7 @@ namespace UE
 					const TArray<TWrappedAttribute<OtherAllocator>>& OtherValuesArray = Other.Values[TypeIndex];					
 
 					// Populate an array entry for the type
+					// 填充类型的数组条目
 					TArray<FAttributeId>& TypeAttributeIdentifiers = AttributeIdentifiers.AddDefaulted_GetRef();
 					TArray<TWrappedAttribute<InAllocator>>& ValuesArray = Values.AddDefaulted_GetRef();
 					TArray<int32>& TypeBoneIndices = UniqueTypedBoneIndices.AddDefaulted_GetRef();
@@ -173,6 +181,7 @@ namespace UE
 						const TWrappedAttribute<OtherAllocator>& Value = OtherValuesArray[AttributeIndex];
 
 						// If the bone index was mapped successfully - add the remapped attribute
+						// 如果骨骼索引映射成功 - 添加重新映射的属性
 						if (const BoneIndexType* MyIndexPtr = IndexMapping.Find(Id.GetIndex()))
 						{
 							FAttributeId MappedId(Id.GetName(), MyIndexPtr->GetInt(), Id.GetNamespace());
@@ -187,9 +196,11 @@ namespace UE
 			}
 
 			/** Copies all contained data from another Container instance using the same memory allocator */
+			/** 使用相同的内存分配器从另一个容器实例复制所有包含的数据 */
 			void CopyFrom(const TAttributeContainer<BoneIndexType, InAllocator>& Other)
 			{
 				/** Ensure a copy to self is never performed */
+				/** 确保永远不会执行复制到自身 */
 				if (&Other != this)
 				{
 					AttributeIdentifiers = Other.AttributeIdentifiers;
@@ -214,6 +225,7 @@ namespace UE
 			}
 
 			/** Moves all contained data from another Container instance, once moved the other Container instance data is invalid */
+			/** 从另一个 Container 实例中移动所有包含的数据，一旦移动，其他 Container 实例数据就无效 */
 			void MoveFrom(TAttributeContainer<BoneIndexType, InAllocator>& Other)
 			{
 				AttributeIdentifiers = MoveTemp(Other.AttributeIdentifiers);
@@ -223,12 +235,14 @@ namespace UE
 			}
 
 			/** Returns whether or not any this container contains any entries */
+			/** 返回此容器是否包含任何条目 */
 			bool ContainsData() const
 			{
 				return Values.Num() != 0;
 			}
 
 			/** Cleans out all contained entries and types */
+			/** 清除所有包含的条目和类型 */
 			void Empty()
 			{
 				AttributeIdentifiers.Empty();
@@ -240,6 +254,7 @@ namespace UE
 			bool operator!=(const TAttributeContainer<BoneIndexType, InAllocator>& Other)
 			{
 				/** Number of types should match */
+				/** 类型数量应匹配 */
 				if (UniqueTypes.Num() == Other.UniqueTypes.Num())
 				{
 					for (int32 ThisTypeIndex = 0; ThisTypeIndex < UniqueTypes.Num(); ++ThisTypeIndex)
@@ -249,9 +264,11 @@ namespace UE
 						const int32 OtherTypeIndex = Other.FindTypeIndex(ThisType.Get());
 
 						/** Other should contain ThisType */
+						/** 其他应该包含ThisType */
 						if (OtherTypeIndex != INDEX_NONE)
 						{ 
 							/** Number of entries for type should match */
+							/** 类型的条目数应匹配 */
 							if (Values[ThisTypeIndex].Num() == Other.Values[OtherTypeIndex].Num())
 							{
 								for (int32 ThisAttributeIndex = 0; ThisAttributeIndex < Values[ThisTypeIndex].Num(); ++ThisAttributeIndex)
@@ -259,6 +276,7 @@ namespace UE
 									const FAttributeId& ThisAttributeId = AttributeIdentifiers[ThisTypeIndex][ThisAttributeIndex];
 
 									/** Other should contain ThisAttributeId */
+									/** 其他应包含ThisAttributeId */
 									const int32 OtherAttributeIndex = Other.AttributeIdentifiers[OtherTypeIndex].IndexOfByKey(ThisAttributeId);
 									if (OtherAttributeIndex != INDEX_NONE)
 									{
@@ -266,6 +284,7 @@ namespace UE
 										const TWrappedAttribute<InAllocator>& OtherAttributeValue = Other.Values[OtherTypeIndex][OtherAttributeIndex];
 
 										/** Other value should match ThisAttributeValue */
+										/** 其他值应与 ThisAttributeValue 匹配 */
 										if (!ThisType->CompareScriptStruct(ThisAttributeValue.template GetPtr<void>(), OtherAttributeValue.template GetPtr<void>(), 0))
 										{
 											return true;
@@ -294,6 +313,7 @@ namespace UE
 				}
 
 				// If absolutely everything matches
+				// 如果绝对一切都匹配
 				return false;
 			}
 			
@@ -334,6 +354,7 @@ namespace UE
 				const int32 ExistingAttributeIndex = AttributeIds.IndexOfByKey(InAttributeId);
 
 				// Should only add an attribute once
+				// 应该只添加一次属性
 				if (ensure(ExistingAttributeIndex == INDEX_NONE))
 				{
 					int32 NewIndex = INDEX_NONE;
@@ -348,6 +369,7 @@ namespace UE
 					InScriptStruct->InitializeStruct(StructData.template GetPtr<void>());
 
 					// Ensure arrays match in size
+					// 确保数组大小匹配
 					ensure(AttributeIds.Num() == TypedArray.Num());
 
 					return StructData.template GetPtr<uint8>();
@@ -388,6 +410,7 @@ namespace UE
 				TArray<TWrappedAttribute<InAllocator>>& TypedArray = Values[TypeIndex];
 
 				// Should only add an attribute once
+				// 应该只添加一次属性
 				if (AttributeIndex == INDEX_NONE)
 				{
 					AttributeIds.Add(InAttributeId);
@@ -399,6 +422,7 @@ namespace UE
 					InScriptStruct->InitializeStruct(StructData.template GetPtr<void>());
 
 					// Ensure arrays match in size
+					// 确保数组大小匹配
 					ensure(AttributeIds.Num() == TypedArray.Num());
 
 					return StructData.template GetPtr<uint8>();
@@ -580,6 +604,7 @@ namespace UE
 					const TArray<int32>& UniqueBoneIndices = UniqueTypedBoneIndices[TypeIndex];
 
 					// Early out if for this bone index no attributes are currently contained
+					// 如果此骨骼索引当前不包含任何属性，请尽早退出
 					if (UniqueBoneIndices.Contains(InAttributeId.GetIndex()))
 					{
 						const TArray<FAttributeId>& AttributeIds = AttributeIdentifiers[TypeIndex];
@@ -607,6 +632,7 @@ namespace UE
 					const TArray<int32>& UniqueBoneIndices = UniqueTypedBoneIndices[TypeIndex];
 
 					// Early out if for this bone index no attributes are currently contained
+					// 如果此骨骼索引当前不包含任何属性，请尽早退出
 					if (UniqueBoneIndices.Contains(InAttributeId.GetIndex()))
 					{
 						const TArray<FAttributeId>& AttributeIds = AttributeIdentifiers[TypeIndex];
@@ -649,11 +675,13 @@ namespace UE
 					const int32 AttributeIndex = AttributeIds.IndexOfByKey(InAttributeId);
 
 					// Can only remove if it exists
+					// 仅当存在时才能删除
 					if (AttributeIndex != INDEX_NONE)
 					{
 						TArray<TWrappedAttribute<InAllocator>>& TypedArray = Values[TypeIndex];
 
 						// If removing the last one, remove all data for the attribute type
+						// 如果删除最后一项，则删除该属性类型的所有数据
 						if (TypedArray.Num() == 1)
 						{
 							UniqueTypes.RemoveAtSwap(TypeIndex);
@@ -796,11 +824,14 @@ namespace UE
 			TArray<FAttributeId>& GetKeysInternal(int32 TypeIndex) { return AttributeIdentifiers[TypeIndex]; }
 			
 			/** Find or add a new root-level entry for the provided attribute data type, returning the index into the arrays representing the type */
+			/** 为所提供的属性数据类型查找或添加新的根级条目，将索引返回到表示该类型的数组中 */
 			int32 FindOrAddTypeIndex(const UScriptStruct* InScriptStruct)
 			{
 				const int32 OldNum = UniqueTypes.Num();
 				// Technically we could have avoided using const cast here if we made UniqueTypes use const UScriptStruct*
+				// 从技术上讲，如果我们使 UniqueTypes 使用 const UScriptStruct*，我们可以避免在此处使用 const 强制转换
 				// but a bit of refactoring is required
+				// 但需要一些重构
 				const int32 TypeIndex = UniqueTypes.AddUnique(const_cast<UScriptStruct*>(InScriptStruct));
 
 				if (UniqueTypes.Num() > OldNum)
@@ -817,6 +848,7 @@ namespace UE
 			}
 		protected:
 			/** Unique bone indices for all contained entries of a specific attribute type */
+			/** 特定属性类型的所有包含条目的唯一骨骼索引 */
 			TArray<TArray<int32>> UniqueTypedBoneIndices;
 			TArray<TArray<FAttributeId>> AttributeIdentifiers;
 			TArray<TArray<TWrappedAttribute<InAllocator>>> Values;

@@ -10,6 +10,7 @@
 struct FAnimationUpdateContext;
 
 // Input modifier with scaling and biasing
+// 具有缩放和偏置功能的输入修改器
 USTRUCT(BlueprintType)
 struct FInputScaleBias
 {
@@ -69,6 +70,7 @@ public:
 };
 
 // Input modifier with remapping, scaling, biasing, clamping, and interpolation
+// 具有重新映射、缩放、偏置、钳位和插值功能的输入修改器
 USTRUCT(BlueprintType)
 struct FInputScaleBiasClamp
 {
@@ -136,6 +138,7 @@ public:
 };
 
 // Input modifier with clamping and interpolation
+// 具有钳位和插值的输入修改器
 USTRUCT(BlueprintType)
 struct FInputClampConstants
 {
@@ -161,23 +164,28 @@ struct FInputClampConstants
 
 #if WITH_EDITOR
 	// Get a friendly name to display on a pin
+	// 获取一个友好的名称以显示在图钉上
 	ENGINE_API FText GetFriendlyName(FText InFriendlyName) const;
 #endif
 };
 
 // Mutable state struct to be used with FInputClampConstants
+// 与 FInputClampConstants 一起使用的可变状态结构
 USTRUCT(BlueprintType)
 struct FInputClampState
 {
 	GENERATED_BODY()
 
 	// The interpolated result
+	// 插值结果
 	float InterpolatedResult = 0.f;
 
 	// Whether this state is initialized
+	// 该状态是否已初始化
 	bool bInitialized = false;
 
 	// Apply scale, bias, and clamp to value
+	// 对值应用缩放、偏差和限制
 	ENGINE_API float ApplyTo(const FInputClampConstants& InConstants, float InValue, float InDeltaTime);
 
 	void Reinitialize() { bInitialized = false; }
@@ -237,23 +245,28 @@ public:
 
 #if WITH_EDITOR
 	// Get a friendly name to display on a pin
+	// 获取一个友好的名称以显示在图钉上
 	ENGINE_API FText GetFriendlyName(FText InFriendlyName) const;
 
 	// Copy parameters from the legacy combined constants/state structure
+	// 从旧的组合常量/状态结构中复制参数
 	ENGINE_API void CopyFromLegacy(const FInputScaleBiasClamp& InLegacy);
 #endif
 };
 
 // Mutable state struct to be used with FInputScaleBiasClampConstants
+// 与 FInputScaleBiasClampConstants 一起使用的可变状态结构
 USTRUCT(BlueprintType)
 struct FInputScaleBiasClampState
 {
 	GENERATED_BODY()
 
 	// The interpolated result
+	// 插值结果
 	float InterpolatedResult;
 
 	// Whether this state is initialized
+	// 该状态是否已初始化
 	bool bInitialized;
 
 public:
@@ -264,15 +277,18 @@ public:
 	}
 
 	// Apply scale, bias, and clamp to value
+	// 对值应用缩放、偏差和限制
 	ENGINE_API float ApplyTo(const FInputScaleBiasClampConstants& InConstants, float Value, float InDeltaTime);
 
 	// Apply but dont modify InterpolatedResult
+	// 应用但不修改 InterpolatedResult
 	ENGINE_API float ApplyTo(const FInputScaleBiasClampConstants& InConstants, float Value) const;
 
 	void Reinitialize() { bInitialized = false; }
 };
 
 // AnimNodes using an Alpha can choose how it is driven.
+// 使用 Alpha 的 AnimNode 可以选择其驱动方式。
 UENUM()
 enum class EAnimAlphaInputType : uint8
 {

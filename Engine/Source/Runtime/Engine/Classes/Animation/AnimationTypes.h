@@ -7,6 +7,7 @@
 #include "AnimationTypes.generated.h"
 
 /** A named float */
+/** 一个命名的浮点数 */
 USTRUCT(BlueprintType)
 struct FNamedFloat
 {
@@ -21,6 +22,7 @@ public:
 };
 
 /** A named float */
+/** 一个命名的浮点数 */
 USTRUCT(BlueprintType)
 struct FNamedVector
 {
@@ -35,6 +37,7 @@ public:
 };
 
 /** A named color */
+/** 已命名的颜色 */
 USTRUCT(BlueprintType)
 struct FNamedColor
 {
@@ -49,6 +52,7 @@ public:
 };
 
 /** A named transform */
+/** 命名变换 */
 USTRUCT(BlueprintType)
 struct FNamedTransform
 {
@@ -63,6 +67,7 @@ public:
 };
 
 /** A pose in local space (i.e. each transform is relative to its parent) */
+/** 局部空间中的姿势（即每个变换都相对于其父变换） */
 USTRUCT(BlueprintType)
 struct FLocalSpacePose
 {
@@ -77,6 +82,7 @@ public:
 };
 
 /** A pose in component space (i.e. each transform is relative to the component's transform) */
+/** 组件空间中的姿势（即每个变换都相对于组件的变换） */
 USTRUCT(BlueprintType)
 struct FComponentSpacePose
 {

@@ -19,6 +19,7 @@ static const FVector DefaultLookUpAxis(1.f, 0.f, 0.f);
 
 /////////////////////////////////////////////////////
 // FAnimNode_LookAt
+// FAnimNode_LookAt
 
 FAnimNode_LookAt::FAnimNode_LookAt()
 	: LookAtLocation(FVector(100.f, 0.f, 0.f))
@@ -91,6 +92,7 @@ void FAnimNode_LookAt::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseCont
 	FTransform ComponentBoneTransform = Output.Pose.GetComponentSpaceTransform(ModifyBoneIndex);
 
 	// get target location
+	// 获取目标位置
 	FTransform TargetTransform = LookAtTarget.GetTargetTransform(LookAtLocation, Output.Pose, Output.AnimInstanceProxy->GetComponentTransform());
 	FVector TargetLocationInComponentSpace = TargetTransform.GetLocation();
 	
@@ -102,6 +104,7 @@ void FAnimNode_LookAt::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseCont
 		if (AccumulatedInterpoolationTime >= InterpolationTime)
 		{
 			// reset current Alpha, we're starting to move
+			// 重置当前Alpha，我们开始移动
 			AccumulatedInterpoolationTime = 0.f;
 		}
 
@@ -138,15 +141,19 @@ void FAnimNode_LookAt::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseCont
 	CachedCurrentTargetLocation = CurrentTargetLocation;
 
 	// lookat vector
+	// 看向量
 	FVector LookAtVector = LookAt_Axis.GetTransformedAxis(ComponentBoneTransform);
 	// find look up vector in local space
+	// 在局部空间中查找查找向量
 	FVector LookUpVector = LookUp_Axis.GetTransformedAxis(ComponentBoneTransform);
 	// Find new transform from look at info
+	// 从查看信息中找到新的变换
 	FQuat DeltaRotation = AnimationCore::SolveAim(ComponentBoneTransform, CurrentLookAtLocation, LookAtVector, bUseLookUpAxis, LookUpVector, LookAtClamp);
 
 	ModifyPoseFromDeltaRotation(Output, OutBoneTransforms, ComponentBoneTransform, DeltaRotation);
 
 	// Sort OutBoneTransforms so indices are in increasing order.
+	// 对 OutBoneTransforms 进行排序，使索引按升序排列。
 	OutBoneTransforms.Sort(FCompareBoneTransformIndex());
 
 #if UE_ENABLE_DEBUG_DRAWING
@@ -180,17 +187,24 @@ void FAnimNode_LookAt::EvaluateComponentSpaceInternal(FComponentSpacePoseContext
 bool FAnimNode_LookAt::IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) 
 {
 	// if both bones are valid
+	// 如果两个骨头都有效
 	return (BoneToModify.IsValidToEvaluate(RequiredBones) &&
 		// or if name isn't set (use Look At Location) or Look at bone is valid 
+		// 或者如果未设置名称（使用“查看位置”）或“查看骨骼”有效
 		// do not call isValid since that means if look at bone isn't in LOD, we won't evaluate
+		// 不要调用 isValid，因为这意味着如果查看骨骼不在 LOD 中，我们将不会评估
 		// we still should evaluate as long as the BoneToModify is valid even LookAtBone isn't included in required bones
+		// 只要 BoneToModify 有效，即使 LookAtBone 未包含在所需骨骼中，我们仍然应该进行评估
 		(!LookAtTarget.HasTargetSetup() || LookAtTarget.IsValidToEvaluate(RequiredBones)) );
 }
 
 #if WITH_EDITOR
 // can't use World Draw functions because this is called from Render of viewport, AFTER ticking component, 
+// 无法使用 World Draw 函数，因为这是在滴答组件之后从视口渲染中调用的，
 // which means LineBatcher already has ticked, so it won't render anymore
+// 这意味着 LineBatcher 已经勾选了，所以它不会再渲染
 // to use World Draw functions, we have to call this from tick of actor
+// 要使用世界绘制函数，我们必须从演员的刻度中调用它
 void FAnimNode_LookAt::ConditionalDebugDraw(FPrimitiveDrawInterface* PDI, USkeletalMeshComponent* MeshComp) const
 {
 	auto CalculateLookAtMatrixFromTransform = [this](const FTransform& BaseTransform) -> FMatrix
@@ -199,6 +213,7 @@ void FAnimNode_LookAt::ConditionalDebugDraw(FPrimitiveDrawInterface* PDI, USkele
 		const FVector DefaultUpVector = BaseTransform.GetUnitAxis(EAxis::Z);
 		FVector UpVector = (bUseLookUpAxis) ? BaseTransform.TransformVector(LookUp_Axis.Axis) : DefaultUpVector;
 		// if parallel with up vector, find something else
+		// 如果与向上向量平行，则找到其他东西
 		if (FMath::Abs(FVector::DotProduct(UpVector, TransformedLookAtAxis)) > (1.f - ZERO_ANIMWEIGHT_THRESH))
 		{
 			UpVector = BaseTransform.GetUnitAxis(EAxis::X);
@@ -212,6 +227,7 @@ void FAnimNode_LookAt::ConditionalDebugDraw(FPrimitiveDrawInterface* PDI, USkele
 	};
 
 	// did not apply any of LocaltoWorld
+	// 没有应用任何 LocaltoWorld
 	if(PDI && MeshComp)
 	{
 		FTransform LocalToWorld = MeshComp->GetComponentTransform();
@@ -221,22 +237,27 @@ void FAnimNode_LookAt::ConditionalDebugDraw(FPrimitiveDrawInterface* PDI, USkele
 		FVector BoneLocation = LookAtTransform.GetLocation();
 
 		// we're using interpolation, so print previous location
+		// 我们正在使用插值，因此打印之前的位置
 		const bool bUseInterpolation = InterpolationTime > 0.f;
 		if(bUseInterpolation)
 		{
 			// this only will be different if we're interpolating
+			// 如果我们进行插值，这只会有所不同
 			DrawDashedLine(PDI, BoneLocation, LocalToWorld.TransformPosition(CachedPreviousTargetLocation), FColor(0, 255, 0), 5.f, SDPG_World);
 		}
 
 		// current look at location (can be clamped or interpolating)
+		// 当前查看位置（可以钳制或插值）
 		DrawDashedLine(PDI, BoneLocation, LocalToWorld.TransformPosition(CachedCurrentLookAtLocation), FColor::Yellow, 5.f, SDPG_World);
 		DrawWireStar(PDI, CachedCurrentLookAtLocation, 5.0f, FColor::Yellow, SDPG_World);
 
 		// draw current target information
+		// 绘制当前目标信息
 		DrawDashedLine(PDI, BoneLocation, LocalToWorld.TransformPosition(CachedCurrentTargetLocation), FColor::Blue, 5.f, SDPG_World);
 		DrawWireStar(PDI, CachedCurrentTargetLocation, 5.0f, FColor::Blue, SDPG_World);
 
 		// draw the angular clamp
+		// 画出有角度的夹子
 		if (LookAtClamp > 0.f)
 		{
 			float Angle = FMath::DegreesToRadians(LookAtClamp);
@@ -245,6 +266,7 @@ void FAnimNode_LookAt::ConditionalDebugDraw(FPrimitiveDrawInterface* PDI, USkele
 		}
 
 		// draw directional  - lookat and look up
+		// 绘制方向 - 向上看
 		DrawDirectionalArrow(PDI, CalculateLookAtMatrixFromTransform(LookAtTransform), FLinearColor::Red, 20, 5, SDPG_World);
 		DrawCoordinateSystem(PDI, BoneLocation, LookAtTransform.GetRotation().Rotator(), 20.f, SDPG_Foreground);
 		DrawCoordinateSystem(PDI, TargetTrasnform.GetLocation(), TargetTrasnform.GetRotation().Rotator(), 20.f, SDPG_Foreground);
@@ -275,6 +297,7 @@ void FAnimNode_LookAt::Initialize_AnyThread(const FAnimationInitializeContext& C
 	LookAtTarget.Initialize(Context.AnimInstanceProxy);
 
 	// initialize
+	// 初始化
 	LookUp_Axis.Initialize();
 	if (LookUp_Axis.Axis.IsZero())
 	{

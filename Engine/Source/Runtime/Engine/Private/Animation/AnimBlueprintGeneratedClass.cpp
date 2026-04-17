@@ -24,6 +24,7 @@
 
 /////////////////////////////////////////////////////
 // FStateMachineDebugData
+// [翻译失败: FStateMachineDebugData]
 
 UEdGraphNode* FStateMachineDebugData::FindNodeFromStateIndex(int32 StateIndex) const
 {
@@ -45,6 +46,7 @@ UEdGraphNode* FStateMachineDebugData::FindNodeFromTransitionIndex(int32 Transiti
 
 /////////////////////////////////////////////////////
 // FAnimBlueprintDebugData
+// [翻译失败: FAnimBlueprintDebugData]
 
 #if WITH_EDITORONLY_DATA
 
@@ -74,6 +76,7 @@ float FAnimBlueprintDebugData::GetSnapshotLengthInSeconds()
 	if (SnapshotBuffer != NULL)
 	{
 		//@TODO: Shouldn't use hardcoded snapshot length; ideally we actually use timestamps, etc...
+		//@TODO：不应使用硬编码的快照长度；理想情况下我们实际上使用时间戳等......
 		return SnapshotBuffer->Num() * 1.0f / 30.0f;
 	}
 
@@ -85,6 +88,7 @@ int32 FAnimBlueprintDebugData::GetSnapshotLengthInFrames()
 	if (SnapshotBuffer != NULL)
 	{
 		//@TODO: Shouldn't use hardcoded snapshot length; ideally we actually use timestamps, etc...
+		//[翻译失败: @TODO: Shouldn't use hardcoded snapshot length; ideally we actually use timestamps, etc...]
 		return SnapshotBuffer->Num();
 	}
 
@@ -100,6 +104,7 @@ void FAnimBlueprintDebugData::SetSnapshotIndex(UAnimInstance* Instance, int32 Ne
 		SnapshotIndex = (NewIndex == INDEX_NONE) ? INDEX_NONE : ClampedIndex;
 
 		// Apply the desired snapshot (or the most recent one if free-running was selected)
+		// [翻译失败: Apply the desired snapshot (or the most recent one if free-running was selected)]
 		if ((SnapshotIndex != SavedIndex) && (SnapshotBuffer->Num() > 0))
 		{
 			(*SnapshotBuffer)(ClampedIndex).CopyToInstance(Instance);
@@ -128,9 +133,11 @@ void FAnimBlueprintDebugData::SetSnapshotIndexByTime(UAnimInstance* Instance, do
 	}
 
 	// Determine which snapshot to use
+	// [翻译失败: Determine which snapshot to use]
 	SetSnapshotIndex(Instance, NewIndex);
 
 	// Stomp on the time that was played back from the snapshot since we were given an exact one
+	// [翻译失败: Stomp on the time that was played back from the snapshot since we were given an exact one]
 	Instance->CurrentLifeTimerScrubPosition = TargetTime;
 }
 
@@ -242,6 +249,7 @@ void FAnimBlueprintDebugData::AddPoseWatch(int32 NodeID, UPoseWatchPoseElement* 
 	check(InPoseWatchPoseElement != nullptr); // Expect a valid pointer.
 
 	//Not found so make new one
+	//[翻译失败: Not found so make new one]
 	AnimNodePoseWatch.Add(FAnimNodePoseWatch());
 	FAnimNodePoseWatch& NewAnimNodePoseWatch = AnimNodePoseWatch.Last();
 	NewAnimNodePoseWatch.NodeID = NodeID;
@@ -300,6 +308,7 @@ TArrayView<const FName> FAnimBlueprintDebugData::GetNodeAttributes(TWeakObjectPt
 
 /////////////////////////////////////////////////////
 // FBinaryObjectWriter
+// [翻译失败: FBinaryObjectWriter]
 
 class FBinaryObjectWriter : public FObjectWriter
 {
@@ -314,6 +323,7 @@ public:
 
 /////////////////////////////////////////////////////
 // FBinaryObjectReader
+// [翻译失败: FBinaryObjectReader]
 
 class FBinaryObjectReader : public FObjectReader
 {
@@ -328,6 +338,7 @@ public:
 
 /////////////////////////////////////////////////////
 // FAnimationFrameSnapshot
+// [翻译失败: FAnimationFrameSnapshot]
 
 void FAnimationFrameSnapshot::InitializeFromInstance(UAnimInstance* Instance)
 {
@@ -345,6 +356,7 @@ void FAnimationFrameSnapshot::CopyToInstance(UAnimInstance* Instance)
 
 /////////////////////////////////////////////////////
 // UAnimBlueprintGeneratedClass
+// [翻译失败: UAnimBlueprintGeneratedClass]
 
 UAnimBlueprintGeneratedClass::UAnimBlueprintGeneratedClass(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -466,7 +478,9 @@ void UAnimBlueprintGeneratedClass::Link(FArchive& Ar, bool bRelinkExistingProper
 {
 #if WITH_EDITOR
 	// Re-link the mutables struct if we have one as we need to correctly account for its size
+	// [翻译失败: Re-link the mutables struct if we have one as we need to correctly account for its size]
 	// This is mostly needed during re-instancing as post duplication the class requires a re-link
+	// [翻译失败: This is mostly needed during re-instancing as post duplication the class requires a re-link]
 	if(UScriptStruct* MutablesStruct = FindObject<UScriptStruct>(this, *GetMutablesStructName().ToString()))
 	{
 		MutablesStruct->Link(Ar, bRelinkExistingProperties);
@@ -476,6 +490,7 @@ void UAnimBlueprintGeneratedClass::Link(FArchive& Ar, bool bRelinkExistingProper
 	Super::Link(Ar, bRelinkExistingProperties);
 	
 	// @TODO: Shouldn't be necessary to clear these, but currently the class gets linked twice during compilation
+	// [翻译失败: @TODO: Shouldn't be necessary to clear these, but currently the class gets linked twice during compilation]
 	AnimNodeProperties.Empty();
 	LinkedAnimGraphNodeProperties.Empty();
 	LinkedAnimLayerNodeProperties.Empty();
@@ -491,10 +506,12 @@ void UAnimBlueprintGeneratedClass::Link(FArchive& Ar, bool bRelinkExistingProper
 
 #if WITH_EDITOR
 	// This relies on the entire class being fully loaded, this is not the case with EDL async-loading, in which case the functions are generated in PostLoad
+	// [翻译失败: This relies on the entire class being fully loaded, this is not the case with EDL async-loading, in which case the functions are generated in PostLoad]
 	GenerateAnimationBlueprintFunctions();
 #endif // WITH_EDITOR
 
 	// Initialize the various tracked node arrays & fix up function internals
+	// [翻译失败: Initialize the various tracked node arrays & fix up function internals]
 	for (TFieldIterator<FProperty> It(this); It; ++It)
 	{
 		if (FStructProperty* StructProp = CastField<FStructProperty>(*It))
@@ -533,11 +550,15 @@ void UAnimBlueprintGeneratedClass::Link(FArchive& Ar, bool bRelinkExistingProper
 
 #if WITH_EDITORONLY_DATA
 	// With cooked data, we skip this as Link() is called on serialization and sparse class data
+	// 对于熟数据，我们跳过此步骤，因为在序列化和稀疏类数据上调用 Link()
 	// is not properly serialized yet
+	// [翻译失败: is not properly serialized yet]
 	if(!GetPackage()->bIsCookedForEditor)
 	{
 		// Must build constant properties to be able to iterate subsystems and call OnLink()
+		// [翻译失败: Must build constant properties to be able to iterate subsystems and call OnLink()]
 		// Subsystems in non-editor data builds should be initialized in OnPostLoadDefaults.
+		// [翻译失败: Subsystems in non-editor data builds should be initialized in OnPostLoadDefaults.]
 		BuildConstantProperties();
 		
 		ForEachSubsystem([this](const FAnimSubsystemContext& InContext)
@@ -570,6 +591,7 @@ uint8* UAnimBlueprintGeneratedClass::GetPersistentUberGraphFrame(UObject* Obj, U
 	if(!IsInGameThread())
 	{
 		// we cant use the persistent frame if we are executing in parallel (as we could potentially thunk to BP)
+		// 如果我们并行执行，我们就不能使用持久帧（因为我们可能会调用 BP）
 		return nullptr;
 	}
 
@@ -585,11 +607,13 @@ void UAnimBlueprintGeneratedClass::HandleReinitializeObjectAfterCompile(UObject*
 void UAnimBlueprintGeneratedClass::PrepareToConformSparseClassData(UScriptStruct* SparseClassDataArchetypeStruct)
 {
 	// ABPGC sparse data is generated on compile, so there is nothing to conform
+	// [翻译失败: ABPGC sparse data is generated on compile, so there is nothing to conform]
 }
 
 void UAnimBlueprintGeneratedClass::ConformSparseClassData(UObject* Object)
 {
 	// ABPGC sparse data is generated on compile, so there is nothing to conform
+	// ABPGC 稀疏数据是在编译时生成的，因此没有什么可遵循的
 }
 #endif
 
@@ -603,6 +627,7 @@ void UAnimBlueprintGeneratedClass::PostLoadDefaultObject(UObject* Object)
 void UAnimBlueprintGeneratedClass::OnPostLoadDefaults(UObject* Object)
 {
 	// Make sure that 'functions' are generated before we use them in LinkFunctionsToDefaultObjectNodes()
+	// 确保在 LinkFunctionsToDefaultObjectNodes() 中使用“函数”之前已生成它们
 	if (AnimBlueprintFunctions.IsEmpty()) 
 	{ 
 		GenerateAnimationBlueprintFunctions();
@@ -631,6 +656,7 @@ void UAnimBlueprintGeneratedClass::PostLoad()
 	BuildConstantProperties();
 
 	// Call postload on the class subsystems
+	// 在类子系统上调用 postload
 	ForEachSubsystem([this](const FAnimSubsystemContext& InContext)
 	{
 		FAnimSubsystemPostLoadContext Context(InContext, *this);
@@ -645,11 +671,13 @@ void UAnimBlueprintGeneratedClass::GenerateAnimationBlueprintFunctions()
 
 	static const FName DefaultAnimGraphName("AnimGraph");
 	// Patch up blueprint function info
+	// 修补蓝图功能信息
 	for (TFieldIterator<UFunction> It(this); It; ++It)
 	{
 		bool bFoundOutput = false;
 #if WITH_EDITOR
 		// In editor we can grab the group from metadata, otherwise we need to wait until CDO post load (LinkFunctionsToDefaultObjectNodes)
+		// 在编辑器中，我们可以从元数据中获取组，否则我们需要等到 CDO 后加载 (LinkFunctionsToDefaultObjectNodes)
 		FText CategoryText = FObjectEditorUtils::GetCategoryText(*It);
 		FName Group = CategoryText.IsEmpty() ? NAME_None : FName(*CategoryText.ToString());
 #endif
@@ -660,6 +688,7 @@ void UAnimBlueprintGeneratedClass::GenerateAnimationBlueprintFunctions()
 		TArray<FAnimBlueprintFunction::FInputPropertyData> InputPropertyData;
 
 		// grab the input/output poses, their indices will be patched up later once the CDO is loaded in PostLoadDefaultObject
+		// 抓取输入/输出姿势，一旦 CDO 加载到 PostLoadDefaultObject 中，它们的索引将在稍后修补
 		for (TFieldIterator<FProperty> ItParam(*It); ItParam; ++ItParam)
 		{
 			if (FStructProperty* StructProperty = CastField<FStructProperty>(*ItParam))
@@ -676,6 +705,7 @@ void UAnimBlueprintGeneratedClass::GenerateAnimationBlueprintFunctions()
 						else
 						{
 							// our required signature needs us to have a single post link output, so null it out if we find more than one
+							// 我们所需的签名需要我们有一个帖子链接输出，因此如果我们发现多个链接，则将其清空
 							OutputPoseNodeProperty = nullptr;
 						}
 					}
@@ -700,11 +730,13 @@ void UAnimBlueprintGeneratedClass::GenerateAnimationBlueprintFunctions()
 		if (OutputPoseNodeProperty)
 		{
 			// We use the undecorated name here, so trim the postfix
+			// 我们在这里使用未修饰的名称，因此修剪后缀
 			FAnimBlueprintFunction* AnimBlueprintFunction = nullptr;
 
 			FName FunctionName = It->GetFName();
 
 			// Make sure that the default graph is at index 0
+			// 确保默认图表位于索引 0
 			if (FunctionName == DefaultAnimGraphName)
 			{
 				AnimBlueprintFunction = &AnimBlueprintFunctions.Insert_GetRef(FAnimBlueprintFunction(FunctionName), 0);
@@ -729,6 +761,7 @@ void UAnimBlueprintGeneratedClass::InitializeAnimNodeData(UObject* DefaultObject
 {
 #if WITH_EDITOR
 	// In editor, skip this work if properties and node data are mismatched. This will be rectified by compile-on-load
+	// 在编辑器中，如果属性和节点数据不匹配，请跳过此工作。这将通过加载时编译来纠正
 	if (AnimNodeProperties.Num() != AnimNodeData.Num())
 	{
 		return;
@@ -736,6 +769,7 @@ void UAnimBlueprintGeneratedClass::InitializeAnimNodeData(UObject* DefaultObject
 #endif
 
 	// Link functions to their nodes
+	// 将函数链接到其节点
 	for(int32 AnimNodeIndex = 0; AnimNodeIndex < AnimNodeProperties.Num() && AnimNodeIndex < AnimNodeData.Num(); ++AnimNodeIndex)
 	{
 		FStructProperty* StructProperty = AnimNodeProperties[AnimNodeIndex];
@@ -745,7 +779,9 @@ void UAnimBlueprintGeneratedClass::InitializeAnimNodeData(UObject* DefaultObject
 			FAnimNode_Base* Node = StructProperty->ContainerPtrToValuePtr<FAnimNode_Base>(DefaultObject);
 
 			// This function is called on child->parent hierarchies in postload. We dont want to overwrite child data
+			// 该函数在 postload 中的子->父层次结构上调用。我们不想覆盖子数据
 			// with parent data so skip if the node data has already been set up by a previous call.	
+			// 与父数据一起，如果节点数据已由先前的调用设置，则跳过。
 			if(bForce || Node->NodeData == nullptr || IAnimClassInterface::GetActualAnimClass(&Node->NodeData->GetAnimClassInterface()) != DefaultObject->GetClass())
 			{
 				Node->SetNodeData(AnimNodeData[AnimNodeIndex]);
@@ -762,10 +798,15 @@ void UAnimBlueprintGeneratedClass::LinkFunctionsToDefaultObjectNodes(UObject* De
 
 #if WITH_EDITORONLY_DATA
 	// If this class has not been generated against the current set of anim node data layouts, accessing anim node data
+	// 如果尚未针对当前的动画节点数据布局集生成此类，则访问动画节点数据
 	// (e.g. via RootNode->GetName()) could end up accessing incorrect data. To verify this we check the serialized layout
+	// （例如通过 RootNode->GetName()）可能最终会访问不正确的数据。为了验证这一点，我们检查序列化布局
 	// that we are expecting to find here and do not use it if so.
+	// 我们希望在这里找到它，如果是的话不要使用它。
 	// This is OK in editor due to compile-on-load rectifying the layout against the current set of anim node structs.
+	// 这在编辑器中是可以的，因为加载时编译会根据当前的动画节点结构集纠正布局。
 	// If we continue past this point then we could potentially pollute any persistent FNodeDataIds with invalid indices.
+	// 如果我们继续超过这一点，那么我们可能会用无效索引污染任何持久的 FNodeDataId。
 	if(!VerifyNodeDataLayout())
 	{
 		return;
@@ -773,10 +814,13 @@ void UAnimBlueprintGeneratedClass::LinkFunctionsToDefaultObjectNodes(UObject* De
 #endif
 
 	// Perform node init as a first pass as root nodes (needed for function names)
+	// 作为根节点执行节点初始化（函数名称所需）
 	// may not be initialized in sparse class data before they need to be patched
+	// 在需要修补之前，可能不会在稀疏类数据中进行初始化
 	InitializeAnimNodeData(DefaultObject, false);
 	
 	// Link functions to their nodes
+	// 将函数链接到其节点
 	for(int32 AnimNodeIndex = 0; AnimNodeIndex < AnimNodeProperties.Num(); ++AnimNodeIndex)
 	{
 		FStructProperty* StructProperty = AnimNodeProperties[AnimNodeIndex];
@@ -835,6 +879,7 @@ void UAnimBlueprintGeneratedClass::LinkFunctionsToDefaultObjectNodes(UObject* De
 	}
 
 	// Determine whether functions are 'implemented'
+	// 确定功能是否已“实现”
 	for(FAnimBlueprintFunction& AnimBlueprintFunction : AnimBlueprintFunctions)
 	{
 		if(AnimBlueprintFunction.OutputPoseNodeProperty)
@@ -851,6 +896,7 @@ void UAnimBlueprintGeneratedClass::LinkFunctionsToDefaultObjectNodes(UObject* De
 	if(!(GetClassFlags() | CLASS_Transient))
 	{
 		// Now verify we fixed up all our functions
+		// 现在验证我们是否修复了所有功能
 		for(const FAnimBlueprintFunction& AnimBlueprintFunction : AnimBlueprintFunctions)
 		{
 			check(AnimBlueprintFunction.Name != NAME_None);
@@ -949,9 +995,11 @@ void UAnimBlueprintGeneratedClass::BuildConstantProperties()
 	if(UScriptStruct* ConstantsStruct = GetSparseClassDataStruct())
 	{
 		// Make sure we create the data area up-front here
+		// 确保我们在此处预先创建数据区域
 		GetOrCreateSparseClassData();
 
 		// We must init sparse class data here once the class has been serialized
+		// 一旦类被序列化，我们必须在这里初始化稀疏类数据
 		for (TFieldIterator<FProperty> It(ConstantsStruct); It; ++It)
 		{
 			if (FStructProperty* StructProp = CastField<FStructProperty>(*It))
@@ -961,6 +1009,7 @@ void UAnimBlueprintGeneratedClass::BuildConstantProperties()
 					ConstantSubsystemProperties.Add(StructProp);
 				}
 				// Initialize any anim node functions held in sparse data
+				// 初始化稀疏数据中保存的任何动画节点函数
 				else if(StructProp->Struct == FAnimNodeFunctionRef::StaticStruct())
 				{
 					FAnimNodeFunctionRef& AnimNodeFunction = *StructProp->ContainerPtrToValuePtr<FAnimNodeFunctionRef>(SparseClassData);
@@ -1011,6 +1060,7 @@ FName UAnimBlueprintGeneratedClass::GetMutablesStructName()
 bool UAnimBlueprintGeneratedClass::VerifyNodeDataLayout()
 {
 	// Run though the type map and check against the currently-compiled set of structs
+	// 运行类型映射并检查当前编译的结构集
 	for(const auto& NodeTypePair : NodeTypeMap)
 	{
 		FAnimNodeStructData CurrentData(NodeTypePair.Key);

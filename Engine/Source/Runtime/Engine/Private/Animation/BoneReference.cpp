@@ -16,8 +16,11 @@ bool FBoneReference::Initialize(const FBoneContainer& RequiredBones)
 
 	bUseSkeletonIndex = false;
 	// If bone name is not found, look into the leader skeleton to see if it's found there.
+	// 如果未找到骨骼名称，请查看领导者骨骼以查看是否在那里找到它。
 	// SkeletalMeshes can exclude bones from the leader skeleton, and that's OK.
+	// SkeletalMeshes 可以从领导者骨架中排除骨骼，这没问题。
 	// If it's not found in the leader skeleton, the bone does not exist at all! so we should log it.
+	// 如果在首领骨骼中没有找到，那么这根骨头根本不存在！所以我们应该记录它。
 	if (BoneIndex == INDEX_NONE && BoneName != NAME_None)
 	{
 		if (USkeleton* SkeletonAsset = RequiredBones.GetSkeletonAsset())
@@ -63,6 +66,7 @@ bool FBoneReference::IsValidToEvaluate(const FBoneContainer& RequiredBones) cons
 FSkeletonPoseBoneIndex FBoneReference::GetSkeletonPoseIndex(const FBoneContainer& RequiredBones) const
 { 
 	// accessing array with invalid index would cause crash, so we have to check here
+	// 访问具有无效索引的数组会导致崩溃，所以我们必须在这里检查
 	if (BoneIndex != INDEX_NONE)
 	{
 		if (bUseSkeletonIndex)
@@ -81,6 +85,7 @@ FSkeletonPoseBoneIndex FBoneReference::GetSkeletonPoseIndex(const FBoneContainer
 FMeshPoseBoneIndex FBoneReference::GetMeshPoseIndex(const FBoneContainer& RequiredBones) const
 { 
 	// accessing array with invalid index would cause crash, so we have to check here
+	// 访问具有无效索引的数组会导致崩溃，所以我们必须在这里检查
 	if (BoneIndex != INDEX_NONE)
 	{
 		if (bUseSkeletonIndex)
@@ -101,9 +106,11 @@ FCompactPoseBoneIndex FBoneReference::GetCompactPoseIndex(const FBoneContainer& 
 	if (bUseSkeletonIndex)
 	{
 		//If we were initialized with a skeleton we wont have a cached index.
+		//如果我们用骨架初始化，我们将不会有缓存索引。
 		if (BoneIndex != INDEX_NONE)
 		{
 			// accessing array with invalid index would cause crash, so we have to check here
+			// 访问具有无效索引的数组会导致崩溃，所以我们必须在这里检查
 			return RequiredBones.GetCompactPoseIndexFromSkeletonPoseIndex(FSkeletonPoseBoneIndex(BoneIndex));
 		}
 		return FCompactPoseBoneIndex(INDEX_NONE);
@@ -113,6 +120,7 @@ FCompactPoseBoneIndex FBoneReference::GetCompactPoseIndex(const FBoneContainer& 
 }
 
 // need this because of BoneReference being used in CurveMetaData and that is in SmartName
+// 需要这个，因为 CurveMetaData 中使用了 BoneReference，而 SmartName 中也使用了 BoneReference
 FArchive& operator<<(FArchive& Ar, FBoneReference& B)
 {
 	Ar << B.BoneName;

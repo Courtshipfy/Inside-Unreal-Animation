@@ -9,6 +9,7 @@ struct FTriangle;
 
 //////////////////////////////////////////////////////////////////////////
 // SAnimationBlendSpace
+// S动画混合空间
 
 struct FTriangle;
 
@@ -19,12 +20,15 @@ struct FTriangle;
 struct FVertex
 {
 	// position of Point
+	// 点的位置
 	FVector2D Position;
 
 	// Triangles this point belongs to
+	// 该点所属的三角形
 	TArray<FTriangle *> Triangles;
 
 	// The original animation sample associated with this point
+	// 与此点相关的原始动画样本
 	int32 SampleIndex;
 	
 	FVertex(FVector2D InPosition, int32 InSampleIndex) : Position(InPosition), SampleIndex(InSampleIndex) {}
@@ -32,12 +36,14 @@ struct FVertex
 	bool operator==(const FVector2D& Other) const
 	{
 		// if same position, it's same point
+		// 如果位置相同，则为同一点
 		return (Other == Position);
 	}
 
 	bool operator==( const FVertex& Other ) const
 	{
 		// if same position, it's same point
+		// 如果位置相同，则为同一点
 		return (Other.Position == Position);
 	}
 
@@ -60,6 +66,7 @@ struct FVertex
 struct FHalfEdge
 {
 	// 3 vertices in CCW order
+	// 3 个逆时针顺序的顶点
 	FVertex* Vertices[2]; 
 
 	FHalfEdge(){};
@@ -77,6 +84,7 @@ struct FHalfEdge
 	bool operator==( const FHalfEdge& Other ) const 
 	{
 		// if same position, it's same point
+		// 如果位置相同，则为同一点
 		return FMemory::Memcmp(Other.Vertices, Vertices, sizeof(Vertices)) == 0;
 	}
 };
@@ -87,10 +95,13 @@ struct FHalfEdge
 struct FTriangle
 {
 	// 3 vertices in CCW order
+	// 3 个逆时针顺序的顶点
 	FVertex* Vertices[3]; 
 	// average points for Vertices
+	// 顶点的平均点
 	FVector2D Center;
 	// FEdges
+	// 边缘
 	FHalfEdge Edges[3];
 
 	void UpdateCenter() 
@@ -101,6 +112,7 @@ struct FTriangle
 	bool operator==( const FTriangle& Other ) const 
 	{
 		// if same position, it's same point
+		// 如果位置相同，则为同一点
 		return FMemory::Memcmp(Other.Vertices, Vertices, sizeof(Vertices)) == 0;
 	}
 
@@ -126,9 +138,11 @@ struct FTriangle
 		Vertices[1]->AddTriangle(this);
 		Vertices[2]->AddTriangle(this);
 		// when you make triangle first time, make sure it stays in CCW
+		// 当你第一次制作三角形时，确保它保持在 CCW 方向
 		MakeCCW();
 
 		// now create edges, this should be in the CCW order
+		// 现在创建边，这应该是按照 CCW 顺序
 		Edges[0] = FHalfEdge(Vertices[0], Vertices[1]);
 		Edges[1] = FHalfEdge(Vertices[1], Vertices[2]);
 		Edges[2] = FHalfEdge(Vertices[2], Vertices[0]);
@@ -146,6 +160,7 @@ struct FTriangle
 		Vertices[2]->AddTriangle(this);
 
 		// now create edges, this should be in the CCW order
+		// 现在创建边，这应该是按照 CCW 顺序
 		Edges[0] = FHalfEdge(Vertices[0], Vertices[1]);
 		Edges[1] = FHalfEdge(Vertices[1], Vertices[2]);
 		Edges[2] = FHalfEdge(Vertices[2], Vertices[0]);
@@ -163,6 +178,7 @@ struct FTriangle
 		Vertices[2]->AddTriangle(this);
 
 		// now create edges, this should be in the CCW order
+		// 现在创建边，这应该是按照 CCW 顺序
 		Edges[0] = FHalfEdge(Vertices[0], Vertices[1]);
 		Edges[1] = FHalfEdge(Vertices[1], Vertices[2]);
 		Edges[2] = FHalfEdge(Vertices[2], Vertices[0]);
@@ -234,7 +250,9 @@ struct FTriangle
 	}
 
 	// find point that doesn't share with this
+	// 找到与此不共享的点
 	// this should only get called if it shares same edge
+	// 只有当它共享相同的边缘时才应该调用它
 	FVertex * FindNonSharingPoint(const FTriangle* Other) const
 	{
 		if (!Contains(*Other->Vertices[0]))
@@ -259,7 +277,9 @@ private:
 	void MakeCCW()
 	{
 		// this eventually has to happen on the plane that contains this 3 points
+		// [翻译失败: this eventually has to happen on the plane that contains this 3 points]
 		// for now we ignore Z
+		// [翻译失败: for now we ignore Z]
 		FVector2D Diff1 = Vertices[1]->Position-Vertices[0]->Position;
 		FVector2D Diff2 = Vertices[2]->Position-Vertices[0]->Position;
 
@@ -268,9 +288,11 @@ private:
 		check (Result != 0.f);
 
 		// it's in left side, we need this to be right side
+		// 它在左侧，我们需要它在右侧
 		if (Result < 0.f)
 		{
 			// swap 1&2 
+			// 交换1和2
 			FVertex * TempPt = Vertices[2];
 			Vertices[2] = Vertices[1];
 			Vertices[1] = TempPt;
@@ -336,6 +358,7 @@ public:
 	const TArray<FVertex> & GetSamplePointList() const { return SamplePointList; };
 
 	/* Set the grid box, so we can normalize the sample points */
+	/* 设置网格框，这样我们就可以对样本点进行归一化 */
 	void SetGridBox(const FBlendParameter& BlendParamX, const FBlendParameter& BlendParamY);
 
 private:
@@ -422,8 +445,11 @@ private:
 };
 
 // @todo fixmelh : this code is mess between fvector2D and fvector
+// @todo fixmelh：这段代码在 fvector2D 和 fvector 之间是混乱的
 // ideally FBlendSpaceGrid will be handled in 3D, and SBlendSpaceGridWidget only knows about 2D
+// 理想情况下，FBlendSpaceGrid 将在 3D 中处理，而 SBlendSpaceGridWidget 只知道 2D
 // in the future this should all change to 3D
+// 将来这一切都应该变成 3D
 
 /**
  * BlendSpace Grid
@@ -493,13 +519,16 @@ public:
 private:
 	FEditorElement& GetElement(const int32 GridX, const int32 GridY);
 	// Grid Dimension
+	// 网格尺寸
 	FVector2D GridMin;
 	FVector2D GridMax;
 
 	// how many rows/cols for each axis
+	// 每个轴有多少行/列
 	FIntPoint NumGridPointsForAxis;
 	FIntPoint NumGridDivisions;
 
 	// Each point data -output data
+	// 各点数据-输出数据
 	TArray<FEditorElement> GridPoints; // 2D array saved in 1D array, to search (x, y), x*GridSizeX+y;
 };

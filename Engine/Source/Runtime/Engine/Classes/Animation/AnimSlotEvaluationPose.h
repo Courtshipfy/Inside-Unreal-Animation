@@ -9,21 +9,26 @@
 #include "AnimSlotEvaluationPose.generated.h"
 
 /** Helper struct for Slot node pose evaluation. */
+/** 用于槽节点姿态评估的辅助结构。 */
 USTRUCT()
 struct FSlotEvaluationPose
 {
 	GENERATED_USTRUCT_BODY()
 
 		/** Type of additive for pose */
+		/** 姿势添加剂类型 */
 		UPROPERTY()
 		TEnumAsByte<EAdditiveAnimationType> AdditiveType;
 
 	/** Weight of pose */
+	/** 姿势重量 */
 	UPROPERTY()
 		float Weight;
 
 	/*** ATTENTION *****/
+	/*** 注意力 *****/
 	/* These Pose/Curve is stack allocator. You should not use it outside of stack. */
+	/* 这些姿势/曲线是堆栈分配器。您不应该在堆栈之外使用它。 */
 	FCompactPose Pose;
 	FBlendedCurve Curve;
 	UE::Anim::FStackAttributeContainer Attributes;

@@ -9,6 +9,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimPoseByNameNode
+// FAnimPose按名称节点
 
 FAnimNode_PoseBlendNode::FAnimNode_PoseBlendNode()
 	: CustomCurve(nullptr)
@@ -53,9 +54,11 @@ void FAnimNode_PoseBlendNode::Evaluate_AnyThread(FPoseContext& Output)
 		FPoseContext CurrentPose(Output);
 
 		// Remap incoming curve
+		// 重新映射传入曲线
 		UE::Anim::FCurveUtils::BulkGet(SourceData.Curve, BulkCurves, [this](const UE::Anim::FNamedIndexElement& InBulkElement, float InValue)
 		{
 			// Remap using chosen BlendOption
+			// 使用选定的 BlendOption 重新映射
 			const float RemappedValue = FAlphaBlend::AlphaToBlendOption(InValue, BlendOption, CustomCurve);
 			PoseExtractContext.PoseCurves[InBulkElement.Index].Value = RemappedValue;
 		});
@@ -64,6 +67,7 @@ void FAnimNode_PoseBlendNode::Evaluate_AnyThread(FPoseContext& Output)
 		if (CachedPoseAsset->GetAnimationPose(CurrentAnimationPoseData, PoseExtractContext))
 		{
 			// once we get it, we have to blend by weight
+			// 一旦我们得到它，我们必须按重量混合
 			if (CachedPoseAsset->IsValidAdditive())
 			{
 				Output = SourceData;
@@ -85,6 +89,7 @@ void FAnimNode_PoseBlendNode::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// If we didn't create a valid pose, just copy SourcePose to output (pass through)
+	// 如果我们没有创建有效的姿势，只需将 SourcePose 复制到输出（通过）
 	if(!bValidPose)
 	{
 		Output = SourceData;

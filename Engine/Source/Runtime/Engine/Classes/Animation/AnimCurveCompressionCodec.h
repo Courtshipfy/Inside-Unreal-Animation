@@ -13,15 +13,19 @@ struct FBlendedCurve;
 
 #if WITH_EDITORONLY_DATA
 /** Holds the result from animation curve compression */
+/** [翻译失败: Holds the result from animation curve compression] */
 struct FAnimCurveCompressionResult
 {
 	/** The animation curves as raw compressed bytes */
+	/** 动画曲线作为原始压缩字节 */
 	TArray<uint8> CompressedBytes;
 
 	/** The codec used by the compressed bytes */
+	/** 压缩字节使用的编解码器 */
 	UAnimCurveCompressionCodec* Codec;
 
 	/** Default constructor */
+	/** [翻译失败: Default constructor] */
 	FAnimCurveCompressionResult() : CompressedBytes(), Codec(nullptr) {}
 };
 #endif
@@ -35,6 +39,7 @@ class UAnimCurveCompressionCodec : public UObject
 	GENERATED_UCLASS_BODY()
 
 	/** Allow us to convert DDC serialized path back into codec object */
+	/** 允许我们将 DDC 序列化路径转换回编解码器对象 */
 	virtual UAnimCurveCompressionCodec* GetCodec(const FString& Path) { return this; }
 
 	//////////////////////////////////////////////////////////////////////////
@@ -52,9 +57,11 @@ class UAnimCurveCompressionCodec : public UObject
 
 #if WITH_EDITORONLY_DATA
 	/** Returns whether or not we can use this codec to compress. */
+	/** 返回我们是否可以使用此编解码器进行压缩。 */
 	virtual bool IsCodecValid() const { return true; }
 
 	/** Compresses the curve data from an animation sequence. */
+	/** 压缩动画序列中的曲线数据。 */
 	virtual bool Compress(const FCompressibleAnimData& AnimSeq, FAnimCurveCompressionResult& OutResult) PURE_VIRTUAL(UAnimCurveCompressionCodec::Compress, return false;);
 
 	/**

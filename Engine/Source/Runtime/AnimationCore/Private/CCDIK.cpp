@@ -19,6 +19,7 @@ namespace AnimationCore
 				FCCDIKChainLink& CurrentLink = Chain[LinkIndex];
 
 				// update new tip pos
+				// 更新新的小费位置
 				FVector TipPos = Chain[TipBoneLinkIndex].Transform.GetLocation();
 
 				FTransform& CurrentLinkTransform = CurrentLink.Transform;
@@ -34,6 +35,7 @@ namespace AnimationCore
 				if (bCanRotate)
 				{
 					// check rotation limit first, if fails, just abort
+					// 首先检查旋转限制，如果失败，则中止
 					if (bInEnableRotationLimit)
 					{
 						if (RotationLimitPerJointInRadian < CurrentLink.CurrentAngleDelta + Angle)
@@ -49,11 +51,13 @@ namespace AnimationCore
 					}
 
 					// continue with rotating toward to target
+					// 继续旋转至目标
 					FVector RotationAxis = FVector::CrossProduct(ToEnd, ToTarget);
 					if (RotationAxis.SizeSquared() > 0.f)
 					{
 						RotationAxis.Normalize();
 						// Delta Rotation is the rotation to target
+						// Delta Rotation 是目标的旋转
 						FQuat DeltaRotation(RotationAxis, Angle);
 
 						FQuat NewRotation = DeltaRotation * CurrentLinkTransform.GetRotation();
@@ -61,6 +65,7 @@ namespace AnimationCore
 						CurrentLinkTransform.SetRotation(NewRotation);
 
 						// if I have parent, make sure to refresh local transform since my current transform has changed
+						// 如果我有父级，请确保刷新本地转换，因为我当前的转换已更改
 						if (LinkIndex > 0)
 						{
 							FCCDIKChainLink const & Parent = Chain[LinkIndex - 1];
@@ -69,9 +74,11 @@ namespace AnimationCore
 						}
 
 						// now update all my children to have proper transform
+						// 现在更新我所有的孩子以进行适当的转变
 						FTransform CurrentParentTransform = CurrentLinkTransform;
 
 						// now update all chain
+						// 现在更新所有链
 						for (int32 ChildLinkIndex = LinkIndex + 1; ChildLinkIndex <= TipBoneLinkIndex; ++ChildLinkIndex)
 						{
 							FCCDIKChainLink& ChildIterLink = Chain[ChildLinkIndex];
@@ -93,12 +100,15 @@ namespace AnimationCore
 		int32 const NumChainLinks = InOutChain.Num();
 
 		// iterate
+		// 迭代
 		{
 			int32 const TipBoneLinkIndex = NumChainLinks - 1;
 
 			// @todo optimize locally if no update, stop?
+			// @todo 本地优化如果没有更新，停止吗？
 			bool bLocalUpdated = false;
 			// check how far
+			// 检查有多远
 			const FVector TargetPos = TargetPosition;
 			FVector TipPos = InOutChain[TipBoneLinkIndex].Transform.GetLocation();
 			double Distance = FVector::Dist(TargetPos, TipPos);
@@ -106,6 +116,7 @@ namespace AnimationCore
 			while ((Distance > Precision) && (IterationCount++ < MaxIteration))
 			{
 				// iterate from tip to root
+				// 从尖端到根迭代
 				if (bStartFromTail)
 				{
 					for (int32 LinkIndex = TipBoneLinkIndex - 1; LinkIndex > 0; --LinkIndex)
@@ -126,6 +137,7 @@ namespace AnimationCore
 				bBoneLocationUpdated |= bLocalUpdated;
 
 				// no more update in this iteration
+				// 本次迭代不再更新
 				if (!bLocalUpdated)
 				{
 					break;

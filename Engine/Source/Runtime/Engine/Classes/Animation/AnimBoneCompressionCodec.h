@@ -28,6 +28,7 @@ class UAnimBoneCompressionCodec : public UObject
 	GENERATED_UCLASS_BODY()
 
 	/** Description for this codec. */
+	/** 该编解码器的说明。 */
 	UPROPERTY(Category = Compression, EditAnywhere)
 	FString Description;
 
@@ -35,12 +36,15 @@ class UAnimBoneCompressionCodec : public UObject
 
 #if WITH_EDITORONLY_DATA
 	/** Returns whether or not we can use this codec to compress. */
+	/** 返回我们是否可以使用此编解码器进行压缩。 */
 	virtual bool IsCodecValid() const { return true; }
 
 	/** Returns whether or not this codec is high fidelity. High fidelity codecs requires the original raw data without any sanitizing by the engine. */
+	/** 返回此编解码器是否为高保真度。高保真编解码器需要原始数据，而无需引擎进行任何清理。 */
 	virtual bool IsHighFidelity(const FCompressibleAnimData& CompressibleAnimData) const { return false; }
 
 	/** Compresses the curve data from an animation sequence. */
+	/** 压缩动画序列中的曲线数据。 */
 	virtual bool Compress(const FCompressibleAnimData& CompressibleAnimData, FCompressibleAnimDataResult& OutResult) PURE_VIRTUAL(UAnimCurveCompressionCodec::Compress, return false;);
 
 	/**
@@ -78,12 +82,15 @@ class UAnimBoneCompressionCodec : public UObject
 #endif
 
 	/** Allow us to convert DDC serialized path back into codec object */
+	/** 允许我们将 DDC 序列化路径转换回编解码器对象 */
 	ENGINE_API virtual UAnimBoneCompressionCodec* GetCodec(const FString& DDCHandle);
 
 	/** Returns a unique path relative to the parent settings asset */
+	/** 返回相对于父设置资源的唯一路径 */
 	ENGINE_API virtual FString GetCodecDDCHandle() const;
 
 	/** Allocates the necessary anim data structure used for decompression. The engine will serialize the data in/out and bind it. */
+	/** 分配用于解压缩的必要动画数据结构。引擎将序列化数据输入/输出并绑定它。 */
 	virtual TUniquePtr<ICompressedAnimData> AllocateAnimData() const PURE_VIRTUAL(UAnimCurveCompressionCodec::AllocateAnimData, return TUniquePtr<ICompressedAnimData>(););
 
 	/**
@@ -112,6 +119,7 @@ class UAnimBoneCompressionCodec : public UObject
 	virtual void DecompressPose(FAnimSequenceDecompressionContext& DecompContext, const BoneTrackArray& RotationPairs, const BoneTrackArray& TranslationPairs, const BoneTrackArray& ScalePairs, TArrayView<FTransform>& OutAtoms) const PURE_VIRTUAL(UAnimCurveCompressionCodec::DecompressPose, );
 
 	/** Decompress a single bone. */
+	/** 减压单个骨头。 */
 	virtual void DecompressBone(FAnimSequenceDecompressionContext& DecompContext, int32 TrackIndex, FTransform& OutAtom) const PURE_VIRTUAL(UAnimCurveCompressionCodec::DecompressBone, );
 
 	/**

@@ -32,6 +32,7 @@ void FAnimLinkableElement::Update()
 		float CurrentTime = GetTime();
 
 		// If we don't have a segment, check to see if one has been added.
+		// [翻译失败: If we don't have a segment, check to see if one has been added.]
 		if(SegmentIndex == INDEX_NONE || !Slot.AnimTrack.AnimSegments.IsValidIndex(SegmentIndex))
 		{
 			SegmentIndex = Slot.AnimTrack.GetSegmentIndexAtTime(CurrentTime);
@@ -40,12 +41,14 @@ void FAnimLinkableElement::Update()
 		if(SegmentIndex != INDEX_NONE)
 		{
 			// Update timing info from current segment
+			// [翻译失败: Update timing info from current segment]
 			FAnimSegment& Segment = Slot.AnimTrack.AnimSegments[SegmentIndex];
 			LinkedSequence = Segment.GetAnimReference();
 			SegmentBeginTime = Segment.StartPos;
 			SegmentLength = Segment.GetLength();
 
 			// Handle Relative link mode, make sure to stay within the linked segment
+			// [翻译失败: Handle Relative link mode, make sure to stay within the linked segment]
 			if(CachedLinkMethod == EAnimLinkMethod::Relative)
 			{
 				float SegmentEnd = SegmentBeginTime + SegmentLength;
@@ -56,6 +59,7 @@ void FAnimLinkableElement::Update()
 			}
 
 			// Relink if necessary
+			// 必要时重新链接
 			ConditionalRelink();
 		}
 	}
@@ -64,6 +68,7 @@ void FAnimLinkableElement::Update()
 void FAnimLinkableElement::OnChanged(float NewMontageTime)
 {
 	// Only update linkage in a montage.
+	// 仅更新蒙太奇中的链接。
 	if(!LinkedMontage)
 	{
 		return;
@@ -72,6 +77,7 @@ void FAnimLinkableElement::OnChanged(float NewMontageTime)
 	SlotIndex = FMath::Clamp(SlotIndex, 0, LinkedMontage->SlotAnimTracks.Num()-1);
 
 	// If the link method changed, transform the link value
+	// 如果链接方法改变，则转换链接值
 	if(CachedLinkMethod != LinkMethod)
 	{
 		float AbsTime = -1.0f;
@@ -91,6 +97,7 @@ void FAnimLinkableElement::OnChanged(float NewMontageTime)
 		CachedLinkMethod = LinkMethod;
 
 		// We aren't changing the time, just transforming it so use internal settime
+		// 我们不会改变时间，只是改变它，所以使用内部设置时间
 		SetTime_Internal(AbsTime);
 		NewMontageTime = AbsTime;
 	}
@@ -101,6 +108,7 @@ void FAnimLinkableElement::OnChanged(float NewMontageTime)
 	if(SegmentIndex != INDEX_NONE)
 	{
 		// Update to the detected segment
+		// 更新检测到的段
 		FAnimSegment& Segment = Slot.AnimTrack.AnimSegments[SegmentIndex];
 		LinkedSequence = Segment.GetAnimReference();
 		SegmentBeginTime = Segment.StartPos;
@@ -111,7 +119,9 @@ void FAnimLinkableElement::OnChanged(float NewMontageTime)
 	else if(!LinkedSequence)
 	{
 		// We have no segment to link to, we need to clear our the segment data
+		// 我们没有要链接的段，我们需要清除段数据
 		// and give ourselves an absolute time
+		// 并给自己一个绝对的时间
 		LinkValue = NewMontageTime;
 		Clear();
 	}
@@ -248,6 +258,7 @@ void FAnimLinkableElement::SetTimeFromProportional(float NewTime, EAnimLinkMetho
 			else
 			{
 				// if segment length is 0, we can't set anywhere else but 0.f
+				// 如果段长度为0，我们不能设置除了0.f之外的任何其他地方
 				LinkValue = 0.f;
 			}
 		}
@@ -261,6 +272,7 @@ void FAnimLinkableElement::SetTimeFromProportional(float NewTime, EAnimLinkMetho
 			else
 			{
 				// if segment length is 0, we can't set anywhere else but 0.f
+				// [翻译失败: if segment length is 0, we can't set anywhere else but 0.f]
 				LinkValue = 0.f;			
 			}
 		}
@@ -273,6 +285,7 @@ void FAnimLinkableElement::ChangeLinkMethod(EAnimLinkMethod::Type NewLinkMethod)
 	if(NewLinkMethod != LinkMethod)
 	{
 		// Switch to the new link method and resolve it
+		// 切换到新的链接方式并解决
 		LinkMethod = NewLinkMethod;
 		OnChanged(GetTime());
 	}
@@ -318,6 +331,7 @@ void FAnimLinkableElement::SetTime_Internal(float NewTime, EAnimLinkMethod::Type
 bool FAnimLinkableElement::ConditionalRelink()
 {
 	// Check slot index if we're in a montage
+	// 如果我们处于蒙太奇中，请检查插槽索引
 	bool bRequiresRelink = false;
 	
 	if(LinkedMontage)
@@ -330,6 +344,7 @@ bool FAnimLinkableElement::ConditionalRelink()
 	}
 
 	// Check to see if we've moved to a new segment
+	// 检查我们是否已移至新航段
 	float CurrentAbsTime = GetTime();
 	if(CurrentAbsTime < SegmentBeginTime || CurrentAbsTime > SegmentBeginTime + SegmentLength)
 	{
@@ -375,8 +390,11 @@ void FAnimLinkableElement::Link(UAnimSequenceBase* AnimSequenceBase, float AbsTi
 			else
 			{
 				// Nothing to link to
+				// 没有可链接的内容
 				// We have no segment to link to, we need to clear our the segment data
+				// 我们没有要链接的段，我们需要清除段数据
 				// and give ourselves an absolute time
+				// 并给自己一个绝对的时间
 				LinkValue = AbsTime;
 				LinkedSequence = nullptr;
 				SegmentBeginTime = -1.0f;
@@ -402,6 +420,7 @@ void FAnimLinkableElement::Link(UAnimSequenceBase* AnimSequenceBase, float AbsTi
 void FAnimLinkableElement::RefreshSegmentOnLoad()
 {
 	// We only perform this step if we have valid data from a previous link
+	// 仅当我们从先前的链接获得有效数据时，我们才执行此步骤
 	if(LinkedMontage && SegmentIndex != INDEX_NONE && SlotIndex != INDEX_NONE)
 	{
 		if(LinkedMontage->SlotAnimTracks.IsValidIndex(SlotIndex))
@@ -419,6 +438,7 @@ void FAnimLinkableElement::RefreshSegmentOnLoad()
 					}
 
 					// Update timing
+					// 更新时间
 					SegmentBeginTime = Segment.StartPos;
 					SegmentLength = Segment.GetLength();
 				}

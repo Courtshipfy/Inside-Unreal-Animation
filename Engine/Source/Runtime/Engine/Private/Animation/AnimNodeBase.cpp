@@ -13,11 +13,13 @@ namespace UE::Anim::Private
 {
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 	// Don't inline this function to keep the stack usage down
+	// 不要内联此函数以降低堆栈使用率
 	FORCENOINLINE void ValidatePose(const FCompactPose& Pose, const FAnimInstanceProxy* AnimInstanceProxy, const FAnimNode_Base* LinkedNode)
 	{
 		if (Pose.ContainsNaN())
 		{
 			// Show bone transform with some useful debug info
+			// 显示骨骼变换以及一些有用的调试信息
 			const auto& Bones = Pose.GetBones();
 			for (int32 CPIndex = 0; CPIndex < Bones.Num(); ++CPIndex)
 			{
@@ -38,6 +40,7 @@ namespace UE::Anim::Private
 		if (!Pose.IsNormalized())
 		{
 			// Show bone transform with some useful debug info
+			// 显示骨骼变换以及一些有用的调试信息
 			const auto& Bones = Pose.GetBones();
 			for (int32 CPIndex = 0; CPIndex < Bones.Num(); ++CPIndex)
 			{
@@ -59,6 +62,7 @@ namespace UE::Anim::Private
 }
 
 /////////////////////////////////////////////////////
+// FAnimationBaseContext
 // FAnimationBaseContext
 
 FAnimationBaseContext::FAnimationBaseContext()
@@ -100,6 +104,7 @@ void FAnimationBaseContext::LogMessageInternal(FName InLogType, const TSharedRef
 }
 /////////////////////////////////////////////////////
 // FPoseContext
+// FPoseContext
 
 void FPoseContext::InitializeImpl(FAnimInstanceProxy* InAnimInstanceProxy)
 {
@@ -113,6 +118,7 @@ void FPoseContext::InitializeImpl(FAnimInstanceProxy* InAnimInstanceProxy)
 
 /////////////////////////////////////////////////////
 // FComponentSpacePoseContext
+// FComponentSpacePoseContext
 
 void FComponentSpacePoseContext::ResetToRefPose()
 {
@@ -123,6 +129,7 @@ void FComponentSpacePoseContext::ResetToRefPose()
 }
 
 /////////////////////////////////////////////////////
+// FAnimNode_Base
 // FAnimNode_Base
 
 void FAnimNode_Base::Initialize_AnyThread(const FAnimationInitializeContext& Context)
@@ -158,6 +165,7 @@ void FAnimNode_Base::OnInitializeAnimInstance(const FAnimInstanceProxy* InProxy,
 void FAnimNode_Base::ResetDynamics(ETeleportType InTeleportType)
 {
 	// Call legacy implementation for backwards compatibility
+	// 调用遗留实现以实现向后兼容性
 	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	ResetDynamics();
 	PRAGMA_ENABLE_DEPRECATION_WARNINGS
@@ -180,16 +188,19 @@ const FAnimNodeFunctionRef& FAnimNode_Base::GetUpdateFunction() const
 
 /////////////////////////////////////////////////////
 // FPoseLinkBase
+// FPoseLinkBase
 
 void FPoseLinkBase::AttemptRelink(const FAnimationBaseContext& Context)
 {
 	// Do the linkage
+	// 做好联动
 	if ((LinkedNode == nullptr) && (LinkID != INDEX_NONE))
 	{
 		IAnimClassInterface* AnimBlueprintClass = Context.GetAnimClass();
 		check(AnimBlueprintClass);
 
 		// adding ensure. We had a crash on here
+		// 添加确保。我们在这里发生了车祸
 		const TArray<FStructProperty*>& AnimNodeProperties = AnimBlueprintClass->GetAnimNodeProperties();
 		if ( ensure(AnimNodeProperties.IsValidIndex(LinkID)) )
 		{
@@ -214,10 +225,12 @@ void FPoseLinkBase::Initialize(const FAnimationInitializeContext& InContext)
 	InitializationCounter.SynchronizeWith(InContext.AnimInstanceProxy->GetInitializationCounter());
 
 	// Initialization will require update to be called before an evaluate.
+	// 初始化需要在评估之前调用更新。
 	UpdateCounter.Reset();
 #endif
 
 	// Do standard initialization
+	// 进行标准初始化
 	if (LinkedNode != nullptr)
 	{
 		FAnimationInitializeContext LinkContext(InContext);
@@ -230,6 +243,7 @@ void FPoseLinkBase::Initialize(const FAnimationInitializeContext& InContext)
 void FPoseLinkBase::SetLinkNode(struct FAnimNode_Base* NewLinkNode)
 {
 	// this is custom interface, only should be used by native handlers
+	// 这是自定义接口，仅应由本机处理程序使用
 	LinkedNode = NewLinkNode;
 }
 
@@ -259,6 +273,7 @@ FAnimNode_Base* FPoseLinkBase::GetLinkNode()
 }
 
 // Don't inline this function to keep the stack usage down
+// 不要内联此函数以降低堆栈使用率
 FORCENOINLINE const FExposedValueHandler& FAnimNode_Base::GetEvaluateGraphExposedInputs() const
 {
 	if(NodeData)
@@ -269,7 +284,9 @@ FORCENOINLINE const FExposedValueHandler& FAnimNode_Base::GetEvaluateGraphExpose
 	else
 	{
 		// Inverting control (entering via the immutable data rather than the mutable data) would allow
+		// 反转控制（通过不可变数据而不是可变数据输入）将允许
 		// us to remove this static local. Would also allow us to remove the vtable from FAnimNode_Base.
+		// 我们删除这个静态本地。还允许我们从 FAnimNode_Base 中删除 vtable。
 		static const FExposedValueHandler Default;	
 		return Default;
 	}
@@ -311,10 +328,12 @@ void FPoseLinkBase::Update(const FAnimationUpdateContext& InContext)
 		if (LinkedNode == nullptr)
 		{
 			//@TODO: Should only do this when playing back
+			//@TODO：应该只在播放时执行此操作
 			AttemptRelink(InContext);
 		}
 
 		// Record the node line activation
+		// 记录节点线激活
 		if (LinkedNode != nullptr)
 		{
 			if (InContext.AnimInstanceProxy->IsBeingDebugged())
@@ -354,6 +373,7 @@ void FPoseLinkBase::GatherDebugData(FNodeDebugData& InDebugData)
 
 /////////////////////////////////////////////////////
 // FPoseLink
+// FPoseLink
 
 void FPoseLink::Evaluate(FPoseContext& Output)
 {
@@ -367,6 +387,7 @@ void FPoseLink::Evaluate(FPoseContext& Output)
 	if ((LinkedNode == nullptr) && GIsEditor)
 	{
 		//@TODO: Should only do this when playing back
+		//[翻译失败: @TODO: Should only do this when playing back]
 		AttemptRelink(Output);
 	}
 #endif
@@ -427,16 +448,19 @@ void FPoseLink::Evaluate(FPoseContext& Output)
 	else
 	{
 		//@TODO: Warning here?
+		//@TODO：这里警告？
 		Output.ResetToRefPose();
 	}
 
 	// Detect non valid output
+	// 检测无效输出
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 	UE::Anim::Private::ValidatePose(Output.Pose, Output.AnimInstanceProxy, LinkedNode);
 #endif
 }
 
 /////////////////////////////////////////////////////
+// FComponentSpacePoseLink
 // FComponentSpacePoseLink
 
 void FComponentSpacePoseLink::EvaluateComponentSpace(FComponentSpacePoseContext& Output)
@@ -495,10 +519,12 @@ void FComponentSpacePoseLink::EvaluateComponentSpace(FComponentSpacePoseContext&
 	else
 	{
 		//@TODO: Warning here?
+		//@TODO：这里警告？
 		Output.ResetToRefPose();
 	}
 
 	// Detect non valid output
+	// [翻译失败: Detect non valid output]
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 	UE::Anim::Private::ValidatePose(Output.Pose.GetPose(), Output.AnimInstanceProxy, LinkedNode);
 #endif
@@ -506,6 +532,7 @@ void FComponentSpacePoseLink::EvaluateComponentSpace(FComponentSpacePoseContext&
 
 /////////////////////////////////////////////////////
 // FComponentSpacePoseContext
+// [翻译失败: FComponentSpacePoseContext]
 
 bool FComponentSpacePoseContext::ContainsNaN() const
 {
@@ -519,6 +546,7 @@ bool FComponentSpacePoseContext::IsNormalized() const
 
 /////////////////////////////////////////////////////
 // FNodeDebugData
+// [翻译失败: FNodeDebugData]
 
 void FNodeDebugData::AddDebugItem(FString DebugData, bool bPoseSource)
 {
@@ -557,7 +585,9 @@ void FNodeDebugData::GetFlattenedDebugData(TArray<FFlattenedDebugData>& Flattene
 			if(bMultiBranch)
 			{
 				// If we only have one branch we treat it as the same really
+				// [翻译失败: If we only have one branch we treat it as the same really]
 				// as we may have only changed active status
+				// 因为我们可能只改变了活动状态
 				++ChainID;
 			}
 			Child.GetFlattenedDebugData(FlattenedDebugData, ChildIndent, ChainID);
@@ -565,6 +595,7 @@ void FNodeDebugData::GetFlattenedDebugData(TArray<FFlattenedDebugData>& Flattene
 	}
 
 	// Do CachePose nodes only from the root.
+	// 仅从根执行 CachePose 节点。
 	if (RootNodePtr == this)
 	{
 		for (FNodeDebugData& CachePoseData : SaveCachePoseNodes)

@@ -15,6 +15,7 @@
 #include "PreviewAssetAttachComponent.generated.h"
 
 /** Preview items that are attached to the skeleton **/
+/** 预览附加到骨架的项目 **/
 USTRUCT()
 struct FPreviewAttachedObjectPair
 {
@@ -22,6 +23,7 @@ struct FPreviewAttachedObjectPair
 
 private:
 	/** the object to be attached */
+	/** 要附加的对象 */
 	UPROPERTY()
 	TSoftObjectPtr<class UObject> AttachedObject;
 
@@ -39,6 +41,7 @@ public:
 	{}
 
 	/** The name of the attach point of the Object (for example a bone or socket name) */
+	/** 对象的附加点的名称（例如骨骼或插槽名称） */
 	UPROPERTY()
 	FName AttachedTo;
 
@@ -65,10 +68,12 @@ public:
 };
 
 // Iterators
+// 迭代器
 typedef TIndexedContainerIterator<      TArray<FPreviewAttachedObjectPair>,       FPreviewAttachedObjectPair, int32> TIterator;
 typedef TIndexedContainerIterator<const TArray<FPreviewAttachedObjectPair>, const FPreviewAttachedObjectPair, int32> TConstIterator;
 
 /** Component which deals with attaching assets */
+/** 处理附加资产的组件 */
 USTRUCT()
 struct FPreviewAssetAttachContainer
 {

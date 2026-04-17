@@ -6,10 +6,12 @@
 
 /////////////////////////////////////////////////////
 // FAnimRefPoseNode
+// FAnimRefPoseNode
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AnimNode_RefPose)
 
 /** Helper for enum output... */
+/** 枚举输出的助手... */
 #ifndef CASE_ENUM_TO_TEXT
 #define CASE_ENUM_TO_TEXT(txt) case txt: return TEXT(#txt);
 #endif
@@ -27,7 +29,9 @@ void FAnimNode_RefPose::Evaluate_AnyThread(FPoseContext& Output)
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Evaluate_AnyThread)
 	// I don't have anything to evaluate. Should this be even here?
+	// 我没有什么可以评价的。这应该也在这里吗？
 	// EvaluateGraphExposedInputs.Execute(Context);
+	// EvaluateGraphExposeInputs.Execute(Context);
 
     ERefPoseType CurrentRefPoseType = GetRefPoseType(); 
 	switch (CurrentRefPoseType) 

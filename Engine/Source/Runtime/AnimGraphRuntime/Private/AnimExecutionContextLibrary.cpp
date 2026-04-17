@@ -20,6 +20,7 @@ FAnimNodeReference UAnimExecutionContextLibrary::GetAnimNodeReference(UAnimInsta
 	const TArray<FStructProperty*>& AnimNodeProperties = AnimClassInterface->GetAnimNodeProperties();
 
 	// As the index is patched during compilation, it needs to be reversed here
+	// 由于编译时对索引进行了修补，所以这里需要反转
 	int32 ReverseIndex = AnimNodeProperties.Num() - 1 - Index;
 	return FAnimNodeReference(Instance, ReverseIndex);
 }

@@ -19,12 +19,15 @@ class UAnimDataModel : public UObject, public IAnimationDataModel
 	GENERATED_BODY()
 public:
 	/** Begin UObject overrides */
+	/** 开始 UObject 覆盖 */
 	ENGINE_API virtual void PostLoad() override;
 	ENGINE_API virtual void PostDuplicate(bool bDuplicateForPIE) override;
 	virtual bool IsEditorOnly() const override { return true; }
 	/** End UObject overrides */
+	/** 结束 UObject 覆盖 */
 	
 	/** Begin IAnimationDataModel overrides */
+	/** 开始 IAnimationDataModel 覆盖 */
 	ENGINE_API virtual double GetPlayLength() const override;
 	ENGINE_API virtual int32 GetNumberOfFrames() const override;
 	ENGINE_API virtual int32 GetNumberOfKeys() const override;
@@ -90,9 +93,11 @@ protected:
 		return bPopulated;
 	}
 	/** End IAnimationDataModel overrides */
+	/** 结束 IAnimationDataModel 覆盖 */
 
 private:
 	/** Helper functionality used by UAnimDataController to retrieve mutable data */ 
+	/** UAnimDataController 使用辅助功能来检索可变数据 */
 	ENGINE_API FBoneAnimationTrack* FindMutableBoneTrackByName(FName Name);
 	ENGINE_API FBoneAnimationTrack& GetMutableBoneTrackByName(FName Name);
 	ENGINE_API FTransformCurve* FindMutableTransformCurveById(const FAnimationCurveIdentifier& CurveIdentifier);
@@ -109,38 +114,47 @@ private:
 	int32 BracketCounter = 0;
 
 	/** Dynamic delegate event allows scripting to register to any broadcasted notify. */
+	/** 动态委托事件允许脚本注册到任何广播的通知。 */
 	UPROPERTY(BlueprintAssignable, Transient, Category = AnimationDataModel, meta = (ScriptName = "ModifiedEvent", AllowPrivateAccess = "true"))
 	FAnimDataModelModifiedDynamicEvent ModifiedEventDynamic;
 	
 	/** Native delegate event allows for registerings to any broadcasted notify. */
+	/** 本机委托事件允许注册任何广播通知。 */
 	FAnimDataModelModifiedEvent ModifiedEvent;
 
 	/** All individual bone animation tracks */
+	/** 所有单独的骨骼动画轨道 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Animation Data Model", meta = (AllowPrivateAccess = "true"))
 	TArray<FBoneAnimationTrack> BoneAnimationTracks;
 
 	/** Total playable length of the contained animation data */
+	/** 包含的动画数据的总可播放长度 */
 	UE_DEPRECATED(5.1, "PlayLength is deprecated use GetPlayLength instead, as it is now calculated with Number of Frames * FrameRate instead of stored as a value")
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation Data Model", meta = (AllowPrivateAccess = "true"))
 	float PlayLength;
 	
 	/** Rate at which the animated data is sampled */
+	/** 动画数据的采样率 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation Data Model", meta = (AllowPrivateAccess = "true"))
 	FFrameRate FrameRate;
 
 	/** Total number of sampled animated frames */
+	/** 采样的动画帧总数 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation Data Model", meta = (AllowPrivateAccess = "true"))
 	int32 NumberOfFrames;
 
 	/** Total number of sampled animated keys */
+	/** 采样动画按键总数 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation Data Model", meta = (AllowPrivateAccess = "true"))
 	int32 NumberOfKeys;
 	
 	/** Container with all animated curve data */
+	/** 包含所有动画曲线数据的容器 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation Data Model", meta = (AllowPrivateAccess = "true"))
 	FAnimationCurveData CurveData;
 	
 	/** Container with all animated (bone) attribute data */
+	/** 包含所有动画（骨骼）属性数据的容器 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation Data Model", meta = (AllowPrivateAccess = "true"))
 	TArray<FAnimatedBoneAttribute> AnimatedBoneAttributes;
 

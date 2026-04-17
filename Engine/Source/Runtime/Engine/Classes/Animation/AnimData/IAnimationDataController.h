@@ -53,6 +53,7 @@ public:
 
 #if WITH_EDITOR
 	/** RAII helper to define a scoped-based bracket, opens and closes a controller bracket automatically */
+	/** RAII 帮助程序定义基于范围的支架，自动打开和关闭控制器支架 */
     struct FScopedBracket
 	{
 		FScopedBracket(IAnimationDataController* InController, const FText& InDescription, bool bInShouldTransact=true)
@@ -691,12 +692,15 @@ public:
 	virtual void UpdateWithSkeleton(USkeleton* TargetSkeleton, bool bShouldTransact = true) = 0;
 
 	/** Copies any animation relevant data from an already existing IAnimationDataModel object */
+	/** 从已存在的 IAnimationDataModel 对象复制任何动画相关数据 */
 	virtual void PopulateWithExistingModel(TScriptInterface<IAnimationDataModel> InModel) = 0;
 
 	/** Initializes model data structures */
+	/** 初始化模型数据结构 */
 	virtual void InitializeModel() = 0;
 
 	/** Returns the final frame number calculating according to the Model its frame-rate, additionally outputs log information for invalid/loss of precision */
+	/** 返回根据模型的帧率计算的最终帧数，另外输出无效/精度损失的日志信息 */
 	FFrameNumber ConvertSecondsToFrameNumber(double Seconds) const
 	{
 		ValidateModel();
@@ -709,6 +713,7 @@ public:
 	
 		const FFrameTime FrameTime = ModelFrameRate.AsFrameTime(Seconds);
 		// Check for either small sub-frame value or near zero seconds representation (of sub-frame only)
+		// 检查小子帧值或接近零秒的表示（仅子帧）
 		if (!FMath::IsNearlyZero(FrameTime.GetSubFrame(), UE_KINDA_SMALL_NUMBER) &&
 			!FMath::IsNearlyZero(ModelFrameRate.AsSeconds(FFrameTime(0, FrameTime.GetSubFrame())), UE_DOUBLE_KINDA_SMALL_NUMBER))
 		{
@@ -719,6 +724,7 @@ public:
 	}	
 protected:
 	/** Functionality used by FOpenBracketAction and FCloseBracketAction to broadcast their equivalent notifies without actually opening a bracket. */
+	/** FOpenBracketAction 和 FCloseBracketAction 使用的功能来广播其等效通知，而无需实际打开括号。 */
 	virtual void NotifyBracketOpen() = 0;
 	virtual void NotifyBracketClosed() = 0;
 
@@ -756,6 +762,7 @@ protected:
     }
 
 	/** Returns whether or not the supplied curve type is supported by the controller functionality */
+	/** 返回控制器功能是否支持提供的曲线类型 */
 	static bool IsSupportedCurveType(ERawCurveTrackTypes CurveType)
 	{
 		const TArray<ERawCurveTrackTypes> SupportedTypes = { ERawCurveTrackTypes::RCT_Float, ERawCurveTrackTypes::RCT_Transform };
@@ -763,12 +770,14 @@ protected:
 	}
 
 	/** Ensures that a valid model is currently targeted */
+	/** 确保当前目标模型有效 */
 	void ValidateModel() const
 	{
 		checkf(GetModel() != nullptr, TEXT("Invalid Model"));
 	}
 		
 	/** Verifies whether or not the Model's outer object is (or is derived from) the specified UClass */
+	/** 验证模型的外部对象是否是（或派生自）指定的 UClass */
 	bool CheckOuterClass(UClass* InClass) const
 	{
 		ValidateModel();
@@ -796,6 +805,7 @@ protected:
 	}
 	
 	/** Returns the string representation of the provided curve enum type value */
+	/** 返回所提供的曲线枚举类型值的字符串表示形式 */
 	static FString GetCurveTypeValueName(ERawCurveTrackTypes InType)
 	{
 		FString ValueString;

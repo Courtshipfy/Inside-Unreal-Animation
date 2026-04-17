@@ -11,7 +11,9 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AnimCompress_RemoveLinearKeys)
 
 // Define to 1 to enable timing of the meat of linear key removal done in DoReduction
+// [翻译失败: Define to 1 to enable timing of the meat of linear key removal done in DoReduction]
 // The times are non-trivial, but the extra log spam isn't useful if one isn't optimizing DoReduction runtime
+// 这些时间并不简单，但如果不优化 DoReduction 运行时，额外的日志垃圾邮件就没有用处。
 #define TIME_LINEAR_KEY_REMOVAL 0
 
 /**
@@ -32,12 +34,14 @@ static UE::Math::TQuat<T> EnforceShortestArc(const UE::Math::TQuat<T>& A, const 
  */
 
 /** CalcDelta for FVectors */
+/** FVectors 的 CalcDelta */
 float CalcDelta(const FVector3f& A, const FVector3f& B)
 {
 	return (A - B).Size();
 }
 
 /** CalcDelta for FQuat */
+/** FQuat 的 CalcDelta */
 float CalcDelta(const FQuat4f& A, const FQuat4f& B)
 {
 	return FQuat4f::Error(A, B);
@@ -124,12 +128,14 @@ void FilterLinearKeysTemplate(
 	check( KeyCount >= 1 );
 	
 	// generate new arrays we will fill with the final keys
+	// 生成新数组，我们将用最终的键填充
 	TArray<KeyType> NewKeys;
 	TArray<float> NewTimes;
 	NewKeys.Reset(KeyCount);
 	NewTimes.Reset(KeyCount);
 
 	// Only bother doing anything if we have some keys!
+	// 只有当我们有钥匙的时候才去做任何事情！
 	if(KeyCount > 0)
 	{
 		int32 LowKey = 0;
@@ -157,6 +163,7 @@ void FilterLinearKeysTemplate(
 		}
 		
 		// copy the low key (this one is a given)
+		// [翻译失败: copy the low key (this one is a given)]
 		NewTimes.Add(Times[0]);
 		NewKeys.Add(Keys[0]);
 
@@ -166,18 +173,22 @@ void FilterLinearKeysTemplate(
 		const float DeltaThreshold = (BoneData[BoneIndex].IsEndEffector() && (BoneData[BoneIndex].bHasSocket || BoneData[BoneIndex].bKeyEndEffector)) ? EffectorDiffSocket : MaxTargetDelta;
 
 		// We will test within a sliding window between LowKey and HighKey.
+		// [翻译失败: We will test within a sliding window between LowKey and HighKey.]
 		// Therefore, we are done when the LowKey exceeds the range
+		// [翻译失败: Therefore, we are done when the LowKey exceeds the range]
 		while (LowKey + 1 < KeyCount)
 		{
 			int32 GoodHighKey = LowKey + 1;
 			int32 BadHighKey = KeyCount;
 			
 			// bisect until we find the lowest acceptable high key
+			// [翻译失败: bisect until we find the lowest acceptable high key]
 			while (BadHighKey - GoodHighKey >= 2)
 			{
 				HighKey = GoodHighKey + (BadHighKey - GoodHighKey) / 2;
 
 				// get the parameters of the window we are testing
+				// [翻译失败: get the parameters of the window we are testing]
 				const float LowTime = Times[LowKey];
 				const float HighTime = Times[HighKey];
 				const KeyType& LowValue = Keys[LowKey];
@@ -186,51 +197,66 @@ void FilterLinearKeysTemplate(
 				const float InvRange = 1.0f/Range;
 
 				// iterate through all interpolated members of the window to
+				// [翻译失败: iterate through all interpolated members of the window to]
 				// compute the error when compared to the original raw values
+				// [翻译失败: compute the error when compared to the original raw values]
 				float MaxLerpError = 0.0f;
 				float MaxTargetError = 0.0f;
 				for (int32 TestKey = LowKey+1; TestKey< HighKey; ++TestKey)
 				{
 					// get the parameters of the member being tested
+					// [翻译失败: get the parameters of the member being tested]
 					float TestTime = Times[TestKey];
 					const KeyType& TestValue = Keys[TestKey];
 
 					// compute the proposed, interpolated value for the key
+					// [翻译失败: compute the proposed, interpolated value for the key]
 					const float Alpha = (TestTime - LowTime) * InvRange;
 					const KeyType LerpValue = AnimationCompressionUtils::Interpolate(LowValue, HighValue, Alpha);
 
 					// compute the error between our interpolated value and the desired value
+					// [翻译失败: compute the error between our interpolated value and the desired value]
 					float LerpError = CalcDelta(TestValue, LerpValue);
 
 					// if the local-space lerp error is within our tolerances, we will also check the
+					// 如果局部空间 lerp 误差在我们的容差范围内，我们还将检查
 					// effect this interpolated key will have on our target end effectors
+					// 这个插值键将对我们的目标末端执行器产生影响
 					float TargetError = -1.0f;
 					if (LerpError <= MaxDelta)
 					{
 						// get the raw world transform for this bone (the original world-space position)
+						// 获取该骨骼的原始世界变换（原始世界空间位置）
 						const int32 FrameIndex = TestKey;
 						const FTransform& InvRawBase = CachedInvRawBases[FrameIndex];
 						
 						// generate the proposed local bone atom and transform (local space)
+						// 生成建议的局部骨原子并进行变换（局部空间）
 						FTransform ProposedTM = AdapterType::UpdateBoneAtom(BoneAtoms[FrameIndex], LerpValue);
 
 						// convert the proposed local transform to world space using this bone's parent transform
+						// 使用该骨骼的父变换将建议的局部变换转换为世界空间
 						const FTransform& CurrentParent = ParentBoneIndex != INDEX_NONE ? NewWorldBones[(ParentBoneIndex*NumFrames) + FrameIndex] : FTransform::Identity;
 						FTransform ProposedBase = ProposedTM * CurrentParent;
 						
 						// for each target end effector, compute the error we would introduce with our proposed key
+						// 对于每个目标末端执行器，计算我们使用建议的密钥引入的误差
 						for (int32 TargetIndex=0; TargetIndex<TargetBoneIndices.Num(); ++TargetIndex)
 						{
 							// find the offset transform from the raw base to the end effector
+							// 找到从原始底座到末端执行器的偏移变换
 							const int32 TargetBoneIndex = TargetBoneIndices[TargetIndex];
 							FTransform RawTarget = RawWorldBones[(TargetBoneIndex*NumFrames) + FrameIndex];
 							const FTransform RelTM = RawTarget * InvRawBase;
 
 							// forecast where the new end effector would be using our proposed key
+							// 预测新末端执行器将使用我们建议的密钥的位置
 							FTransform ProposedTarget = RelTM * ProposedBase;
 
 							// If this is an EndEffector, add a dummy bone to measure the effect of compressing the rotation.
+							// 如果这是 EndEffector，请添加虚拟骨骼来测量压缩旋转的效果。
 							// Sockets and Key EndEffectors have a longer dummy bone to maintain higher precision.
+							// 插座和关键末端效应器具有更长的假骨头，以保持更高的精度。
 							if (BoneData[TargetIndex].bHasSocket || BoneData[TargetIndex].bKeyEndEffector)
 							{
 								ProposedTarget = EndEffectorDummyBoneSocket * ProposedTarget;
@@ -243,10 +269,12 @@ void FilterLinearKeysTemplate(
 							}
 
 							// determine the extend of error at the target end effector
+							// 确定目标末端执行器的误差范围
 							const float ThisError = (ProposedTarget.GetTranslation() - RawTarget.GetTranslation()).Size();
 							TargetError = FMath::Max(TargetError, ThisError); 
 
 							// exit early when we encounter a large delta
+							// 当我们遇到大的三角洲时尽早退出
 							const float TargetDeltaThreshold = BoneData[TargetIndex].bHasSocket ? EffectorDiffSocket : DeltaThreshold;
 							if( TargetError > TargetDeltaThreshold )
 							{ 
@@ -256,26 +284,35 @@ void FilterLinearKeysTemplate(
 					}
 
 					// If the parent has a key at this time, we'll scale our error values as requested.
+					// 如果父级此时有密钥，我们将根据要求缩放错误值。
 					// This increases the odds that we will choose keys on the same frames as our parent bone,
+					// 这增加了我们选择与父骨骼相同的帧上的关键点的可能性，
 					// making the skeleton more uniform in key distribution.
+					// 使骨架的密钥分布更加均匀。
 					if (ParentTimes)
 					{
 						if (KnownParentTimes[TestKey])
 						{
 							// our parent has a key at this time, 
+							// 我们的父母此时有一把钥匙，
 							// inflate our perceived error to increase our sensitivity
+							// 夸大我们感知到的错误以提高我们的敏感性
 							// for also retaining a key at this time
+							// 此时还保留密钥
 							LerpError *= ParentScale;
 							TargetError *= ParentScale;
 						}
 					}
 					
 					// keep track of the worst errors encountered for both 
+					// 跟踪双方遇到的最严重的错误
 					// the local-space 'lerp' error and the end effector drift we will cause
+					// 我们将导致的局部空间“lerp”误差和末端执行器漂移
 					MaxLerpError = FMath::Max(MaxLerpError, LerpError);
 					MaxTargetError = FMath::Max(MaxTargetError, TargetError);
 
 					// exit early if we have failed in this span
+					// 如果我们在此期间失败，请尽早退出
 					if (MaxLerpError > MaxDelta ||
 						MaxTargetError > DeltaThreshold)
 					{
@@ -284,6 +321,7 @@ void FilterLinearKeysTemplate(
 				}
 
 				// determine if the span succeeded. That is, the worst errors found are within tolerances
+				// 确定跨度是否成功。也就是说，发现的最严重错误在公差范围内
 				if ((MaxLerpError <= MaxDelta) && (MaxTargetError <= DeltaThreshold))
 				{
 					GoodHighKey = HighKey;
@@ -301,6 +339,7 @@ void FilterLinearKeysTemplate(
 		}
 
 		// return the new key set to the caller
+		// 将新的密钥集返回给调用者
 		Times= NewTimes;
 		Keys= NewKeys;
 	}
@@ -327,6 +366,7 @@ void UAnimCompress_RemoveLinearKeys::UpdateWorldBoneTransformTable(
 	if( TrackIndex != INDEX_NONE )
 	{
 		// get the local-space bone transforms using the animation solver
+		// 使用动画解算器获取局部空间骨骼变换
 		for ( int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex )
 		{
 			const double Time = SamplingRate.AsSeconds(KeyIndex);
@@ -337,6 +377,7 @@ void UAnimCompress_RemoveLinearKeys::UpdateWorldBoneTransformTable(
 			FQuat Rot = LocalAtom.GetRotation();
 			LocalAtom.SetRotation(EnforceShortestArc(FQuat::Identity, Rot));
 			// Saw some crashes happening with it, so normalize here. 
+			// 看到发生了一些崩溃，所以在这里正常化。
 			LocalAtom.NormalizeRotation();
 
 			OutputWorldBones[(BoneIndex*NumKeys) + KeyIndex] = LocalAtom;
@@ -345,12 +386,14 @@ void UAnimCompress_RemoveLinearKeys::UpdateWorldBoneTransformTable(
 	else
 	{
 		// get the default rotation and translation from the reference skeleton
+		// 从参考骨架获取默认旋转和平移
 		FTransform DefaultTransform;
 		FTransform LocalAtom = RefPose[BoneIndex];
 		LocalAtom.SetRotation(EnforceShortestArc(FQuat::Identity, LocalAtom.GetRotation()));
 		DefaultTransform = LocalAtom;
 
 		// copy the default transformation into the world bone table
+		// 将默认变换复制到世界骨骼表中
 		for ( int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex )
 		{
 			OutputWorldBones[(BoneIndex*NumKeys) + KeyIndex] = DefaultTransform;
@@ -358,6 +401,7 @@ void UAnimCompress_RemoveLinearKeys::UpdateWorldBoneTransformTable(
 	}
 
 	// apply parent transforms to bake into world space. We assume the parent transforms were previously set using this function
+	// 应用父级变换来烘焙到世界空间中。我们假设之前使用此函数设置了父变换
 	const int32 ParentIndex = Bone.GetParent();
 	if (ParentIndex != INDEX_NONE)
 	{
@@ -377,6 +421,7 @@ void* UAnimCompress_RemoveLinearKeys::FilterBeforeMainKeyRemoval(
 	TArray<FScaleTrack>& ScaleData)
 {
 	// remove obviously redundant keys from the source data
+	// 从源数据中删除明显冗余的键
 	FilterTrivialKeys(TranslationData, RotationData, ScaleData, TRANSLATION_ZEROING_THRESHOLD, QUATERNION_ZEROING_THRESHOLD, SCALE_ZEROING_THRESHOLD);
 	return nullptr;
 }
@@ -396,7 +441,9 @@ void UAnimCompress_RemoveLinearKeys::UpdateWorldBoneTransformRange(
 	TArray<FTransform>& OutputWorldBones)
 {
 	// bitwise compress the tracks into the anim sequence buffers
+	// 按位将轨道压缩到动画序列缓冲区中
 	// to make sure the data we've compressed so far is ready for solving
+	// 确保我们到目前为止压缩的数据已准备好用于求解
 	CompressUsingUnderlyingCompressor(
 		CompressibleAnimData,
 		OutCompressedData,
@@ -406,7 +453,9 @@ void UAnimCompress_RemoveLinearKeys::UpdateWorldBoneTransformRange(
 		false);
 
 	// build all world-space transforms from this bone to the target end effector we are monitoring
+	// 构建从该骨骼到我们正在监控的目标末端执行器的所有世界空间变换
 	// all parent transforms have been built already
+	// 所有父级转换均已构建
 	for ( int32 Index = StartingBoneIndex; Index <= EndingBoneIndex; ++Index )
 	{
 		UpdateWorldBoneTransformTable(
@@ -445,12 +494,15 @@ void UAnimCompress_RemoveLinearKeys::UpdateBoneAtomList(
 void UAnimCompress_RemoveLinearKeys::ConvertFromRelativeSpace(FCompressibleAnimData& CompressibleAnimData)
 {
 	// if this is an additive animation, temporarily convert it out of relative-space
+	// 如果这是附加动画，则暂时将其转换出相对空间
 	check(CompressibleAnimData.bIsValidAdditive);
 	// convert the raw tracks out of additive-space
+	// 将原始轨道从附加空间转换出来
 	const int32 NumTracks = CompressibleAnimData.RawAnimationData.Num();
 	for (int32 TrackIndex = 0; TrackIndex < NumTracks; ++TrackIndex)
 	{
 		// bone index of skeleton
+		// 骨骼骨指数
 		int32 const BoneIndex = CompressibleAnimData.TrackToSkeletonMapTable[TrackIndex].BoneTreeIndex;
 		bool const bIsRootBone = (BoneIndex == 0);
 
@@ -458,17 +510,21 @@ void UAnimCompress_RemoveLinearKeys::ConvertFromRelativeSpace(FCompressibleAnimD
 		FRawAnimSequenceTrack& RawTrack	= CompressibleAnimData.RawAnimationData[TrackIndex];
 
 		// @note: we only extract the first frame, as we don't want to induce motion from the base pose
+		// @注意：我们只提取第一帧，因为我们不想从基本姿势引起运动
 		// only the motion from the additive data should matter.
+		// [翻译失败: only the motion from the additive data should matter.]
 		const FVector3f& RefBonePos = BasePoseTrack.PosKeys[0];
 		const FQuat4f& RefBoneRotation = BasePoseTrack.RotKeys[0];
 
 		// Transform position keys.
+		// [翻译失败: Transform position keys.]
 		for (int32 PosIndex = 0; PosIndex < RawTrack.PosKeys.Num(); ++PosIndex)
 		{
 			RawTrack.PosKeys[PosIndex] += RefBonePos;
 		}
 
 		// Transform rotation keys.
+		// 变换旋转关键点。
 		for (int32 RotIndex = 0; RotIndex < RawTrack.RotKeys.Num(); ++RotIndex)
 		{
 			RawTrack.RotKeys[RotIndex] = RawTrack.RotKeys[RotIndex] * RefBoneRotation;
@@ -476,6 +532,7 @@ void UAnimCompress_RemoveLinearKeys::ConvertFromRelativeSpace(FCompressibleAnimD
 		}
 
 		// make sure scale key exists
+		// 确保比例键存在
 		if (RawTrack.ScaleKeys.Num() > 0)
 		{
 			const FVector3f& RefBoneScale = (BasePoseTrack.ScaleKeys.Num() > 0)? BasePoseTrack.ScaleKeys[0] : FVector3f::OneVector;
@@ -500,6 +557,7 @@ void UAnimCompress_RemoveLinearKeys::ConvertToRelativeSpaceBoth(
 void UAnimCompress_RemoveLinearKeys::ConvertToRelativeSpace(FCompressibleAnimData& CompressibleAnimData) const
 {
 	// convert the raw tracks back to additive-space
+	// 将原始轨道转换回附加空间
 	const int32 NumTracks = CompressibleAnimData.RawAnimationData.Num();
 	for (int32 TrackIndex = 0; TrackIndex < NumTracks; ++TrackIndex)
 	{
@@ -507,17 +565,21 @@ void UAnimCompress_RemoveLinearKeys::ConvertToRelativeSpace(FCompressibleAnimDat
 		FRawAnimSequenceTrack& RawTrack = CompressibleAnimData.RawAnimationData[TrackIndex];
 
 		// @note: we only extract the first frame, as we don't want to induce motion from the base pose
+		// @注意：我们只提取第一帧，因为我们不想从基本姿势引起运动
 		// only the motion from the additive data should matter.
+		// 只有来自附加数据的运动才是重要的。
 		const FQuat4f InvRefBoneRotation = BasePoseTrack.RotKeys[0].Inverse();
 		const FVector3f InvRefBoneTranslation = -BasePoseTrack.PosKeys[0];
 
 		// transform position keys.
+		// 变换位置键。
 		for (int32 PosIndex = 0; PosIndex < RawTrack.PosKeys.Num(); ++PosIndex)
 		{
 			RawTrack.PosKeys[PosIndex] += InvRefBoneTranslation;
 		}
 
 		// transform rotation keys.
+		// 变换旋转键。
 		for (int32 RotIndex = 0; RotIndex < RawTrack.RotKeys.Num(); ++RotIndex)
 		{
 			RawTrack.RotKeys[RotIndex] = RawTrack.RotKeys[RotIndex] * InvRefBoneRotation;
@@ -525,16 +587,20 @@ void UAnimCompress_RemoveLinearKeys::ConvertToRelativeSpace(FCompressibleAnimDat
 		}
 
 		// scale key
+		// 音阶键
 		if (RawTrack.ScaleKeys.Num() > 0)
 		{
         	const FVector3f& RefBoneScale = (BasePoseTrack.ScaleKeys.Num() > 0)? BasePoseTrack.ScaleKeys[0] : FVector3f::OneVector;
 			const FVector3f InvRefBoneScale = (FVector3f)FTransform::GetSafeScaleReciprocal((FVector)RefBoneScale);
 
 			// transform scale keys.
+			// 变换音阶键。
 			for (int32 ScaleIndex = 0; ScaleIndex < RawTrack.ScaleKeys.Num(); ++ScaleIndex)
 			{
 				// to revert scale correctly, you have to - 1.f
+				// 要正确恢复比例，您必须 - 1.f
 				// check AccumulateWithAdditiveScale
+				// 检查 AccumulateWithAdditiveScale
 				RawTrack.ScaleKeys[ScaleIndex] = (RawTrack.ScaleKeys[ScaleIndex] * InvRefBoneScale) - 1.f;
 			}
 		}
@@ -548,17 +614,21 @@ void UAnimCompress_RemoveLinearKeys::ConvertToRelativeSpace(
 	TArray<FScaleTrack>& ScaleData) const
 {
 	// convert the raw tracks back to additive-space
+	// 将原始轨道转换回附加空间
 	const int32 NumTracks = CompressibleAnimData.RawAnimationData.Num();
 	for (int32 TrackIndex = 0; TrackIndex < NumTracks; ++TrackIndex)
 	{
 		const FRawAnimSequenceTrack& BasePoseTrack = CompressibleAnimData.AdditiveBaseAnimationData[TrackIndex];
 
 		// @note: we only extract the first frame, as we don't want to induce motion from the base pose
+		// @注意：我们只提取第一帧，因为我们不想从基本姿势引起运动
 		// only the motion from the additive data should matter.
+		// 只有来自附加数据的运动才是重要的。
 		const FQuat4f InvRefBoneRotation = BasePoseTrack.RotKeys[0].Inverse();
 		const FVector3f InvRefBoneTranslation = -BasePoseTrack.PosKeys[0];
 
 		// convert the new translation tracks to additive space
+		// 将新的平移轨迹转换为附加空间
 		FTranslationTrack& TranslationTrack = TranslationData[TrackIndex];
 		for (int32 KeyIndex = 0; KeyIndex < TranslationTrack.PosKeys.Num(); ++KeyIndex)
 		{
@@ -566,6 +636,7 @@ void UAnimCompress_RemoveLinearKeys::ConvertToRelativeSpace(
 		}
 
 		// convert the new rotation tracks to additive space
+		// 将新的旋转轨迹转换为附加空间
 		FRotationTrack& RotationTrack = RotationData[TrackIndex];
 		for (int32 KeyIndex = 0; KeyIndex < RotationTrack.RotKeys.Num(); ++KeyIndex)
 		{
@@ -574,12 +645,14 @@ void UAnimCompress_RemoveLinearKeys::ConvertToRelativeSpace(
 		}
 
 		// scale key
+		// 音阶键
 		if (ScaleData.Num() > 0)
 		{
         	const FVector3f& RefBoneScale = (BasePoseTrack.ScaleKeys.Num() > 0)? BasePoseTrack.ScaleKeys[0] : FVector3f::OneVector;
 			const FVector3f InvRefBoneScale = (FVector3f)FTransform::GetSafeScaleReciprocal((FVector)RefBoneScale);
 
 			// convert the new scale tracks to additive space
+			// 将新的比例轨道转换为附加空间
 			FScaleTrack& ScaleTrack = ScaleData[TrackIndex];
 			for (int32 KeyIndex = 0; KeyIndex < ScaleTrack.ScaleKeys.Num(); ++KeyIndex)
 			{
@@ -597,6 +670,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 	TArray<FScaleTrack>& ScaleTracks)
 {
 	// extract all the data we'll need about the skeleton and animation sequence
+	// 提取我们需要的有关骨架和动画序列的所有数据
 	const int32 NumBones			= CompressibleAnimData.BoneData.Num();
 	const int32 NumKeys			= CompressibleAnimData.NumberOfKeys;
 	const float SequenceLength	= CompressibleAnimData.SequenceLength;
@@ -608,9 +682,11 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 	const bool bHasScale =  (ScaleTracks.Num() > 0);
 
 	// make sure the parent key scale is properly bound to 1.0 or more
+	// 确保父键比例正确绑定到 1.0 或更大
 	const float ClampedParentKeyScale = FMath::Max(ParentKeyScale, 1.0f);
 
 	// generate the raw and compressed skeleton in world-space
+	// 在世界空间中生成原始和压缩的骨架
 	TArray<FTransform> RawWorldBones;
 	TArray<FTransform> NewWorldBones;
 	RawWorldBones.Empty(NumBones * NumKeys);
@@ -619,13 +695,16 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 	NewWorldBones.AddZeroed(NumBones * NumKeys);
 
 	// generate an array to hold the indices of our end effectors
+	// 生成一个数组来保存末端执行器的索引
 	TArray<int32> EndEffectors;
 	EndEffectors.Empty(NumBones);
 
 	// Create an array of FTransform to use as a workspace
+	// 创建一个 FTransform 数组用作工作区
 	TArray<FTransform> BoneAtoms;
 
 	// setup the raw bone transformation and find all end effectors
+	// 设置原始骨骼转换并找到所有末端执行器
 	for ( int32 BoneIndex = 0; BoneIndex < NumBones; ++BoneIndex )
 	{
 		if (CompressibleAnimData.IsCancelled())
@@ -633,6 +712,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 			return;
 		}
 		// get the raw world-atoms for this bone
+		// 获取这根骨头的原始世界原子
 		UpdateWorldBoneTransformTable(
 			CompressibleAnimData,
 			OutCompressedData,
@@ -642,6 +722,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 			RawWorldBones);
 
 		// also record all end-effectors we find
+		// 还记录我们找到的所有末端执行器
 		const FBoneData& Bone = CompressibleAnimData.BoneData[BoneIndex];
 		if (Bone.IsEndEffector())
 		{
@@ -651,6 +732,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 
 	TArray<int32> TargetBoneIndices;
 	// for each bone...
+	// 对于每根骨头...
 	for ( int32 BoneIndex = 0; BoneIndex < NumBones; ++BoneIndex )
 	{
 		if (CompressibleAnimData.IsCancelled())
@@ -665,6 +747,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 		if (TrackIndex != INDEX_NONE)
 		{
 			// get the tracks we will be editing for this bone
+			// 获取我们将为此骨骼编辑的轨道
 			FRotationTrack& RotTrack = RotationTracks[TrackIndex];
 			FTranslationTrack& TransTrack = PositionTracks[TrackIndex];
 			const int32 NumRotKeys = RotTrack.RotKeys.Num();
@@ -674,6 +757,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 			check( (NumPosKeys == 1) || (NumRotKeys == 1) || (NumPosKeys == NumRotKeys) );
 
 			// build an array of end effectors we need to monitor
+			// 构建我们需要监控的一系列末端执行器
 			TargetBoneIndices.Reset(NumBones);
 
 			int32 HighestTargetBoneIndex = BoneIndex;
@@ -711,11 +795,13 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 			}
 
 			// if requested, retarget the FBoneAtoms towards the target end effectors
+			// 如果需要，将 FBoneAtoms 重新定位到目标末端执行器
 			if (bRetarget)
 			{
 				if (NumScaleKeys > 0 && ParentBoneIndex != INDEX_NONE)
 				{
 					// update our bone table from the current bone through the last end effector we need to test
+					// 从当前骨骼到我们需要测试的最后一个末端执行器更新我们的骨骼表
 					UpdateWorldBoneTransformRange(
 						CompressibleAnimData,
 						OutCompressedData,
@@ -731,6 +817,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 					FScaleTrack& ScaleTrack = ScaleTracks[TrackIndex];
 
 					// adjust all translation keys to align better with the destination
+					// 调整所有翻译键以更好地与目的地保持一致
 					for ( int32 KeyIndex = 0; KeyIndex < NumScaleKeys; ++KeyIndex )
 					{
 						FVector3f& Key= ScaleTrack.ScaleKeys[KeyIndex];
@@ -767,6 +854,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 					else
 					{
 						// update our bone table from the current bone through the last end effector we need to test
+						// 从当前骨骼到我们需要测试的最后一个末端执行器更新我们的骨骼表
 						UpdateWorldBoneTransformRange(
 							CompressibleAnimData,
 							OutCompressedData,
@@ -780,6 +868,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 							NewWorldBones);
 						
 						// adjust all rotation keys towards the end effector target
+						// 朝着末端执行器目标调整所有旋转关键点
 						for ( int32 KeyIndex = 0; KeyIndex < NumRotKeys; ++KeyIndex )
 						{
 							FQuat4f& Key = RotTrack.RotKeys[KeyIndex];
@@ -792,15 +881,18 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 							const FTransform& CurrentChildTransform = NewWorldBones[(FurthestTargetBoneIndex*NumKeys) + FrameIndex].GetRelativeTransform(NewWorldTransform);
 
 							// find the two vectors which represent the angular error we are trying to correct
+							// 找到代表我们要纠正的角度误差的两个向量
 							const FVector& CurrentHeading = CurrentChildTransform.GetTranslation();
 							const FVector& DesiredHeading = DesiredChildTransform.GetTranslation();
 
 							// if these are valid, we can continue
+							// 如果这些有效，我们可以继续
 							if (!CurrentHeading.IsNearlyZero() && !DesiredHeading.IsNearlyZero())
 							{
 								const float DotResult = CurrentHeading.GetSafeNormal() | DesiredHeading.GetSafeNormal();
 
 								// limit the range we will retarget to something reasonable (~60 degrees)
+								// 将我们重新定位的范围限制为合理的范围（~60 度）
 								if (DotResult < 1.0f && DotResult > 0.5f)
 								{
 									FQuat4f Adjustment= FQuat4f::FindBetweenVectors((FVector3f)CurrentHeading, (FVector3f)DesiredHeading);
@@ -825,6 +917,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 				if (NumPosKeys > 0 && ParentBoneIndex != INDEX_NONE)
 				{
 					// update our bone table from the current bone through the last end effector we need to test
+					// 从当前骨骼到我们需要测试的最后一个末端执行器更新我们的骨骼表
 					UpdateWorldBoneTransformRange(
 						CompressibleAnimData,
 						OutCompressedData,
@@ -838,6 +931,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 						NewWorldBones);
 					
 					// adjust all translation keys to align better with the destination
+					// 调整所有翻译键以更好地与目的地保持一致
 					for ( int32 KeyIndex = 0; KeyIndex < NumPosKeys; ++KeyIndex )
 					{
 						FVector3f& Key= TransTrack.PosKeys[KeyIndex];
@@ -856,6 +950,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 			}
 
 			// look for a parent track to reference as a guide
+			// 寻找父曲目作为参考
 			int32 GuideTrackIndex = INDEX_NONE;
 			if (ClampedParentKeyScale > 1.0f)
 			{
@@ -868,6 +963,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 			}
 
 			// update our bone table from the current bone through the last end effector we need to test
+			// 从当前骨骼到我们需要测试的最后一个末端执行器更新我们的骨骼表
 			UpdateWorldBoneTransformRange(
 				CompressibleAnimData,
 				OutCompressedData,
@@ -881,11 +977,15 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 				NewWorldBones);
 			
 			// rebuild the BoneAtoms table using the current set of keys
+			// 使用当前的键集重建 BoneAtoms 表
 			UpdateBoneAtomList(CompressibleAnimData, OutCompressedData, BoneIndex, TrackIndex, NumKeys, TimePerFrame, BoneAtoms);
 
 			// determine the EndEffectorTolerance. 
+			// 确定 EndEffectorTolerance。
 			// We use the Maximum value by default, and the Minimum value
+			// 我们默认使用最大值，默认使用最小值
 			// as we approach the end effectors
+			// 当我们接近末端执行器时
 			float EndEffectorTolerance = MaxEffectorDiff;
 			if (ShortestChain <= 1)
 			{
@@ -893,6 +993,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 			}
 
 			// Determine if a guidance track should be used to aid in choosing keys to retain
+			// 确定是否应使用引导轨道来帮助选择要保留的钥匙
 			TArray<float>* GuidanceTrack = nullptr;
 			float GuidanceScale = 1.0f;
 			if (GuideTrackIndex != INDEX_NONE)
@@ -903,7 +1004,9 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 			}
 			
 			// if the TargetBoneIndices array is empty, then this bone is an end effector.
+			// 如果 TargetBoneIndices 数组为空，则该骨骼是末端执行器。
 			// so we add it to the list to maintain our tolerance checks
+			// 所以我们将其添加到列表中以维护我们的容差检查
 			if (TargetBoneIndices.Num() == 0)
 			{
 				TargetBoneIndices.Add(BoneIndex);
@@ -915,6 +1018,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 				{
 					FScaleTrack& ScaleTrack = ScaleTracks[TrackIndex];
 					// filter out translations we can approximate through interpolation
+					// 过滤掉我们可以通过插值近似的翻译
 					FilterLinearKeysTemplate<ScaleAdapter>(
 						ScaleTrack.ScaleKeys, 
 						ScaleTrack.Times, 
@@ -933,6 +1037,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 						CompressibleAnimData.BoneData);
 
 					// update our bone table from the current bone through the last end effector we need to test
+					// 从当前骨骼到我们需要测试的最后一个末端执行器更新我们的骨骼表
 					UpdateWorldBoneTransformRange(
 						CompressibleAnimData,
 						OutCompressedData,
@@ -946,10 +1051,12 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 						NewWorldBones);
 					
 					// rebuild the BoneAtoms table using the current set of keys
+					// 使用当前的键集重建 BoneAtoms 表
 					UpdateBoneAtomList(CompressibleAnimData, OutCompressedData, BoneIndex, TrackIndex, NumKeys, TimePerFrame, BoneAtoms);
 				}
 
 				// filter out translations we can approximate through interpolation
+				// 过滤掉我们可以通过插值近似的翻译
 				FilterLinearKeysTemplate<TranslationAdapter>(
 					TransTrack.PosKeys, 
 					TransTrack.Times, 
@@ -968,6 +1075,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 					CompressibleAnimData.BoneData);
 
 				// update our bone table from the current bone through the last end effector we need to test
+				// 从当前骨骼到我们需要测试的最后一个末端执行器更新我们的骨骼表
 				UpdateWorldBoneTransformRange(
 					CompressibleAnimData,
 					OutCompressedData,
@@ -981,9 +1089,11 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 					NewWorldBones);
 				
 				// rebuild the BoneAtoms table using the current set of keys
+				// 使用当前的键集重建 BoneAtoms 表
 				UpdateBoneAtomList(CompressibleAnimData, OutCompressedData, BoneIndex, TrackIndex, NumKeys, TimePerFrame, BoneAtoms);
 
 				// filter out rotations we can approximate through interpolation
+				// 过滤掉我们可以通过插值近似的旋转
 				FilterLinearKeysTemplate<RotationAdapter>(
 					RotTrack.RotKeys, 
 					RotTrack.Times, 
@@ -1004,6 +1114,7 @@ void UAnimCompress_RemoveLinearKeys::ProcessAnimationTracks(
 		}
 
 		// make sure the final compressed keys are repesented in our NewWorldBones table
+		// 确保最终的压缩密钥出现在我们的 NewWorldBones 表中
 		UpdateWorldBoneTransformRange(
 			CompressibleAnimData,
 			OutCompressedData,
@@ -1038,6 +1149,7 @@ void UAnimCompress_RemoveLinearKeys::CompressUsingUnderlyingCompressor(
 		true);
 
 	// record the proper runtime decompressor to use
+	// 记录要使用的正确运行时解压缩器
 	FUECompressedAnimDataMutable& AnimData = static_cast<FUECompressedAnimDataMutable&>(*OutCompressedData.AnimData);
 	AnimData.KeyEncodingFormat = AKF_VariableKeyLerp;
 	AnimationFormat_SetInterfaceLinks(AnimData);
@@ -1047,10 +1159,13 @@ bool UAnimCompress_RemoveLinearKeys::DoReduction(const FCompressibleAnimData& Co
 {
 #if WITH_EDITORONLY_DATA
 	// Only need to do the heavy lifting if it will have some impact
+	// 仅当会产生一些影响时才需要进行繁重的工作
 	// One of these will always be true for the base class, but derived classes may choose to turn both off (e.g., in PerTrackCompression)
+	// 对于基类，其中之一始终为真，但派生类可以选择关闭两者（例如，在 PerTrackCompression 中）
 	const bool bRunningProcessor = bRetarget || bActuallyFilterLinearKeys;
 
 	// If the processor is to be run, then additive animations need to be converted from relative to absolute
+	// 如果要运行处理器，则需要将附加动画从相对转换为绝对
 	const bool bNeedToConvertBackToAdditive = bRunningProcessor ? CompressibleAnimData.bIsValidAdditive : false;
 
 	TUniquePtr<FCompressibleAnimData> TempConvertedAnimData;
@@ -1064,6 +1179,7 @@ bool UAnimCompress_RemoveLinearKeys::DoReduction(const FCompressibleAnimData& Co
 	const FCompressibleAnimData& CompressibleDataToOperateOn = bNeedToConvertBackToAdditive ? *TempConvertedAnimData : CompressibleAnimData;
 
 	// Separate the raw data into tracks and remove trivial tracks (all the same value)
+	// 将原始数据分成轨道并删除琐碎的轨道（所有相同的值）
 	TArray<FTranslationTrack> TranslationData;
 	TArray<FRotationTrack> RotationData;
 	TArray<FScaleTrack> ScaleData;
@@ -1078,6 +1194,7 @@ bool UAnimCompress_RemoveLinearKeys::DoReduction(const FCompressibleAnimData& Co
 		double TimeStart = FPlatformTime::Seconds();
 #endif
 		// compress this animation without any key-reduction to prime the codec
+		// 压缩此动画而不进行任何关键点缩减以启动编解码器
 		CompressUsingUnderlyingCompressor(
 			CompressibleDataToOperateOn,
 			OutResult,
@@ -1087,6 +1204,7 @@ bool UAnimCompress_RemoveLinearKeys::DoReduction(const FCompressibleAnimData& Co
 			false);
 
 		// now remove the keys which can be approximated with linear interpolation
+		// 现在删除可以用线性插值近似的关键点
 		ProcessAnimationTracks(
 			CompressibleDataToOperateOn,
 			OutResult,
@@ -1106,6 +1224,7 @@ bool UAnimCompress_RemoveLinearKeys::DoReduction(const FCompressibleAnimData& Co
 	}
 
 	// compress the final (possibly key-reduced) tracks into the anim sequence buffers
+	// 将最终（可能是关键减少的）轨道压缩到动画序列缓冲区中
 	CompressUsingUnderlyingCompressor(
 		CompressibleAnimData,
 		OutResult,

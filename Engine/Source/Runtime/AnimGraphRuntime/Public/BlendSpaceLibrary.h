@@ -28,10 +28,12 @@ class UBlendSpaceLibrary : public UBlueprintFunctionLibrary
 
 public:
 	/** Get a blend space context from an anim node context. */
+	/** 从动画节点上下文获取混合空间上下文。 */
 	UFUNCTION(BlueprintCallable, Category = "Blend Space", meta = (BlueprintThreadSafe, ExpandEnumAsExecs = "Result"))
 	static ANIMGRAPHRUNTIME_API FBlendSpaceReference ConvertToBlendSpace(const FAnimNodeReference& Node, EAnimNodeReferenceConversionResult& Result);
 
 	/** Get a blend space context from an anim node context (pure). */
+	/** 从动画节点上下文（纯）获取混合空间上下文。 */
 	UFUNCTION(BlueprintPure, Category = "Blend Space", meta = (BlueprintThreadSafe, DisplayName = "Convert to Blend Space (Pure)"))
 	static void ConvertToBlendSpacePure(const FAnimNodeReference& Node, FBlendSpaceReference& BlendSpace, bool& Result)
 	{
@@ -41,14 +43,17 @@ public:
 	}
 
 	/** Get the current position of the blend space. */
+	/** 获取混合空间的当前位置。 */
 	UFUNCTION(BlueprintPure, Category = "Blend Space", meta = (BlueprintThreadSafe))
 	static ANIMGRAPHRUNTIME_API FVector GetPosition(const FBlendSpaceReference& BlendSpace);
 
 	/** Get the current sample coordinates after going through the filtering. */
+	/** 经过过滤后得到当前样本坐标。 */
 	UFUNCTION(BlueprintPure, Category = "Blend Space", meta = (BlueprintThreadSafe))
 	static ANIMGRAPHRUNTIME_API FVector GetFilteredPosition(const FBlendSpaceReference& BlendSpace);
 
 	/** Forces the Position to the specified value */
+	/** 强制将位置设置为指定值 */
 	UFUNCTION(BlueprintCallable, Category = "Blend Space", meta = (BlueprintThreadSafe))
 	static ANIMGRAPHRUNTIME_API void SnapToPosition(const FBlendSpaceReference& BlendSpace, FVector NewPosition);
 };

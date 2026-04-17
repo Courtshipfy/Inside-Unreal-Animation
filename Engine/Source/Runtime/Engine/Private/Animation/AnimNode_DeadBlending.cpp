@@ -21,6 +21,7 @@ TAutoConsoleVariable<int32> CVarAnimDeadBlendingEnable(TEXT("a.AnimNode.DeadBlen
 namespace UE::Anim
 {
 	// Inertialization request event bound to a node
+	// 绑定到节点的初始化请求事件
 	class FDeadBlendingRequester : public IInertializationRequester
 	{
 	public:
@@ -32,6 +33,7 @@ namespace UE::Anim
 
 	private:
 		// IInertializationRequester interface
+		// IIInertializationRequester接口
 		virtual void RequestInertialization(
 			float InRequestedDuration,
 			const UBlendProfile* InBlendProfile) override
@@ -55,12 +57,15 @@ namespace UE::Anim
 		virtual FName GetTag() const override { return Node.GetTag(); }
 
 		// Node to target
+		// 节点到目标
 		FAnimNode_DeadBlending& Node;
 
 		// Node index
+		// 节点索引
 		int32 NodeId;
 
 		// Proxy currently executing
+		// 当前正在执行的代理
 		FAnimInstanceProxy& Proxy;
 	};
 
@@ -233,13 +238,21 @@ namespace UE::Anim::DeadBlending::Private
 		const float Epsilon = UE_KINDA_SMALL_NUMBER)
 	{
 		// Essentially what this function does is compute a half-life based on the ratio between the velocity vector and
+		// 本质上，该函数的作用是根据速度矢量与速度矢量之间的比率计算半衰期
 		// the vector from the source to the destination. This is then clamped to some min and max. If the signs are
+		// 从源到目的地的向量。然后将其限制为某个最小值和最大值。如果迹象是
 		// different (i.e. the velocity and the vector from source to destination are in opposite directions) this will
+		// 不同（即从源到目的地的速度和矢量方向相反），这将
 		// produce a negative number that will get clamped to HalfLifeMin. If the signs match, this will produce a large
+		// 产生一个负数，该负数将被限制为 HalfLifeMin。如果符号匹配，这将产生一个大的
 		// number when the velocity is small and the vector from source to destination is large, and a small number when
+		// [翻译失败: number when the velocity is small and the vector from source to destination is large, and a small number when]
 		// the velocity is large and the vector from source to destination is small. This will be clamped either way to 
+		// 速度很大，从源到目的地的矢量很小。这将被夹紧到
 		// be in the range given by HalfLifeMin and HalfLifeMax. Finally, since the velocity can be close to zero we 
+		// 在 HalfLifeMin 和 HalfLifeMax 给出的范围内。最后，由于速度可以接近于零，我们
 		// have to clamp it to always be greater than some given magnitude (preserving the sign).
+		// 必须将其限制为始终大于某个给定的幅度（保留符号）。
 
 		return FMath::Clamp(HalfLife * (SrcDstDiff / ClipMagnitudeToGreaterThanEpsilon(SrcVelocity, Epsilon)), HalfLifeMin, HalfLifeMax);
 	}
@@ -297,6 +310,7 @@ void FAnimNode_DeadBlending::InitFrom(
 	const int32 NumSkeletonBones = UE::Anim::DeadBlending::Private::GetNumSkeletonBones(BoneContainer);
 
 	// Compute the Inertialization Bone Indices which we will use to index into BoneTranslations, BoneRotations, etc
+	// 计算惯性化骨骼索引，我们将使用它来索引 BoneTranslations、BoneRotations 等
 
 	BoneIndices.Init(INDEX_NONE, NumSkeletonBones);
 
@@ -318,6 +332,7 @@ void FAnimNode_DeadBlending::InitFrom(
 	}
 
 	// Allocate Inertialization Bones
+	// 分配惯性化骨骼
 
 	BoneTranslations.Init(FVector::ZeroVector, NumInertializationBones);
 	BoneRotations.Init(FQuat::Identity, NumInertializationBones);
@@ -344,6 +359,7 @@ void FAnimNode_DeadBlending::InitFrom(
 		}
 
 		// Get Bone Indices for Inertialization Bone, Prev and Curr Pose Bones
+		// 获取惯性化骨骼、前一姿势骨骼和当前姿势骨骼的骨骼索引
 
 		const int32 InertializationBoneIndex = BoneIndices[SkeletonPoseBoneIndex];
 		const int32 CurrPoseBoneIndex = SrcPoseCurr.BoneIndices[SkeletonPoseBoneIndex];
@@ -354,6 +370,7 @@ void FAnimNode_DeadBlending::InitFrom(
 		check(PrevPoseBoneIndex != INDEX_NONE);
 
 		// Get Source Animation Transform
+		// 获取源动画变换
 
 		const FVector SrcTranslationCurr = SrcPoseCurr.BoneTranslations[CurrPoseBoneIndex];
 		const FQuat SrcRotationCurr = SrcPoseCurr.BoneRotations[CurrPoseBoneIndex];
@@ -366,6 +383,7 @@ void FAnimNode_DeadBlending::InitFrom(
 		if (SrcPoseCurr.DeltaTime > UE_SMALL_NUMBER)
 		{
 			// Get Source Animation Velocity
+			// 获取源动画速度
 
 			const FVector SrcTranslationPrev = SrcPosePrev.BoneTranslations[PrevPoseBoneIndex];
 			const FQuat SrcRotationPrev = SrcPosePrev.BoneRotations[PrevPoseBoneIndex];
@@ -384,12 +402,14 @@ void FAnimNode_DeadBlending::InitFrom(
 				(FVector3f)(UE::Anim::DeadBlending::Private::VectorLogSafe(ScaleDiffExponential) / SrcPoseCurr.DeltaTime);
 
 			// Clamp Maximum Velocity
+			// 钳位最大速度
 
 			BoneTranslationVelocities[InertializationBoneIndex] = BoneTranslationVelocities[InertializationBoneIndex].GetClampedToMaxSize(MaximumTranslationVelocity);
 			BoneRotationVelocities[InertializationBoneIndex] = BoneRotationVelocities[InertializationBoneIndex].GetClampedToMaxSize(FMath::DegreesToRadians(MaximumRotationVelocity));
 			BoneScaleVelocities[InertializationBoneIndex] = BoneScaleVelocities[InertializationBoneIndex].GetClampedToMaxSize(MaximumScaleVelocity);
 
 			// Compute Decay HalfLives
+			// [翻译失败: Compute Decay HalfLives]
 
 			const FTransform DstTransform = InPose[BoneIndex];
 
@@ -426,6 +446,7 @@ void FAnimNode_DeadBlending::InitFrom(
 	CurveData.CopyFrom(SrcPoseCurr.Curves.BlendedCurve);
 
 	// Record Source Animation Curve State
+	// [翻译失败: Record Source Animation Curve State]
 
 	UE::Anim::FNamedValueArrayUtils::Union(CurveData, SrcPoseCurr.Curves.BlendedCurve,
 		[this](FDeadBlendingCurveElement& OutResultElement, const UE::Anim::FCurveElement& InElement1, UE::Anim::ENamedValueUnionFlags InFlags)
@@ -436,6 +457,7 @@ void FAnimNode_DeadBlending::InitFrom(
 		});
 
 	// Record Source Animation Curve Velocity
+	// [翻译失败: Record Source Animation Curve Velocity]
 
 	if (SrcPoseCurr.DeltaTime > UE_SMALL_NUMBER)
 	{
@@ -454,6 +476,7 @@ void FAnimNode_DeadBlending::InitFrom(
 	}
 
 	// Perform Union with Curves from Destination Animation and compute Half-life
+	// 与目标动画中的曲线执行并集并计算半衰期
 
 	UE::Anim::FNamedValueArrayUtils::Union(CurveData, InCurves,
 		[this](FDeadBlendingCurveElement& OutResultElement, const UE::Anim::FCurveElement& InElement1, UE::Anim::ENamedValueUnionFlags InFlags)
@@ -467,25 +490,34 @@ void FAnimNode_DeadBlending::InitFrom(
 		});
 
 	// Apply filtering to remove filtered curves from extrapolation. This does not actually
+	// 应用过滤以从外推法中删除过滤后的曲线。这实际上并不
 	// prevent these curves from being blended, but does stop them appearing as empty
+	// 防止这些曲线混合，但确实阻止它们显示为空
 	// in the output curves created by the Union in ApplyTo unless they are already in the
+	// 在ApplyTo中Union创建的输出曲线中，除非它们已经在
 	// destination animation.
+	// 目的地动画。
 	if (CurveFilter.Num() > 0)
 	{
 		UE::Anim::FCurveUtils::Filter(CurveData, CurveFilter);
 	}
 
 	// Apply filtering to remove curves that are not meant to be extrapolated
+	// 应用过滤来删除不需要外推的曲线
 	if (ExtrapolatedCurveFilter.Num() > 0)
 	{
 		UE::Anim::FCurveUtils::Filter(CurveData, ExtrapolatedCurveFilter);
 	}
 
 	// Record Root Motion Delta
+	// 记录根运动增量
 
 	// We don't compute the root acceleration difference which can be quite noisy and unreliable
+	// 我们不计算根加速度差，这可能非常嘈杂且不可靠
 	// and so can cause the extrapolated root velocity to be quite bad and not very useful when
+	// 因此可能会导致推断的根速度非常糟糕并且在以下情况下不是很有用
 	// being blended out.
+	// 被混合出来。
 
 	RootTranslationVelocity = FVector3f::ZeroVector;
 	RootRotationVelocity = FVector3f::ZeroVector;
@@ -527,6 +559,7 @@ void FAnimNode_DeadBlending::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& InO
 		check(InertializationBoneIndex != INDEX_NONE);
 
 		// Compute Extrapolated Bone State
+		// 计算外推骨状态
 
 		const FVector ExtrapolatedTranslation = UE::Anim::DeadBlending::Private::ExtrapolateTranslation(
 			BoneTranslations[InertializationBoneIndex],
@@ -545,6 +578,7 @@ void FAnimNode_DeadBlending::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& InO
 		if (bLinearlyInterpolateScales)
 		{
 			// If we are handling scales linearly then treat them like a normal vector such as a translation.
+			// 如果我们线性处理尺度，那么将它们视为法线向量（例如平移）。
 			ExtrapolatedScale = UE::Anim::DeadBlending::Private::ExtrapolateTranslation(
 				BoneScales[InertializationBoneIndex],
 				BoneScaleVelocities[InertializationBoneIndex],
@@ -554,6 +588,7 @@ void FAnimNode_DeadBlending::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& InO
 		else
 		{
 			// Otherwise extrapolate using the exponential version of scalar velocities.
+			// [翻译失败: Otherwise extrapolate using the exponential version of scalar velocities.]
 			ExtrapolatedScale = UE::Anim::DeadBlending::Private::ExtrapolateScale(
 				BoneScales[InertializationBoneIndex],
 				BoneScaleVelocities[InertializationBoneIndex],
@@ -571,24 +606,32 @@ void FAnimNode_DeadBlending::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& InO
 		}
 #endif
 		// We need to enforce that the blend of the rotation doesn't suddenly "switch sides"
+		// [翻译失败: We need to enforce that the blend of the rotation doesn't suddenly "switch sides"]
 		// given that the extrapolated rotation can become quite far from the destination
+		// 鉴于推断的旋转可能会距离目的地很远
 		// animation. To do this we keep track of the blend "direction" and ensure that the
+		// 动画片。为此，我们跟踪混合“方向”并确保
 		// delta we are applying to the destination animation always remains on the same
+		// 我们应用于目标动画的增量始终保持不变
 		// side of this rotation.
+		// 此旋转的一侧。
 
 		FQuat RotationDiff = ExtrapolatedRotation * InOutPose[BoneIndex].GetRotation().Inverse();
 		RotationDiff.EnforceShortestArcWith((FQuat)BoneRotationDirections[InertializationBoneIndex]);
 
 		// Update BoneRotationDirections to match our current path
+		// 更新 BoneRotationDirections 以匹配我们当前的路径
 		BoneRotationDirections[InertializationBoneIndex] = (FQuat4f)RotationDiff;
 
 		// Compute Blend Alpha
+		// 计算混合 Alpha
 
 		const float Alpha = 1.0f - FAlphaBlend::AlphaToBlendOption(
 			FMath::Clamp(InertializationTime / FMath::Max(InertializationDurationPerBone[SkeletonPoseBoneIndex], UE_SMALL_NUMBER), 0.0f, 1.0f),
 			InertializationBlendMode, InertializationCustomBlendCurve);
 
 		// Perform Blend
+		// 执行混合
 
 		if (Alpha != 0.0f)
 		{
@@ -596,10 +639,15 @@ void FAnimNode_DeadBlending::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& InO
 			InOutPose[BoneIndex].SetRotation(FQuat::MakeFromRotationVector(RotationDiff.ToRotationVector() * Alpha) * InOutPose[BoneIndex].GetRotation());
 
 			// Here we use `Eerp` rather than `Lerp` to interpolate scales by default (see: https://theorangeduck.com/page/scalar-velocity).
+			// 这里我们默认使用 `Eerp` 而不是 `Lerp` 来插值尺度（参见：https://theorangeduck.com/page/scalar-velocity）。
 			// This default is inconsistent with the rest of Unreal which (mostly) uses `Lerp` on scales. The decision 
+			// 此默认值与虚幻的其余部分不一致，虚幻的其余部分（大部分）在比例上使用“Lerp”。决定
 			// to use `Eerp` by default here is partially due to the fact we are also providing the option of dealing properly 
+			// 这里默认使用 `Eerp` 部分是因为我们还提供了正确处理的选项
 			// with scalar velocities in this node, and partially to try and not to lock this node into having the same less 
+			// 在此节点中具有标量速度，并且部分地尝试不将该节点锁定为具有相同的 less
 			// accurate behavior by default. Users still have the option to interpolate scales with `Lerp` if they want using bLinearlyInterpolateScales.
+			// [翻译失败: accurate behavior by default. Users still have the option to interpolate scales with `Lerp` if they want using bLinearlyInterpolateScales.]
 			if (bLinearlyInterpolateScales)
 			{
 				InOutPose[BoneIndex].SetScale3D(FMath::Lerp(InOutPose[BoneIndex].GetScale3D(), ExtrapolatedScale, Alpha));
@@ -612,12 +660,14 @@ void FAnimNode_DeadBlending::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& InO
 	}
 
 	// Compute Blend Alpha
+	// [翻译失败: Compute Blend Alpha]
 
 	const float CurveAlpha = 1.0f - FAlphaBlend::AlphaToBlendOption(
 		FMath::Clamp(InertializationTime / FMath::Max(InertializationDuration, UE_SMALL_NUMBER), 0.0f, 1.0f),
 		InertializationBlendMode, InertializationCustomBlendCurve);
 
 	// Blend Curves
+	// [翻译失败: Blend Curves]
 
 	PoseCurveData.CopyFrom(InOutCurves);
 
@@ -628,6 +678,7 @@ void FAnimNode_DeadBlending::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& InO
 			UE::Anim::ENamedValueUnionFlags InFlags)
 		{
 			// For filtered Curves take destination value
+			// 对于过滤后的曲线，采用目标值
 
 			if (FilteredCurves.Contains(OutResultElement.Name))
 			{
@@ -637,6 +688,7 @@ void FAnimNode_DeadBlending::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& InO
 			}
 
 			// Compute Extrapolated Curve Value
+			// 计算外推曲线值
 
 			const float ExtrapolatedCurve = UE::Anim::DeadBlending::Private::ExtrapolateCurve(
 				InElement1.Value,
@@ -658,10 +710,12 @@ void FAnimNode_DeadBlending::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& InO
 		});
 
 	// Blend Root Motion Delta
+	// 混合根运动增量
 
 	if (const UE::Anim::IAnimRootMotionProvider* RootMotionProvider = UE::Anim::IAnimRootMotionProvider::Get())
 	{
 		// Compute Blend Alpha
+		// 计算混合 Alpha
 
 		const float Alpha = 1.0f - FAlphaBlend::AlphaToBlendOption(
 			FMath::Clamp(InertializationTime / FMath::Max(InertializationDurationPerBone[0], UE_SMALL_NUMBER), 0.0f, 1.0f),
@@ -773,6 +827,7 @@ void FAnimNode_DeadBlending::CacheBones_AnyThread(const FAnimationCacheBonesCont
 	Source.CacheBones(Context);
 
 	// Compute Compact Pose Bone Index for each bone in Filter
+	// 计算过滤器中每个骨骼的紧凑姿势骨骼指数
 
 	const FBoneContainer& RequiredBones = Context.AnimInstanceProxy->GetRequiredBones();
 	BoneFilter.Init(FCompactPoseBoneIndex(INDEX_NONE), FilteredBones.Num());
@@ -796,12 +851,15 @@ void FAnimNode_DeadBlending::Update_AnyThread(const FAnimationUpdateContext& Con
 	if (bNeedsReset)
 	{
 		// Clear any pending inertialization requests
+		// 清除任何待处理的惯性化请求
 		RequestQueue.Reset();
 
 		// Clear the inertialization state
+		// [翻译失败: Clear the inertialization state]
 		Deactivate();
 
 		// Clear the pose history
+		// [翻译失败: Clear the pose history]
 		PrevPoseSnapshot.Empty();
 		CurrPoseSnapshot.Empty();
 	}
@@ -809,6 +867,7 @@ void FAnimNode_DeadBlending::Update_AnyThread(const FAnimationUpdateContext& Con
 	UpdateCounter.SynchronizeWith(Context.AnimInstanceProxy->GetUpdateCounter());
 
 	// Catch the inertialization request message and call the node's RequestInertialization function with the request
+	// [翻译失败: Catch the inertialization request message and call the node's RequestInertialization function with the request]
 	UE::Anim::TScopedGraphMessage<UE::Anim::FDeadBlendingRequester> InertializationMessage(Context, Context, this);
 
 	if (bForwardRequestsThroughSkippedCachedPoseNodes)
@@ -817,17 +876,25 @@ void FAnimNode_DeadBlending::Update_AnyThread(const FAnimationUpdateContext& Con
 		const FAnimInstanceProxy& Proxy = *Context.AnimInstanceProxy;
 
 		// Handle skipped updates for cached poses by forwarding to inertialization nodes in those residual stacks
+		// 通过转发到这些残余堆栈中的惯性化节点来处理缓存姿势的跳过更新
 		UE::Anim::TScopedGraphMessage<UE::Anim::FCachedPoseSkippedUpdateHandler> CachedPoseSkippedUpdate(Context, [this, NodeId, &Proxy](TArrayView<const UE::Anim::FMessageStack> InSkippedUpdates)
 		{
 			// If we have a pending request forward the request to other Inertialization nodes
+			// 如果我们有待处理的请求，则将该请求转发到其他惯性化节点
 			// that were skipped due to pose caching.
+			// 由于姿势缓存而被跳过。
 			if (RequestQueue.Num() > 0)
 			{
 				// Cached poses have their Update function called once even though there may be multiple UseCachedPose nodes for the same pose.
+				// 即使同一姿势可能有多个 UseCachedPose 节点，缓存姿势也会调用一次其 Update 函数。
 				// Because of this, there may be Inertialization ancestors of the UseCachedPose nodes that missed out on requests.
+				// 因此，UseCachedPose 节点的 Inertialization 祖先可能会错过请求。
 				// So here we forward 'this' node's requests to the ancestors of those skipped UseCachedPose nodes.
+				// 因此，在这里我们将“此”节点的请求转发给那些跳过的 UseCachedPose 节点的祖先。
 				// Note that in some cases, we may be forwarding the requests back to this same node.  Those duplicate requests will ultimately
+				// 请注意，在某些情况下，我们可能会将请求转发回同一节点。  这些重复的请求最终将
 				// be ignored by the 'AddUnique' in the body of FAnimNode_DeadBlending::RequestInertialization.
+				// 被 FAnimNode_DeadBlending::RequestInertialization 主体中的“AddUnique”忽略。
 				for (const UE::Anim::FMessageStack& Stack : InSkippedUpdates)
 				{
 					Stack.ForEachMessage<UE::Anim::IInertializationRequester>([this, NodeId, &Proxy](UE::Anim::IInertializationRequester& InMessage)
@@ -845,6 +912,7 @@ void FAnimNode_DeadBlending::Update_AnyThread(const FAnimationUpdateContext& Con
 		});
 
 		// Context message stack lifetime is scope based so we need to call Source.Update() before exiting the scope of the message above.
+		// 上下文消息堆栈生命周期是基于范围的，因此我们需要在退出上述消息的范围之前调用 Source.Update()。
 		Source.Update(Context);
 	}
 	else
@@ -853,6 +921,7 @@ void FAnimNode_DeadBlending::Update_AnyThread(const FAnimationUpdateContext& Con
 	}
 
 	// Accumulate delta time between calls to Evaluate_AnyThread
+	// 累积调用 Evaluate_AnyThread 之间的增量时间
 	DeltaTime += Context.GetDeltaTime();
 }
 
@@ -861,31 +930,40 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Evaluate_AnyThread);
 
 	// Evaluate the Input and write it to the Output
+	// 评估输入并将其写入输出
 
 	Source.Evaluate(Output);
 
 	// Disable inertialization if requested (for testing / debugging)
+	// 如果需要，禁用惯性化（用于测试/调试）
 	if (!CVarAnimDeadBlendingEnable.GetValueOnAnyThread())
 	{
 		// Clear any pending inertialization requests
+		// 清除任何待处理的惯性化请求
 		RequestQueue.Reset();
 
 		// Clear the inertialization state
+		// 清除惯性状态
 		Deactivate();
 
 		// Clear the pose history
+		// 清除姿势历史记录
 		PrevPoseSnapshot.Empty();
 		CurrPoseSnapshot.Empty();
 
 		// Reset the cached time accumulator
+		// [翻译失败: Reset the cached time accumulator]
 		DeltaTime = 0.0f;
 
 		return;
 	}
 
 	// Automatically detect teleports... note that we do the teleport distance check against the root bone's location (world space) rather
+	// [翻译失败: Automatically detect teleports... note that we do the teleport distance check against the root bone's location (world space) rather]
 	// than the mesh component's location because we still want to inertialize instances where the skeletal mesh component has been moved
+	// [翻译失败: than the mesh component's location because we still want to inertialize instances where the skeletal mesh component has been moved]
 	// while simultaneously counter-moving the root bone (as is the case when mounting and dismounting vehicles for example)
+	// 同时反向移动根骨（例如安装和拆卸车辆时的情况）
 
 	const FTransform ComponentTransform = Output.AnimInstanceProxy->GetComponentTransform();
 
@@ -911,6 +989,7 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// If teleported we simply reset the inertialization
+	// [翻译失败: If teleported we simply reset the inertialization]
 
 	if (bTeleported)
 	{
@@ -918,8 +997,11 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 	}
 	
 	// If we don't have any Pose Snapshots recorded it means this is the first time this node has been evaluated in 
+	// [翻译失败: If we don't have any Pose Snapshots recorded it means this is the first time this node has been evaluated in]
 	// which case there shouldn't be any discontinuity to remove, so no inertialization needs to be done, and we can 
+	// [翻译失败: which case there shouldn't be any discontinuity to remove, so no inertialization needs to be done, and we can]
 	// discard any requests.
+	// [翻译失败: discard any requests.]
 
 	if (CurrPoseSnapshot.IsEmpty() && PrevPoseSnapshot.IsEmpty())
 	{
@@ -927,11 +1009,13 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// Process Inertialization Requests
+	// 处理初始化请求
 
 	if (!RequestQueue.IsEmpty())
 	{
 
 		// Find shortest request
+		// 查找最短的请求
 		int32 ShortestRequestIdx = INDEX_NONE;
 		float ShortestRequestDuration = UE_MAX_FLT;
 		for (int32 RequestIdx = 0; RequestIdx < RequestQueue.Num(); RequestIdx++)
@@ -939,6 +1023,7 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 			const FInertializationRequest& Request = RequestQueue[RequestIdx];
 			
 			// If the request has a specific tag, it needs to match ours
+			// 如果请求有特定标签，它需要与我们的匹配
 			if (Request.Tag == NAME_None || Request.Tag == GetTag())
 			{
 				if (Request.Duration < ShortestRequestDuration)
@@ -954,6 +1039,7 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 			const int32 NumSkeletonBones = UE::Anim::DeadBlending::Private::GetNumSkeletonBones(Output.AnimInstanceProxy->GetRequiredBones());
 
 			// Record Request
+			// 记录请求
 
 			InertializationTime = 0.0f;
 			InertializationDuration = BlendTimeMultiplier * RequestQueue[ShortestRequestIdx].Duration;
@@ -970,6 +1056,7 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 			}
 
 			// Cache the maximum duration across all bones (so we know when to deactivate the inertialization request)
+			// 缓存所有骨骼的最大持续时间（因此我们知道何时停用惯性化请求）
 			InertializationMaxDuration = FMath::Max(InertializationDuration, *Algo::MaxElement(InertializationDurationPerBone));
 
 			if (RequestQueue[ShortestRequestIdx].bUseBlendMode)
@@ -985,6 +1072,7 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 #endif
 
 			// Override with defaults
+			// 使用默认值覆盖
 
 			if (bAlwaysUseDefaultBlendSettings)
 			{
@@ -999,10 +1087,12 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 			check(InertializationMaxDuration != UE_MAX_FLT);
 
 			// Initialize the recorded pose state at the point of transition
+			// 在过渡点初始化记录的姿势状态
 
 			if (!PrevPoseSnapshot.IsEmpty() && !CurrPoseSnapshot.IsEmpty())
 			{
 				// We have two previous poses and so can initialize as normal.
+				// 我们有两个先前的姿势，因此可以正常初始化。
 
 				InitFrom(
 					Output.Pose,
@@ -1014,6 +1104,7 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 			else if (!CurrPoseSnapshot.IsEmpty())
 			{
 				// We only have a single previous pose. Repeat this pose assuming zero velocity.
+				// [翻译失败: We only have a single previous pose. Repeat this pose assuming zero velocity.]
 
 				InitFrom(
 					Output.Pose,
@@ -1025,19 +1116,24 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 			else
 			{
 				// This should never happen because we are not able to issue an inertialization 
+				// [翻译失败: This should never happen because we are not able to issue an inertialization]
 				// requested until we have at least one pose recorded in the snapshots.
+				// 直到我们在快照中记录至少一个姿势为止。
 				check(false);
 			}
 
 			// Set state to active
+			// 将状态设置为活动
 
 			InertializationState = EInertializationState::Active;
 		}
 		// Reset Request Queue
+		// 重置请求队列
 		RequestQueue.Reset();
 	}
 
 	// Update Time Since Transition and deactivate if blend is over
+	// 更新自转换以来的时间并在混合结束时停用
 
 	if (InertializationState == EInertializationState::Active)
 	{
@@ -1050,6 +1146,7 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// Apply inertialization
+	// 应用惯性化
 
 	if (InertializationState == EInertializationState::Active)
 	{
@@ -1057,6 +1154,7 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// Find AttachParentName
+	// 查找 AttachParentName
 
 	FName AttachParentName = NAME_None;
 	if (AActor* Owner = Output.AnimInstanceProxy->GetSkelMeshComponent()->GetOwner())
@@ -1068,17 +1166,21 @@ void FAnimNode_DeadBlending::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// Record Pose Snapshot
+	// 记录姿势快照
 
 	if (!CurrPoseSnapshot.IsEmpty())
 	{
 		// Directly swap the memory of the current pose with the prev pose snapshot (to avoid allocations and copies)
+		// 直接将当前姿势的内存与上一个姿势快照交换（以避免分配和复制）
 		Swap(PrevPoseSnapshot, CurrPoseSnapshot);
 	}
 	
 	// Initialize the current pose
+	// 初始化当前姿势
 	CurrPoseSnapshot.InitFrom(Output.Pose, Output.Curve, Output.CustomAttributes, ComponentTransform, AttachParentName, DeltaTime);
 
 	// Reset Delta Time
+	// 重置增量时间
 
 	DeltaTime = 0.0f;
 

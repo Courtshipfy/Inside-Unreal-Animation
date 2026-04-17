@@ -13,6 +13,7 @@
 class UAnimInstance;
 
 /** Supply curves from some external source (e.g. audio) */
+/** 来自某些外部源（例如音频）的电源曲线 */
 USTRUCT(BlueprintInternalUseOnly)
 struct FAnimNode_CurveSource : public FAnimNode_Base
 {
@@ -31,16 +32,19 @@ struct FAnimNode_CurveSource : public FAnimNode_Base
 	FName SourceBinding;
 
 	/** How much we wan to blend the curve in by */
+	/** 我们想要将曲线混合多少 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CurveSource, meta = (PinShownByDefault))
 	float Alpha;
 
 	/** Our bound source */
+	/** 我们的绑定源 */
 	UPROPERTY(Transient)
 	TScriptInterface<ICurveSourceInterface> CurveSource;
 
 	ANIMGRAPHRUNTIME_API FAnimNode_CurveSource();
 
 	// FAnimNode_Base interface
+	// FAnimNode_Base接口
 	virtual bool HasPreUpdate() const override { return true; }
 	ANIMGRAPHRUNTIME_API virtual void PreUpdate(const UAnimInstance* InAnimInstance) override;
 	ANIMGRAPHRUNTIME_API virtual void Evaluate_AnyThread(FPoseContext& Output) override;
@@ -49,4 +53,5 @@ struct FAnimNode_CurveSource : public FAnimNode_Base
 	ANIMGRAPHRUNTIME_API virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
+	// FAnimNode_Base接口结束
 };

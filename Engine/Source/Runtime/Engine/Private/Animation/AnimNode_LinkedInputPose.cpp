@@ -8,20 +8,26 @@
 const FName FAnimNode_LinkedInputPose::DefaultInputPoseName("InPose");
 
 // Note not calling through Initialize or CacheBones here.
+// 请注意，此处不要通过 Initialize 或 CacheBones 进行调用。
 // This is handled in the owning LinkedAnimGraph node. This is because not all input poses may be linked in a
+// 这是在所属的 LinkedAnimGraph 节点中处理的。这是因为并非所有输入姿势都可以链接到一个
 // particular linked graph, so to avoid mismatches in initialization and bone references we make sure that all
+// 特定的链接图，因此为了避免初始化和骨骼引用中的不匹配，我们确保所有
 // branches of the tree are taken when initializing and caching bones.
+// 初始化和缓存骨骼时会获取树的分支。
 
 #if ENABLE_ANIMGRAPH_TRAVERSAL_DEBUG
 void FAnimNode_LinkedInputPose::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
 	// Make sure to sync input pose debug counters as we still use this pose link in Update/Evaluate etc.
+	// [翻译失败: Make sure to sync input pose debug counters as we still use this pose link in Update/Evaluate etc.]
 	InputPose.InitializationCounter.SynchronizeWith(Context.AnimInstanceProxy->GetInitializationCounter());
 }
 
 void FAnimNode_LinkedInputPose::CacheBones_AnyThread(const FAnimationCacheBonesContext& Context)
 {
 	// Make sure to sync input pose debug counters as we still use this pose link in Update/Evaluate etc.
+	// [翻译失败: Make sure to sync input pose debug counters as we still use this pose link in Update/Evaluate etc.]
 	InputPose.CachedBonesCounter.SynchronizeWith(Context.AnimInstanceProxy->GetCachedBonesCounter());
 }
 #endif
@@ -41,6 +47,7 @@ void FAnimNode_LinkedInputPose::Evaluate_AnyThread(FPoseContext& Output)
 	if(InputProxy)
 	{
 		// Stash current proxy for restoration after recursion
+		// 存储当前代理以在递归后恢复
 		FAnimInstanceProxy& OldProxy = *Output.AnimInstanceProxy;
 
 		Output.AnimInstanceProxy = InputProxy;
@@ -50,6 +57,7 @@ void FAnimNode_LinkedInputPose::Evaluate_AnyThread(FPoseContext& Output)
 		InputPose.Evaluate(Output);
 
 		// Restore proxy & required bones after evaluation
+		// 评估后恢复代理和所需的骨骼
 		Output.AnimInstanceProxy = &OldProxy;
 		Output.Pose.SetBoneContainer(&OldProxy.GetRequiredBones());
 	}

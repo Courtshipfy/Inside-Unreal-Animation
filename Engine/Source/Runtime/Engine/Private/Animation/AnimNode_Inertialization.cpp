@@ -36,6 +36,7 @@ namespace UE::Anim
 	}
 
 	// Inertialization request event bound to a node
+	// 绑定到节点的初始化请求事件
 	class FInertializationRequester : public IInertializationRequester
 	{
 	public:
@@ -47,6 +48,7 @@ namespace UE::Anim
 
 	private:
 		// IInertializationRequester interface
+		// IIInertializationRequester接口
 		virtual void RequestInertialization(float InRequestedDuration, const UBlendProfile* InBlendProfile) override
 		{
 			Node.RequestInertialization(InRequestedDuration, InBlendProfile);
@@ -55,6 +57,7 @@ namespace UE::Anim
 		virtual void RequestInertialization(const FInertializationRequest& InInertializationRequest) override
 		{
 			// The Blend Mode parameters will be ignored as FAnimNode_Inertialization does not support them.
+			// 混合模式参数将被忽略，因为 FAnimNode_Inertialization 不支持它们。
 			Node.RequestInertialization(InInertializationRequest);
 		}
 
@@ -69,12 +72,15 @@ namespace UE::Anim
 		virtual FName GetTag() const override { return Node.GetTag(); }
 
 		// Node to target
+		// [翻译失败: Node to target]
 		FAnimNode_Inertialization& Node;
 
 		// Node index
+		// [翻译失败: Node index]
 		int32 NodeId;
 
 		// Proxy currently executing
+		// [翻译失败: Proxy currently executing]
 		FAnimInstanceProxy& Proxy;
 	};
 }
@@ -93,18 +99,28 @@ namespace UE::Anim::Inertialization::Private
 	static constexpr float INERTIALIZATION_TIME_EPSILON = 1.0e-7f;
 
 	// Calculate the "inertialized" value of a single float at time t
+	// 计算单个浮点在时间 t 的“惯性化”值
 	//
 	// @param x0	Initial value of the float (at time 0)
+	// @param x0 浮点数的初始值（在时间 0 处）
 	// @param v0	Initial "velocity" (first derivative) of the float (at time 0)
+	// @param v0 浮点的初始“速度”（一阶导数）（在时间 0 处）
 	// @param t		Time at which to evaluate the float
+	// @param t 计算浮点数的时间
 	// @param t1	Ending inertialization time (ie: the time at which the curve must be zero)
+	// @param t1 结束惯性化时间（即：曲线必须为零的时间）
 	//
 	// Evaluates a quintic polynomial curve with the specified initial conditions (x0, v0) which hits zero at time t1.  As well,
+	// 使用指定的初始条件 (x0, v0) 计算五次多项式曲线，该曲线在时间 t1 处为零。  还有，
 	// the curve is designed so that the first and second derivatives are also zero at time t1.
+	// 该曲线的设计使得一阶和二阶导数在时间 t1 时也为零。
 	//
 	// The initial second derivative (a0) is chosen such that it is as close to zero as possible, but large enough to prevent any
+	// 选择初始二阶导数 (a0)，使其尽可能接近零，但又足够大以防止任何
 	// overshoot (ie: enforce x >= 0 for t between 0 and t1).  If necessary, the ending time t1 will be adjusted (shortened) to
+	// 过冲（即：对于 0 和 t1 之间的 t 强制 x >= 0）。  如有必要，结束时间t1将调整（缩短）为
 	// guarantee that there is no overshoot, even for very large initial velocities.
+	// 即使初始速度非常大，也能保证不会出现超调。
 	//
 	static float CalcInertialFloat(float x0, float v0, float t, float t1)
 	{
@@ -122,6 +138,7 @@ namespace UE::Anim::Inertialization::Private
 		}
 
 		// Assume that x0 >= 0... if this is not the case, then simply invert everything (both input and output)
+		// 假设 x0 >= 0...如果情况并非如此，则只需反转所有内容（输入和输出）
 		float sign = 1.0f;
 		if (x0 < 0.0f)
 		{
@@ -131,12 +148,14 @@ namespace UE::Anim::Inertialization::Private
 		}
 
 		// If v0 > 0, then the curve will overshoot away from zero, so clamp v0 here to guarantee that there is no overshoot
+		// 如果 v0 > 0，则曲线将超调远离零，因此将 v0 钳位在此处以保证不会超调
 		if (v0 > 0.0f)
 		{
 			v0 = 0.0f;
 		}
 
 		// Check for invalid values - this is only expected to occur if NaNs or other invalid values are coming into the node
+		// 检查无效值 - 仅当 NaN 或其他无效值进入节点时才会发生这种情况
 		if (!ensureMsgf(x0 >= 0.0f && v0 <= 0.0f && t >= 0.0f && t1 >= 0.0f,
 			TEXT("Invalid Value(s) in Inertialization - x0: %f, v0: %f, t: %f, t1: %f"), x0, v0, t, t1))
 		{
@@ -147,22 +166,35 @@ namespace UE::Anim::Inertialization::Private
 		}
 
 		// Limit t1 such that the curve does not overshoot below zero (ensuring that x >= 0 for all t between 0 and t1).
+		// 限制 t1，使曲线不会超调到零以下（确保对于 0 和 t1 之间的所有 t，x >= 0）。
 		//
 		// We observe that if the curve does overshoot below zero, it must have an inflection point somewhere between 0 and t1
+		// 我们观察到，如果曲线确实超出零以下，则它一定在 0 和 t1 之间的某个位置有一个拐点
 		// (since we know that both x0 and x1 are >= 0).  Therefore, we can prevent overshoot by adjusting t1 such that any
+		// （因为我们知道 x0 和 x1 都 >= 0）。  因此，我们可以通过调整 t1 来防止超调，使得任何
 		// inflection point is at t >= t1.
+		// 拐点位于 t >= t1。
 		//
 		// Assuming that we are using the zero jerk version of the curve (see below) whose velocity has a triple root at t1, then
+		// 假设我们使用曲线的零加加速度版本（见下文），其速度在 t1 处有三重根，则
 		// we can prevent overshoot by forcing the remaining root to be at time t >= t1, or equivalently, we can set t1 to be the
+		// 我们可以通过强制剩余根位于时间 t >= t1 来防止超调，或者等效地，我们可以将 t1 设置为
 		// lesser of the original t1 or the value that gives us a solution with a quadruple velocity root at t1.
+		// 原始 t1 或为我们提供在 t1 处具有四倍速度根的解的值中的较小者。
 		//
 		// The following Mathematica expression solves for t1 that gives us the quadruple velocity root:
+		// 以下 Mathematica 表达式求解 t1，得到四倍速度根：
 		//
 		//		v := q * (t-t1)^4
+		//		v := q * (t-t1)^4
 		//		x := Integrate[Expand[v], t] + x0
+		//		x := 积分[展开[v], t] + x0
+		//		eq1 := (v/.t->0)==v0
 		//		eq1 := (v/.t->0)==v0
 		//		eq2 := (x/.t->t1)==0
+		//		eq2 := (x/.t->t1)==0
 		//		Solve[{eq1 && eq2}, {q,t1}]
+		//		求解[{eq1 && eq2}, {q,t1}]
 		//
 		if (v0 < -UE_KINDA_SMALL_NUMBER)
 		{
@@ -180,38 +212,64 @@ namespace UE::Anim::Inertialization::Private
 		const float t1_5 = t1 * t1_4;
 
 		// Compute the initial acceleration value (a0) for this curve.  Ideally we want to use an initial acceleration of zero, but
+		// 计算该曲线的初始加速度值 (a0)。  理想情况下，我们希望使用零初始加速度，但是
 		// if there is a large negative initial velocity, then we will need to use a larger acceleration in order to ensure that
+		// 如果存在较大的负初速度，那么我们需要使用较大的加速度以确保
 		// the curve does not overshoot below zero (ie: to ensure that x >= 0 for all t between 0 and t1).
+		// 曲线不会超调到零以下（即：确保对于 0 和 t1 之间的所有 t，x >= 0）。
 		//
 		// To compute a0, we first compute the a0 that we would get if we also specified that the third derivative (the "jerk" j)
+		// 为了计算 a0，我们首先计算 a0，如果我们还指定了三阶导数（“混蛋”j），我们将得到 a0
 		// is zero at t1.  If this value of a0 is positive (and therefore opposing the initial velocity), then we use that.  If it
+		// 在 t1 处为零。  如果 a0 的值为正（因此与初始速度相反），那么我们就使用它。  如果它
 		// is negative, then we simply use an initial a0 of zero.
+		// 是负数，那么我们只需使用初始 a0 为零。
 		//
 		// The following Mathematica expression solves for a0 that gives us zero jerk at t1:
+		// 以下 Mathematica 表达式求解 a0，使我们在 t1 处的加加速度为零：
 		//
 		//		x:= A*t^5 + B*t^4 + C*t^3 + D*t^2 + v0*t + x0
+		//		x:= A*t^5 + B*t^4 + C*t^3 + D*t^2 + v0*t + x0
 		//		v:=Dt[x, t, Constants->{A,B,C,D,v0,x0}]
+		//		v:=Dt[x, t, 常数->{A,B,C,D,v0,x0}]
 		//		a:=Dt[v, t, Constants->{A,B,C,D,v0,x0}]
+		//		a:=Dt[v, t, 常数->{A,B,C,D,v0,x0}]
 		//		j:=Dt[a, t, Constants->{A,B,C,D,v0,x0}]
+		//		j:=Dt[a, t, 常数->{A,B,C,D,v0,x0}]
+		//		eq1:=(x/.t->t1)==0
 		//		eq1:=(x/.t->t1)==0
 		//		eq2:=(v/.t->t1)==0
+		//		eq2:=(v/.t->t1)==0
+		//		eq3:=(a/.t->t1)==0
 		//		eq3:=(a/.t->t1)==0
 		//		eq4:=(j/.t->t1)==0
+		//		eq4:=(j/.t->t1)==0
+		//		a0:=a/.t->0/.Solve[{eq1 && eq2 && eq3 && eq4}, {A,B,C,D}]
 		//		a0:=a/.t->0/.Solve[{eq1 && eq2 && eq3 && eq4}, {A,B,C,D}]
 		//		ExpandNumerator[a0]
+		//		展开分子[a0]
 		//
 		const float a0 = FMath::Max(0.0f, (-8.0f * t1 * v0 - 20.0f * x0) / t1_2);
 
 		// Compute the polynomial coefficients given the starting and ending conditions, solved from:
+		// [翻译失败: Compute the polynomial coefficients given the starting and ending conditions, solved from:]
 		//
 		//		x:= A*t^5 + B*t^4 + C*t^3 + D*t^2 + v0*t + x0
+		//		[翻译失败: x:= A*t^5 + B*t^4 + C*t^3 + D*t^2 + v0*t + x0]
 		//		v:=Dt[x, t, Constants->{A,B,C,D,v0,x0}]
+		//		[翻译失败: v:=Dt[x, t, Constants->{A,B,C,D,v0,x0}]]
 		//		a:=Dt[v, t, Constants->{A,B,C,D,v0,x0}]
+		//		[翻译失败: a:=Dt[v, t, Constants->{A,B,C,D,v0,x0}]]
+		//		eq1:=(x/.t->t1)==0
 		//		eq1:=(x/.t->t1)==0
 		//		eq2:=(v/.t->t1)==0
+		//		eq2:=(v/.t->t1)==0
 		//		eq3:=(a/.t->t1)==0
+		//		[翻译失败: eq3:=(a/.t->t1)==0]
 		//		eq4:=(a/.t->0)==a0
+		//		[翻译失败: eq4:=(a/.t->0)==a0]
 		//		Simplify[Solve[{eq1 && eq2 && eq3 && eq4}, {A,B,C,D}]]
+		//		化简[求解[{eq1 && eq2 && eq3 && eq4}, {A,B,C,D}]]
 		//
 		const float A = -0.5f * (a0 * t1_2 + 6.0f * t1 * v0 + 12.0f * x0) / t1_5;
 		const float B = 0.5f * (3.0f * a0 * t1_2 + 16.0f * t1 * v0 + 30.0f * x0) / t1_4;
@@ -279,6 +337,7 @@ void FAnimNode_Inertialization::RequestInertialization(const FInertializationReq
 }
 
 /*static*/ void FAnimNode_Inertialization::LogRequestError(const FAnimationUpdateContext& Context, const int32 NodePropertyIndex)
+/*静止的*/ void FAnimNode_Inertialization::LogRequestError(const FAnimationUpdateContext& Context, const int32 NodePropertyIndex)
 {
 #if WITH_EDITORONLY_DATA	
 	UAnimBlueprint* AnimBlueprint = Context.AnimInstanceProxy->GetAnimBlueprint();
@@ -293,6 +352,7 @@ void FAnimNode_Inertialization::RequestInertialization(const FInertializationReq
 }
 
 /*static*/ void FAnimNode_Inertialization::LogRequestError(const FAnimationUpdateContext& Context, const FPoseLinkBase& RequesterPoseLink)
+/*静止的*/ void FAnimNode_Inertialization::LogRequestError(const FAnimationUpdateContext& Context, const FPoseLinkBase& RequesterPoseLink)
 {
 #if WITH_EDITORONLY_DATA	
 	LogRequestError(Context, RequesterPoseLink.SourceLinkID);
@@ -354,6 +414,7 @@ void FAnimNode_Inertialization::CacheBones_AnyThread(const FAnimationCacheBonesC
 	Source.CacheBones(Context);
 
 	// Compute Compact Pose Bone Index for each bone in Filter
+	// [翻译失败: Compute Compact Pose Bone Index for each bone in Filter]
 
 	const FBoneContainer& RequiredBones = Context.AnimInstanceProxy->GetRequiredBones();
 	BoneFilter.Init(FCompactPoseBoneIndex(INDEX_NONE), FilteredBones.Num());
@@ -377,12 +438,15 @@ void FAnimNode_Inertialization::Update_AnyThread(const FAnimationUpdateContext& 
 	if (bNeedsReset)
 	{
 		// Clear any pending inertialization requests
+		// [翻译失败: Clear any pending inertialization requests]
 		RequestQueue.Reset();
 
 		// Clear the inertialization state
+		// [翻译失败: Clear the inertialization state]
 		Deactivate();
 
 		// Clear the pose history
+		// [翻译失败: Clear the pose history]
 		PrevPoseSnapshot.Empty();
 		CurrPoseSnapshot.Empty();
 	}
@@ -390,6 +454,7 @@ void FAnimNode_Inertialization::Update_AnyThread(const FAnimationUpdateContext& 
 	UpdateCounter.SynchronizeWith(Context.AnimInstanceProxy->GetUpdateCounter());
 
 	// Catch the inertialization request message and call the node's RequestInertialization function with the request
+	// [翻译失败: Catch the inertialization request message and call the node's RequestInertialization function with the request]
 	UE::Anim::TScopedGraphMessage<UE::Anim::FInertializationRequester> InertializationMessage(Context, Context, this);
 
 	if (bForwardRequestsThroughSkippedCachedPoseNodes)
@@ -398,17 +463,25 @@ void FAnimNode_Inertialization::Update_AnyThread(const FAnimationUpdateContext& 
 		const FAnimInstanceProxy& Proxy = *Context.AnimInstanceProxy;
 
 		// Handle skipped updates for cached poses by forwarding to inertialization nodes in those residual stacks
+		// [翻译失败: Handle skipped updates for cached poses by forwarding to inertialization nodes in those residual stacks]
 		UE::Anim::TScopedGraphMessage<UE::Anim::FCachedPoseSkippedUpdateHandler> CachedPoseSkippedUpdate(Context, [this, NodeId, &Proxy](TArrayView<const UE::Anim::FMessageStack> InSkippedUpdates)
 		{
 			// If we have a pending request forward the request to other Inertialization nodes
+			// [翻译失败: If we have a pending request forward the request to other Inertialization nodes]
 			// that were skipped due to pose caching.
+			// [翻译失败: that were skipped due to pose caching.]
 			if (RequestQueue.Num() > 0)
 			{
 				// Cached poses have their Update function called once even though there may be multiple UseCachedPose nodes for the same pose.
+				// [翻译失败: Cached poses have their Update function called once even though there may be multiple UseCachedPose nodes for the same pose.]
 				// Because of this, there may be Inertialization ancestors of the UseCachedPose nodes that missed out on requests.
+				// [翻译失败: Because of this, there may be Inertialization ancestors of the UseCachedPose nodes that missed out on requests.]
 				// So here we forward 'this' node's requests to the ancestors of those skipped UseCachedPose nodes.
+				// [翻译失败: So here we forward 'this' node's requests to the ancestors of those skipped UseCachedPose nodes.]
 				// Note that in some cases, we may be forwarding the requests back to this same node.  Those duplicate requests will ultimately
+				// [翻译失败: Note that in some cases, we may be forwarding the requests back to this same node.  Those duplicate requests will ultimately]
 				// be ignored by the 'AddUnique' in the body of FAnimNode_Inertialization::RequestInertialization.
+				// [翻译失败: be ignored by the 'AddUnique' in the body of FAnimNode_Inertialization::RequestInertialization.]
 				for (const UE::Anim::FMessageStack& Stack : InSkippedUpdates)
 				{
 					Stack.ForEachMessage<UE::Anim::IInertializationRequester>([this, NodeId, &Proxy](UE::Anim::IInertializationRequester& InMessage)
@@ -426,6 +499,7 @@ void FAnimNode_Inertialization::Update_AnyThread(const FAnimationUpdateContext& 
 		});
 
 		// Context message stack lifetime is scope based so we need to call Source.Update() before exiting the scope of the message above.
+		// [翻译失败: Context message stack lifetime is scope based so we need to call Source.Update() before exiting the scope of the message above.]
 		Source.Update(Context);
 	}
 	else
@@ -434,6 +508,7 @@ void FAnimNode_Inertialization::Update_AnyThread(const FAnimationUpdateContext& 
 	}
 
 	// Accumulate delta time between calls to Evaluate_AnyThread
+	// 累积调用 Evaluate_AnyThread 之间的增量时间
 	DeltaTime += Context.GetDeltaTime();
 }
 
@@ -445,25 +520,31 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 	Source.Evaluate(Output);
 
 	// Disable inertialization if requested (for testing / debugging)
+	// 如果需要，禁用惯性化（用于测试/调试）
 	if (!CVarAnimInertializationEnable.GetValueOnAnyThread())
 	{
 		// Clear any pending inertialization requests
+		// 清除任何待处理的惯性化请求
 		RequestQueue.Reset();
 
 		// Clear the inertialization state
+		// 清除惯性状态
 		Deactivate();
 
 		// Clear the pose history
+		// 清除姿势历史记录
 		PrevPoseSnapshot.Empty();
 		CurrPoseSnapshot.Empty();
 
 		// Reset the cached time accumulator
+		// 重置缓存的时间累加器
 		DeltaTime = 0.0f;
 
 		return;
 	}
 
 	// Filter requests with tags that do not match ours
+	// 过滤带有与我们不匹配的标签的请求
 	for (int32 RequestIndex = RequestQueue.Num()-1; RequestIndex >= 0; --RequestIndex)
 	{
 		const FInertializationRequest& Request = RequestQueue[RequestIndex];
@@ -474,6 +555,7 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// Update the inertialization state if a new inertialization request is pending
+	// 如果新的惯性化请求待处理，则更新惯性化状态
 	const int32 NumRequests = RequestQueue.Num();
 	if (NumRequests > 0 && !CurrPoseSnapshot.IsEmpty())
 	{
@@ -481,8 +563,11 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 		if (InertializationState == EInertializationState::Active)
 		{
 			// An active inertialization is being interrupted. Keep track of the lost inertialization time
+			// 主动惯性化被中断。跟踪丢失的惯性时间
 			// and reduce future durations if interruptions continue. Without this mitigation,
+			// 如果中断继续存在，则减少未来的持续时间。如果没有这种缓解措施，
 			// repeated interruptions will lead to a degenerate pose because the pose target is unstable.
+			// 由于姿势目标不稳定，重复中断会导致退化姿势。
 			bool bApplyDeficit = InertializationDeficit > 0.0f && !CVarAnimInertializationIgnoreDeficit.GetValueOnAnyThread();
 			InertializationDeficit = InertializationDuration - InertializationElapsedTime;
 			AppliedDeficit = bApplyDeficit ? InertializationDeficit : 0.0f;
@@ -512,6 +597,7 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 		};
 
 		// Handle the first inertialization request in the queue
+		// 处理队列中的第一个惯性化请求
 		InertializationDuration = FMath::Max(RequestQueue[0].Duration - AppliedDeficit, 0.0f);
 #if ANIM_TRACE_ENABLED
 		InertializationRequestDescription = RequestQueue[0].DescriptionString;
@@ -522,6 +608,7 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 		FillSkeletonBoneDurationsArray(InertializationDurationPerBone, InertializationDuration, RequestQueue[0].BlendProfile);
 
 		// Handle all subsequent inertialization requests (often there will be only a single request)
+		// [翻译失败: Handle all subsequent inertialization requests (often there will be only a single request)]
 		if (NumRequests > 1)
 		{
 			UE::Anim::TTypedIndexArray<FSkeletonPoseBoneIndex, float, FAnimStackAllocator> RequestDurationPerBone;
@@ -531,6 +618,7 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 				const float RequestDuration = FMath::Max(Request.Duration - AppliedDeficit, 0.0f);
 
 				// Merge this request in with the previous requests (using the minimum requested time per bone)
+				// [翻译失败: Merge this request in with the previous requests (using the minimum requested time per bone)]
 				if (RequestDuration < InertializationDuration)
 				{
 					InertializationDuration = RequestDuration;
@@ -560,23 +648,27 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 		}
 
 		// Cache the maximum duration across all bones (so we know when to deactivate the inertialization request)
+		// 缓存所有骨骼的最大持续时间（因此我们知道何时停用惯性化请求）
 		InertializationMaxDuration = FMath::Max(InertializationDuration, *Algo::MaxElement(InertializationDurationPerBone));
 	}
 
 	RequestQueue.Reset();
 
 	// Update the inertialization timer
+	// 更新惯性定时器
 	if (InertializationState != EInertializationState::Inactive)
 	{
 		InertializationElapsedTime += DeltaTime;
 		if (InertializationElapsedTime >= InertializationDuration)
 		{
 			// Reset the deficit accumulator
+			// 重置赤字累加器
 			InertializationDeficit = 0.0f;
 		}
 		else
 		{
 			// Pay down the accumulated deficit caused by interruptions
+			// 偿还因中断造成的累积赤字
 			InertializationDeficit -= FMath::Min(InertializationDeficit, DeltaTime);
 		}
 
@@ -589,8 +681,11 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 	const FTransform ComponentTransform = Output.AnimInstanceProxy->GetComponentTransform();
 
 	// Automatically detect teleports... note that we do the teleport distance check against the root bone's location (world space) rather
+	// 自动检测传送...请注意，我们针对根骨骼的位置（世界空间）进行传送距离检查，而不是
 	// than the mesh component's location because we still want to inertialize instances where the skeletal mesh component has been moved
+	// 比网格体组件的位置更重要，因为我们仍然希望对骨架网格体组件已移动的实例进行惯性化
 	// while simultaneously counter-moving the root bone (as is the case when mounting and dismounting vehicles for example)
+	// 同时反向移动根骨（例如安装和拆卸车辆时的情况）
 
 	bool bTeleported = false;
 	const float TeleportDistanceThreshold = Output.AnimInstanceProxy->GetSkelMeshComponent()->GetTeleportDistanceThreshold();
@@ -614,23 +709,28 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 	if (bTeleported)
 	{
 		// Cancel inertialization requests during teleports
+		// 取消传送期间的惯性化请求
 		if (InertializationState == EInertializationState::Pending)
 		{
 			Deactivate();
 		}
 
 		// Clear the time accumulator during teleports (in order to invalidate any recorded velocities during the teleport)
+		// 在传送期间清除时间累加器（以使传送期间记录的任何速度无效）
 		DeltaTime = 0.0f;
 	}
 
 	// Ignore the inertialization velocities if requested (for testing / debugging)
+	// [翻译失败: Ignore the inertialization velocities if requested (for testing / debugging)]
 	if (CVarAnimInertializationIgnoreVelocity.GetValueOnAnyThread())
 	{
 		// Clear the time accumulator (so as to invalidate any recorded velocities)
+		// [翻译失败: Clear the time accumulator (so as to invalidate any recorded velocities)]
 		DeltaTime = 0.0f;
 	}
 
 	// Get the parent actor attachment information (to detect and counteract discontinuities when changing parents)
+	// 获取父 Actor 附件信息（以检测并消除更改父级时的不连续性）
 	FName AttachParentName = NAME_None;
 	if (AActor* Owner = Output.AnimInstanceProxy->GetSkelMeshComponent()->GetOwner())
 	{
@@ -641,12 +741,14 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// Inertialize the pose
+	// 惯性化姿势
 
 	if (InertializationState == EInertializationState::Pending)
 	{
 		if (!PrevPoseSnapshot.IsEmpty() && !CurrPoseSnapshot.IsEmpty())
 		{
 			// We have two previous poses and so can record the offset as normal.
+			// 我们有两个先前的姿势，因此可以正常记录偏移。
 
 			InitFrom(
 				Output.Pose,
@@ -660,6 +762,7 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 		else if (!CurrPoseSnapshot.IsEmpty())
 		{
 			// We only have a single previous pose. Repeat this pose (assuming zero velocity).
+			// 我们只有一个先前的姿势。重复这个姿势（假设速度为零）。
 
 			InitFrom(
 				Output.Pose,
@@ -673,7 +776,9 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 		else
 		{
 			// This should never happen because we are not able to issue an inertialization 
+			// 这种情况永远不应该发生，因为我们无法发出惯性化
 			// requested until we have at least one pose recorded in the snapshots.
+			// 直到我们在快照中记录至少一个姿势为止。
 			check(false);
 		}
 
@@ -681,6 +786,7 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// Apply the inertialization offset
+	// 应用惯性化偏移
 
 	if (InertializationState == EInertializationState::Active)
 	{
@@ -688,18 +794,22 @@ void FAnimNode_Inertialization::Evaluate_AnyThread(FPoseContext& Output)
 	}
 
 	// Record Pose Snapshot
+	// 记录姿势快照
 
 	if (!CurrPoseSnapshot.IsEmpty())
 	{
 		// Directly swap the memory of the current pose with the prev pose snapshot (to avoid allocations and copies)
+		// 直接将当前姿势的内存与上一个姿势快照交换（以避免分配和复制）
 		Swap(PrevPoseSnapshot, CurrPoseSnapshot);
 	}
 	
 	// Initialize the current pose
+	// 初始化当前姿势
 	CurrPoseSnapshot.InitFrom(Output.Pose, Output.Curve, Output.CustomAttributes, ComponentTransform, AttachParentName, DeltaTime);
 	
 
 	// Reset the time accumulator and teleport state
+	// 重置时间累加器和传送状态
 	DeltaTime = 0.0f;
 
 	const float NormalizedInertializationTime = InertializationDuration > UE_KINDA_SMALL_NUMBER ? (InertializationElapsedTime / InertializationDuration) : 0.0f;
@@ -756,14 +866,17 @@ bool FAnimNode_Inertialization::NeedsDynamicReset() const
 void FAnimNode_Inertialization::ResetDynamics(ETeleportType InTeleportType)
 {
 	// Note: InTeleportType is unused and teleports are detected automatically (UE-78594)
+	// 注意：InTeleportType 未使用，自动检测传送 (UE-78594)
 }
 
 PRAGMA_DISABLE_DEPRECATION_WARNINGS
 
 // DEPRECATED: See FAnimNode_Inertialization::InitFrom
+// 已弃用：请参阅 FAnimNode_Inertialization::InitFrom
 void FAnimNode_Inertialization::StartInertialization(FPoseContext& Context, FInertializationPose& PreviousPose1, FInertializationPose& PreviousPose2, float Duration, TArrayView<const float> DurationPerBone, /*OUT*/ FInertializationPoseDiff& OutPoseDiff)
 {
 	// Determine if this skeletal mesh's actor is attached to another actor
+	// 确定该骨架网格物体的 actor 是否附加到另一个 actor
 	FName AttachParentName = NAME_None;
 	if (AActor* Owner = Context.AnimInstanceProxy->GetSkelMeshComponent()->GetOwner())
 	{
@@ -774,6 +887,7 @@ void FAnimNode_Inertialization::StartInertialization(FPoseContext& Context, FIne
 	}
 
 	// Initialize curve filter if required 
+	// 如果需要，初始化曲线滤波器
 	if (FilteredCurves.Num() != CurveFilter.Num())
 	{
 		CurveFilter.Empty();
@@ -785,6 +899,7 @@ void FAnimNode_Inertialization::StartInertialization(FPoseContext& Context, FIne
 }
 
 // DEPRECATED: See FAnimNode_Inertialization::ApplyTo
+// 已弃用：请参阅 FAnimNode_Inertialization::ApplyTo
 void FAnimNode_Inertialization::ApplyInertialization(FPoseContext& Context, const FInertializationPoseDiff& PoseDiff, float ElapsedTime, float Duration, TArrayView<const float> DurationPerBone)
 {
 	PoseDiff.ApplyTo(Context.Pose, Context.Curve, ElapsedTime, Duration, DurationPerBone);
@@ -804,21 +919,27 @@ void FAnimNode_Inertialization::InitFrom(
 	check(!Prev1.IsEmpty() && !Prev2.IsEmpty());
 
 	// Compute the Inertialization Space
+	// 计算惯性化空间
 
 	const FQuat ComponentTransformGetRotationInverse = ComponentTransform.GetRotation().Inverse();
 
 	// Determine if we should initialize in local space (the default) or in world space (for situations where we wish to correct
+	// 确定我们是否应该在本地空间（默认）或世界空间（对于我们希望纠正的情况）进行初始化
 	// a world-space discontinuity such as an abrupt orientation change)
+	// 世界空间不连续性，例如方向突然改变）
 	EInertializationSpace InertializationSpace = EInertializationSpace::Default;
 	if (AttachParentName != Prev1.AttachParentName || AttachParentName != Prev2.AttachParentName)
 	{
 		// If the parent space has changed, then inertialize in world space
+		// 如果父空间发生了变化，则在世界空间中进行惯性化
 		InertializationSpace = EInertializationSpace::WorldSpace;
 	}
 	else if (AttachParentName == NAME_None)
 	{
 		// If there was a discontinuity in ComponentTransform orientation, then correct for that by inertializing the orientation in world space
+		// 如果 ComponentTransform 方向存在不连续性，则通过惯性化世界空间中的方向来纠正该问题
 		// (but only if the mesh is not attached to another actor, because we don't want to dampen the connection between attached actors)
+		// （但前提是网格没有附加到另一个角色，因为我们不想削弱附加角色之间的连接）
 		if ((FMath::Abs((Prev1.ComponentTransform.GetRotation() * ComponentTransformGetRotationInverse).W) < 0.999f) ||	// (W < 0.999f --> angle > 5 degrees)
 			(FMath::Abs((Prev2.ComponentTransform.GetRotation() * ComponentTransformGetRotationInverse).W) < 0.999f))	// (W < 0.999f --> angle > 5 degrees)
 		{
@@ -827,6 +948,7 @@ void FAnimNode_Inertialization::InitFrom(
 	}
 
 	// Compute the Inertialization Bone Indices which we will use to index into BoneTranslations, BoneRotations, etc
+	// 计算惯性化骨骼索引，我们将使用它来索引 BoneTranslations、BoneRotations 等
 
 	const FBoneContainer& BoneContainer = InPose.GetBoneContainer();
 
@@ -852,6 +974,7 @@ void FAnimNode_Inertialization::InitFrom(
 	}
 
 	// Allocate Inertialization Bones
+	// [翻译失败: Allocate Inertialization Bones]
 
 	BoneTranslationDiffDirection.Init(FVector3f::ZeroVector, NumInertializationBones);
 	BoneTranslationDiffMagnitude.Init(0.0f, NumInertializationBones);
@@ -864,6 +987,7 @@ void FAnimNode_Inertialization::InitFrom(
 	BoneScaleDiffSpeed.Init(0.0f, NumInertializationBones);
 	
 	// Compute Pose Differences
+	// [翻译失败: Compute Pose Differences]
 
 	for (FCompactPoseBoneIndex BoneIndex : InPose.ForEachBoneIndex())
 	{
@@ -877,6 +1001,7 @@ void FAnimNode_Inertialization::InitFrom(
 		}
 
 		// Get Bone Indices for Inertialization Bone, Prev and Curr Pose Bones
+		// 获取惯性化骨骼、前一姿势骨骼和当前姿势骨骼的骨骼索引
 
 		const int32 InertializationBoneIndex = BoneIndices[SkeletonPoseBoneIndex];
 		const int32 Prev1PoseBoneIndex = Prev1.BoneIndices[SkeletonPoseBoneIndex];
@@ -893,6 +1018,7 @@ void FAnimNode_Inertialization::InitFrom(
 		if (BoneIndex.IsRootBone())
 		{
 			// If we are inertializing in world space, then adjust the historical root bones to be in a consistent reference frame
+			// 如果我们在世界空间中进行惯性化，则调整历史根骨骼以使其处于一致的参考系中
 			if (InertializationSpace == EInertializationSpace::WorldSpace)
 			{
 				Prev1Transform *= Prev1.ComponentTransform.GetRelativeTransform(ComponentTransform);
@@ -906,6 +1032,7 @@ void FAnimNode_Inertialization::InitFrom(
 		}
 
 		// Compute the bone translation difference
+		// 计算骨骼平移差异
 		{
 			FVector TranslationDirection = FVector::ZeroVector;
 			float TranslationMagnitude = 0.0f;
@@ -931,6 +1058,7 @@ void FAnimNode_Inertialization::InitFrom(
 		}
 
 		// Compute the bone rotation difference
+		// 计算骨骼旋转差异
 		{
 			FVector RotationAxis = FVector::ZeroVector;
 			float RotationAngle = 0.0f;
@@ -958,6 +1086,7 @@ void FAnimNode_Inertialization::InitFrom(
 		}
 
 		// Compute the bone scale difference
+		// 计算骨尺度差异
 		{
 			FVector ScaleAxis = FVector::ZeroVector;
 			float ScaleMagnitude = 0.0f;
@@ -984,10 +1113,13 @@ void FAnimNode_Inertialization::InitFrom(
 	}
 
 	// Compute the curve differences
+	// 计算曲线差异
 	// First copy in current values
+	// 首先复制当前值
 	CurveDiffs.CopyFrom(InCurves);
 
 	// Compute differences
+	// 计算差异
 	UE::Anim::FNamedValueArrayUtils::Union(CurveDiffs, Prev1.Curves.BlendedCurve,
 		[](FInertializationCurveDiffElement& OutResultElement, const UE::Anim::FCurveElement& InElement1, UE::Anim::ENamedValueUnionFlags InFlags)
 		{
@@ -995,6 +1127,7 @@ void FAnimNode_Inertialization::InitFrom(
 		});
 
 	// Compute derivatives
+	// 计算导数
 	if (Prev1.DeltaTime > UE_KINDA_SMALL_NUMBER)
 	{
 		UE::Anim::FNamedValueArrayUtils::Union(CurveDiffs, Prev2.Curves.BlendedCurve,
@@ -1007,19 +1140,27 @@ void FAnimNode_Inertialization::InitFrom(
 	}
 
 	// Apply filtering to remove filtered curves from diffs. This does not actually
+	// 应用过滤以从差异中删除过滤后的曲线。这实际上并不
 	// prevent these curves from being inertialized, but does stop them appearing as empty
+	// 防止这些曲线被惯性化，但确实阻止它们显示为空
 	// in the output curves created by the Union in ApplyTo unless they are already in the
+	// 在ApplyTo中Union创建的输出曲线中，除非它们已经在
 	// destination animation.
+	// 目的地动画。
 	if (CurveFilter.Num() > 0)
 	{
 		UE::Anim::FCurveUtils::Filter(CurveDiffs, CurveFilter);
 	}
 
 	// Compute Root Motion Delta Difference
+	// 计算根运动增量差
 
 	// We don't compute the speed difference since this essentially represents
+	// 我们不计算速度差，因为这本质上代表
 	// the acceleration of the root motion, which can be quite noisy and unreliable
+	// 根部运动的加速度，可能非常嘈杂且不可靠
 	// and so can cause the computed offsets to be bad when they are blended out
+	// 因此在混合时可能会导致计算出的偏移量变差
 
 	RootTranslationVelocityDiffDirection = FVector3f::ZeroVector;
 	RootTranslationVelocityDiffMagnitude = 0.0f;
@@ -1066,6 +1207,7 @@ void FAnimNode_Inertialization::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& 
 	const FBoneContainer& BoneContainer = InOutPose.GetBoneContainer();
 
 	// Apply pose difference
+	// 应用姿势差异
 	for (FCompactPoseBoneIndex BoneIndex : InOutPose.ForEachBoneIndex())
 	{
 		const int32 SkeletonPoseBoneIndex = BoneContainer.GetSkeletonIndex(BoneIndex);
@@ -1081,16 +1223,19 @@ void FAnimNode_Inertialization::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& 
 		const float Duration = InertializationDurationPerBone[SkeletonPoseBoneIndex];
 
 		// Apply the bone translation difference
+		// 应用骨骼平移差异
 		const FVector T = (FVector)BoneTranslationDiffDirection[InertializationBoneIndex] *
 			UE::Anim::Inertialization::Private::CalcInertialFloat(BoneTranslationDiffMagnitude[InertializationBoneIndex], BoneTranslationDiffSpeed[InertializationBoneIndex], InertializationElapsedTime, Duration);
 		InOutPose[BoneIndex].AddToTranslation(T);
 
 		// Apply the bone rotation difference
+		// 应用骨骼旋转差异
 		const FQuat Q = FQuat((FVector)BoneRotationDiffAxis[InertializationBoneIndex],
 			UE::Anim::Inertialization::Private::CalcInertialFloat(BoneRotationDiffAngle[InertializationBoneIndex], BoneRotationDiffSpeed[InertializationBoneIndex], InertializationElapsedTime, Duration));
 		InOutPose[BoneIndex].SetRotation(Q * InOutPose[BoneIndex].GetRotation());
 
 		// Apply the bone scale difference
+		// 应用骨尺度差异
 		const FVector S = (FVector)BoneScaleDiffAxis[InertializationBoneIndex] *
 			UE::Anim::Inertialization::Private::CalcInertialFloat(BoneScaleDiffMagnitude[InertializationBoneIndex], BoneScaleDiffSpeed[InertializationBoneIndex], InertializationElapsedTime, Duration);
 		InOutPose[BoneIndex].SetScale3D(S + InOutPose[BoneIndex].GetScale3D());
@@ -1099,6 +1244,7 @@ void FAnimNode_Inertialization::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& 
 	InOutPose.NormalizeRotations();
 
 	// Apply curve differences
+	// 应用曲线差异
 
 	PoseCurveData.CopyFrom(InOutCurves);
 
@@ -1109,6 +1255,7 @@ void FAnimNode_Inertialization::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& 
 		UE::Anim::ENamedValueUnionFlags InFlags)
 		{
 			// For filtered Curves take destination value
+			// 对于过滤后的曲线，采用目标值
 
 			if (FilteredCurves.Contains(OutResultElement.Name))
 			{
@@ -1118,12 +1265,14 @@ void FAnimNode_Inertialization::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& 
 			}
 
 			// Otherwise take destination value plus offset
+			// 否则取目标值加上偏移量
 
 			OutResultElement.Value = InElement0.Value + UE::Anim::Inertialization::Private::CalcInertialFloat(InElement1.Delta, InElement1.Derivative, InertializationElapsedTime, InertializationDuration);
 			OutResultElement.Flags = InElement0.Flags | InElement1.Flags;
 		});
 
 	// Apply Root Motion Delta Difference
+	// [翻译失败: Apply Root Motion Delta Difference]
 
 	if (const UE::Anim::IAnimRootMotionProvider* RootMotionProvider = UE::Anim::IAnimRootMotionProvider::Get())
 	{
@@ -1131,19 +1280,23 @@ void FAnimNode_Inertialization::ApplyTo(FCompactPose& InOutPose, FBlendedCurve& 
 		if (RootMotionProvider->ExtractRootMotion(InOutAttributes, CurrRootMotionDelta))
 		{
 			// Use Blend Duration from Root Bone
+			// [翻译失败: Use Blend Duration from Root Bone]
 			const float Duration = InertializationDurationPerBone[0];
 
 			// Apply the root translation velocity difference
+			// [翻译失败: Apply the root translation velocity difference]
 			const FVector T = DeltaTime * (FVector)RootTranslationVelocityDiffDirection *
 				UE::Anim::Inertialization::Private::CalcInertialFloat(RootTranslationVelocityDiffMagnitude, 0.0f, InertializationElapsedTime, Duration);
 			CurrRootMotionDelta.AddToTranslation(T);
 
 			// Apply the root rotation velocity difference
+			// [翻译失败: Apply the root rotation velocity difference]
 			const FQuat Q = FQuat::MakeFromRotationVector(DeltaTime * (FVector)RootRotationVelocityDiffDirection *
 				UE::Anim::Inertialization::Private::CalcInertialFloat(RootRotationVelocityDiffMagnitude, 0.0f, InertializationElapsedTime, Duration));
 			CurrRootMotionDelta.SetRotation(Q * CurrRootMotionDelta.GetRotation());
 
 			// Apply the root scale velocity difference
+			// [翻译失败: Apply the root scale velocity difference]
 			const FVector S = DeltaTime * (FVector)RootScaleVelocityDiffDirection *
 				UE::Anim::Inertialization::Private::CalcInertialFloat(RootScaleVelocityDiffMagnitude, 0.0f, InertializationElapsedTime, Duration);
 			CurrRootMotionDelta.SetScale3D(S + CurrRootMotionDelta.GetScale3D());
@@ -1184,6 +1337,7 @@ void FAnimNode_Inertialization::Deactivate()
 PRAGMA_DISABLE_DEPRECATION_WARNINGS
 
 // DEPRECATED: See FInertializationSparsePose::InitFrom
+// [翻译失败: DEPRECATED: See FInertializationSparsePose::InitFrom]
 void FInertializationPose::InitFrom(const FCompactPose& Pose, const FBlendedCurve& InCurves, const FTransform& InComponentTransform, const FName& InAttachParentName, float InDeltaTime)
 {
 	const FBoneContainer& BoneContainer = Pose.GetBoneContainer();
@@ -1224,6 +1378,7 @@ void FInertializationSparsePose::InitFrom(
 	const int32 NumSkeletonBones = UE::Anim::Inertialization::Private::GetNumSkeletonBones(BoneContainer);
 
 	// Allocate Bone Index Array
+	// [翻译失败: Allocate Bone Index Array]
 
 	BoneIndices.Init(INDEX_NONE, NumSkeletonBones);
 
@@ -1239,14 +1394,18 @@ void FInertializationSparsePose::InitFrom(
 		}
 
 		// For each valid bone in the Compact Pose we write into BoneIndices the InertializationBoneIndex -
+		// [翻译失败: For each valid bone in the Compact Pose we write into BoneIndices the InertializationBoneIndex -]
 		// i.e. the index into BoneTranslations, BoneRotations, and BoneScales we are going to use to store
+		// 即我们将用来存储的 BoneTranslations、BoneRotations 和 BoneScales 的索引
 		// the transform data
+		// 变换数据
 
 		BoneIndices[SkeletonPoseBoneIndex] = NumInertializationBones;
 		NumInertializationBones++;
 	}
 
 	// Initialize the BoneTranslations, BoneRotations, and BoneScales arrays
+	// 初始化 BoneTranslations、BoneRotations 和 BoneScales 数组
 
 	BoneTranslations.Init(FVector::ZeroVector, NumInertializationBones);
 	BoneRotations.Init(FQuat::Identity, NumInertializationBones);
@@ -1262,6 +1421,7 @@ void FInertializationSparsePose::InitFrom(
 		}
 
 		// Get the InertializationBoneIndex and write the transform data
+		// 获取InertializationBoneIndex并写入变换数据
 
 		const int32 InertializationBoneIndex = BoneIndices[SkeletonPoseBoneIndex];
 		check(InertializationBoneIndex != INDEX_NONE);
@@ -1273,6 +1433,7 @@ void FInertializationSparsePose::InitFrom(
 	}
 
 	// Init the Root Motion Delta
+	// 初始化根运动增量
 
 	bHasRootMotion = false;
 	RootMotionDelta = FTransform::Identity;
@@ -1283,6 +1444,7 @@ void FInertializationSparsePose::InitFrom(
 	}
 
 	// Init the rest of the snapshot data
+	// [翻译失败: Init the rest of the snapshot data]
 
 	Curves.InitFrom(InCurves);
 	ComponentTransform = InComponentTransform;
@@ -1308,6 +1470,7 @@ void FInertializationSparsePose::Empty()
 PRAGMA_DISABLE_DEPRECATION_WARNINGS
 
 // DEPRECATED: See FAnimNode_Inertialization::InitFrom
+// [翻译失败: DEPRECATED: See FAnimNode_Inertialization::InitFrom]
 void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlendedCurve& Curves, const FTransform& ComponentTransform, const FName& AttachParentName, const FInertializationPose& Prev1, const FInertializationPose& Prev2, const UE::Anim::FCurveFilter& CurveFilter)
 {
 	const FBoneContainer& BoneContainer = Pose.GetBoneContainer();
@@ -1315,17 +1478,22 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 	const FQuat ComponentTransform_GetRotation_Inverse = ComponentTransform.GetRotation().Inverse();
 
 	// Determine if we should initialize in local space (the default) or in world space (for situations where we wish to correct
+	// [翻译失败: Determine if we should initialize in local space (the default) or in world space (for situations where we wish to correct]
 	// a world-space discontinuity such as an abrupt orientation change)
+	// [翻译失败: a world-space discontinuity such as an abrupt orientation change)]
 	InertializationSpace = EInertializationSpace::Default;
 	if (AttachParentName != Prev1.AttachParentName || AttachParentName != Prev2.AttachParentName)
 	{
 		// If the parent space has changed, then inertialize in world space
+		// [翻译失败: If the parent space has changed, then inertialize in world space]
 		InertializationSpace = EInertializationSpace::WorldSpace;
 	}
 	else if (AttachParentName == NAME_None)
 	{
 		// If there was a discontinuity in ComponentTransform orientation, then correct for that by inertializing the orientation in world space
+		// [翻译失败: If there was a discontinuity in ComponentTransform orientation, then correct for that by inertializing the orientation in world space]
 		// (but only if the mesh is not attached to another actor, because we don't want to dampen the connection between attached actors)
+		// [翻译失败: (but only if the mesh is not attached to another actor, because we don't want to dampen the connection between attached actors)]
 		if ((FMath::Abs((Prev1.ComponentTransform.GetRotation() * ComponentTransform_GetRotation_Inverse).W) < 0.999f) ||	// (W < 0.999f --> angle > 5 degrees)
 			(FMath::Abs((Prev2.ComponentTransform.GetRotation() * ComponentTransform_GetRotation_Inverse).W) < 0.999f))		// (W < 0.999f --> angle > 5 degrees)
 		{
@@ -1334,6 +1502,7 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 	}
 
 	// Compute the inertialization differences for each bone
+	// [翻译失败: Compute the inertialization differences for each bone]
 	const int32 NumSkeletonBones = UE::Anim::Inertialization::Private::GetNumSkeletonBones(BoneContainer);
 	BoneDiffs.Empty(NumSkeletonBones);
 	BoneDiffs.AddZeroed(NumSkeletonBones);
@@ -1351,6 +1520,7 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 			if (BoneIndex.IsRootBone())
 			{
 				// If we are inertializing in world space, then adjust the historical root bones to be in a consistent reference frame
+				// [翻译失败: If we are inertializing in world space, then adjust the historical root bones to be in a consistent reference frame]
 				if (InertializationSpace == EInertializationSpace::WorldSpace)
 				{
 					Prev1Transform *= Prev1.ComponentTransform.GetRelativeTransform(ComponentTransform);
@@ -1365,7 +1535,9 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 			else
 			{
 				// If this bone is a child of an excluded bone, then adjust the previous transforms to be relative to the excluded parent's
+				// [翻译失败: If this bone is a child of an excluded bone, then adjust the previous transforms to be relative to the excluded parent's]
 				// new transform so that the children maintain their original component space transform even though the parent will pop
+				// 新的变换，以便子级保持其原始组件空间变换，即使父级将弹出
 				FCompactPoseBoneIndex ParentBoneIndex = BoneContainer.GetParentBoneIndex(BoneIndex);
 				int32 ParentSkeletonPoseBoneIndex = (ParentBoneIndex != INDEX_NONE) ? BoneContainer.GetSkeletonIndex(ParentBoneIndex) : INDEX_NONE;
 				if (ParentBoneIndex != INDEX_NONE && ParentSkeletonPoseBoneIndex != INDEX_NONE &&
@@ -1376,6 +1548,7 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 					FTransform ParentPoseTransform = Pose[ParentBoneIndex];
 
 					// Continue walking up the skeleton hierarchy in case the parent's parent etc is also excluded
+					// 继续沿着骨架层次结构向上移动，以防父级的父级等也被排除在外
 					ParentBoneIndex = BoneContainer.GetParentBoneIndex(ParentBoneIndex);
 					ParentSkeletonPoseBoneIndex = (ParentBoneIndex != INDEX_NONE) ? BoneContainer.GetSkeletonIndex(ParentBoneIndex) : INDEX_NONE;
 					while (ParentBoneIndex != INDEX_NONE && ParentSkeletonPoseBoneIndex != INDEX_NONE &&
@@ -1390,6 +1563,7 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 					}
 
 					// Adjust the transforms so that they behave as though the excluded parent has been in its new location all along
+					// 调整变换，使它们的行为就像排除的父级一直位于其新位置一样
 					Prev1Transform *= ParentPrev1Transform.GetRelativeTransform(ParentPoseTransform);
 					Prev2Transform *= ParentPrev2Transform.GetRelativeTransform(ParentPoseTransform);
 				}
@@ -1398,6 +1572,7 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 			FInertializationBoneDiff& BoneDiff = BoneDiffs[SkeletonPoseBoneIndex];
 
 			// Compute the bone translation difference
+			// 计算骨骼平移差异
 			{
 				FVector TranslationDirection = FVector::ZeroVector;
 				float TranslationMagnitude = 0.0f;
@@ -1423,6 +1598,7 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 			}
 
 			// Compute the bone rotation difference
+			// 计算骨骼旋转差异
 			{
 				FVector RotationAxis = FVector::ZeroVector;
 				float RotationAngle = 0.0f;
@@ -1450,6 +1626,7 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 			}
 
 			// Compute the bone scale difference
+			// 计算骨尺度差异
 			{
 				FVector ScaleAxis = FVector::ZeroVector;
 				float ScaleMagnitude = 0.0f;
@@ -1477,10 +1654,13 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 	}
 
 	// Compute the curve differences
+	// 计算曲线差异
 	// First copy in current values
+	// 首先复制当前值
 	CurveDiffs.CopyFrom(Curves);
 
 	// Compute differences
+	// 计算差异
 	UE::Anim::FNamedValueArrayUtils::Union(CurveDiffs, Prev1.Curves.BlendedCurve,
 		[](FInertializationCurveDiffElement& OutResultElement, const UE::Anim::FCurveElement& InElement1, UE::Anim::ENamedValueUnionFlags InFlags)
 		{
@@ -1488,6 +1668,7 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 		});
 
 	// Compute derivatives
+	// 计算导数
 	if(Prev1.DeltaTime > UE_KINDA_SMALL_NUMBER)
 	{
 		UE::Anim::FNamedValueArrayUtils::Union(CurveDiffs, Prev2.Curves.BlendedCurve,
@@ -1500,6 +1681,7 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 	}
 
 	// Apply filtering to diffs to remove anything we dont want to inertialize
+	// 对差异应用过滤以删除我们不想惯性化的任何内容
 	if(CurveFilter.Num() > 0)
 	{
 		UE::Anim::FCurveUtils::Filter(CurveDiffs, CurveFilter);
@@ -1507,11 +1689,13 @@ void FInertializationPoseDiff::InitFrom(const FCompactPose& Pose, const FBlended
 }
 
 // DEPRECATED: See FAnimNode_Inertialization::ApplyTo
+// 已弃用：请参阅 FAnimNode_Inertialization::ApplyTo
 void FInertializationPoseDiff::ApplyTo(FCompactPose& Pose, FBlendedCurve& Curves, float InertializationElapsedTime, float InertializationDuration, TArrayView<const float> InertializationDurationPerBone) const
 {
 	const FBoneContainer& BoneContainer = Pose.GetBoneContainer();
 
 	// Apply pose difference
+	// 应用姿势差异
 	for (FCompactPoseBoneIndex BoneIndex : Pose.ForEachBoneIndex())
 	{
 		const int32 SkeletonPoseBoneIndex = BoneContainer.GetSkeletonIndex(BoneIndex);
@@ -1522,16 +1706,19 @@ void FInertializationPoseDiff::ApplyTo(FCompactPose& Pose, FBlendedCurve& Curves
 			const float Duration = InertializationDurationPerBone[SkeletonPoseBoneIndex];
 
 			// Apply the bone translation difference
+			// 应用骨骼平移差异
 			const FVector T = BoneDiff.TranslationDirection *
 				UE::Anim::Inertialization::Private::CalcInertialFloat(BoneDiff.TranslationMagnitude, BoneDiff.TranslationSpeed, InertializationElapsedTime, Duration);
 			Pose[BoneIndex].AddToTranslation(T);
 
 			// Apply the bone rotation difference
+			// 应用骨骼旋转差异
 			const FQuat Q = FQuat(BoneDiff.RotationAxis,
 				UE::Anim::Inertialization::Private::CalcInertialFloat(BoneDiff.RotationAngle, BoneDiff.RotationSpeed, InertializationElapsedTime, Duration));
 			Pose[BoneIndex].SetRotation(Q * Pose[BoneIndex].GetRotation());
 
 			// Apply the bone scale difference
+			// 应用骨尺度差异
 			const FVector S = BoneDiff.ScaleAxis *
 				UE::Anim::Inertialization::Private::CalcInertialFloat(BoneDiff.ScaleMagnitude, BoneDiff.ScaleSpeed, InertializationElapsedTime, Duration);
 			Pose[BoneIndex].SetScale3D(S + Pose[BoneIndex].GetScale3D());
@@ -1541,6 +1728,7 @@ void FInertializationPoseDiff::ApplyTo(FCompactPose& Pose, FBlendedCurve& Curves
 	Pose.NormalizeRotations();
 
 	// Apply curve differences
+	// 应用曲线差异
 	UE::Anim::FNamedValueArrayUtils::Union(Curves, CurveDiffs,
 		[&InertializationElapsedTime, &InertializationDuration](UE::Anim::FCurveElement& OutResultElement, const FInertializationCurveDiffElement& InParamElement, UE::Anim::ENamedValueUnionFlags InFlags)
 		{

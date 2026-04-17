@@ -13,6 +13,7 @@ int32 FAnimSubsystem_Tag::FindNodeIndexByTag(FName InTag) const
 	{
 		const TArray<FStructProperty*>& AnimNodeProperties = AnimClass->GetAnimNodeProperties();
 		// As the index is patched during compilation, it needs to be reversed here
+		// [翻译失败: As the index is patched during compilation, it needs to be reversed here]
 		int32 ReverseIndex = AnimNodeProperties.Num() - 1 - *NodeIndexPtr;
 		return ReverseIndex;
 	}
@@ -28,6 +29,7 @@ FAnimNode_Base* FAnimSubsystem_Tag::FindNodeByTag_Internal(FName InTag, UAnimIns
 	{
 		const TArray<FStructProperty*>& AnimNodeProperties = AnimClass->GetAnimNodeProperties();
 		// As the index is patched during compilation, it needs to be reversed here
+		// [翻译失败: As the index is patched during compilation, it needs to be reversed here]
 		int32 ReverseIndex = AnimNodeProperties.Num() - 1 - *NodeIndexPtr;
 		
 		check(AnimNodeProperties.IsValidIndex(ReverseIndex));

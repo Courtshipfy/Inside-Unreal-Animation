@@ -22,6 +22,7 @@ FAnimSyncGroupScope::FAnimSyncGroupScope(const FAnimationBaseContext& InContext,
 	, GroupRole(InGroupRole)
 {
 	// If we have an outer message, grab its proxy for forwarding
+	// 如果我们有外部消息，则获取其代理进行转发
 	if(const FAnimSyncGroupScope* OuterMessage = InContext.GetMessage<FAnimSyncGroupScope>())
 	{
 		OuterProxy = OuterMessage->OuterProxy != nullptr ? OuterMessage->OuterProxy : &OuterMessage->Proxy;
@@ -33,6 +34,7 @@ void FAnimSyncGroupScope::AddTickRecord(const FAnimTickRecord& InTickRecord, con
 	FAnimSyncParams NewSyncParams = InSyncParams;
 
 	// Apply method to transform params if necessary
+	// 如有必要，应用方法来转换参数
 	switch(InSyncParams.Method)
 	{
 	default:
@@ -44,6 +46,7 @@ void FAnimSyncGroupScope::AddTickRecord(const FAnimTickRecord& InTickRecord, con
 		break;
 	case EAnimSyncMethod::Graph:
 		// Override sync group/role supplied with our group
+		// 覆盖我们组提供的同步组/角色
 		check(InSyncParams.GroupName == NAME_None);
 		NewSyncParams.GroupName = SyncGroup;
 		NewSyncParams.Role = GroupRole;
@@ -62,6 +65,7 @@ void FAnimSyncGroupScope::AddTickRecord(const FAnimTickRecord& InTickRecord, con
 	}
 
 	// Forward to outer instance if we have one
+	// 如果有的话转发到外部实例
 	if(OuterProxy)
 	{
 		OuterProxy->AddTickRecord(InTickRecord, NewSyncParams);
@@ -75,6 +79,7 @@ void FAnimSyncGroupScope::AddTickRecord(const FAnimTickRecord& InTickRecord, con
 void FAnimSyncGroupScope::SetMirror(const UMirrorDataTable* MirrorDataTable)
 {
 	// Forward to outer instance if we have one
+	// 如果有的话转发到外部实例
 	if (OuterProxy)
 	{
 		OuterProxy->SetSyncMirror(MirrorDataTable);

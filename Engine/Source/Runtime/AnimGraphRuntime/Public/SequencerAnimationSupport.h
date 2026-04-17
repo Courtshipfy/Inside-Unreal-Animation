@@ -29,23 +29,29 @@ class ISequencerAnimationSupport
 	GENERATED_IINTERFACE_BODY()
 
 	/** Source Animation Getter for the support of the Sequencer Animation Track interface */
+	/** Source Animation Getter，用于支持 Sequencer Animation Track 接口 */
 	virtual UAnimInstance* GetSourceAnimInstance() = 0;
 	virtual void SetSourceAnimInstance(UAnimInstance* SourceAnimInstance) = 0;
 	virtual bool DoesSupportDifferentSourceAnimInstance() const = 0;
 	/** Update an animation sequence player in this instance */
+	/** 在此实例中更新动画序列播放器 */
 	virtual void UpdateAnimTrack(UAnimSequenceBase* InAnimSequence, int32 SequenceId, float InPosition, float Weight, bool bFireNotifies) = 0;
 	virtual void UpdateAnimTrack(UAnimSequenceBase* InAnimSequence, int32 SequenceId, float InFromPosition, float InToPosition, float Weight, bool bFireNotifies) = 0;
 
 	/** Construct all nodes in this instance */
+	/** 构造该实例中的所有节点 */
 	virtual void ConstructNodes() = 0;
 
 	/** Reset all nodes in this instance */
+	/** 重置此实例中的所有节点 */
 	virtual void ResetNodes() = 0;
 
 	/** Reset the pose for this instance*/
+	/** 重置此实例的姿势*/
 	virtual void ResetPose() = 0;
 
 	/** Saved the named pose to restore after */
+	/** 保存命名姿势后恢复 */
 	virtual void SavePose() = 0;
 };
 

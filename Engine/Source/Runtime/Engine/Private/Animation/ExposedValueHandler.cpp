@@ -8,6 +8,7 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ExposedValueHandler)
 
 // Deprecation support
+// 弃用支持
 PRAGMA_DISABLE_DEPRECATION_WARNINGS
 TArray<FExposedValueCopyRecord> FExposedValueHandler::CopyRecords;
 TObjectPtr<UFunction> FExposedValueHandler::Function;
@@ -39,6 +40,7 @@ void FExposedValueHandler::Initialize(UClass* InClass, const FPropertyAccessLibr
 }
 
 // Don't inline this function to keep the stack usage down
+// [翻译失败: Don't inline this function to keep the stack usage down]
 FORCENOINLINE void FExposedValueHandler::Execute(const FAnimationBaseContext& Context) const
 {
 	if (Handler)
@@ -52,8 +54,11 @@ void FAnimNodeExposedValueHandler_Base::Initialize(const UClass* InClass)
 	if (BoundFunction != NAME_None)
 	{
 		// This cached function is nullptr when the CDO is initially serialized, or (in editor) when the class has been
+		// [翻译失败: This cached function is nullptr when the CDO is initially serialized, or (in editor) when the class has been]
 		// recompiled and any instances have been re-instanced. When new instances are spawned, this function is
+		// [翻译失败: recompiled and any instances have been re-instanced. When new instances are spawned, this function is]
 		// duplicated (it is a FProperty) onto those instances so we dont pay the cost of the FindFunction() call
+		// [翻译失败: duplicated (it is a FProperty) onto those instances so we dont pay the cost of the FindFunction() call]
 #if !WITH_EDITOR
 		if (Function == nullptr)
 #endif

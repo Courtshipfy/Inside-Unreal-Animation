@@ -17,7 +17,9 @@ namespace UE { namespace Anim { struct FStackAttributeContainer; } }
 struct FBlendProfileScratchData : public TThreadSingleton<FBlendProfileScratchData>
 {
 	// @todo: TArray<TArray<>> allocations are not preserved during resets. We should either implement a new TArrayOfArrays container
+	// @todo：重置期间不会保留 TArray<TArray<>> 分配。我们应该实现一个新的 TArrayOfArrays 容器
 	// or change the deallocation policy perhaps via template specialization?
+	// 或者也许通过模板专业化来改变释放策略？
 
 	TArray<TArray<float>> PerBoneWeights;		// A set of bone weights, per montage instance. Index this like [PoseIndex][CompactPoseBoneIndex].
 	TArray<float> PerBoneWeightTotals;			// The bone weight totals for non-additive poses, used for normalizing weights.

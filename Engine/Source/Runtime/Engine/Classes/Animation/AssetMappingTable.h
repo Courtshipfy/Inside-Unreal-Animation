@@ -17,16 +17,19 @@
 class UAnimationAsset;
 
  /** This defines one asset mapping */
+ /** 这定义了一个资产映射 */
 USTRUCT()
 struct FAssetMapping
 {
 	GENERATED_USTRUCT_BODY()
 
 	/** source asset **/
+	/** 源资产 **/
 	UPROPERTY(EditAnywhere, Category = "FAssetMapping")
 	TObjectPtr<class UAnimationAsset>			SourceAsset;
 
 	/** source asset **/
+	/** 源资产 **/
 	UPROPERTY(EditAnywhere, Category = "FAssetMapping")
 	TObjectPtr<class UAnimationAsset>			TargetAsset;
 
@@ -63,11 +66,13 @@ class UAssetMappingTable : public UObject
 
 private:
 	/** Mappin of asset between source and target **/
+	/** 源和目标之间资产的映射 **/
 	UPROPERTY(VisibleAnywhere, Category = AssetMappingTable, EditFixedSize)
 	TArray<FAssetMapping> MappedAssets;
 
 public:
 	/** Find Mapped Asset */
+	/** 查找映射资产 */
 	int32 FindMappedAsset(const UAnimationAsset* NewAsset) const;
 	void Clear();
 	void RefreshAssetList(const TArray<UAnimationAsset*>& AnimAssets);

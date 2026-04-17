@@ -21,14 +21,17 @@ class UAnimCompress_RemoveLinearKeys : public UAnimCompress
 	GENERATED_UCLASS_BODY()
 
 	/** Maximum position difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression. */
+	/** [翻译失败: Maximum position difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression.] */
 	UPROPERTY(EditAnywhere, Category=LinearKeyRemoval)
 	float MaxPosDiff;
 
 	/** Maximum angle difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression. */
+	/** [翻译失败: Maximum angle difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression.] */
 	UPROPERTY(EditAnywhere, Category=LinearKeyRemoval)
 	float MaxAngleDiff;
 
 	/** Maximum Scale difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression. */
+	/** [翻译失败: Maximum Scale difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression.] */
 	UPROPERTY(EditAnywhere, Category=LinearKeyRemoval)
 	float MaxScaleDiff;
 
@@ -77,18 +80,22 @@ class UAnimCompress_RemoveLinearKeys : public UAnimCompress
 	uint32 bActuallyFilterLinearKeys:1;
 
 	//~ Begin UAnimBoneCompressionCodec Interface
+	//~ 开始 UAnimBoneCompressionCodec 接口
 #if WITH_EDITORONLY_DATA
 	virtual int64 EstimateCompressionMemoryUsage(const UAnimSequence& AnimSequence) const override;
 #endif // WITH_EDITORONLY_DATA
 	//~ End UAnimBoneCompressionCodec Interface
+	//~ 结束 UAnimBoneCompressionCodec 接口
 
 protected:
 	//~ Begin UAnimCompress Interface
+	//[翻译失败: ~ Begin UAnimCompress Interface]
 #if WITH_EDITOR
 	virtual bool DoReduction(const FCompressibleAnimData& CompressibleAnimData, FCompressibleAnimDataResult& OutResult) override;
 	virtual void PopulateDDCKey(const UE::Anim::Compression::FAnimDDCKeyArgs& KeyArgs, FArchive& Ar) override;
 #endif // WITH_EDITOR
 	//~ Begin UAnimCompress Interface
+	//[翻译失败: ~ Begin UAnimCompress Interface]
 
 #if WITH_EDITOR
 	/**

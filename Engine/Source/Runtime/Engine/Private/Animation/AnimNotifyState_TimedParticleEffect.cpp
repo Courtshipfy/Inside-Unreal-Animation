@@ -26,10 +26,12 @@ void UAnimNotifyState_TimedParticleEffect::NotifyBegin(USkeletalMeshComponent * 
 void UAnimNotifyState_TimedParticleEffect::NotifyBegin(USkeletalMeshComponent * MeshComp, class UAnimSequenceBase * Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
 	// ensure deprecated path is called because a call to Super is not made
+	// 确保调用已弃用的路径，因为未调用 Super
 	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	NotifyBegin(MeshComp, Animation, TotalDuration);
 	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	// Only spawn if we've got valid params
+	// 仅当我们有有效参数时才生成
 	if(ValidateParameters(MeshComp))
 	{
 		UParticleSystemComponent* NewComponent = UGameplayStatics::SpawnEmitterAttached(PSTemplate, MeshComp, SocketName, LocationOffset, RotationOffset, EAttachLocation::KeepRelativeOffset, !bDestroyAtEnd);
@@ -70,7 +72,9 @@ void UAnimNotifyState_TimedParticleEffect::NotifyEnd(USkeletalMeshComponent * Me
 
 #if WITH_EDITORONLY_DATA
 			// In editor someone might have changed our parameters while we're ticking; so check 
+			// 在编辑器中，有人可能在我们勾选时更改了我们的参数；所以检查一下
 			// previous known parameters too.
+			// 以前已知的参数也是如此。
 			bSocketMatch |= PreviousSocketNames.Contains(ParticleComponent->GetAttachSocketName());
 			bTemplateMatch |= PreviousPSTemplates.Contains(ParticleComponent->Template);
 #endif
@@ -78,7 +82,9 @@ void UAnimNotifyState_TimedParticleEffect::NotifyEnd(USkeletalMeshComponent * Me
 			if(bSocketMatch && bTemplateMatch && !ParticleComponent->bWasDeactivated)
 			{
 				// Either destroy the component or deactivate it to have it's active particles finish.
+				// 要么破坏该组件，要么停用它，以完成其活动粒子。
 				// The component will auto destroy once all particle are gone.
+				// 一旦所有粒子消失，该组件将自动销毁。
 				if(bDestroyAtEnd)
 				{
 					ParticleComponent->DestroyComponent();
@@ -90,11 +96,14 @@ void UAnimNotifyState_TimedParticleEffect::NotifyEnd(USkeletalMeshComponent * Me
 
 #if WITH_EDITORONLY_DATA
 				// No longer need to track previous values as we've found our component
+				// 不再需要跟踪以前的值，因为我们已经找到了我们的组件
 				// and removed it.
+				// 并将其删除。
 				PreviousPSTemplates.Empty();
 				PreviousSocketNames.Empty();
 #endif
 				// Removed a component, no need to continue
+				// 删除了一个组件，无需继续
 				break;
 			}
 		}

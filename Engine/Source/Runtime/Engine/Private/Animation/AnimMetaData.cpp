@@ -6,6 +6,7 @@
 
 /////////////////////////////////////////////////////
 // UAnimMetaDatay
+// U动画元数据
 
 UAnimMetaData::UAnimMetaData(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

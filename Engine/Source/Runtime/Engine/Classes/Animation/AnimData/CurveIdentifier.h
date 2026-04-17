@@ -11,6 +11,7 @@
 #include "CurveIdentifier.generated.h"
 
 /** Enum used to determine a component channel of a transform curve */
+/** 用于确定变换曲线的分量通道的枚举 */
 UENUM(BlueprintType)
 enum class ETransformCurveChannel : uint8
 {
@@ -21,6 +22,7 @@ enum class ETransformCurveChannel : uint8
 };
 
 /** Enum used to determine an axis channel of a vector curve */
+/** 用于确定矢量曲线的轴通道的枚举 */
 UENUM(BlueprintType)
 enum class EVectorCurveChannel : uint8
 {
@@ -112,6 +114,7 @@ struct TStructOpsTypeTraits<FAnimationCurveIdentifier> : public TStructOpsTypeTr
 };
 
 /** Script-exposed functionality for wrapping native functionality and constructing valid FAnimationCurveIdentifier instances */
+/** 脚本公开的功能，用于包装本机功能并构造有效的 FAnimationCurveIdentifier 实例 */
 UCLASS(MinimalAPI)
 class UAnimationCurveIdentifierExtensions : public UBlueprintFunctionLibrary
 {

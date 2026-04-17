@@ -29,10 +29,12 @@ struct FAnimNode_ApplyMeshSpaceAdditive : public FAnimNode_Base
 	EAnimAlphaInputType AlphaInputType;
 
 	/** The float value that controls the alpha blending when the alpha input type is set to 'Float' */
+	/** 当 Alpha 输入类型设置为“Float”时控制 Alpha 混合的浮点值 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (PinShownByDefault))
 	float Alpha;
 
 	/** The boolean value that controls the alpha blending when the alpha input type is set to 'Bool' */
+	/** 当 alpha 输入类型设置为“Bool”时控制 alpha 混合的布尔值 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (PinShownByDefault, DisplayName = "bEnabled"))
 	uint8 bAlphaBoolEnabled : 1;
 
@@ -63,6 +65,7 @@ public:
 	ENGINE_API FAnimNode_ApplyMeshSpaceAdditive();
 
 	// FAnimNode_Base interface
+	// FAnimNode_Base接口
 	ENGINE_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ENGINE_API virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
 	ENGINE_API virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override;
@@ -70,4 +73,5 @@ public:
 	ENGINE_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	virtual int32 GetLODThreshold() const override { return LODThreshold; }
 	// End of FAnimNode_Base interface
+	// FAnimNode_Base接口结束
 };

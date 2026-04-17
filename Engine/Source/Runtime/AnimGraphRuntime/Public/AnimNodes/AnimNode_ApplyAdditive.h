@@ -55,6 +55,7 @@ public:
 	ANIMGRAPHRUNTIME_API FAnimNode_ApplyAdditive();
 
 	// FAnimNode_Base interface
+	// FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override;
@@ -62,5 +63,6 @@ public:
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	virtual int32 GetLODThreshold() const override { return LODThreshold; }
 	// End of FAnimNode_Base interface
+	// FAnimNode_Base接口结束
 
 };

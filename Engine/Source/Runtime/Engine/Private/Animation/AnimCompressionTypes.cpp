@@ -87,9 +87,11 @@ void StripFramesOdd(TArray<ArrayValue>& Keys, const int32 NumFrames)
 		NewKeys.Add(Keys[0]); //Always keep first 
 
 		//Always keep first and last
+		//[翻译失败: Always keep first and last]
 		const int32 NumFramesToCalculate = NewNumFrames - 2;
 
 		// Frame increment is ratio of old frame spaces vs new frame spaces 
+		// [翻译失败: Frame increment is ratio of old frame spaces vs new frame spaces]
 		const double FrameIncrement = (double)(NumFrames - 1) / (double)(NewNumFrames - 1);
 
 		for (int32 Frame = 0; Frame < NumFramesToCalculate; ++Frame)
@@ -126,9 +128,11 @@ void StripFramesMultipler(TArray<ArrayValue>& Keys, const int32 NumFrames, int32
 		NewKeys.Add(Keys[0]); //Always keep first 
 
 		//Always keep first and last
+		//始终保持第一个和最后一个
 		const int32 NumFramesToCalculate = NewNumFrames - 2;
 
 		// Frame increment is ratio of old frame spaces vs new frame spaces 
+		// 帧增量是旧帧空间与新帧空间的比率
 		const double FrameIncrement = (double)(NumFrames - 1) / (double)(NewNumFrames - 1);
 
 		for (int32 Frame = 0; Frame < NumFramesToCalculate; ++Frame)
@@ -161,6 +165,7 @@ public:
 	FByFramePoseEvalContext(USkeleton* InSkeleton)
 	{
 		// Initialize RequiredBones for pose evaluation
+		// 初始化RequiredBones进行姿势评估
 		RequiredBones.SetUseRAWData(true);
 
 		check(InSkeleton);
@@ -228,6 +233,7 @@ void FCompressibleAnimData::BakeOutAdditiveIntoRawData(const FFrameRate& SampleR
 	checkf(bSelfAdditiveType || (AdditiveBaseAnimation && !AdditiveBaseAnimation->HasAnyFlags(EObjectFlags::RF_NeedPostLoad)), TEXT("Invalid additive base animation state"));
 
 	// Lock DataModel evaluation
+	// [翻译失败: Lock DataModel evaluation]
 	IAnimationDataModel::FEvaluationAndModificationLock Lock(*AnimSequence->GetDataModelInterface(), [this]() -> bool
 	{
 		return !IsCancelled();
@@ -237,6 +243,7 @@ void FCompressibleAnimData::BakeOutAdditiveIntoRawData(const FFrameRate& SampleR
 	if (!bSelfAdditiveType)
 	{
 		// Additive is based off another Animation Asset, so lock its evaluation path as well
+		// [翻译失败: Additive is based off another Animation Asset, so lock its evaluation path as well]
 		AdditiveBaseLock = MakeUnique<IAnimationDataModel::FEvaluationAndModificationLock>(*AdditiveBaseAnimation->GetDataModelInterface(), [this]() -> bool
 		{
 			return !IsCancelled();
@@ -253,12 +260,14 @@ void FCompressibleAnimData::BakeOutAdditiveIntoRawData(const FFrameRate& SampleR
 	FByFramePoseEvalContext EvalContext(AnimSequence);
 
 	// Enable re-targeting as we wish for both the base and additive sequences to use the same frame of reference.
+	// 启用重新定位，因为我们希望基础序列和附加序列使用相同的参考系。
 	EvalContext.RequiredBones.SetDisableRetargeting(false);
 	EvalContext.RequiredBones.SetUseRAWData(true);
 	EvalContext.RequiredBones.SetUseSourceData(false);
 
 	TScriptInterface<IAnimationDataModel> DataModelInterface = AnimSequence->GetDataModelInterface();
 	// We actually need to resample bone transforms
+	// 我们实际上需要重新采样骨骼变换
 	const FFrameNumber ModelNumberOfFrames = DataModelInterface->GetNumberOfFrames();
 	const FFrameTime ResampledFrameTime = FFrameRate::TransformTime(ModelNumberOfFrames, DataModelInterface->GetFrameRate(), SampleRate);
 	ensureMsgf(FMath::IsNearlyZero(ResampledFrameTime.GetSubFrame()), TEXT("Incompatible resampling frame rate for animation sequence %s, frame remainder of %1.8f"), *AnimSequence->GetName(), ResampledFrameTime.GetSubFrame());
@@ -272,6 +281,7 @@ void FCompressibleAnimData::BakeOutAdditiveIntoRawData(const FFrameRate& SampleR
 	const FReferenceSkeleton& ReferenceSkeleton = Skeleton->GetReferenceSkeleton();
 
 	// Populate tracks
+	// [翻译失败: Populate tracks]
 	for (int32 TrackIndex = 0; TrackIndex < EvalContext.RequiredBoneIndexArray.Num(); ++TrackIndex)
 	{
 		FBoneAnimationTrack& Track = ResampledTrackData[TrackIndex];
@@ -290,6 +300,7 @@ void FCompressibleAnimData::BakeOutAdditiveIntoRawData(const FFrameRate& SampleR
 
 	{
 		//Pose evaluation data
+		//[翻译失败: Pose evaluation data]
 		FCompactPose Pose;
 		Pose.SetBoneContainer(&EvalContext.RequiredBones);
 		FCompactPose BasePose;
@@ -303,10 +314,12 @@ void FCompressibleAnimData::BakeOutAdditiveIntoRawData(const FFrameRate& SampleR
 		for (int32 KeyIndex = 0; KeyIndex < SampledKeys; ++KeyIndex)
 		{
 			// Initialise curve data from Skeleton
+			// 从骨架初始化曲线数据
 			Curve.InitFrom(EvalContext.RequiredBones);
 			DummyBaseCurve.InitFrom(EvalContext.RequiredBones);
 
 			//Grab pose for this frame
+			//[翻译失败: Grab pose for this frame]
 			const double PreviousKeyTime = SampleRate.AsSeconds(KeyIndex - 1);
 			const double CurrentKeyTime = SampleRate.AsSeconds(KeyIndex);
 			FFrameTime CurrentFrameTime = KeyIndex;
@@ -322,6 +335,7 @@ void FCompressibleAnimData::BakeOutAdditiveIntoRawData(const FFrameRate& SampleR
 			AnimSequence->GetAdditiveBasePose(AnimBasePoseData, ExtractContext);
 
 			//Write out every track for this frame
+			//[翻译失败: Write out every track for this frame]
 			for (FCompactPoseBoneIndex TrackIndex(0); TrackIndex < ResampledTrackData.Num(); ++TrackIndex)
 			{
 				CopyTransformToRawAnimationData(Pose[TrackIndex], ResampledTrackData[TrackIndex.GetInt()].InternalTrackData, KeyIndex);
@@ -329,6 +343,7 @@ void FCompressibleAnimData::BakeOutAdditiveIntoRawData(const FFrameRate& SampleR
 			}
 
 			//Write out curve data for this frame
+			//写出该帧的曲线数据
 			Curve.ForEachElement([this, &FloatCurves, KeyIndex, PreviousKeyTime, CurrentKeyTime, CurrentFrameTime, &SampleRate](const UE::Anim::FCurveElement& InElement)
 			{
 				const float CurveWeight = InElement.Value;
@@ -336,6 +351,7 @@ void FCompressibleAnimData::BakeOutAdditiveIntoRawData(const FFrameRate& SampleR
 				if (!RawCurve && !FMath::IsNearlyZero(CurveWeight)) //Only make a new curve if we are going to give it data
 				{
 					// curve flags don't matter much for compressed curves
+					// 曲线标志对于压缩曲线来说并不重要
 					RawCurve = FindOrAddCurve(FloatCurves, InElement.Name);
 				}
 
@@ -345,6 +361,7 @@ void FCompressibleAnimData::BakeOutAdditiveIntoRawData(const FFrameRate& SampleR
 					if (!bHasKeys)
 					{
 						//Add pre key of 0
+						//添加预密钥 0
 						if (KeyIndex > 0)
 						{
 							RawCurve->UpdateOrAddKey(0.f, PreviousKeyTime);
@@ -359,6 +376,7 @@ void FCompressibleAnimData::BakeOutAdditiveIntoRawData(const FFrameRate& SampleR
 						{
 							FRichCurveKey& PrevKey = CurveKeys.Last(1);
 							// Round to frame here as it would have been added at a specific frame boundary (though float->double conversion might mean the value is off)
+							// 此处舍入到帧，因为它会在特定帧边界添加（尽管 float->double 转换可能意味着该值已关闭）
 							const FFrameTime PrevKeyTime = SampleRate.AsFrameTime(PrevKey.Time).RoundToFrame();
 							if (PrevKeyTime < CurrentFrameTime - 1) // Did we skip a frame, if so need to make previous key const
 							{
@@ -383,13 +401,17 @@ static void FindAnimatedVirtualBones(const TArray<FBoneAnimationTrack>& Animated
 		if (Algo::FindBy(AnimatedBoneTracks, VirtualBone.VirtualBoneName, &FBoneAnimationTrack::Name) == nullptr)
 		{
 			//Need to test if we will animation virtual bone. This involves seeing if any bone that can affect the position
+			//需要测试我们是否会对虚拟骨骼进行动画处理。这涉及查看是否有任何骨骼可以影响位置
 			//of the target relative to the source is animated by this animation. A bone that can affect the relative position
+			//目标相对于源的变化通过此动画进行动画化。可以影响相对位置的骨骼
 			//is any both that is a child of the common ancestor of the target and source
+			//是目标和源的共同祖先的子代
 
 			SourceParents.Reset();
 			bool bBuildVirtualBone = false;
 
 			// First get all the bones that form the chain to the source bone. 
+			// 首先获取形成源骨骼链的所有骨骼。
 			int32 CurrentBone = ReferenceSkeleton.FindBoneIndex(VirtualBone.SourceBoneName);
 			while (CurrentBone != INDEX_NONE)
 			{
@@ -398,6 +420,7 @@ static void FindAnimatedVirtualBones(const TArray<FBoneAnimationTrack>& Animated
 			}
 
 			// Now start checking every bone in the target bones hierarchy until a common ancestor is reached. 
+			// 现在开始检查目标骨骼层次结构中的每个骨骼，直到达到共同的祖先。
 			CurrentBone = ReferenceSkeleton.FindBoneIndex(VirtualBone.TargetBoneName);
 
 			while (!SourceParents.Contains(CurrentBone))
@@ -405,6 +428,7 @@ static void FindAnimatedVirtualBones(const TArray<FBoneAnimationTrack>& Animated
 				if (Algo::FindBy(AnimatedBoneTracks, CurrentBone, &FBoneAnimationTrack::BoneTreeIndex) != nullptr)
 				{
 					//We animate this bone so the virtual bone is needed
+					//我们为该骨骼设置动画，因此需要虚拟骨骼
 					bBuildVirtualBone = true;
 					break;
 				}
@@ -414,12 +438,14 @@ static void FindAnimatedVirtualBones(const TArray<FBoneAnimationTrack>& Animated
 			}
 
 			// Now we have all the non common bones from the target chain we need the same check from the source chain
+			// 现在我们有了目标链中的所有非公共骨骼，我们需要从源链中进行相同的检查
 			const int32 FirstCommon = SourceParents.IndexOfByKey(CurrentBone);
 			for (int32 i = FirstCommon - 1; i >= 0; --i)
 			{
 				if (Algo::FindBy(AnimatedBoneTracks, i, &FBoneAnimationTrack::BoneTreeIndex) != nullptr)
 				{
 					//We animate this bone so the virtual bone is needed
+					//[翻译失败: We animate this bone so the virtual bone is needed]
 					bBuildVirtualBone = true;
 					break;
 				}
@@ -460,6 +486,7 @@ void FCompressibleAnimData::ResampleAnimationTrackData(const FFrameRate& SampleR
 			FByFramePoseEvalContext EvalContext(AnimSequence);
 
 			// Disable re-targeting since we wish to compress pre-retargeting data. Retargeting is performed at runtime.
+			// [翻译失败: Disable re-targeting since we wish to compress pre-retargeting data. Retargeting is performed at runtime.]
 			EvalContext.RequiredBones.SetDisableRetargeting(true);
 			EvalContext.RequiredBones.SetUseRAWData(true);
 			EvalContext.RequiredBones.SetUseSourceData(false);
@@ -471,6 +498,7 @@ void FCompressibleAnimData::ResampleAnimationTrackData(const FFrameRate& SampleR
 
 
 			// We actually need to resample bone transforms
+			// 我们实际上需要重新采样骨骼变换
 			const FFrameNumber ModelNumberOfFrames = DataModelInterface->GetNumberOfFrames();
 			const FFrameTime ResampledFrameTime = FFrameRate::TransformTime(ModelNumberOfFrames, DataModelInterface->GetFrameRate(), SampleRate);
 			ensureMsgf(FMath::IsNearlyZero(ResampledFrameTime.GetSubFrame()), TEXT("Incompatible resampling frame rate for animation sequence %s, frame remainder of %1.8f"), *AnimSequence->GetName(), ResampledFrameTime.GetSubFrame());
@@ -586,15 +614,18 @@ void FCompressibleAnimData::WriteCompressionDataToJSON(TArrayView<FName> Origina
 			Writer->WriteValue(TEXT("name"), Name);
 
 			// Interpolation type
+			// [翻译失败: Interpolation type]
 			Writer->WriteValue(TEXT("interpolation"), InterpolationEnum->GetValueAsString(Interpolation));
 
 			// Keys
 			Writer->WriteValue(TEXT("number_of_keys"), NumberOfKeys);
 
 			// Length
+			// 长度
 			Writer->WriteValue(TEXT("length_in_seconds"), SequenceLength);
 
 			// Raw Animation
+			// 原始动画
 			if ((bPositionalData || bRotationalData || bScalingData) && FinalRawAnimationData.Num())
 			{
 				Writer->WriteArrayStart(TEXT("animation_tracks"));
@@ -604,11 +635,13 @@ void FCompressibleAnimData::WriteCompressionDataToJSON(TArrayView<FName> Origina
 						Writer->WriteObjectStart();
 							
 						// Track name
+						// 曲目名称
 						Writer->WriteValue(TEXT("name"), FinalTrackNames[TrackIndex].ToString());
 
 						const FRawAnimSequenceTrack& Track = FinalRawAnimationData[TrackIndex];
 
 						// Position
+						// 位置
 						if (bPositionalData)
 						{
 							Writer->WriteArrayStart(TEXT("positional_data"));
@@ -623,6 +656,7 @@ void FCompressibleAnimData::WriteCompressionDataToJSON(TArrayView<FName> Origina
 							
 
 						// Rotation
+						// 旋转
 						if (bRotationalData)
 						{
 							Writer->WriteArrayStart(TEXT("rotational_data"));
@@ -636,6 +670,7 @@ void FCompressibleAnimData::WriteCompressionDataToJSON(TArrayView<FName> Origina
 						}
 
 						// Scale
+						// 规模
 						if (bScalingData)
 						{
 							Writer->WriteArrayStart(TEXT("scaling_data"));
@@ -654,6 +689,7 @@ void FCompressibleAnimData::WriteCompressionDataToJSON(TArrayView<FName> Origina
 				Writer->WriteArrayEnd();
 
 				// Additive Animation
+				// 附加动画
 				if(bIsValidAdditive && AdditiveBaseAnimationData.Num())
 				{
 					Writer->WriteArrayStart(TEXT("additive_base_tracks"));
@@ -664,9 +700,11 @@ void FCompressibleAnimData::WriteCompressionDataToJSON(TArrayView<FName> Origina
 							Writer->WriteObjectStart();
 							{
 								// Track name
+								// [翻译失败: Track name]
 								Writer->WriteValue(TEXT("name"), OriginalTrackNames[TrackIndex].ToString());							
 									
 								// Position
+								// 位置
 								if (bPositionalData)
 								{
 									Writer->WriteArrayStart(TEXT("positional_data"));
@@ -681,6 +719,7 @@ void FCompressibleAnimData::WriteCompressionDataToJSON(TArrayView<FName> Origina
 							
 
 								// Rotation
+								// 旋转
 								if (bRotationalData)
 								{
 									Writer->WriteArrayStart(TEXT("rotational_data"));
@@ -694,6 +733,7 @@ void FCompressibleAnimData::WriteCompressionDataToJSON(TArrayView<FName> Origina
 								}
 
 								// Scale
+								// 规模
 								if (bScalingData)
 								{
 									Writer->WriteArrayStart(TEXT("scaling_data"));
@@ -716,6 +756,7 @@ void FCompressibleAnimData::WriteCompressionDataToJSON(TArrayView<FName> Origina
 			if (bCurveData && RawFloatCurves.Num())
 			{
 				// Num curves
+				// 曲线数
 				Writer->WriteValue(TEXT("number_of_curves"), RawFloatCurves.Num());
 					
 				Writer->WriteArrayStart(TEXT("curve_data"));		
@@ -826,6 +867,7 @@ void FCompressibleAnimData::FetchData(const ITargetPlatform* InPlatform)
 	const bool bHasVirtualBones = Skeleton->GetVirtualBones().Num() > 0;
 
 	/* Always get the resampled data to start off with */
+	/* 始终从重新采样的数据开始 */
 	TArray<FBoneAnimationTrack> ResampledTrackData;
 
 	SampledFrameRate = FrameRateToSampleWith;
@@ -859,24 +901,30 @@ void FCompressibleAnimData::FetchData(const ITargetPlatform* InPlatform)
 	}
 
 	// Pre-sort raw float curves. While FName indices are not stable over serialization, ordering is *close* if names come from the same source.
+	// 预排序原始浮点曲线。虽然 FName 索引在序列化过程中不稳定，但如果名称来自同一源，则排序是“接近”的。
 	// Sorting increases the chances of linearizing the decompression later
+	// 排序增加了稍后线性化解压的机会
 	RawFloatCurves.Sort([](const FFloatCurve& InLHS, const FFloatCurve& InRHS)
 	{
 		return InLHS.GetName().LexicalLess(InRHS.GetName());
 	});
 
 	// High fidelity codecs wish to see the original raw data where possible
+	// 高保真编解码器希望尽可能看到原始数据
 	const bool bIsHighFidelity = BoneCompressionSettings->IsHighFidelity(*this);
 	
 	// Apply any key reduction if possible
+	// 如果可能的话应用任何键减少
 	if (RawAnimationData.Num())
 	{ 
 		// Fixup broken data
+		// 修复损坏的数据
 		UE::Anim::Compression::CompressAnimationDataTracks(Skeleton, TrackToSkeletonMapTable, RawAnimationData, NumberOfKeys, AnimSequence->GetFName(), -1.f, -1.f, -1.f);
 
 		if (!bIsHighFidelity)
 		{
 			// Low fidelity codecs need some help, sanitize the raw data
+			// 低保真编解码器需要一些帮助，清理原始数据
 			UE::Anim::Compression::CompressAnimationDataTracks(Skeleton, TrackToSkeletonMapTable, RawAnimationData, NumberOfKeys, AnimSequence->GetFName());
 		}
 	}
@@ -894,11 +942,15 @@ void FCompressibleAnimData::FetchData(const ITargetPlatform* InPlatform)
 	};
 
 	// Verify bone track names and data, removing any bone that does not exist on the skeleton
+	// 验证骨骼轨迹名称和数据，删除骨架上不存在的任何骨骼
     // And for additive animations remove any track deemed not to add any additive animation (identity rotation and zero-vector translation and scale)
+    // 对于附加动画，删除任何被认为不添加任何附加动画的轨道（身份旋转和零向量平移和缩放）
 	// Note on (TrackIndex > 0) below : deliberately stop before track 0, compression code doesn't like getting a completely empty animation
+	// 注意下面的 (TrackIndex > 0)：故意在轨道 0 之前停止，压缩代码不喜欢得到完全空的动画
 	TArray<FName> FinalTrackNames;
 
 	// Ensure we have any tracks at all	to begin with
+	// 确保我们一开始就有任何曲目
 	if (OriginalTrackNames.Num())
 	{
 		TArray<FRawAnimSequenceTrack> TempRawAnimationData;
@@ -910,6 +962,7 @@ void FCompressibleAnimData::FetchData(const ITargetPlatform* InPlatform)
 		TempAdditiveBaseAnimationData.Reserve(AdditiveBaseAnimationData.Num() ? AdditiveBaseAnimationData.Num() : 0);
 
 		// Include root bone track
+		// 包括根骨轨道
 		FinalTrackNames.Add(OriginalTrackNames[0]);
 		TempTrackToSkeletonMapTable.Add(TrackToSkeletonMapTable[0]);
 		TempRawAnimationData.Add(RawAnimationData[0]);
@@ -923,14 +976,17 @@ void FCompressibleAnimData::FetchData(const ITargetPlatform* InPlatform)
 		{
 			const FRawAnimSequenceTrack& Track = RawAnimationData[TrackIndex];
 			// Try find correct bone index
+			// 尝试找到正确的骨指数
 			const int32 BoneIndex = RefSkeleton.FindBoneIndex(OriginalTrackNames[TrackIndex]);
 
 			const bool bValidBoneIndex = BoneIndex != INDEX_NONE;
 
 			// Low fidelity codecs need some help, sanitize the raw data
+			// 低保真编解码器需要一些帮助，清理原始数据
 			const bool bValidAdditiveTrack = bIsHighFidelity || !IsRawTrackZeroAdditive(Track);
 
 			// Only include track if it contains valid (additive) data and its name corresponds to a bone on the skeleton
+			// 仅当轨道包含有效（附加）数据且其名称对应于骨架上的骨骼时才包含轨道
 			if ((!bIsAdditiveAnimation || bValidAdditiveTrack) && bValidBoneIndex)
 			{
 				FinalTrackNames.Add(OriginalTrackNames[TrackIndex]);
@@ -945,6 +1001,7 @@ void FCompressibleAnimData::FetchData(const ITargetPlatform* InPlatform)
 		}
 
 		// Swap out maintained track data
+		// [翻译失败: Swap out maintained track data]
 		Swap(RawAnimationData, TempRawAnimationData);
 		Swap(TrackToSkeletonMapTable, TempTrackToSkeletonMapTable);
 
@@ -980,9 +1037,11 @@ void FCompressibleAnimData::FetchData(const ITargetPlatform* InPlatform)
 		else 
 		{
 			// End frame does not count towards "Even framed" calculation
+			// [翻译失败: End frame does not count towards "Even framed" calculation]
 			const bool bIsEvenFramed = ((NumberOfKeys - 1) % 2) == 0;
 
 			//Strip every other frame from tracks
+			//从轨道中删除每隔一帧
 			if (bIsEvenFramed)
 			{
 				for (FRawAnimSequenceTrack& Track : RawAnimationData)
@@ -1203,6 +1262,7 @@ template<typename TArchive>
 void FUECompressedAnimData::ByteSwapData(TArrayView<uint8> CompressedData, TArchive& MemoryStream)
 {
 	//Handle Array Header
+	//处理数组头
 	uint8* MovingCompressedDataPtr = CompressedData.GetData();
 
 	ByteSwapArray(MemoryStream, MovingCompressedDataPtr, CompressedTrackOffsets);
@@ -1256,6 +1316,7 @@ void ICompressedAnimData::SerializeCompressedData(UObject* DataOwner, FArchive& 
 {
 	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	// When we remove the deprecated function, we can inline it here
+	// 当我们删除不推荐使用的函数时，我们可以在这里内联它
 	SerializeCompressedData(Ar);
 	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 }
@@ -1318,6 +1379,7 @@ void FCompressedAnimSequence::SerializeCompressedData(FArchive& Ar, bool bDDCDat
 	Ar << IndexedCurveNames;
 
 	// Serialize the compressed byte stream from the archive to the buffer.
+	// 将压缩字节流从存档序列化到缓冲区。
 	int32 NumBytes = CompressedByteStream.Num();
 	Ar << NumBytes;
 
@@ -1348,6 +1410,7 @@ void FCompressedAnimSequence::SerializeCompressedData(FArchive& Ar, bool bDDCDat
 			FOwnedBulkDataPtr* OwnedPtr = OptionalBulk.StealFileMapping();
 
 			// Decompression will crash later if the data failed to load so assert now to make it easier to debug in the future.
+			// 如果数据加载失败，解压后会崩溃，所以现在断言以便将来更容易调试。
 			checkf(OwnedPtr->GetPointer() != nullptr || Size == 0, TEXT("Compressed animation data failed to load")); 
 
 #if WITH_EDITOR
@@ -1396,6 +1459,7 @@ void FCompressedAnimSequence::SerializeCompressedData(FArchive& Ar, bool bDDCDat
 		Ar.Serialize(CompressedCurveByteStream.GetData(), NumCurveBytes);
 
 		// Lookup our codecs in our settings assets
+		// 在我们的设置资产中查找我们的编解码器
 		ValidateUObjectLoaded(BoneCompressionSettings, DataOwner);
 		ValidateUObjectLoaded(CurveCompressionSettings, DataOwner);
 		BoneCompressionCodec = BoneCompressionSettings->GetCodec(BoneCodecDDCHandle);
@@ -1408,10 +1472,13 @@ void FCompressedAnimSequence::SerializeCompressedData(FArchive& Ar, bool bDDCDat
 			CompressedDataStructure->Bind(CompressedByteStream);
 
 			// The codec can be null if we are a default object, a sequence with no raw bone data (just curves),
+			// 如果我们是默认对象，没有原始骨骼数据（只是曲线）的序列，则编解码器可以为空，
 			// or if we are duplicating the sequence during compression (new settings are assigned)
+			// 或者如果我们在压缩期间复制序列（分配新设置）
 			if (SerializedData.Num() != 0)
 			{
 				// Swap the buffer into the byte stream.
+				// [翻译失败: Swap the buffer into the byte stream.]
 				FMemoryReader MemoryReader(SerializedData, true);
 				MemoryReader.SetByteSwapping(Ar.ForceByteSwapping());
 				BoneCompressionCodec->ByteSwapIn(*CompressedDataStructure, CompressedByteStream, MemoryReader);
@@ -1423,11 +1490,13 @@ void FCompressedAnimSequence::SerializeCompressedData(FArchive& Ar, bool bDDCDat
 	else if (Ar.IsSaving() || Ar.IsCountingMemory())
 	{
 		// Swap the byte stream into a buffer.
+		// [翻译失败: Swap the byte stream into a buffer.]
 		TArray<uint8> SerializedData;
 
 		const bool bIsCooking = !bDDCData && Ar.IsCooking();
 
 		// The codec can be null if we are a default object or a sequence with no raw data, just curves
+		// 如果我们是默认对象或没有原始数据、只有曲线的序列，则编解码器可以为空
 		if (BoneCompressionCodec != nullptr)
 		{
 			FMemoryWriter MemoryWriter(SerializedData, true);
@@ -1436,6 +1505,7 @@ void FCompressedAnimSequence::SerializeCompressedData(FArchive& Ar, bool bDDCDat
 		}
 
 		// Make sure the entire byte stream was serialized.
+		// 确保整个字节流已序列化。
 		check(NumBytes == SerializedData.Num());
 
 		bool bUseBulkDataForSave = bCanUseBulkData && NumBytes && bIsCooking && Ar.CookingTarget()->SupportsFeature(ETargetPlatformFeatures::MemoryMappedFiles) && Ar.CookingTarget()->SupportsFeature(ETargetPlatformFeatures::MemoryMappedAnimation);
@@ -1454,6 +1524,7 @@ void FCompressedAnimSequence::SerializeCompressedData(FArchive& Ar, bool bDDCDat
 		}
 
 		// Count compressed data.
+		// 计算压缩数据。
 		Ar.CountBytes(SerializedData.Num(), SerializedData.Num());
 
 		if (bSavebUseBulkDataForSave)
@@ -1553,18 +1624,21 @@ void FCompressedAnimSequence::RebuildCurveIndexTable()
 	IndexArray.SetNumUninitialized(IndexedCurveNames.Num());
 	
 	// Create linear indices
+	// 创建线性索引
 	for(int32 NameIndex = 0; NameIndex < IndexArray.Num(); ++NameIndex)
 	{
 		IndexArray[NameIndex] = NameIndex;
 	}
 
 	// Sort by FName
+	// 按 FName 排序
 	IndexArray.Sort([&IndexedCurveNames = IndexedCurveNames](int32 LHS, int32 RHS)
 	{
 		return IndexedCurveNames[LHS].CurveName.FastLess(IndexedCurveNames[RHS].CurveName);
 	});
 
 	// Index curves
+	// 指数曲线
 	for(int32 NameIndex = 0; NameIndex < IndexedCurveNames.Num(); ++NameIndex)
 	{
 		IndexedCurveNames[NameIndex].CurveIndex = IndexArray[NameIndex];

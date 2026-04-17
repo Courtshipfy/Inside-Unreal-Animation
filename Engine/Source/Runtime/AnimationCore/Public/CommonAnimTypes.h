@@ -9,6 +9,7 @@
 #include "CommonAnimTypes.generated.h"
 
 /** Axis to represent direction */
+/** 代表方向的轴 */
 USTRUCT()
 struct FAxis
 {
@@ -27,6 +28,7 @@ struct FAxis
 	};
 
 	/** return transformed axis based on ComponentSpaceTransform */
+	/** 返回基于 ComponentSpaceTransform 的变换轴 */
 	FVector GetTransformedAxis(const FTransform& ComponentSpaceTransform) const
 	{
 		if (bInLocalSpace)
@@ -35,16 +37,19 @@ struct FAxis
 		}
 
 		// if world transform, we don't have to transform
+		// 如果世界改变，我们不必改变
 		return Axis;
 	}
 
 	/** Initialize the set up */
+	/** 初始化设置 */
 	void Initialize()
 	{
 		Axis = Axis.GetSafeNormal();
 	}
 
 	/** return true if Valid data */
+	/** 如果数据有效则返回 true */
 	bool IsValid() const
 	{
 		return Axis.IsNormalized();

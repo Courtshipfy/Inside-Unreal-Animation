@@ -49,6 +49,7 @@ class UAnimCurveCompressionCodec_UniformIndexable : public UAnimCurveCompression
 
 #if WITH_EDITORONLY_DATA
 	// UAnimCurveCompressionCodec overrides
+	// UAnimCurveCompressionCodec 覆盖
 	ENGINE_API virtual bool Compress(const FCompressibleAnimData& AnimSeq, FAnimCurveCompressionResult& OutResult) override;
 	ENGINE_API virtual int64 EstimateCompressionMemoryUsage(const UAnimSequence& AnimSequence) const override;
 	ENGINE_API virtual void PopulateDDCKey(FArchive& Ar) override;

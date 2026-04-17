@@ -18,6 +18,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_BlendSpacePlayerBase
+// FAnimNode_BlendSpacePlayerBase
 
 float FAnimNode_BlendSpacePlayerBase::GetCurrentAssetTime() const
 {
@@ -27,6 +28,7 @@ float FAnimNode_BlendSpacePlayerBase::GetCurrentAssetTime() const
 	}
 
 	// No sample
+	// 无样品
 	return 0.0f;
 }
 
@@ -49,6 +51,7 @@ float FAnimNode_BlendSpacePlayerBase::GetCurrentAssetLength() const
 	}
 
 	// No sample
+	// 无样品
 	return 0.0f;
 }
 
@@ -91,6 +94,7 @@ void FAnimNode_BlendSpacePlayerBase::UpdateInternal(const FAnimationUpdateContex
 		const FVector Position = GetPosition();
 
 		// Create a tick record and push into the closest scope
+		// 创建一个tick记录并推入最近的范围
 		UE::Anim::FAnimSyncGroupScope& SyncScope = Context.GetMessageChecked<UE::Anim::FAnimSyncGroupScope>();
 
 		FAnimTickRecord TickRecord(
@@ -156,6 +160,7 @@ void FAnimNode_BlendSpacePlayerBase::GatherDebugData(FNodeDebugData& DebugData)
 float FAnimNode_BlendSpacePlayerBase::GetTimeFromEnd(float CurrentTime) const
 {
 	// Blend-spaces use normalized time value
+	// 混合空间使用标准化时间值
 	const float PlayLength = 1.0f;
 	return GetBlendSpace() != nullptr ? PlayLength - CurrentTime : 0.0f;
 }
@@ -205,6 +210,7 @@ void FAnimNode_BlendSpacePlayerBase::Reinitialize(bool bResetTime)
 		if (CurrentStartPosition == 0.f && GetPlayRate() < 0.0f)
 		{
 			// Blend spaces run between 0 and 1
+			// 混合空间在 0 和 1 之间运行
 			InternalTimeAccumulator = 1.0f;
 		}
 
@@ -219,6 +225,7 @@ void FAnimNode_BlendSpacePlayerBase::Reinitialize(bool bResetTime)
 }
 
 /////////////////////////////////////////////////////
+// FAnimNode_BlendSpacePlayer
 // FAnimNode_BlendSpacePlayer
 
 FName FAnimNode_BlendSpacePlayer::GetGroupName() const

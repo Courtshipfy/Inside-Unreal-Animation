@@ -17,10 +17,12 @@ class UAnimCurveCompressionCodec_UniformlySampled : public UAnimCurveCompression
 
 #if WITH_EDITORONLY_DATA
 	/** Whether to use the animation sequence sample rate or an explicit value */
+	/** [翻译失败: Whether to use the animation sequence sample rate or an explicit value] */
 	UPROPERTY(Category = Compression, EditAnywhere)
 	bool UseAnimSequenceSampleRate;
 
 	/** Sample rate to use when uniformly sampling */
+	/** [翻译失败: Sample rate to use when uniformly sampling] */
 	UPROPERTY(Category = Compression, EditAnywhere, meta = (ClampMin = "0", EditCondition = "!UseAnimSequenceSampleRate"))
 	float SampleRate;
 #endif
@@ -29,6 +31,7 @@ class UAnimCurveCompressionCodec_UniformlySampled : public UAnimCurveCompression
 
 #if WITH_EDITORONLY_DATA
 	// UAnimCurveCompressionCodec overrides
+	// [翻译失败: UAnimCurveCompressionCodec overrides]
 	ENGINE_API virtual bool Compress(const FCompressibleAnimData& AnimSeq, FAnimCurveCompressionResult& OutResult) override;
 	ENGINE_API virtual int64 EstimateCompressionMemoryUsage(const UAnimSequence& AnimSequence) const override;
 	ENGINE_API virtual void PopulateDDCKey(FArchive& Ar) override;

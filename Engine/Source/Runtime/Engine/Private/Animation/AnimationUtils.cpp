@@ -22,17 +22,24 @@
 #include "UObject/LinkerLoad.h"
 
 /** Array to keep track of SkeletalMeshes we have built metadata for, and log out the results just once. */
+/** 用于跟踪我们为其构建元数据的 SkeletalMeshes 的数组，并仅注销一次结果。 */
 //static TArray<USkeleton*> UniqueSkeletonsMetadataArray;
+//静态 TArray<USkeleton*> UniqueSkeletonsMetadataArray;
 
 void FAnimationUtils::BuildSkeletonMetaData(USkeleton* Skeleton, TArray<FBoneData>& OutBoneData)
 {
 	// Disable logging by default. Except if we deal with a new Skeleton. Then we log out its details. (just once).
+	// 默认情况下禁用日志记录。除非我们处理一个新的骷髅。然后我们注销其详细信息。 （仅一次）。
 	bool bEnableLogging = false;
 // Uncomment to enable.
+// 取消注释以启用。
 // 	if( UniqueSkeletonsMetadataArray.FindItemIndex(Skeleton) == INDEX_NONE )
+// 	if( UniqueSkeletonsMetadataArray.FindItemIndex(骨架) == INDEX_NONE )
 // 	{
 // 		bEnableLogging = true;
+// 		bEnableLogging = true;
 // 		UniqueSkeletonsMetadataArray.AddItem(Skeleton);
+// 		UniqueSkeletonsMetadataArray.AddItem(骨架);
 // 	}
 
 	const FReferenceSkeleton& RefSkeleton = Skeleton->GetReferenceSkeleton();
@@ -40,6 +47,7 @@ void FAnimationUtils::BuildSkeletonMetaData(USkeleton* Skeleton, TArray<FBoneDat
 	const int32 NumBones = RefSkeleton.GetNum();
 
 	// Assemble bone data.
+	// 组装骨骼数据。
 	OutBoneData.Empty();
 	OutBoneData.AddZeroed( NumBones );
 
@@ -50,6 +58,7 @@ void FAnimationUtils::BuildSkeletonMetaData(USkeleton* Skeleton, TArray<FBoneDat
 		FBoneData& BoneData = OutBoneData[BoneIndex];
 
 		// Copy over data from the skeleton.
+		// 从骨架复制数据。
 		const FTransform& SrcTransform = SkeletonRefPose[BoneIndex];
 
 		ensure(!SrcTransform.ContainsNaN());
@@ -63,6 +72,7 @@ void FAnimationUtils::BuildSkeletonMetaData(USkeleton* Skeleton, TArray<FBoneDat
 		if ( BoneIndex > 0 )
 		{
 			// Compute ancestry.
+			// 计算血统。
 			int32 ParentIndex = RefSkeleton.GetParentIndex(BoneIndex);
 			BoneData.BonesToRoot.Add( ParentIndex );
 			while ( ParentIndex > 0 )
@@ -73,8 +83,10 @@ void FAnimationUtils::BuildSkeletonMetaData(USkeleton* Skeleton, TArray<FBoneDat
 		}
 
 		// See if a Socket is attached to that bone
+		// 查看 Socket 是否连接到该骨骼
 		BoneData.bHasSocket = false;
 		// @todo anim: socket isn't moved to Skeleton yet, but this code needs better testing
+		// @todo anim：套接字尚未移至骨架，但此代码需要更好的测试
 		for(int32 SocketIndex=0; SocketIndex<Skeleton->Sockets.Num(); SocketIndex++)
 		{
 			USkeletalMeshSocket* Socket = Skeleton->Sockets[SocketIndex];
@@ -87,6 +99,7 @@ void FAnimationUtils::BuildSkeletonMetaData(USkeleton* Skeleton, TArray<FBoneDat
 	}
 
 	// Enumerate children (bones that refer to this bone as parent).
+	// 枚举子项（将此骨骼称为父项的骨骼）。
 	for(int32 BoneIndex = 1; BoneIndex < OutBoneData.Num(); ++BoneIndex)
 	{
 		const int32 ParentIndex = OutBoneData[BoneIndex].GetParent();
@@ -97,6 +110,7 @@ void FAnimationUtils::BuildSkeletonMetaData(USkeleton* Skeleton, TArray<FBoneDat
 	}
 	
 	// Enumerate end effectors.  For each end effector, propagate its index up to all ancestors.
+	// 枚举末端执行器。  对于每个末端执行器，将其索引传播到所有祖先。
 	if( bEnableLogging )
 	{
 		UE_LOG(LogAnimationCompression, Log, TEXT("Enumerate End Effectors for %s"), *Skeleton->GetFName().ToString());
@@ -107,8 +121,10 @@ void FAnimationUtils::BuildSkeletonMetaData(USkeleton* Skeleton, TArray<FBoneDat
 		if ( BoneData.IsEndEffector() )
 		{
 			// End effectors have themselves as an ancestor.
+			// 末端执行器有自己的祖先。
 			BoneData.EndEffectors.Add( BoneIndex );
 			// Add the end effector to the list of end effectors of all ancestors.
+			// 将末端执行器添加到所有祖先的末端执行器列表中。
 			for ( int32 i = 0 ; i < BoneData.BonesToRoot.Num() ; ++i )
 			{
 				const int32 AncestorIndex = BoneData.BonesToRoot[i];
@@ -118,6 +134,7 @@ void FAnimationUtils::BuildSkeletonMetaData(USkeleton* Skeleton, TArray<FBoneDat
 			for(int32 MatchIndex=0; MatchIndex<KeyEndEffectorsMatchNameArray.Num(); MatchIndex++)
 			{
 				// See if this bone has been defined as a 'key' end effector
+				// 查看该骨骼是否已被定义为“关键”末端执行器
 				FString BoneString(BoneData.Name.ToString());
 				if( BoneString.Contains(KeyEndEffectorsMatchNameArray[MatchIndex]) )
 				{
@@ -186,6 +203,7 @@ void FAnimationUtils::BuildComponentSpaceTransform(FTransform& OutTransform,
 											   const TArray<FBoneData>& BoneData)
 {
 	// Put root-to-component in OutTransform.
+	// 将根到组件放入 OutTransform 中。
 	OutTransform = BoneSpaceTransforms[0];
 
 	if (BoneIndex > 0)
@@ -195,6 +213,7 @@ void FAnimationUtils::BuildComponentSpaceTransform(FTransform& OutTransform,
 		checkSlow((Bone.BonesToRoot.Num() - 1) == 0);
 
 		// Compose BoneData.BonesToRoot down.
+		// 编写 BoneData.BonesToRoot 下来。
 		for (int32 i = Bone.BonesToRoot.Num()-2; i >=0; --i)
 		{
 			const int32 AncestorIndex = Bone.BonesToRoot[i];
@@ -204,6 +223,7 @@ void FAnimationUtils::BuildComponentSpaceTransform(FTransform& OutTransform,
 		}
 
 		// Finally, include the bone's local-to-parent.
+		// 最后，包括骨骼的本地到父级。
 		OutTransform = BoneSpaceTransforms[BoneIndex] * OutTransform;
 		OutTransform.NormalizeRotation();
 	}
@@ -241,6 +261,7 @@ void FAnimationUtils::ComputeCompressionError(const FCompressibleAnimData& Compr
 		if (!bCanUseCompressedData)
 		{
 			// If we can't use CompressedData, there's not much point in being here.
+			// 如果我们不能使用 CompressedData，那么这里就没有意义了。
 			return;
 		}
 
@@ -257,7 +278,9 @@ void FAnimationUtils::ComputeCompressionError(const FCompressibleAnimData& Compr
 		NewTransforms.AddZeroed(NumBones);
 
 		// Cache these to speed up animations with a lot of frames.
+		// 缓存这些以加速具有大量帧的动画。
 		// We do this only once, instead of every frame.
+		// 我们只执行一次，而不是每一帧。
 		struct FCachedBoneIndexData
 		{
 			int32 TrackIndex;
@@ -273,6 +296,7 @@ void FAnimationUtils::ComputeCompressionError(const FCompressibleAnimData& Compr
 		}
 
 		// Check the precondition that parents occur before children in the RequiredBones array.
+		// 检查RequiredBones 数组中父项出现在子项之前的先决条件。
 		for (int32 BoneIndex = 1; BoneIndex < NumBones; ++BoneIndex)
 		{
 			const FCachedBoneIndexData& BoneIndexData = CachedBoneIndexData[BoneIndex];
@@ -294,12 +318,14 @@ void FAnimationUtils::ComputeCompressionError(const FCompressibleAnimData& Compr
 			DecompContext.Seek(Time);
 
 			// get the raw and compressed atom for each bone
+			// 获取每个骨骼的原始和压缩原子
 			for (int32 BoneIndex = 0; BoneIndex < NumBones; ++BoneIndex)
 			{
 				const FCachedBoneIndexData& BoneIndexData = CachedBoneIndexData[BoneIndex];
 				if (BoneIndexData.TrackIndex == INDEX_NONE)
 				{
 					// No track for the bone was found, use default transform
+					// 未找到骨骼轨迹，使用默认变换
 					const FTransform& RefPoseTransform = RefPose[BoneIndex];
 					RawTransforms[BoneIndex] = RefPoseTransform;
 					NewTransforms[BoneIndex] = RefPoseTransform;
@@ -307,9 +333,13 @@ void FAnimationUtils::ComputeCompressionError(const FCompressibleAnimData& Compr
 				else
 				{
 					// If we have transforms, but they're additive, apply them to the ref pose.
+					// [翻译失败: If we have transforms, but they're additive, apply them to the ref pose.]
 					// This is because additive animations are mostly rotation.
+					// [翻译失败: This is because additive animations are mostly rotation.]
 					// And for the error metric we measure distance between end effectors.
+					// [翻译失败: And for the error metric we measure distance between end effectors.]
 					// So that means additive animations by default will all be balled up at the origin and not show any error.
+					// [翻译失败: So that means additive animations by default will all be balled up at the origin and not show any error.]
 					if (CompressibleAnimData.bIsValidAdditive)
 					{
 						const FTransform& RefPoseTransform = RefPose[BoneIndex];
@@ -336,6 +366,7 @@ void FAnimationUtils::ComputeCompressionError(const FCompressibleAnimData& Compr
 				ensure(!NewTransforms[BoneIndex].ContainsNaN());
 
 				// For all bones below the root, final component-space transform is relative transform * component-space transform of parent.
+				// [翻译失败: For all bones below the root, final component-space transform is relative transform * component-space transform of parent.]
 				if (BoneIndex > 0)
 				{
 					RawTransforms[BoneIndex] *= RawTransforms[BoneIndexData.ParentIndex];
@@ -343,9 +374,11 @@ void FAnimationUtils::ComputeCompressionError(const FCompressibleAnimData& Compr
 				}
 				
 				// If this is an EndEffector, add a dummy bone to measure the effect of compressing the rotation.
+				// [翻译失败: If this is an EndEffector, add a dummy bone to measure the effect of compressing the rotation.]
 				if (BoneData[BoneIndex].IsEndEffector())
 				{
 					// Sockets and Key EndEffectors have a longer dummy bone to maintain higher precision.
+					// [翻译失败: Sockets and Key EndEffectors have a longer dummy bone to maintain higher precision.]
 					if (BoneData[BoneIndex].bHasSocket || BoneData[BoneIndex].bKeyEndEffector)
 					{
 						RawTransforms[BoneIndex] = EndEffectorDummyBoneSocket * RawTransforms[BoneIndex];
@@ -359,6 +392,7 @@ void FAnimationUtils::ComputeCompressionError(const FCompressibleAnimData& Compr
 				}
 
 				// Normalize rotations
+				// 标准化旋转
 				RawTransforms[BoneIndex].NormalizeRotation();
 				NewTransforms[BoneIndex].NormalizeRotation();
 
@@ -397,6 +431,7 @@ void FAnimationUtils::ComputeCompressionError(const FCompressibleAnimData& Compr
 bool FAnimationUtils::GetForcedRecompressionSetting()
 {
 	// Allow the Engine INI file to provide a new override
+	// 允许引擎 INI 文件提供新的覆盖
 	bool ForcedRecompressionSetting = false;
 	GConfig->GetBool( TEXT("AnimationCompression"), TEXT("ForceRecompression"), (bool&)ForcedRecompressionSetting, GEngineIni );
 
@@ -407,7 +442,10 @@ static void GetBindPoseAtom(FTransform &OutBoneAtom, int32 BoneIndex, USkeleton 
 {
 	OutBoneAtom = Skeleton->GetRefLocalPoses()[BoneIndex];
 // #if DEBUG_ADDITIVE_CREATION
+// #if DEBUG_ADDITIVE_CREATION
 // 	UE_LOG(LogAnimation, Log, TEXT("GetBindPoseAtom BoneIndex: %d, OutBoneAtom: %s"), BoneIndex, *OutBoneAtom.ToString());
+// 	UE_LOG(LogAnimation, Log, TEXT("GetBindPoseAtom BoneIndex: %d, OutBoneAtom: %s"), BoneIndex, *OutBoneAtom.ToString());
+// #endif
 // #endif
 }
 
@@ -425,6 +463,7 @@ UObject* FAnimationUtils::GetDefaultAnimSequenceOuter(UAnimSet* InAnimSet, bool 
 	{
 		UAnimSequence* TestAnimSeq = InAnimSet->Sequences[i];
 		// Make sure outer is not current AnimSet, but they should be in the same package.
+		// 确保outer不是当前的AnimSet，但它们应该位于同一个包中。
 		if( TestAnimSeq && TestAnimSeq->GetOuter() != InAnimSet && TestAnimSeq->GetOutermost() == InAnimSet->GetOutermost() )
 		{
 			return TestAnimSeq->GetOuter();
@@ -433,20 +472,25 @@ UObject* FAnimationUtils::GetDefaultAnimSequenceOuter(UAnimSet* InAnimSet, bool 
 #endif	//#if WITH_EDITORONLY_DATA
 
 	// Otherwise go ahead and create a new one if we should.
+	// 否则，如果需要的话，请继续创建一个新的。
 	if( bCreateIfNotFound )
 	{
 		// We can only create Group if we are within the editor.
+		// 只有在编辑器中，我们才能创建组。
 		check(GIsEditor);
 
 		UPackage* AnimSetPackage = InAnimSet->GetOutermost();
 		// Make sure package is fully loaded.
+		// 确保包已满载。
 		AnimSetPackage->FullyLoad();
 
 		// Try to create a new package with Group named <AnimSetName>_Group.
+		// 尝试创建一个名为 <AnimSetName>_Group 的新包。
 		FString NewPackageString = FString::Printf(TEXT("%s.%s_Group"), *AnimSetPackage->GetFName().ToString(), *InAnimSet->GetFName().ToString());
 		UPackage* NewPackage = CreatePackage( *NewPackageString );
 
 		// New Outer to use
+		// [翻译失败: New Outer to use]
 		return NewPackage;
 	}
 
@@ -532,10 +576,13 @@ void FAnimationUtils::CalculateTrackHeights(const FCompressibleAnimData& Compres
 	const TArray<FBoneData>& BoneData = CompressibleAnimData.BoneData;
 
 	// Populate the bone 'height' table (distance from closest end effector, with 0 indicating an end effector)
+	// 填充骨骼“高度”表（距最近末端执行器的距离，0 表示末端执行器）
 	// setup the raw bone transformation and find all end effectors
+	// [翻译失败: setup the raw bone transformation and find all end effectors]
 	for (int32 BoneIndex = 0; BoneIndex < BoneData.Num(); ++BoneIndex)
 	{
 		// also record all end-effectors we find
+		// [翻译失败: also record all end-effectors we find]
 		const FBoneData& Bone = BoneData[BoneIndex];
 		if (Bone.IsEndEffector())
 		{
@@ -606,6 +653,7 @@ FORCEINLINE void CalcErrorValues<EPerturbationErrorMode::Transform>(FAnimPerturb
 	TrackError.MaxErrorInTransDueToTrans = FMath::Max(TrackError.MaxErrorInTransDueToTrans, (RawTransform.GetLocation() - NewTransform.GetLocation()).SizeSquared());
 	TrackError.MaxErrorInRotDueToTrans = FMath::Max(TrackError.MaxErrorInRotDueToTrans, FQuat::ErrorAutoNormalize(RawTransform.GetRotation(), NewTransform.GetRotation()));
 	//TrackError.MaxErrorInScaleDueToTrans = FMath::Max(TrackError.MaxErrorInScaleDueToTrans, (RawTransform.GetScale3D() - NewTransform.GetScale3D()).SizeSquared());
+	//TrackError.MaxErrorInScaleDueToTrans = FMath::Max(TrackError.MaxErrorInScaleDueToTrans, (RawTransform.GetScale3D() - NewTransform.GetScale3D()).SizeSquared());
 }
 
 template<>
@@ -613,6 +661,7 @@ FORCEINLINE void CalcErrorValues<EPerturbationErrorMode::Rotation>(FAnimPerturba
 {
 	TrackError.MaxErrorInTransDueToRot = FMath::Max(TrackError.MaxErrorInTransDueToRot, (RawTransform.GetLocation() - NewTransform.GetLocation()).SizeSquared());
 	TrackError.MaxErrorInRotDueToRot = FMath::Max(TrackError.MaxErrorInRotDueToRot, FQuat::ErrorAutoNormalize(RawTransform.GetRotation(), NewTransform.GetRotation()));
+	//TrackError.MaxErrorInScaleDueToRot = FMath::Max(TrackError.MaxErrorInScaleDueToRot, (RawTransform.GetScale3D() - NewTransform.GetScale3D()).SizeSquared());
 	//TrackError.MaxErrorInScaleDueToRot = FMath::Max(TrackError.MaxErrorInScaleDueToRot, (RawTransform.GetScale3D() - NewTransform.GetScale3D()).SizeSquared());
 }
 
@@ -625,6 +674,7 @@ FORCEINLINE void CalcErrorValues<EPerturbationErrorMode::Scale>(FAnimPerturbatio
 
 	TrackError.MaxErrorInTransDueToScale = TrackError.MaxErrorInTransDueToRot; //Original tally code was calculating scale errors then using rot regardless.
 	TrackError.MaxErrorInRotDueToScale = TrackError.MaxErrorInRotDueToRot;     
+	//TrackError.MaxErrorInScaleDueToScale = TrackError.MaxErrorInScaleDueToRot;
 	//TrackError.MaxErrorInScaleDueToScale = TrackError.MaxErrorInScaleDueToRot;
 }
 
@@ -682,6 +732,7 @@ void FAnimationUtils::TallyErrorsFromPerturbation(
 	FTransform Perturbation(RotationNudge, PositionNudge, ScaleNudge);
 
 	// Build Track bone mapping for processingh
+	// [翻译失败: Build Track bone mapping for processingh]
 	struct FTrackBoneMapping
 	{
 		int32 TrackIndex;
@@ -709,6 +760,7 @@ void FAnimationUtils::TallyErrorsFromPerturbation(
 	Algo::SortBy(TracksAndBonesToTest, &FTrackBoneMapping::BoneIndex);
 
 	// Prebuild bone test paths
+	// [翻译失败: Prebuild bone test paths]
 	TArray<TArray<FBoneTestItem>> BonesToTestMap;
 	BonesToTestMap.AddDefaulted(NumTracks);
 
@@ -740,6 +792,7 @@ void FAnimationUtils::TallyErrorsFromPerturbation(
 	for (int32 KeyIndex = 0; KeyIndex < CompressibleAnimData.NumberOfKeys; ++KeyIndex)
 	{
 		//Build Locals For Frame
+		//为框架构建局部变量
 		if (CompressibleAnimData.IsCancelled())
 		{
 			return;
@@ -752,6 +805,7 @@ void FAnimationUtils::TallyErrorsFromPerturbation(
 		}
 
 		//Build Reference Component Space for Frame
+		//为框架构建参考组件空间
 		RawTransforms[0] = RawAtoms[0];
 		for (int32 BoneIndex = 1; BoneIndex < NumBones; ++BoneIndex)
 		{
@@ -760,6 +814,7 @@ void FAnimationUtils::TallyErrorsFromPerturbation(
 		}
 
 		//For each track
+		//对于每个曲目
 		int32 PreviousCopyPoint = 0;
 
 		for (const FTrackBoneMapping& TrackBonePair : TracksAndBonesToTest)
@@ -771,15 +826,18 @@ void FAnimationUtils::TallyErrorsFromPerturbation(
 			FAnimPerturbationError& ThisBoneError = InducedErrors[TrackBonePair.TrackIndex];
 
 			// Init unchanged cache
+			// 初始化未更改的缓存
 			for (int32 BoneIndex = PreviousCopyPoint; BoneIndex < BoneToModify; ++BoneIndex)
 			{
 				NewTransforms[BoneIndex] = RawTransforms[BoneIndex];
 			}
 
 			// Modify test bone
+			// 修改测试骨骼
 			PreviousCopyPoint = BoneToModify;
 			
 			// Calc Transform Error
+			// 计算转换错误
 			NewTransforms[BoneToModify] = RawAtoms[BoneToModify];
 			NewTransforms[BoneToModify].AddToTranslation(PositionNudge);
 
@@ -797,6 +855,7 @@ void FAnimationUtils::TallyErrorsFromPerturbation(
 			CalcErrorsLoop<EPerturbationErrorMode::Transform>(BonesToTest, CompressibleAnimData, RawAtoms, RawTransforms, NewTransforms, ThisBoneError);
 
 			// Calc Rotatin Error
+			// 计算旋转误差
 			NewTransforms[BoneToModify] = RawAtoms[BoneToModify];
 			FQuat NewR = RawAtoms[BoneToModify].GetRotation();
 			NewR += RotationNudge;
@@ -815,6 +874,7 @@ void FAnimationUtils::TallyErrorsFromPerturbation(
 			CalcErrorsLoop<EPerturbationErrorMode::Rotation>(BonesToTest, CompressibleAnimData, RawAtoms, RawTransforms, NewTransforms, ThisBoneError);
 
 			//Calc Scale Error
+			//计算刻度误差
 			NewTransforms[BoneToModify] = RawAtoms[BoneToModify];
 			NewTransforms[BoneToModify].SetScale3D(RawAtoms[BoneToModify].GetScale3D() + ScaleNudge);
 
@@ -861,6 +921,7 @@ static void EnsureDependenciesAreLoaded(UObject* Object)
 	}
 	
 	// Always call conditional preload as the test is a little bit more involved than the one we did for the warning above.
+	// 始终调用条件预加载，因为该测试比我们针对上述警告所做的测试要复杂一些。
 	Object->ConditionalPreload();
 
 	if (Object->HasAnyFlags(RF_NeedPostLoad))
@@ -880,6 +941,7 @@ static void EnsureDependenciesAreLoaded(UObject* Object)
 		}
 
 		// Always call conditional preload as the test is a little bit more involved than the one we did for the warning above.
+		// 始终调用条件预加载，因为该测试比我们针对上述警告所做的测试要复杂一些。
 		Dependency->ConditionalPreload();
 
 		if (Dependency->HasAnyFlags(RF_NeedPostLoad))
@@ -929,6 +991,7 @@ UObject* GetDefaultAnimationCompressionSettings(const TCHAR* IniValueName, bool 
 	}
 
 	// Force load the default settings and all its dependencies just in case it hasn't happened yet
+	// 强制加载默认设置及其所有依赖项，以防万一它还没有发生
 	EnsureDependenciesAreLoaded(DefaultCompressionSettings);
 
 	DefaultCompressionSettings->AddToRoot();
@@ -1016,6 +1079,7 @@ void FAnimationUtils::EnsureAnimSequenceLoaded(UAnimSequence& AnimSeq)
 void FAnimationUtils::ExtractTransformForFrameFromTrackSafe(const FRawAnimSequenceTrack& RawTrack, int32 Frame, FTransform& OutAtom)
 {
 	// Bail out (with rather wacky data) if data is empty for some reason.
+	// 如果由于某种原因数据为空，则退出（使用相当古怪的数据）。
 	if (RawTrack.PosKeys.Num() == 0 || RawTrack.RotKeys.Num() == 0)
 	{
 		OutAtom.SetIdentity();
@@ -1051,6 +1115,7 @@ void FAnimationUtils::ExtractTransformFromTrack(float Time, int32 NumFrames, flo
 void FAnimationUtils::ExtractTransformFromTrack(const FRawAnimSequenceTrack& RawTrack, double Time, int32 NumFrames, double SequenceLength, EAnimInterpolationType Interpolation, FTransform &OutAtom)
 {
 	// Bail out (with rather wacky data) if data is empty for some reason.
+	// 如果由于某种原因数据为空，则退出（使用相当古怪的数据）。
 	if (RawTrack.PosKeys.Num() == 0 || RawTrack.RotKeys.Num() == 0)
 	{
 		OutAtom.SetIdentity();
@@ -1061,6 +1126,7 @@ void FAnimationUtils::ExtractTransformFromTrack(const FRawAnimSequenceTrack& Raw
 	float Alpha;
 	FAnimationRuntime::GetKeyIndicesFromTime(KeyIndex1, KeyIndex2, Alpha, Time, NumFrames, SequenceLength);
 	// @Todo fix me: this change is not good, it has lots of branches. But we'd like to save memory for not saving scale if no scale change exists
+	// @Todo 修复我：这个改变不好，它有很多分支。但如果不存在比例变化，我们希望节省内存而不保存比例
 	
 	static const FVector DefaultScale3D = FVector(1.f);
 
@@ -1104,9 +1170,12 @@ void FAnimationUtils::ExtractTransformFromTrack(const FRawAnimSequenceTrack& Raw
 	}
 
 	// 	UE_LOG(LogAnimation, Log, TEXT(" *  *  *  Position. PosKeyIndex1: %3d, PosKeyIndex2: %3d, Alpha: %f"), PosKeyIndex1, PosKeyIndex2, Alpha);
+	// 	UE_LOG(LogAnimation, Log, TEXT(" * * * 位置。PosKeyIndex1: %3d, PosKeyIndex2: %3d, Alpha: %f"), PosKeyIndex1, PosKeyIndex2, Alpha);
 	// 	UE_LOG(LogAnimation, Log, TEXT(" *  *  *  Rotation. RotKeyIndex1: %3d, RotKeyIndex2: %3d, Alpha: %f"), RotKeyIndex1, RotKeyIndex2, Alpha);
+	// 	UE_LOG(LogAnimation, Log, TEXT(" * * * 旋转。RotKeyIndex1: %3d, RotKeyIndex2: %3d, Alpha: %f"), RotKeyIndex1, RotKeyIndex2, Alpha);
 
 	// Ensure rotations are normalized (Added for Jira UE-53971)
+	// 确保旋转标准化（为 Jira UE-53971 添加）
 	KeyAtom1.NormalizeRotation();
 	KeyAtom2.NormalizeRotation();
 
@@ -1125,9 +1194,11 @@ void FAnimationUtils::ExtractTransformFromCompressionData(const FCompressibleAni
 	FUECompressedAnimDataMutable& AnimDataMutable = static_cast<FUECompressedAnimDataMutable&>(*CompressedAnimData.AnimData);
 
 	// If the caller didn't request that raw animation data be used . . .
+	// 如果调用者没有请求使用原始动画数据。 。 。
 	if (!bUseRawData && AnimDataMutable.IsValid())
 	{
 		// Build our read-only version from the mutable source
+		// 从可变源构建我们的只读版本
 		FUECompressedAnimData AnimData(AnimDataMutable);
 
 		FAnimSequenceDecompressionContext DecompContext(CompressibleAnimData.SampledFrameRate, CompressibleAnimData.GetNumberOfFrames(), CompressibleAnimData.Interpolation, CompressibleAnimData.AnimFName, AnimData, CompressibleAnimData.RefLocalPoses, CompressibleAnimData.TrackToSkeletonMapTable, nullptr, CompressibleAnimData.bIsValidAdditive, CompressibleAnimData.AdditiveType);
@@ -1142,6 +1213,7 @@ void FAnimationUtils::ExtractTransformFromCompressionData(const FCompressibleAni
 bool FAnimationUtils::CompressAnimBones(FCompressibleAnimData& AnimSeq, FCompressibleAnimDataResult& Target)
 {
 	// Clear any previous data we might have even if we end up failing to compress
+	// 即使最终压缩失败，也清除我们可能拥有的所有先前数据
 	Target = FCompressibleAnimDataResult();
 
 	if (AnimSeq.BoneCompressionSettings == nullptr || !AnimSeq.BoneCompressionSettings->AreSettingsValid())
@@ -1155,6 +1227,7 @@ bool FAnimationUtils::CompressAnimBones(FCompressibleAnimData& AnimSeq, FCompres
 bool FAnimationUtils::CompressAnimCurves(FCompressibleAnimData& AnimSeq, FCompressedAnimSequence& Target)
 {
 	// Clear any previous data we might have even if we end up failing to compress
+	// 即使最终压缩失败，也清除我们可能拥有的所有先前数据
 	Target.ClearCompressedCurveData();
 
 	if (AnimSeq.CurveCompressionSettings == nullptr || !AnimSeq.CurveCompressionSettings->AreSettingsValid())

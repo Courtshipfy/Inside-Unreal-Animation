@@ -21,6 +21,7 @@ struct FPositionHistory
 public:
 
 	/** Default constructor */
+	/** 默认构造函数 */
 	FPositionHistory()
 		: Positions(TArray<FVector>())
 		, Range(0.f)
@@ -29,10 +30,12 @@ public:
 	{}
 
 	/** The recorded positions */
+	/** 记录的位置 */
 	UPROPERTY(EditAnywhere, Category = "FPositionHistory")
 	TArray<FVector> Positions;
 
 	/** The range for this particular history */
+	/** 这段特定历史的范围 */
 	UPROPERTY(EditAnywhere, Category = "FPositionHistory", meta = (UIMin = "0.0", UIMax = "1.0"))
 	float Range;
 

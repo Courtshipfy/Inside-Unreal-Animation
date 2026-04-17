@@ -54,12 +54,14 @@ void FAnimNotifyQueue::AddAnimNotifiesToDest(bool bSrcIsLeader, const TArray<FAn
 {
 	bool bIsDedicatedServer = World.IsValid() ? (World->GetNetMode() == NM_DedicatedServer) : false;
 	// for now there is no filter whatsoever, it just adds everything requested
+	// 目前没有任何过滤器，它只是添加了请求的所有内容
 	for (const FAnimNotifyEventReference& NotifyRef : NewNotifies)
 	{
 		const FAnimNotifyEvent* Notify = NotifyRef.GetNotify();
 		if( Notify && (bSrcIsLeader || Notify->bTriggerOnFollower))
 		{
 			// only add if it is over TriggerWeightThreshold
+			// 仅在超过 TriggerWeightThreshold 时添加
 			const bool bPassesDedicatedServerCheck = Notify->bTriggerOnDedicatedServer || !bIsDedicatedServer;
 			if (bPassesDedicatedServerCheck && Notify->TriggerWeightThreshold <= InstanceWeight && PassesFiltering(Notify) && PassesChanceOfTriggering(Notify))
 			{
@@ -69,7 +71,9 @@ void FAnimNotifyQueue::AddAnimNotifiesToDest(bool bSrcIsLeader, const TArray<FAn
 				if (bPassedScopeFilter)
 				{
 					// Only add unique AnimNotifyState instances just once. We can get multiple triggers if looping over an animation.
+					// 仅添加一次唯一的 AnimNotifyState 实例。如果循环播放动画，我们可以获得多个触发器。
 					// It is the same state, so just report it once.
+					// 都是同一个状态，报一次就可以了。
 					Notify->NotifyStateClass ? DestArray.AddUnique(NotifyRef) : DestArray.Add(NotifyRef);	
 				}
 			}
@@ -126,6 +130,7 @@ void FAnimNotifyQueue::Reset(USkeletalMeshComponent* Component)
 void FAnimNotifyQueue::Append(const FAnimNotifyQueue& Queue)
 {
 	// we dont just append here - we need to preserve uniqueness for AnimNotifyState instances
+	// 我们不只是在此处附加 - 我们需要保留 AnimNotifyState 实例的唯一性
 	AddAnimNotifiesToDestNoFiltering(Queue.AnimNotifies, AnimNotifies);
 
 	for (const TPair<FName, FAnimNotifyArray>& Pair : Queue.UnfilteredMontageAnimNotifies)

@@ -18,6 +18,7 @@ UVariableFrameStrippingSettings::UVariableFrameStrippingSettings(const FObjectIn
 
 #if WITH_EDITORONLY_DATA
 /** Generates a DDC key that takes into account the current settings, selected codec, input anim sequence and TargetPlatform */
+/** [翻译失败: Generates a DDC key that takes into account the current settings, selected codec, input anim sequence and TargetPlatform] */
 void UVariableFrameStrippingSettings::PopulateDDCKey(const UE::Anim::Compression::FAnimDDCKeyArgs& KeyArgs, FArchive& Ar)
 {
 	const ITargetPlatform* TargetPlatform = KeyArgs.TargetPlatform;

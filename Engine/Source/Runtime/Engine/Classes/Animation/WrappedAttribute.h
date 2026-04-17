@@ -11,18 +11,21 @@ namespace UE
 	namespace Anim 
 	{
 		/** Helper struct to wrap and templated operate raw memory */
+		/** 用于包装和模板化操作原始内存的辅助结构 */
 		template<typename InAllocator>
 		struct TWrappedAttribute
 		{
 			TWrappedAttribute() {}
 
 			/** Construct with allocates memory buffer according to type size*/
+			/** 构造并根据类型大小分配内存缓冲区*/
 			TWrappedAttribute(const UScriptStruct* InStruct)
 			{
 				Allocate(InStruct);
 			}
 						
 			/** Returns typed ptr to memory */
+			/** 将类型化的 ptr 返回到内存 */
 			template <typename Type>
 			inline typename TEnableIf<TIsFundamentalType<Type>::Value, Type*>::Type GetPtr()
 			{
@@ -41,6 +44,7 @@ namespace UE
 			inline Type& GetRef() { return *GetPtr<Type>(); }
 
 			/** Returns typed const ptr to memory */
+			/** 将类型化 const ptr 返回到内存 */
 			template <typename Type>
 			inline typename TEnableIf<TIsFundamentalType<Type>::Value, const Type*>::Type GetPtr() const
 			{
@@ -56,10 +60,12 @@ namespace UE
 			}
 
 			/** Returns typed const reference to memory */
+			/** 返回对内存的类型化 const 引用 */
 			template<typename Type>
 			inline const Type& GetRef() const { return *GetPtr<Type>(); }
 
 			/** Allocated memory buffer according to type size */
+			/** 根据类型大小分配内存缓冲区 */
 			template<typename AttributeType>
 			inline void Allocate()
 			{
@@ -67,6 +73,7 @@ namespace UE
 			}
 
 			/** Allocated memory buffer according to type size */
+			/** 根据类型大小分配内存缓冲区 */
 			inline void Allocate(const UScriptStruct* InStruct)
 			{
 				check(InStruct);

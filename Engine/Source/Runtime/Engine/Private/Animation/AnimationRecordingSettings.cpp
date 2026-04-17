@@ -5,11 +5,14 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AnimationRecordingSettings)
 
 /** 30Hz default sample rate */
+/** [翻译失败: 30Hz default sample rate] */
 const FFrameRate FAnimationRecordingSettings::DefaultSampleFrameRate = FFrameRate(30, 1);
 
 /** 1 minute default length */
+/** [翻译失败: 1 minute default length] */
 const float FAnimationRecordingSettings::DefaultMaximumLength = 1.0f * 60.0f;
 
 /** Length used to specify unbounded */
+/** [翻译失败: Length used to specify unbounded] */
 const float FAnimationRecordingSettings::UnboundedMaximumLength = 0.0f;
 

@@ -8,6 +8,7 @@
 #include "AnimNode_BlendListByBool.generated.h"
 
 // This node is effectively a 'branch', picking one of two input poses based on an input Boolean value
+// 该节点实际上是一个“分支”，根据输入布尔值选择两个输入姿势之一
 USTRUCT(BlueprintInternalUseOnly)
 struct FAnimNode_BlendListByBool : public FAnimNode_BlendListBase
 {
@@ -15,6 +16,7 @@ struct FAnimNode_BlendListByBool : public FAnimNode_BlendListBase
 private:
 #if WITH_EDITORONLY_DATA
 	// Used in conjunction with bUseSeperateBlendProfileForFalse
+	// 与 bUseSeperateBlendProfileForFalse 结合使用
 	UPROPERTY(EditAnywhere, Category = BlendType, meta = (UseAsBlendProfile = true, FoldProperty, EditCondition="bUseSeperateBlendProfileForFalse", DisplayAfter="bUseSeperateBlendProfileForFalse"))
 	TObjectPtr<UBlendProfile> BlendProfileForFalse = nullptr;
 
@@ -27,6 +29,7 @@ private:
 	bool bUseSeperateBlendProfileForFalse = false;
 
 	// Which input should be connected to the output?
+	// 哪个输入应该连接到输出？
 	UPROPERTY(EditAnywhere, Category=Runtime, meta=(PinShownByDefault, FoldProperty))
 	bool bActiveValue = false;
 #endif
@@ -35,6 +38,7 @@ public:
 	FAnimNode_BlendListByBool() = default;
 
 	// Get which input should be connected to the output
+	// 获取哪个输入应连接到输出
 	ANIMGRAPHRUNTIME_API bool GetActiveValue() const;
 
 	ANIMGRAPHRUNTIME_API bool GetUseSeperateBlendProfiles() const;

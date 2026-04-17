@@ -22,9 +22,11 @@
 struct FCompressibleAnimData;
 
 //Helper function for ddc key generation
+//用于 ddc 密钥生成的辅助函数
 uint8 MakeBitForFlag(uint32 Item, uint32 Position);
 
 // Logic for tracking top N error items for later display
+// 用于跟踪前 N 个错误项以便稍后显示的逻辑
 template<typename DataType, typename SortType, int MaxItems>
 struct FMaxErrorStatTracker
 {
@@ -83,9 +85,11 @@ public:
 
 private:
 	//Storage of tracked items
+	//跟踪项目的存储
 	TArray<DataType> Items;
 
 	//For ease cache current lowest error value
+	//为了方便缓存当前最低错误值
 	SortType CurrentLowestError;
 };
 
@@ -131,18 +135,23 @@ struct FErrorTrackerWorstBone
 	}
 
 	// Error of this bone
+	// 这块骨头的错误
 	float BoneError;
 
 	// Time in the sequence that the error occurred at
+	// 错误发生的时间顺序
 	float BoneErrorTime;
 
 	// Bone index the error occurred on
+	// [翻译失败: Bone index the error occurred on]
 	int32 BoneErrorBone;
 
 	// Bone name the error occurred on 
+	// [翻译失败: Bone name the error occurred on]
 	FName BoneErrorBoneName;
 
 	// Animation the error occurred on
+	// 发生错误的动画
 	FName BoneErrorAnimName;
 };
 
@@ -181,9 +190,11 @@ struct FErrorTrackerWorstAnimation
 private:
 
 	// Average error of this animation
+	// 该动画的平均误差
 	float AvgError;
 
 	// Animation being tracked
+	// 正在跟踪的动画
 	FName AnimName;
 };
 
@@ -208,23 +219,29 @@ private:
 	int32 NumberOfAnimations;
 
 	// Total time spent compressing animations
+	// 压缩动画所花费的总时间
 	double TotalCompressionExecutionTime;
 
 	// Stats across all animations
+	// [翻译失败: Stats across all animations]
 	float ErrorTotal;
 	float ErrorCount;
 	float AverageError;
 
 	// Track the largest errors on a single bone
+	// [翻译失败: Track the largest errors on a single bone]
 	FMaxErrorStatTracker<FErrorTrackerWorstBone, float, 10> WorstBoneError;
 
 	// Track the animations with the largest average error
+	// 跟踪平均误差最大的动画
 	FMaxErrorStatTracker<FErrorTrackerWorstAnimation, float, 10> WorstAnimationError;
 };
 
 //////////////////////////////////////////////////////////////////////////
 // FAnimCompressContext - Context information / storage for use during
+// FAnimCompressContext - 期间使用的上下文信息/存储
 // animation compression
+// 动画压缩
 
 struct UE_DEPRECATED(5.2, "FAnimCompressContext has been deprecated") FAnimCompressContext;
 struct FAnimCompressContext
@@ -248,6 +265,7 @@ public:
 	{}
 
 	// If we are duping a compression context we don't want the CompressionSummary to output
+	// 如果我们复制压缩上下文，我们不希望输出 CompressionSummary
 	FAnimCompressContext(const FAnimCompressContext& Rhs)
 		: CompressionSummary(false)
 		, AnimIndex(Rhs.AnimIndex)
@@ -256,6 +274,7 @@ public:
 	{}
 
 	// Unlike the copy constructor, this will copy the CompressionSummary, but the class is deprecated anyway
+	// [翻译失败: Unlike the copy constructor, this will copy the CompressionSummary, but the class is deprecated anyway]
 	FAnimCompressContext& operator=(const FAnimCompressContext&) = default;
 
 	friend class FAnimationUtils;
@@ -271,8 +290,11 @@ namespace UE
 		namespace Compression
 		{		
 			// This is a version string that mimics the old versioning scheme. If you
+			// [翻译失败: This is a version string that mimics the old versioning scheme. If you]
 			// want to bump this version, generate a new guid using VS->Tools->Create GUID and
+			// [翻译失败: want to bump this version, generate a new guid using VS->Tools->Create GUID and]
 			// return it here. Ex.
+			// [翻译失败: return it here. Ex.]
 			static const FString AnimationCompressionVersionString = TEXT("0439926D560447329623BE4394FA11A6");
 			
 			struct FAnimationCompressionMemorySummaryScope
@@ -317,24 +339,29 @@ class UAnimCompress : public UAnimBoneCompressionCodec
 	GENERATED_UCLASS_BODY()
 
 	/** Compression algorithms requiring a skeleton should set this value to true. */
+	/** [翻译失败: Compression algorithms requiring a skeleton should set this value to true.] */
 	UPROPERTY()
 	uint32 bNeedsSkeleton:1;
 
 	/** Format for bitwise compression of translation data. */
+	/** [翻译失败: Format for bitwise compression of translation data.] */
 	UPROPERTY(Category = Compression, EditAnywhere)
 	TEnumAsByte<AnimationCompressionFormat> TranslationCompressionFormat;
 
 	/** Format for bitwise compression of rotation data. */
+	/** [翻译失败: Format for bitwise compression of rotation data.] */
 	UPROPERTY(Category = Compression, EditAnywhere)
 	TEnumAsByte<AnimationCompressionFormat> RotationCompressionFormat;
 
 	/** Format for bitwise compression of scale data. */
+	/** [翻译失败: Format for bitwise compression of scale data.] */
 	UPROPERTY(Category = Compression, EditAnywhere)
 	TEnumAsByte<AnimationCompressionFormat> ScaleCompressionFormat;
 
 public:
 #if WITH_EDITORONLY_DATA
 	/** UAnimBoneCompressionCodec implementation */
+	/** [翻译失败: UAnimBoneCompressionCodec implementation] */
 	virtual bool Compress(const FCompressibleAnimData& CompressibleAnimData, FCompressibleAnimDataResult& OutResult) override;
 #endif
 

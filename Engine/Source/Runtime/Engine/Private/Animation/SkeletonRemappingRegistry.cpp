@@ -18,6 +18,7 @@ struct FSkeletonRemappingRegistryPrivate
 	static void HandlePostGarbageCollect()
 	{
 		// Compact the registry on GC
+		// 压缩 GC 上的注册表
 		if(GSkeletonRemappingRegistry)
 		{
 			UE::TWriteScopeLock WriteLock(GSkeletonRemappingRegistry->MappingsLock);
@@ -85,12 +86,14 @@ const FSkeletonRemapping& FSkeletonRemappingRegistry::GetRemapping(const USkelet
 	}
 
 	// No valid mapping was found, so create a new one
+	// 未找到有效映射，因此创建一个新映射
 	TSharedPtr<FSkeletonRemapping> NewMapping = MakeShared<FSkeletonRemapping>(InSourceSkeleton, InTargetSkeleton);
 	
 	{
 		UE::TWriteScopeLock WriteLock(MappingsLock);
 
 		// First check if another thread grabbed the write lock before us to do the same mapping
+		// 首先检查是否有另一个线程在我们之前抢到了写锁来进行相同的映射
 		const TSharedPtr<FSkeletonRemapping>* ExistingMapping = Mappings.FindByHash(PairHash, Pair);
 		if (ExistingMapping && ExistingMapping->IsValid())
 		{
@@ -98,9 +101,11 @@ const FSkeletonRemapping& FSkeletonRemappingRegistry::GetRemapping(const USkelet
 		}
 
 		// Add to global mapping
+		// 添加到全局映射
 		Mappings.AddByHash(PairHash, Pair, NewMapping);
 
 		// Add to per-skeleton mappings
+		// 添加到每个骨架映射
 		PerSkeletonMappings.Add(InSourceSkeleton, NewMapping);
 		PerSkeletonMappings.Add(InTargetSkeleton, NewMapping);
 

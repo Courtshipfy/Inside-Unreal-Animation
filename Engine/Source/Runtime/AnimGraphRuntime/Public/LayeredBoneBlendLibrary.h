@@ -28,10 +28,12 @@ class ULayeredBoneBlendLibrary : public UBlueprintFunctionLibrary
 
 public:
 	/** Get a layered bone blend context from an anim node context. */
+	/** 从动画节点上下文获取分层骨骼混合上下文。 */
 	UFUNCTION(BlueprintCallable, Category = "Layered Bone Blend", meta = (BlueprintThreadSafe, ExpandEnumAsExecs = "Result"))
 	static ANIMGRAPHRUNTIME_API FLayeredBoneBlendReference ConvertToLayeredBoneBlend(const FAnimNodeReference& Node, EAnimNodeReferenceConversionResult& Result);
 
 	/** Get a layered bone blend context from an anim node context (pure). */
+	/** 从动画节点上下文（纯）获取分层骨骼混合上下文。 */
 	UFUNCTION(BlueprintPure, Category = "Layered Bone Blend", meta = (BlueprintThreadSafe, DisplayName = "Convert to Layered Bone Blend"))
 	static void ConvertToLayeredBlendPerBonePure(const FAnimNodeReference& Node, FLayeredBoneBlendReference& LayeredBoneBlend, bool& Result)
 	{
@@ -41,6 +43,7 @@ public:
 	}
 
 	/** Get the number of poses that a layered bone blend node has (this does not include the base pose) */
+	/** 获取分层骨骼混合节点具有的姿势数量（这不包括基本姿势） */
 	UFUNCTION(BlueprintPure, Category = "Layered Bone Blend", meta = (BlueprintThreadSafe))
 	static ANIMGRAPHRUNTIME_API int32 GetNumPoses(const FLayeredBoneBlendReference& LayeredBoneBlend);
 	

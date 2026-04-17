@@ -17,6 +17,7 @@ struct FMultiBlendData : public TThreadSingleton<FMultiBlendData>
 
 /////////////////////////////////////////////////////
 // FAnimNode_MultiWayBlend
+// FAnimNode_MultiWayBlend
 
 void FAnimNode_MultiWayBlend::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -24,6 +25,7 @@ void FAnimNode_MultiWayBlend::Initialize_AnyThread(const FAnimationInitializeCon
 	FAnimNode_Base::Initialize_AnyThread(Context);
 
 	// this should be consistent all the time by editor node
+	// 编辑器节点应该始终保持一致
 	if (!ensure(Poses.Num() == DesiredAlphas.Num()))
 	{
 		DesiredAlphas.Init(0.f, Poses.Num());
@@ -72,9 +74,11 @@ void FAnimNode_MultiWayBlend::UpdateCachedAlphas()
 		if (bNormalizeAlpha)
 		{
 			// normalize by total alpha
+			// 按总 alpha 标准化
 			for (int32 AlphaIndex = 0; AlphaIndex < DesiredAlphas.Num(); ++AlphaIndex)
 			{
 				// total alpha shouldn't be zero
+				// 总 alpha 不应为零
 				CachedAlphas[AlphaIndex] = AlphaScaleBias.ApplyTo(DesiredAlphas[AlphaIndex] / TotalAlpha);
 			}
 		}
@@ -83,6 +87,7 @@ void FAnimNode_MultiWayBlend::UpdateCachedAlphas()
 			for (int32 AlphaIndex = 0; AlphaIndex < DesiredAlphas.Num(); ++AlphaIndex)
 			{
 				// total alpha shouldn't be zero
+				// 总 alpha 不应为零
 				CachedAlphas[AlphaIndex] = AlphaScaleBias.ApplyTo(DesiredAlphas[AlphaIndex]);
 			}
 		}
@@ -101,6 +106,7 @@ void FAnimNode_MultiWayBlend::Update_AnyThread(const FAnimationUpdateContext& Co
 	for (int32 PoseIndex = 0; PoseIndex < Poses.Num(); ++PoseIndex)
 	{
 		// total alpha shouldn't be zero
+		// 总 alpha 不应为零
 		float CurrentAlpha = CachedAlphas[PoseIndex];
 		if (CurrentAlpha > ZERO_ANIMWEIGHT_THRESH)
 		{
@@ -115,7 +121,9 @@ void FAnimNode_MultiWayBlend::Evaluate_AnyThread(FPoseContext& Output)
 	ANIM_MT_SCOPE_CYCLE_COUNTER_VERBOSE(MultiWayBlend, !IsInGameThread());
 
 	// this function may be reentrant when multiple MultiWayBlend nodes are chained together
+	// 当多个 MultiWayBlend 节点链接在一起时，此函数可能是可重入的
 	// these scratch arrays are treated as stacks below
+	// 这些临时数组被视为下面的堆栈
 	FMultiBlendData& BlendData = FMultiBlendData::Get();
 	TArray<FCompactPose, TInlineAllocator<8>>& SourcePoses = BlendData.SourcePoses;
 	TArray<FBlendedCurve, TInlineAllocator<8>>& SourceCurves = BlendData.SourceCurves;
@@ -132,10 +140,12 @@ void FAnimNode_MultiWayBlend::Evaluate_AnyThread(FPoseContext& Output)
 			if (CurrentAlpha > ZERO_ANIMWEIGHT_THRESH)
 			{
 				// evaluate input pose, potentially reentering this function and pushing/popping more poses
+				// 评估输入姿势，可能会重新输入此功能并推送/弹出更多姿势
 				FPoseContext PoseContext(Output);
 				Poses[PoseIndex].Evaluate(PoseContext);
 
 				// push source pose data
+				// 推送源姿态数据
 				FCompactPose& SourcePose = SourcePoses.AddDefaulted_GetRef();
 				SourcePose.MoveBonesFrom(PoseContext.Pose);
 
@@ -155,6 +165,7 @@ void FAnimNode_MultiWayBlend::Evaluate_AnyThread(FPoseContext& Output)
 	if (SourcePosesAdded > 0)
 	{
 		// obtain views onto the ends of our stacks
+		// 获取堆栈末端的视图
 		TArrayView<FCompactPose> SourcePosesView = MakeArrayView(&SourcePoses[SourcePosesInitialNum], SourcePosesAdded);
 		TArrayView<FBlendedCurve> SourceCurvesView = MakeArrayView(&SourceCurves[SourcePosesInitialNum], SourcePosesAdded);
 		TArrayView<UE::Anim::FStackAttributeContainer> SourceAttributesView = MakeArrayView(&SourceAttributes[SourcePosesInitialNum], SourcePosesAdded);
@@ -165,9 +176,11 @@ void FAnimNode_MultiWayBlend::Evaluate_AnyThread(FPoseContext& Output)
 		FAnimationRuntime::BlendPosesTogether(SourcePosesView, SourceCurvesView, SourceAttributesView, SourceWeightsView, AnimationPoseData);
 		
 		// normalize rotation - some cases, where additive is applied less than 1, it will use non normalized rotation
+		// 标准化旋转 - 某些情况下，应用的加法小于 1，它将使用非标准化旋转
 		Output.Pose.NormalizeRotations();
 		
 		// pop the poses we added
+		// 弹出我们添加的姿势
 		SourcePoses.SetNum(SourcePosesInitialNum, EAllowShrinking::No);
 		SourceCurves.SetNum(SourcePosesInitialNum, EAllowShrinking::No);
 		SourceWeights.SetNum(SourcePosesInitialNum, EAllowShrinking::No);

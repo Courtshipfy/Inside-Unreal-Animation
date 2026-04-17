@@ -8,6 +8,7 @@
 #include "AnimNode_BlendListByInt.generated.h"
 
 // Blend list node; has many children
+// 混合列表节点；有很多孩子
 USTRUCT(BlueprintInternalUseOnly)
 struct FAnimNode_BlendListByInt : public FAnimNode_BlendListBase
 {
@@ -22,6 +23,7 @@ public:
 	FAnimNode_BlendListByInt() = default;
 
 	// Get the currently active child index
+	// 获取当前活动的子索引
 	ANIMGRAPHRUNTIME_API virtual int32 GetActiveChildIndex() override;
 	
 protected:

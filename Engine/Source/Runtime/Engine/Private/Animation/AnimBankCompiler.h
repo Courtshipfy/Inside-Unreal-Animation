@@ -63,6 +63,7 @@ private:
 	TArrayView<FName> GetDependentTypeNames() const override;
 
 	/** Called once per frame, fetches completed tasks and applies them to the scene. */
+	/** 每帧调用一次，获取已完成的任务并将其应用到场景。 */
 	void ProcessAsyncTasks(bool bLimitExecutionTime = false) override;
 
 	bool bHasShutdown = false;

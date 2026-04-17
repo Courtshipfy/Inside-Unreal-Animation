@@ -6,6 +6,7 @@
 #include "NodeChain.generated.h"
 
 /** A chain of nodes in a hierarchy */
+/** 层次结构中的节点链 */
 USTRUCT()
 struct FNodeChain
 {

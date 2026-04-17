@@ -36,11 +36,13 @@ DECLARE_CYCLE_STAT(TEXT("AnimMontageInstance_Terminate"), STAT_AnimMontageInstan
 DECLARE_CYCLE_STAT(TEXT("AnimMontageInstance_HandleEvents"), STAT_AnimMontageInstance_HandleEvents, STATGROUP_Anim);
 
 // Pre-built FNames so we don't take the hit of constructing FNames at spawn time
+// 预构建 FName，这样我们就不会在生成时构建 FName
 namespace MontageFNames
 {
 	static FName TimeStretchCurveName(TEXT("MontageTimeStretchCurve"));
 }
 
+// CVars
 // CVars
 namespace MontageCVars
 {
@@ -93,6 +95,7 @@ bool UAnimMontage::IsValidSlot(FName InSlotName) const
 		if ( SlotAnimTracks[I].SlotName == InSlotName )
 		{
 			// if data is there, return true. Otherwise, it doesn't matter
+			// 如果有数据，则返回 true。否则，没关系
 			return ( SlotAnimTracks[I].AnimTrack.AnimSegments.Num() >  0 );
 		}
 	}
@@ -125,7 +128,9 @@ void UAnimMontage::Serialize(FArchive& Ar)
 		if (CustomVersion < FFortniteMainBranchObjectVersion::ChangeDefaultAlphaBlendType)
 		{
 			// Switch the default back to Linear so old data remains the same
+			// 将默认值切换回线性，以便旧数据保持不变
 			// Note this happens before serialization
+			// 请注意，这发生在序列化之前
 			BlendIn.SetBlendOption(EAlphaBlendOption::Linear);
 			BlendOut.SetBlendOption(EAlphaBlendOption::Linear);
 		}
@@ -142,6 +147,7 @@ const FAnimTrack* UAnimMontage::GetAnimationData(FName InSlotName) const
 		if ( SlotAnimTracks[I].SlotName == InSlotName )
 		{
 			// if data is there, return true. Otherwise, it doesn't matter
+			// 如果有数据，则返回 true。否则，没关系
 			return &( SlotAnimTracks[I].AnimTrack );
 		}
 	}
@@ -169,14 +175,20 @@ bool UAnimMontage::IsWithinPos(int32 FirstIndex, int32 SecondIndex, float Curren
 	else // if end index isn't valid, set to be BIG_NUMBER
 	{
 		// @todo anim, I don't know if using SequenceLength is better or BIG_NUMBER
+		// @todo anim，我不知道使用 SequenceLength 更好还是 BIG_NUMBER
 		// I don't think that'd matter. 
+		// 我认为这并不重要。
 		EndTime = GetPlayLength();
 	}
 
 	// since we do range of [StartTime, EndTime) (excluding EndTime) 
+	// 因为我们的范围是 [StartTime, EndTime)（不包括 EndTime）
 	// there is blindspot of when CurrentTime becomes >= SequenceLength
+	// 当 CurrentTime 变为 >= SequenceLength 时存在盲点
 	// include that frame if CurrentTime gets there. 
+	// 如果 CurrentTime 到达那里，则包括该帧。
 	// Otherwise, we continue to use [StartTime, EndTime)
+	// 否则，我们继续使用[StartTime, EndTime)
 	if (CurrentTime >= GetPlayLength())
 	{
 		return (StartTime <= CurrentTime && EndTime >= CurrentTime);
@@ -190,6 +202,7 @@ float UAnimMontage::CalculatePos(FCompositeSection &Section, float PosWithinComp
 	float Offset = Section.GetTime();
 	Offset += PosWithinCompositeSection;
 	// @todo anim
+	// @todo动画
 	return Offset;
 }
 
@@ -198,6 +211,7 @@ int32 UAnimMontage::GetSectionIndexFromPosition(float Position) const
 	for (int32 I=0; I<CompositeSections.Num(); ++I)
 	{
 		// if within
+		// 如果在
 		if( IsWithinPos(I, I+1, Position) )
 		{
 			return I;
@@ -214,6 +228,7 @@ int32 UAnimMontage::GetAnimCompositeSectionIndexFromPos(float CurrentTime, float
 	for (int32 I=0; I<CompositeSections.Num(); ++I)
 	{
 		// if within
+		// 如果在
 		if (IsWithinPos(I, I+1, CurrentTime))
 		{
 			PosWithinCompositeSection = CurrentTime - CompositeSections[I].GetTime();
@@ -257,7 +272,9 @@ FCompositeSection& UAnimMontage::GetAnimCompositeSection(int32 SectionIndex)
 int32 UAnimMontage::GetSectionIndex(FName InSectionName) const
 {
 	// I can have operator== to check SectionName, but then I have to construct
+	// [翻译失败: I can have operator== to check SectionName, but then I have to construct]
 	// empty FCompositeSection all the time whenever I search :(
+	// 每当我搜索时，FCompositeSection 总是为空:(
 	for (int32 I=0; I<CompositeSections.Num(); ++I)
 	{
 		if ( CompositeSections[I].SectionName == InSectionName ) 
@@ -327,6 +344,7 @@ int32 UAnimMontage::AddAnimCompositeSection(FName InSectionName, float StartTime
 	FCompositeSection NewSection;
 
 	// make sure same name doesn't exists
+	// 确保同名不存在
 	if ( InSectionName != NAME_None )
 	{
 		NewSection.SectionName = InSectionName;
@@ -334,10 +352,12 @@ int32 UAnimMontage::AddAnimCompositeSection(FName InSectionName, float StartTime
 	else
 	{
 		// just give default name
+		// 只需给出默认名称
 		NewSection.SectionName = FName(*FString::Printf(TEXT("Section%d"), CompositeSections.Num()+1));
 	}
 
 	// we already have that name
+	// [翻译失败: we already have that name]
 	if ( GetSectionIndex(InSectionName)!=INDEX_NONE )
 	{
 		UE_LOG(LogAnimMontage, Warning, TEXT("AnimCompositeSection : %s(%s) already exists. Choose different name."), 
@@ -348,10 +368,13 @@ int32 UAnimMontage::AddAnimCompositeSection(FName InSectionName, float StartTime
 	NewSection.Link(this, StartTime);
 
 	// we'd like to sort them in the order of time
+	// [翻译失败: we'd like to sort them in the order of time]
 	int32 NewSectionIndex = CompositeSections.Add(NewSection);
 
 	// when first added, just make sure to link previous one to add me as next if previous one doesn't have any link
+	// [翻译失败: when first added, just make sure to link previous one to add me as next if previous one doesn't have any link]
 	// it's confusing first time when you add this data
+	// [翻译失败: it's confusing first time when you add this data]
 	int32 PrevSectionIndex = NewSectionIndex-1;
 	if ( CompositeSections.IsValidIndex(PrevSectionIndex) )
 	{
@@ -377,6 +400,7 @@ bool UAnimMontage::DeleteAnimCompositeSection(int32 SectionIndex)
 void UAnimMontage::SortAnimCompositeSectionByPos()
 {
 	// sort them in the order of time
+	// [翻译失败: sort them in the order of time]
 	struct FCompareFCompositeSection
 	{
 		FORCEINLINE bool operator()( const FCompositeSection &A, const FCompositeSection &B ) const
@@ -418,8 +442,11 @@ FFrameRate UAnimMontage::GetSamplingFrameRate() const
 void UAnimMontage::PostLoad()
 {
 	// Link notifies before we call the Super::PostLoad (and eventually RefreshCacheData). This is to ensure that branching points get correctly
+	// [翻译失败: Link notifies before we call the Super::PostLoad (and eventually RefreshCacheData). This is to ensure that branching points get correctly]
 	// picked up as FAnimNotifyEvent::IsBranchingPoint() relies on the LinkedMontage being valid, and due to an issue where (since deprecated)
+	// [翻译失败: picked up as FAnimNotifyEvent::IsBranchingPoint() relies on the LinkedMontage being valid, and due to an issue where (since deprecated)]
 	// LinkSequence() was called instead of LinkMontage() there exists content for which LinkedMontage is saved as a null reference.
+	// [翻译失败: LinkSequence() was called instead of LinkMontage() there exists content for which LinkedMontage is saved as a null reference.]
 	for(FAnimNotifyEvent& Notify : Notifies)
 	{
 #if WITH_EDITORONLY_DATA
@@ -443,6 +470,7 @@ void UAnimMontage::PostLoad()
 	Super::PostLoad();
 
 	// copy deprecated variable to new one, temporary code to keep data copied. Am deleting it right after this
+	// [翻译失败: copy deprecated variable to new one, temporary code to keep data copied. Am deleting it right after this]
 	for ( auto SlotIter = SlotAnimTracks.CreateIterator() ; SlotIter ; ++SlotIter)
 	{
 		FAnimTrack & Track = (*SlotIter).AnimTrack;
@@ -513,6 +541,7 @@ void UAnimMontage::PostLoad()
 		}
 	}
 	// find preview base pose if it can
+	// 如果可以的话找到预览基本姿势
 #if WITH_EDITORONLY_DATA
 	if ( IsValidAdditive() && PreviewBasePose == nullptr )
 	{
@@ -533,6 +562,7 @@ void UAnimMontage::PostLoad()
 	}
 
 	// verify if skeleton is valid, otherwise clear it, this can happen if anim sequence has been modified when this hasn't been loaded. 
+	// 验证骨架是否有效，否则清除它，如果在未加载动画序列时修改了动画序列，则可能会发生这种情况。
 	for (int32 I=0; I<SlotAnimTracks.Num(); ++I)
 	{
 		if ( SlotAnimTracks[I].AnimTrack.AnimSegments.Num() > 0 )
@@ -549,6 +579,7 @@ void UAnimMontage::PostLoad()
 #endif // WITH_EDITORONLY_DATA
 
 	// Register Slots w/ Skeleton - to aid deterministic cooking do not do this during cook! 
+	// [翻译失败: Register Slots w/ Skeleton - to aid deterministic cooking do not do this during cook!]
 	if(!GIsCookerLoadingPackage)
 	{
 		USkeleton* MySkeleton = GetSkeleton();
@@ -563,6 +594,7 @@ void UAnimMontage::PostLoad()
 	}
 
 	// Convert BranchingPoints to AnimNotifies.
+	// [翻译失败: Convert BranchingPoints to AnimNotifies.]
 	if (GetLinker() && (GetLinker()->UEVer() < VER_UE4_MONTAGE_BRANCHING_POINT_REMOVAL) )
 	{
 		ConvertBranchingPointsToAnimNotifies();
@@ -570,6 +602,7 @@ void UAnimMontage::PostLoad()
 
 #if WITH_EDITORONLY_DATA
 	// fix up blending time deprecated variable
+	// 修复混合时间已弃用的变量
 	if (BlendInTime_DEPRECATED != -1.f)
 	{
 		BlendIn.SetBlendTime(BlendInTime_DEPRECATED);
@@ -584,6 +617,7 @@ void UAnimMontage::PostLoad()
 #endif
 
 	// collect markers if it's valid
+	// 收集标记（如果有效）
 	CollectMarkers();
 }
 
@@ -593,6 +627,7 @@ void UAnimMontage::ConvertBranchingPointsToAnimNotifies()
 	if (BranchingPoints_DEPRECATED.Num() > 0)
 	{
 		// Handle deprecated DisplayTime first
+		// 首先处理已弃用的 DisplayTime
 		for (auto& BranchingPoint : BranchingPoints_DEPRECATED)
 		{
 			if (BranchingPoint.DisplayTime_DEPRECATED != 0.0f)
@@ -607,9 +642,11 @@ void UAnimMontage::ConvertBranchingPointsToAnimNotifies()
 		}
 
 		// Then convert to AnimNotifies
+		// 然后转换为AnimNotify
 		USkeleton * MySkeleton = GetSkeleton();
 
 		// Add a new AnimNotifyTrack, and place all branching points in there.
+		// 添加一个新的 AnimNotifyTrack，并将所有分支点放置在其中。
 		int32 TrackIndex = AnimNotifyTracks.Num();
 
 		FAnimNotifyTrack NewItem;
@@ -635,6 +672,7 @@ void UAnimMontage::ConvertBranchingPointsToAnimNotifies()
 			NewEvent.MontageTickType = EMontageNotifyTickType::BranchingPoint;
 
 			// Add as a custom AnimNotify event to Skeleton.
+			// 作为自定义 AnimNotify 事件添加到 Skeleton。
 			if (MySkeleton)
 			{
 				MySkeleton->AnimationNotifies.AddUnique(NewEvent.NotifyName);
@@ -653,6 +691,7 @@ void UAnimMontage::RefreshBranchingPointMarkers()
 	BranchingPointStateNotifyIndices.Empty();
 
 	// Verify that we have no overlapping trigger times, this is not supported, and markers would not be triggered then.
+	// 验证我们没有重叠的触发时间，这是不支持的，并且标记不会被触发。
 	TMap<float, FAnimNotifyEvent*> TriggerTimes;
 
 	int32 NumNotifies = Notifies.Num();
@@ -667,9 +706,11 @@ void UAnimMontage::RefreshBranchingPointMarkers()
 			if (NotifyEvent.NotifyStateClass)
 			{
 				// Track end point of AnimNotifyStates.
+				// 跟踪 AnimNotifyStates 的终点。
 				AddBranchingPointMarker(FBranchingPointMarker(NotifyIndex, NotifyEvent.GetEndTriggerTime(), EAnimNotifyEventType::End), TriggerTimes);
 
 				// Also track AnimNotifyStates separately, so we can tick them between their Begin and End points.
+				// 还要单独跟踪 AnimNotifyStates，这样我们就可以在它们的开始点和结束点之间勾选它们。
 				BranchingPointStateNotifyIndices.Add(NotifyIndex);
 			}
 		}
@@ -678,6 +719,7 @@ void UAnimMontage::RefreshBranchingPointMarkers()
 	if (BranchingPointMarkers.Num() > 0)
 	{
 		// Sort markers
+		// 对标记进行排序
 		struct FCompareNotifyTickMarkersTime
 		{
 			FORCEINLINE bool operator()(const FBranchingPointMarker &A, const FBranchingPointMarker &B) const
@@ -695,12 +737,15 @@ void UAnimMontage::RefreshCacheData()
 	Super::RefreshCacheData();
 
 	// This gets called whenever notifies are modified in the editor, so refresh our branch list
+	// 每当在编辑器中修改通知时都会调用此函数，因此请刷新我们的分支列表
 	RefreshBranchingPointMarkers();
 #if WITH_EDITOR
 	if (!FUObjectThreadContext::Get().IsRoutingPostLoad)
 	{
 		// This is not needed during post load (as the child montages themselves will handle
+		// 在后加载期间不需要这样做（因为子蒙太奇本身将处理
 		// updating and calling it can cause deterministic cooking issues depending on load order
+		// 更新和调用它可能会导致确定性烹饪问题，具体取决于加载顺序
 		PropagateChanges();
 	}
 #endif // WITH_EDITOR
@@ -709,10 +754,13 @@ void UAnimMontage::RefreshCacheData()
 void UAnimMontage::AddBranchingPointMarker(FBranchingPointMarker TickMarker, TMap<float, FAnimNotifyEvent*>& TriggerTimes)
 {
 	// Add Marker
+	// 添加标记
 	BranchingPointMarkers.Add(TickMarker);
 
 	// Check that there is no overlapping marker, as we don't support this.
+	// 检查是否有重叠标记，因为我们不支持这一点。
 	// This would mean one of them is not getting triggered!
+	// 这意味着其中之一没有被触发！
 	FAnimNotifyEvent** FoundNotifyEventPtr = TriggerTimes.Find(TickMarker.TriggerTime);
 	if (FoundNotifyEventPtr)
 	{
@@ -794,6 +842,7 @@ void UAnimMontage::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	// It is unclear if CollectMarkers should be here or in RefreshCacheData
+	// 目前尚不清楚 CollectMarkers 应该位于此处还是位于 RefreshCacheData 中
 	if (SyncGroup != NAME_None)
 	{
 		CollectMarkers();
@@ -807,7 +856,9 @@ void UAnimMontage::PostEditChangeProperty(FPropertyChangedEvent& PropertyChanged
 void UAnimMontage::PropagateChanges()
 {
 	// @note propagate to children
+	// @note传播给孩子们
 	// this isn't that slow yet, but if this gets slow, we'll have to do guid method
+	// 这还没有那么慢，但是如果这变得很慢，我们就必须使用 guid 方法
 	if (ChildrenAssets.Num() > 0)
 	{
 		for (UAnimationAsset* Child : ChildrenAssets)
@@ -838,6 +889,7 @@ void UAnimMontage::GetResourceSizeEx(FResourceSizeEx& CumulativeResourceSize)
 bool UAnimMontage::IsValidAdditive() const
 {
 	// if first one is additive, this is additive
+	// 如果第一个是可加的，则这是可加的
 	if ( SlotAnimTracks.Num() > 0 )
 	{
 		for (int32 I=0; I<SlotAnimTracks.Num(); ++I)
@@ -857,6 +909,7 @@ bool UAnimMontage::IsValidAdditive() const
 bool UAnimMontage::IsValidAdditiveSlot(const FName& SlotNodeName) const
 {
 	// if first one is additive, this is additive
+	// 如果第一个是可加的，则这是可加的
 	if ( SlotAnimTracks.Num() > 0 )
 	{
 		for (int32 I=0; I<SlotAnimTracks.Num(); ++I)
@@ -887,6 +940,7 @@ EAnimEventTriggerOffsets::Type UAnimMontage::CalculateOffsetFromSections(float T
 bool FAnimMontageInstance::ValidateInstanceAfterNotifyState(const TWeakObjectPtr<UAnimInstance>& InAnimInstance, const UAnimNotifyState* InNotifyStateClass)
 {
 	// An owning instance should never be invalid after a notify call, since it's where the montage instance lives
+	// 拥有实例在通知调用后永远不应该无效，因为它是蒙太奇实例所在的位置
 	if (!InAnimInstance.IsValid())
 	{
 		ensureMsgf(false, TEXT("Invalid anim instance after triggering notify: %s"), *GetNameSafe(InNotifyStateClass));
@@ -894,6 +948,7 @@ bool FAnimMontageInstance::ValidateInstanceAfterNotifyState(const TWeakObjectPtr
 	}
 
 	// Montage instances array should never be empty after a notify state
+	// Montage 实例数组在通知状态后永远不应该为空
 	if (InAnimInstance->MontageInstances.Num() == 0)
 	{
 		ensureMsgf(false, TEXT("Montage instances empty on AnimInstance(%s) after calling notify:  %s"), *GetNameSafe(InAnimInstance.Get()), *GetNameSafe(InNotifyStateClass));
@@ -942,13 +997,17 @@ FTransform UAnimMontage::ExtractRootMotionFromTrackRange(float StartTrackPositio
 	FRootMotionMovementParams RootMotion;
 
 	// For now assume Root Motion only comes from first track.
+	// 现在假设根运动仅来自第一条轨道。
 	if( SlotAnimTracks.Num() > 0 )
 	{
 		const FAnimTrack& SlotAnimTrack = SlotAnimTracks[0].AnimTrack;
 
 		// Get RootMotion pieces from this track.
+		// 从此轨道获取 RootMotion 片段。
 		// We can deal with looping animations, or multiple animations. So we break those up into sequential operations.
+		// 我们可以处理循环动画或多个动画。因此，我们将它们分解为顺序操作。
 		// (Animation, StartFrame, EndFrame) so we can then extract root motion sequentially.
+		// （动画、StartFrame、EndFrame），这样我们就可以顺序提取根运动。
 		ExtractRootMotionFromTrack(SlotAnimTrack, StartTrackPosition, EndTrackPosition, Context, RootMotion);
 
 	}
@@ -962,6 +1021,7 @@ FTransform UAnimMontage::ExtractRootMotionFromTrackRange(float StartTrackPositio
 }
 
 /** Get Montage's Group Name */
+/** 获取 Montage 的组名 */
 FName UAnimMontage::GetGroupName() const
 {
 	USkeleton* MySkeleton = GetSkeleton();
@@ -976,7 +1036,9 @@ FName UAnimMontage::GetGroupName() const
 bool UAnimMontage::HasValidSlotSetup() const
 {
 	// We only need to worry about this if we have multiple tracks.
+	// 如果我们有多个轨道，我们只需要担心这一点。
 	// Montages with a single track will always have a valid slot setup.
+	// 具有单个轨道的蒙太奇将始终具有有效的插槽设置。
 	int32 NumAnimTracks = SlotAnimTracks.Num();
 	if (NumAnimTracks > 1)
 	{
@@ -990,6 +1052,7 @@ bool UAnimMontage::HasValidSlotSetup() const
 			for (int32 TrackIndex = 1; TrackIndex < NumAnimTracks; TrackIndex++)
 			{
 				// Verify that slot names are unique.
+				// 验证插槽名称是否唯一。
 				FName CurrentSlotName = SlotAnimTracks[TrackIndex].SlotName;
 				bool bSlotNameAlreadyInUse = UniqueSlotNameList.Contains(CurrentSlotName);
 				if (!bSlotNameAlreadyInUse)
@@ -1004,6 +1067,7 @@ bool UAnimMontage::HasValidSlotSetup() const
 				}
 
 				// Verify that all slots belong to the same group.
+				// 验证所有插槽是否属于同一组。
 				FName CurrentSlotGroupName = MySkeleton->GetSlotGroupName(CurrentSlotName);
 				bool bDifferentGroupName = (CurrentSlotGroupName != MontageGroupName);
 				if (bDifferentGroupName)
@@ -1044,6 +1108,7 @@ const TArray<class UAnimMetaData*> UAnimMontage::GetSectionMetaData(FName Sectio
 		if (SectionName == NAME_None || CurSection.SectionName == SectionName)
 		{
 			// add to the list
+			// 添加到列表
 			MetadataList.Append(CurSection.GetMetaData());
 
 			if (bShouldIIncludeSequence)
@@ -1055,11 +1120,13 @@ const TArray<class UAnimMetaData*> UAnimMontage::GetSectionMetaData(FName Sectio
 						if (SlotName == NAME_None || SlotIter.SlotName == SlotName)
 						{
 							// now add the animations within this section
+							// [翻译失败: now add the animations within this section]
 							for (auto& SegmentIter : SlotIter.AnimTrack.AnimSegments)
 							{
 								if (UAnimSequenceBase* AnimReference = SegmentIter.GetAnimReference())
 								{
 									// only add unique here
+									// [翻译失败: only add unique here]
 									TArray<UAnimMetaData*> RefMetadata = AnimReference->GetMetaData();
 
 									for (auto& RefData : RefMetadata)
@@ -1072,7 +1139,9 @@ const TArray<class UAnimMetaData*> UAnimMontage::GetSectionMetaData(FName Sectio
 					}
 
 					// if section name == None, we only grab slots once
+					// 如果节名称 == None，我们只抢槽一次
 					// otherwise, it will grab multiple times
+					// 否则会多次抓取
 					bShouldIIncludeSequence = false;
 				}
 				else
@@ -1084,6 +1153,7 @@ const TArray<class UAnimMetaData*> UAnimMontage::GetSectionMetaData(FName Sectio
 						if (SlotName == NAME_None || SlotIter.SlotName == SlotName)
 						{
 							// now add the animations within this section
+							// 现在在此部分中添加动画
 							for (auto& SegmentIter : SlotIter.AnimTrack.AnimSegments)
 							{
 								if (SegmentIter.IsIncluded(SectionStartTime, SectionEndTime))
@@ -1091,6 +1161,7 @@ const TArray<class UAnimMetaData*> UAnimMontage::GetSectionMetaData(FName Sectio
 									if (UAnimSequenceBase* AnimReference = SegmentIter.GetAnimReference())
 									{
 										// only add unique here
+										// 此处仅添加唯一的
 										TArray<UAnimMetaData*> RefMetadata = AnimReference->GetMetaData();
 
 										for (auto& RefData : RefMetadata)
@@ -1153,6 +1224,7 @@ void UAnimMontage::ReplaceReferredAnimations(const TMap<UAnimationAsset*, UAnima
 void UAnimMontage::UpdateLinkableElements()
 {
 	// Update all linkable elements
+	// 更新所有可链接元素
 	for (FCompositeSection& Section : CompositeSections)
 	{
 		Section.Update();
@@ -1175,6 +1247,7 @@ void UAnimMontage::UpdateLinkableElements(int32 SlotIdx, int32 SegmentIdx)
 		if (Section.GetSlotIndex() == SlotIdx && Section.GetSegmentIndex() == SegmentIdx)
 		{
 			// Update the link
+			// 更新链接
 			Section.Update();
 		}
 	}
@@ -1253,8 +1326,11 @@ void UAnimMontage::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotify
 	bool bRecordNeedsResetting = true;
 
 	// nothing has to happen here
+	// 这里不必发生任何事情
 	// we just have to make sure we set Context data correct
+	// 我们只需要确保我们设置的上下文数据正确
 	//if (ensure (Context.IsLeader()))
+	//如果（确保（Context.IsLeader()））
 	if (Context.IsLeader())
 	{
 		check(Instance.DeltaTimeRecord);
@@ -1263,6 +1339,7 @@ void UAnimMontage::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotify
 		const float MoveDelta = Instance.DeltaTimeRecord->Delta;
 
 		// Update context's data for followers to use.
+		// 更新上下文的数据以供关注者使用。
 		Context.SetLeaderDelta(MoveDelta);
 		Context.SetPreviousAnimationPositionRatio(PreviousTime / GetPlayLength());
 
@@ -1275,6 +1352,7 @@ void UAnimMontage::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotify
 				const bool bIsMarkerTickRecordValid = MarkerTickRecord->IsValid(Instance.bLooping);
 				
 				// Store the sync anim position BEFORE the asset has being ticked.
+				// 在勾选资源之前存储同步动画位置。
 				if (bIsMarkerTickRecordValid)
 				{
 					MarkerTickContext.SetMarkerSyncStartPosition(GetMarkerSyncPositionFromMarkerIndicies(MarkerTickRecord->PreviousMarker.MarkerIndex, MarkerTickRecord->NextMarker.MarkerIndex, PreviousTime, nullptr));
@@ -1282,6 +1360,7 @@ void UAnimMontage::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotify
 				else
 				{
 					// only thing is that passed markers won't work in this frame. To do that, I have to figure out how it jumped from where to where, 
+					// 唯一的问题是传递的标记在此框架中不起作用。为此，我必须弄清楚它是如何从哪里跳到哪里的，
 					FMarkerPair PreviousMarker;
 					FMarkerPair NextMarker;
 					GetMarkerIndicesForTime(PreviousTime, false, MarkerTickContext.GetValidMarkerNames(), PreviousMarker, NextMarker);
@@ -1289,19 +1368,25 @@ void UAnimMontage::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotify
 				}
 
 				// Advance as leader.
+				// 作为领导者前进。
 				// @todo this won't work well once we start jumping
+				// @todo 一旦我们开始跳跃，这将无法正常工作
 				// only thing is that passed markers won't work in this frame. To do that, I have to figure out how it jumped from where to where, 
+				// [翻译失败: only thing is that passed markers won't work in this frame. To do that, I have to figure out how it jumped from where to where,]
 				GetMarkerIndicesForTime(CurrentTime, false, MarkerTickContext.GetValidMarkerNames(), MarkerTickRecord->PreviousMarker, MarkerTickRecord->NextMarker);
 				bRecordNeedsResetting = false; // we have updated it now, no need to reset.
 
 				// Store the sync anim position AFTER the asset has being ticked.
+				// [翻译失败: Store the sync anim position AFTER the asset has being ticked.]
 				MarkerTickContext.SetMarkerSyncEndPosition(GetMarkerSyncPositionFromMarkerIndicies(MarkerTickRecord->PreviousMarker.MarkerIndex, MarkerTickRecord->NextMarker.MarkerIndex, CurrentTime, nullptr));
 
 				MarkerTickContext.MarkersPassedThisTick = *Instance.Montage.MarkersPassedThisTick;
 
 #if DO_CHECK
 				// The marker tick record gets invalidated when the montage position is set externally and due to this change we cannot assume
+				// [翻译失败: The marker tick record gets invalidated when the montage position is set externally and due to this change we cannot assume]
 				// its sync positions will be the same as the previous tick. 
+				// 其同步位置将与前一个刻度相同。
 				if (MarkerTickContext.MarkersPassedThisTick.Num() == 0 && bIsMarkerTickRecordValid)
 				{
 					const FMarkerSyncAnimPosition& StartPosition = MarkerTickContext.GetMarkerSyncStartPosition();
@@ -1316,10 +1401,12 @@ void UAnimMontage::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotify
 		}
 		
 		// Update context's position for followers to use.
+		// 更新上下文的位置以供关注者使用。
 		Context.SetAnimationPositionRatio(CurrentTime / GetPlayLength());
 	}
 
 	// Reset record if needed.
+	// 如果需要，重置记录。
 	if (bRecordNeedsResetting && Instance.MarkerTickRecord)
 	{
 		Instance.MarkerTickRecord->Reset();
@@ -1331,6 +1418,7 @@ void UAnimMontage::CollectMarkers()
 	MarkerData.AuthoredSyncMarkers.Reset();
 
 	// We want to make sure anim reference actually contains markers
+	// 我们要确保动画参考实际上包含标记
 	if (SyncGroup != NAME_None)
 	{
 		if (SlotAnimTracks.IsValidIndex(SyncSlotIndex))
@@ -1342,15 +1430,18 @@ void UAnimMontage::CollectMarkers()
 				if (Sequence && Sequence->AuthoredSyncMarkers.Num() > 0)
 				{
 					// @todo this won't work well if you have starttime < end time and it does have negative playrate
+					// @todo 如果你的开始时间<结束时间并且它确实具有负播放率，那么这将无法正常工作
 					for (const auto& Marker : Sequence->AuthoredSyncMarkers)
 					{
 						if (Marker.Time >= Seg.AnimStartTime && Marker.Time <= Seg.AnimEndTime)
 						{
 							const float TotalSegmentLength = (Seg.AnimEndTime - Seg.AnimStartTime)*Seg.AnimPlayRate;
 							// i don't think we can do negative in this case
+							// 我认为在这种情况下我们不能做消极的事情
 							ensure(TotalSegmentLength >= 0.f);
 
 							// now add to the list
+							// 现在添加到列表中
 							for (int32 LoopCount = 0; LoopCount < Seg.LoopingCount; ++LoopCount)
 							{
 								FAnimSyncMarker NewMarker;
@@ -1394,17 +1485,20 @@ void UAnimMontage::InvalidateRecursiveAsset()
 bool UAnimMontage::ContainRecursive(TArray<UAnimCompositeBase*>& CurrentAccumulatedList) 
 {
 	// am I included already?
+	// 我已经包括在内了吗？
 	if (CurrentAccumulatedList.Contains(this))
 	{
 		return true;
 	}
 
 	// otherwise, add myself to it
+	// [翻译失败: otherwise, add myself to it]
 	CurrentAccumulatedList.Add(this);
 
 	for (FSlotAnimationTrack& SlotTrack : SlotAnimTracks)
 	{
 		// otherwise send to animation track
+		// [翻译失败: otherwise send to animation track]
 		if (SlotTrack.AnimTrack.ContainRecursive(CurrentAccumulatedList))
 		{
 			return true;
@@ -1430,6 +1524,7 @@ void UAnimMontage::SetCompositeLength(float InLength)
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // MontageInstance
+// [翻译失败: MontageInstance]
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 FAnimMontageInstance::FAnimMontageInstance()
@@ -1482,6 +1577,7 @@ void FAnimMontageInstance::Play(float InPlayRate)
 	FMontageBlendSettings BlendInSettings;
 
 	// Fill settings from our Montage asset
+	// 从我们的蒙太奇资源填充设置
 	if (Montage)
 	{
 		BlendInSettings.Blend = Montage->BlendIn;
@@ -1498,9 +1594,11 @@ void FAnimMontageInstance::Play(float InPlayRate, const FMontageBlendSettings& B
 	PlayRate = InPlayRate;
 
 	// if this doesn't exist, nothing works
+	// 如果这不存在，则没有任何作用
 	check(Montage);
 	
 	// Inertialization
+	// 惯性化
 	FAlphaBlendArgs BlendInArgs = BlendInSettings.Blend;
 	if (AnimInstance.IsValid() && BlendInSettings.BlendMode == EMontageBlendMode::Inertialization)
 	{
@@ -1512,14 +1610,18 @@ void FAnimMontageInstance::Play(float InPlayRate, const FMontageBlendSettings& B
 		Request.bUseBlendMode = (BlendInArgs.BlendOption != EAlphaBlendOption::Linear) || (BlendInArgs.CustomCurve != nullptr);
 
 		// Request new inertialization for new montage's group name
+		// 为新蒙太奇的组名称请求新的惯性化
 		// If there is an existing inertialization request, we overwrite that here.
+		// 如果存在现有的惯性化请求，我们将在此处覆盖该请求。
 		AnimInstance->RequestMontageInertialization(Montage, Request);
 
 		// When using inertialization, we need to instantly blend in.
+		// 当使用惯性时，我们需要立即融入。
 		BlendInArgs.BlendTime = 0.0f;
 	}
 
 	// set blend option
+	// 设置混合选项
 	float CurrentWeight = Blend.GetBlendedValue();
 	InitializeBlend(FAlphaBlend(BlendInArgs));
 	BlendStartAlpha = Blend.GetAlpha();
@@ -1546,28 +1648,35 @@ void FAnimMontageInstance::Stop(const FMontageBlendSettings& InBlendOutSettings,
 	}
 
 	// overwrite bInterrupted if it hasn't already interrupted
+	// 如果 bInterrupted 尚未中断，则覆盖它
 	// once interrupted, you don't go back to non-interrupted
+	// 一旦被打断，你就不会再回到未被打断的状态
 	if (!bInterrupted && bInterrupt)
 	{
 		bInterrupted = bInterrupt;
 	}
 
 	// if it hasn't stopped, stop now
+	// 如果还没有停止，现在就停止
 	if (IsStopped() == false)
 	{
 		// If we are using Inertial Blend, blend time should be 0 to instantly stop the montage.
+		// 如果我们使用惯性混合，混合时间应为 0 以立即停止蒙太奇。
 		FAlphaBlendArgs BlendOutArgs = InBlendOutSettings.Blend;
 		const bool bShouldInertialize = InBlendOutSettings.BlendMode == EMontageBlendMode::Inertialization;
 		BlendOutArgs.BlendTime = bShouldInertialize ? 0.0f : BlendOutArgs.BlendTime;
 
 		// do not use default Montage->BlendOut 
+		// 不要使用默认的 Montage->BlendOut
 		// depending on situation, the BlendOut time can change 
+		// 根据情况，BlendOut 时间可能会改变
 		InitializeBlend(FAlphaBlend(BlendOutArgs));
 		BlendStartAlpha = Blend.GetAlpha();
 		Blend.SetDesiredValue(0.f);
 		Blend.Update(0.0f);
 
 		// Only change the active blend profile if the montage isn't stopped. This is to prevent pops on a sudden blend profile switch
+		// 仅当蒙太奇未停止时才更改活动混合配置文件。这是为了防止突然切换混合配置文件时出现爆裂声
 		ActiveBlendProfile = InBlendOutSettings.BlendProfile;
 
 		if(Montage)
@@ -1578,16 +1687,19 @@ void FAnimMontageInstance::Stop(const FMontageBlendSettings& InBlendOutSettings,
 				uint32 LastMontageFlushFrame = Inst->GetLastMontageFlushFrame();
 				
 				// Let AnimInstance know we are being stopped.
+				// [翻译失败: Let AnimInstance know we are being stopped.]
 				Inst->OnMontageInstanceStopped(*this);
 				Inst->QueueMontageBlendingOutEvent(FQueuedMontageBlendingOutEvent(Montage, bInterrupted, OnMontageBlendingOutStarted));
 				
 				// UninitializeAnimation() was called for the our animation instance when executing the blending out event(s).
+				// [翻译失败: UninitializeAnimation() was called for the our animation instance when executing the blending out event(s).]
 				if (!Inst->IsInitialized() && MontageCVars::bEarlyOutMontageWhenUninitialized)
 				{
 					return;
 				}
 
 				// Prone to have being free self from trigger montage events.
+				// 容易将自己从触发蒙太奇事件中解放出来。
 				if (LastMontageFlushFrame != Inst->GetLastMontageFlushFrame() && Inst->MontageInstances.Find(SelfPtr) == INDEX_NONE && MontageCVars::bEarlyOutMontageWhenUninitialized)
 				{
 					return;
@@ -1603,6 +1715,7 @@ void FAnimMontageInstance::Stop(const FMontageBlendSettings& InBlendOutSettings,
 					Request.bUseBlendMode = (InBlendOutSettings.Blend.BlendOption != EAlphaBlendOption::Linear) || (InBlendOutSettings.Blend.CustomCurve != nullptr);
 
 					// Send the inertial blend request to the anim instance
+					// 将惯性混合请求发送到动画实例
 					Inst->RequestMontageInertialization(Montage, Request);
 				}
 			}
@@ -1611,25 +1724,37 @@ void FAnimMontageInstance::Stop(const FMontageBlendSettings& InBlendOutSettings,
 	else
 	{
 		// it is already stopped, but new montage blendtime is shorter than what 
+		// 它已经停止了，但是新的蒙太奇混合时间比原来的要短
 		// I'm blending out, that means this needs to readjust blendtime
+		// [翻译失败: I'm blending out, that means this needs to readjust blendtime]
 		// that way we don't accumulate old longer blendtime for newer montage to play
+		// [翻译失败: that way we don't accumulate old longer blendtime for newer montage to play]
 		if (InBlendOutSettings.Blend.BlendTime < Blend.GetBlendTime())
 		{
 			// I don't know if also using inBlendOut is better than
+			// 我不知道同时使用 inBlendOut 是否比
 			// currently set up blend option, but it might be worse to switch between 
+			// 当前设置了混合选项，但在两者之间切换可能会更糟
 			// blending out, but it is possible options in the future
+			// 混合，但未来可能有选择
 			Blend.SetBlendTime(InBlendOutSettings.Blend.BlendTime);
 			BlendStartAlpha = Blend.GetAlpha();
 			// have to call this again to restart blending with new blend time
+			// 必须再次调用它才能以新的混合时间重新开始混合
 			// we don't change blend options
+			// 我们不改变混合选项
 			Blend.SetDesiredValue(0.f);
 		}
 	}
 
 	// if blending time < 0.f
+	// 如果混合时间 < 0.f
 	// set the playing to be false
+	// 设置播放为 false
 	// @todo is this better to be IsComplete? 
+	// @todo IsComplete 更好吗？
 	// or maybe we need this for if somebody sets blend time to be 0.f
+	// 或者如果有人将混合时间设置为 0.f，我们可能需要这个
 	if (Blend.GetBlendTime() <= 0.0f)
 	{
 		bPlaying = false;
@@ -1648,6 +1773,7 @@ void FAnimMontageInstance::Stop(const FAlphaBlend& InBlendOut, bool bInterrupt/*
 	BlendOutSettings.Blend = InBlendOut;
 
 	// Fill our other settings from the montage asset
+	// [翻译失败: Fill our other settings from the montage asset]
 	if (Montage)
 	{
 		BlendOutSettings.BlendMode = Montage->BlendModeOut;
@@ -1665,6 +1791,7 @@ void FAnimMontageInstance::Pause()
 void FAnimMontageInstance::Initialize(class UAnimMontage * InMontage)
 {
 	// Generate unique ID for this instance
+	// [翻译失败: Generate unique ID for this instance]
 	static int32 IncrementInstanceID = 0;
 	InstanceID = IncrementInstanceID++;
 
@@ -1674,6 +1801,7 @@ void FAnimMontageInstance::Initialize(class UAnimMontage * InMontage)
 		SetPosition(0.f);
 		BlendStartAlpha = 0.0f;
 		// initialize Blend
+		// 初始化混合
 		Blend.SetValueRange(0.f, 1.0f);
 		RefreshNextPrevSections();
 
@@ -1689,6 +1817,7 @@ void FAnimMontageInstance::Initialize(class UAnimMontage * InMontage)
 void FAnimMontageInstance::RefreshNextPrevSections()
 {
 	// initialize next section
+	// 初始化下一节
 	if ( Montage->CompositeSections.Num() > 0 )
 	{
 		NextSections.Empty(Montage->CompositeSections.Num());
@@ -1736,9 +1865,11 @@ void FAnimMontageInstance::Terminate()
 	if (AnimInstance.IsValid())
 	{
 		// Must grab a reference on the stack in case "this" is deleted during iteration
+		// 必须获取堆栈上的引用，以防“this”在迭代过程中被删除
 		TWeakObjectPtr<UAnimInstance> AnimInstanceLocal = AnimInstance;
 
 		// End all active State BranchingPoints
+		// 结束所有活动的 State BranchingPoints
 		for (int32 Index = ActiveStateBranchingPoints.Num() - 1; Index >= 0; Index--)
 		{
 			FAnimNotifyEvent& NotifyEvent = ActiveStateBranchingPoints[Index];
@@ -1762,25 +1893,30 @@ void FAnimMontageInstance::Terminate()
 		uint32 LastMontageFlushFrame = Inst->GetLastMontageFlushFrame();
 		
 		// terminating, trigger end
+		// 终止，触发结束
 		AnimInstance->QueueMontageEndedEvent(FQueuedMontageEndedEvent(OldMontage, InstanceID, bInterrupted, OnMontageEnded));
 
 		// UninitializeAnimation() empties the MontagesInstances array thus we need to exit early to not use freed memory.
+		// UninitializeAnimation() 清空 MontagesInstances 数组，因此我们需要提前退出以不使用释放的内存。
 		if (!AnimInstance->IsInitialized() && MontageCVars::bEarlyOutMontageWhenUninitialized)
 		{
 			return;
 		}
 
 		// Prone to have being free self from trigger montage events.
+		// 容易将自己从触发蒙太奇事件中解放出来。
 		if (LastMontageFlushFrame != Inst->GetLastMontageFlushFrame() && Inst->MontageInstances.Find(SelfPtr) == INDEX_NONE && MontageCVars::bEarlyOutMontageWhenUninitialized)
 		{
 			return;
 		}
 		
 		// Clear references to this MontageInstance. Needs to happen before Montage is cleared to nullptr, as TMaps can use that as a key.
+		// [翻译失败: Clear references to this MontageInstance. Needs to happen before Montage is cleared to nullptr, as TMaps can use that as a key.]
 		AnimInstance->ClearMontageInstanceReferences(*this);
 	}
 
 	// clear Blend curve
+	// [翻译失败: clear Blend curve]
 	Blend.SetCustomCurve(nullptr);
 	Blend.SetBlendOption(EAlphaBlendOption::Linear);
 
@@ -1802,6 +1938,7 @@ bool FAnimMontageInstance::JumpToSectionName(FName const & SectionName, bool bEn
 		OnMontagePositionChanged(SectionName);
 		
 		// changed sections, trigger event
+		// 更改部分，触发事件
 		const bool bLooped = Montage->IsValidSectionIndex(MontageSubStepper.GetCurrentSectionIndex()) ? MontageSubStepper.GetCurrentSectionIndex() == SectionID : false;
 		AnimInstance->QueueMontageSectionChangedEvent(FQueuedMontageSectionChangedEvent(Montage, InstanceID, SectionName, bLooped, OnMontageSectionChanged));
 		
@@ -1826,19 +1963,23 @@ bool FAnimMontageInstance::SetNextSectionID(int32 const & SectionID, int32 const
 	bool const bHasValidNextSection = NextSections.IsValidIndex(SectionID);
 
 	// disconnect prev section
+	// 断开上一节
 	if (bHasValidNextSection && (NextSections[SectionID] != INDEX_NONE) && PrevSections.IsValidIndex(NextSections[SectionID]))
 	{
 		PrevSections[NextSections[SectionID]] = INDEX_NONE;
 	}
 
 	// update in-reverse next section
+	// [翻译失败: update in-reverse next section]
 	if (PrevSections.IsValidIndex(NewNextSectionID))
 	{
 		PrevSections[NewNextSectionID] = SectionID;
 	}
 
 	// update next section for the SectionID
+	// [翻译失败: update next section for the SectionID]
 	// NextSection can be invalid
+	// [翻译失败: NextSection can be invalid]
 	if (bHasValidNextSection)
 	{
 		NextSections[SectionID] = NewNextSectionID;
@@ -1917,10 +2058,13 @@ FName FAnimMontageInstance::GetSectionNameFromID(int32 const & SectionID) const
 void FAnimMontageInstance::MontageSync_Follow(struct FAnimMontageInstance* NewLeaderMontageInstance)
 {
 	// Stop following previous leader if any.
+	// [翻译失败: Stop following previous leader if any.]
 	MontageSync_StopFollowing();
 
 	// Follow new leader
+	// 跟随新领导
 	// Note: we don't really care about detecting loops there, there's no real harm in doing so.
+	// 注意：我们并不真正关心检测那里的循环，这样做并没有真正的危害。
 	if (NewLeaderMontageInstance && (NewLeaderMontageInstance != this))
 	{
 		NewLeaderMontageInstance->MontageSyncFollowers.AddUnique(this);
@@ -1963,9 +2107,13 @@ bool FAnimMontageInstance::MontageSync_HasBeenUpdatedThisFrame() const
 void FAnimMontageInstance::MontageSync_PreUpdate()
 {
 	// If we are being synchronized to a leader
+	// 如果我们正在同步到领导者
 	// And our leader HASN'T been updated yet, then we need to synchronize ourselves now.
+	// 而我们的leader还没有更新，那么我们现在需要同步自己。
 	// We're basically synchronizing to last frame's values.
+	// 我们基本上同步到最后一帧的值。
 	// If we want to avoid that frame of lag, a tick prerequisite should be put between the follower and the leader.
+	// 如果我们想避免这种滞后框架，就应该在追随者和领导者之间放置一个勾选先决条件。
 	if (MontageSyncLeader && !MontageSyncLeader->MontageSync_HasBeenUpdatedThisFrame())
 	{
 		MontageSync_PerformSyncToLeader();
@@ -1975,11 +2123,15 @@ void FAnimMontageInstance::MontageSync_PreUpdate()
 void FAnimMontageInstance::MontageSync_PostUpdate()
 {
 	// Tag ourselves as updated this frame.
+	// 将我们自己标记为已更新此框架。
 	MontageSyncUpdateFrameCounter = MontageSync_GetFrameCounter();
 
 	// If we are being synchronized to a leader
+	// 如果我们正在同步到领导者
 	// And our leader HAS already been updated, then we can synchronize ourselves now.
+	// 我们的领导者已经更新了，那么我们现在可以同步了。
 	// To make sure we are in sync before rendering.
+	// [翻译失败: To make sure we are in sync before rendering.]
 	if (MontageSyncLeader && MontageSyncLeader->MontageSync_HasBeenUpdatedThisFrame())
 	{
 		MontageSync_PerformSyncToLeader();
@@ -1991,7 +2143,9 @@ void FAnimMontageInstance::MontageSync_PerformSyncToLeader()
 	if (MontageSyncLeader)
 	{
 		// Sync follower position only if significant error.
+		// [翻译失败: Sync follower position only if significant error.]
 		// We don't want continually 'teleport' it, which could have side-effects and skip AnimNotifies.
+		// [翻译失败: We don't want continually 'teleport' it, which could have side-effects and skip AnimNotifies.]
 		const float LeaderPosition = MontageSyncLeader->GetPosition();
 		const float FollowerPosition = GetPosition();
 		if (FMath::Abs(FollowerPosition - LeaderPosition) > UE_KINDA_SMALL_NUMBER)
@@ -2002,6 +2156,7 @@ void FAnimMontageInstance::MontageSync_PerformSyncToLeader()
 		SetPlayRate(MontageSyncLeader->GetPlayRate());
 
 		// If source and target share same section names, keep them in sync as well. So we properly handle jumps and loops.
+		// [翻译失败: If source and target share same section names, keep them in sync as well. So we properly handle jumps and loops.]
 		const FName LeaderCurrentSectionName = MontageSyncLeader->GetCurrentSection();
 		if ((LeaderCurrentSectionName != NAME_None) && (GetCurrentSection() == LeaderCurrentSectionName))
 		{
@@ -2020,6 +2175,7 @@ void FAnimMontageInstance::UpdateWeight(float DeltaTime)
 		const bool bWasComplete = Blend.IsComplete();
 
 		// update weight
+		// [翻译失败: update weight]
 		Blend.Update(DeltaTime);
 
 		if (Blend.GetBlendTimeRemaining() < 0.0001f)
@@ -2036,7 +2192,9 @@ void FAnimMontageInstance::UpdateWeight(float DeltaTime)
 		}
 
 		// Notify weight is max of previous and current as notify could have come
+		// 通知权重是先前和当前的最大值，因为通知可能已经到来
 		// from any point between now and last tick
+		// 从现在到最后一个报价之间的任何点
 		NotifyWeight = FMath::Max(PreviousWeight, Blend.GetBlendedValue());
 
 		UE_LOG(LogAnimMontage, Verbose, TEXT("UpdateWeight: AnimMontage: %s,  (DesiredWeight:%0.2f, Weight:%0.2f, PreviousWeight: %0.2f)"),
@@ -2066,24 +2224,30 @@ bool FAnimMontageInstance::SimulateAdvance(float DeltaTime, float& InOutPosition
 		if (SubStepResult != EMontageSubStepResult::Moved)
 		{
 			// stop and leave this loop
+			// 停止并离开这个循环
 			break;
 		}
 
 		// Extract Root Motion for this time slice, and accumulate it.
+		// 提取该时间片的根运动并累加。
 		if (bExtractRootMotion)
 		{
 			OutRootMotionParams.Accumulate(Montage->ExtractRootMotionFromTrackRange(PreviousSubStepPosition, InOutPosition, FAnimExtractContext()));
 		}
 
 		// if we reached end of section, and we were not processing a branching point, and no events has messed with out current position..
+		// 如果我们到达部分末尾，并且我们没有处理分支点，并且没有事件扰乱当前位置..
 		// .. Move to next section.
+		// .. 移至下一节。
 		// (this also handles looping, the same as jumping to a different section).
+		// （这也处理循环，与跳转到不同的部分相同）。
 		if (SimulateMontageSubStepper.HasReachedEndOfSection())
 		{
 			const int32 CurrentSectionIndex = SimulateMontageSubStepper.GetCurrentSectionIndex();
 			const bool bPlayingForward = SimulateMontageSubStepper.GetbPlayingForward();
 
 			// Get recent NextSectionIndex in case it's been changed by previous events.
+			// 获取最近的 NextSectionIndex，以防它被之前的事件更改。
 			const int32 RecentNextSectionIndex = bPlayingForward ? NextSections[CurrentSectionIndex] : PrevSections[CurrentSectionIndex];
 			if (RecentNextSectionIndex != INDEX_NONE)
 			{
@@ -2092,17 +2256,20 @@ bool FAnimMontageInstance::SimulateAdvance(float DeltaTime, float& InOutPosition
 				Montage->GetSectionStartAndEndTime(RecentNextSectionIndex, LatestNextSectionStartTime, LatestNextSectionEndTime);
 
 				// Jump to next section's appropriate starting point (start or end).
+				// [翻译失败: Jump to next section's appropriate starting point (start or end).]
 				InOutPosition = bPlayingForward ? LatestNextSectionStartTime : (LatestNextSectionEndTime - UE_KINDA_SMALL_NUMBER); // remain within section
 			}
 			else
 			{
 				// Clamp position to prevent playing past the end of the current section
+				// [翻译失败: Clamp position to prevent playing past the end of the current section]
 				float CurrentSectionStartTime, CurrentSectionEndTime;
 				Montage->GetSectionStartAndEndTime(CurrentSectionIndex, CurrentSectionStartTime, CurrentSectionEndTime);
 
 				InOutPosition = bPlayingForward ? (CurrentSectionEndTime - UE_KINDA_SMALL_NUMBER) : CurrentSectionStartTime;
 
 				// Reached end of last section. Exit.
+				// [翻译失败: Reached end of last section. Exit.]
 				break;
 			}
 		}
@@ -2133,8 +2300,11 @@ EMontageSubStepResult FMontageSubStepper::Advance(float& InOut_P_Original, const
 	bReachedEndOfSection = false;
 
 	// Update Current Section info in case it's needed by the montage's update loop.
+	// [翻译失败: Update Current Section info in case it's needed by the montage's update loop.]
 	// We need to do this even if we're not going to move this frame.
+	// 即使我们不打算移动这个框架，我们也需要这样做。
 	// We could have been moved externally via a SetPosition() call.
+	// 我们可以通过 SetPosition() 调用从外部移动。
 	float PositionInSection;
 	CurrentSectionIndex = Montage->GetAnimCompositeSectionIndexFromPos(InOut_P_Original, PositionInSection);
 	if (!Montage->IsValidSectionIndex(CurrentSectionIndex))
@@ -2146,6 +2316,7 @@ EMontageSubStepResult FMontageSubStepper::Advance(float& InOut_P_Original, const
 	CurrentSectionStartTime = CurrentSection.GetTime();
 
 	// Find end of current section. We only update one section at a time.
+	// 查找当前部分的结尾。我们一次只更新一个部分。
 	CurrentSectionLength = Montage->GetSectionLength(CurrentSectionIndex);
 
 	if (!MontageInstance->bPlaying || FMath::IsNearlyZero(TimeRemaining))
@@ -2154,13 +2325,16 @@ EMontageSubStepResult FMontageSubStepper::Advance(float& InOut_P_Original, const
 	}
 
 	// If we're forcing next position, this is our DeltaMove.
+	// 如果我们强制下一个位置，这就是我们的 DeltaMove。
 	// We don't use play rate and delta time to move.
+	// 我们不使用播放速率和增量时间来移动。
 	if (MontageInstance->ForcedNextToPosition.IsSet())
 	{
 		const float NewPosition = MontageInstance->ForcedNextToPosition.GetValue();
 		if (MontageInstance->ForcedNextFromPosition.IsSet())
 		{
 			// We are modifying the current position so we also need to update the section and pos in section
+			// 我们正在修改当前位置，因此我们还需要更新部分和部分中的位置
 			InOut_P_Original = MontageInstance->ForcedNextFromPosition.GetValue();
 			CurrentSectionIndex = Montage->GetAnimCompositeSectionIndexFromPos(InOut_P_Original, PositionInSection);
 			
@@ -2186,14 +2360,17 @@ EMontageSubStepResult FMontageSubStepper::Advance(float& InOut_P_Original, const
 		}
 
 		// See if we can attempt to use a TimeStretchCurve.
+		// 看看我们是否可以尝试使用 TimeStretchCurve。
 		const bool bAttemptTimeStretchCurve = Montage->TimeStretchCurve.IsValid() && !FMath::IsNearlyEqual(PlayRate, 1.f);
 		if (bAttemptTimeStretchCurve)
 		{
 			// First we need to see if we have valid cached data and if it is up to date.
+			// 首先，我们需要查看是否有有效的缓存数据以及是否是最新的。
 			ConditionallyUpdateTimeStretchCurveCachedData();
 		}
 
 		// If we're not using a TimeStretchCurve, play rate is constant.
+		// [翻译失败: If we're not using a TimeStretchCurve, play rate is constant.]
 		if (!bAttemptTimeStretchCurve || !bHasValidTimeStretchCurveData)
 		{
 			bPlayingForward = (PlayRate > 0.f);
@@ -2203,47 +2380,64 @@ EMontageSubStepResult FMontageSubStepper::Advance(float& InOut_P_Original, const
 		else
 		{
 			// We're using a TimeStretchCurve.
+			// [翻译失败: We're using a TimeStretchCurve.]
 
 			// Find P_Target for current InOut_P_Original.
+			// 查找当前 InOut_P_Original 的 P_Target。
 			// Not that something external could have modified the montage's position.
+			// 并不是说外部因素可以改变蒙太奇的位置。
 			// So we need to refresh our P_Target.
+			// 所以我们需要刷新我们的P_Target。
 			float P_Target = FindMontagePosition_Target(InOut_P_Original);
 
 			// With P_Target, we're in 'play back time' space. 
+			// 有了 P_Target，我们就进入了“回放时间”空间。
 			// So we can add our delta time there directly.
+			// [翻译失败: So we can add our delta time there directly.]
 			P_Target += bPlayingForward ? TimeRemaining : -TimeRemaining;
 			// Make sure we don't exceed our boundaries.
+			// [翻译失败: Make sure we don't exceed our boundaries.]
 			P_Target = TimeStretchCurveInstance.Clamp_P_Target(P_Target);
 
 			// Now we can map this back into 'original' space and find which frame of animation we should play.
+			// [翻译失败: Now we can map this back into 'original' space and find which frame of animation we should play.]
 			const float NewP_Original = FindMontagePosition_Original(P_Target);
 
 			// And from there, derive our DeltaMove and actual PlayRate for this substep.
+			// [翻译失败: And from there, derive our DeltaMove and actual PlayRate for this substep.]
 			DeltaMove = NewP_Original - InOut_P_Original;
 			PlayRate = DeltaMove / TimeRemaining;
 		}
 	}
 
 	// Now look for a branching point. If we have one, stop there first to handle it.
+	// 现在寻找一个分支点。如果我们有的话，就先停下来处理它。
 	// We need to stop at branching points, because they can trigger events that can cause side effects
+	// 我们需要在分支点停止，因为它们可能会触发导致副作用的事件
 	// (jumping to a new position, changing sections, changing play rate, etc).
+	// （跳到新位置、更改部分、更改播放速率等）。
 	if (OutBranchingPointMarkerPtr)
 	{
 		*OutBranchingPointMarkerPtr = Montage->FindFirstBranchingPointMarker(InOut_P_Original, InOut_P_Original + DeltaMove);
 		if (*OutBranchingPointMarkerPtr)
 		{
 			// If we have a branching point, adjust DeltaMove so we stop there.
+			// 如果我们有一个分支点，请调整 DeltaMove，以便我们在那里停止。
 			DeltaMove = (*OutBranchingPointMarkerPtr)->TriggerTime - InOut_P_Original;
 		}
 	}
 
 	// Finally clamp DeltaMove by section markers.
+	// 最后用截面标记夹住 DeltaMove。
 	{
 		const float OldDeltaMove = DeltaMove;
 
 		// Clamp DeltaMove based on move allowed within current section
+		// [翻译失败: Clamp DeltaMove based on move allowed within current section]
 		// We stop at each section marker to evaluate whether we should jump to another section marker or not.
+		// [翻译失败: We stop at each section marker to evaluate whether we should jump to another section marker or not.]
 		// Test is inclusive, so we know if we've reached marker or not.
+		// 测试具有包容性，因此我们知道是否达到了目标。
 		if (bPlayingForward)
 		{
 			const float MaxSectionMove = CurrentSectionLength - PositionInSection;
@@ -2266,19 +2460,25 @@ EMontageSubStepResult FMontageSubStepper::Advance(float& InOut_P_Original, const
 		if (OutBranchingPointMarkerPtr && *OutBranchingPointMarkerPtr && (OldDeltaMove != DeltaMove))
 		{
 			// Clean up the marker since we hit end of a section and overrode the delta move.
+			// 清理标记，因为我们到达了一个部分的末尾并覆盖了增量移动。
 			*OutBranchingPointMarkerPtr = nullptr;
 		}
 	}
 
 	// DeltaMove is now final, see if it has any effect on our position.
+	// DeltaMove 现已最终确定，看看它对我们的位置是否有任何影响。
 	if (FMath::Abs(DeltaMove) > 0.f)
 	{
 		// Note that we don't worry about looping and wrapping around here.
+		// 请注意，我们不担心这里的循环和环绕。
 		// We step per section to simplify code to extract notifies/root motion/etc.
+		// 我们按节逐步简化代码以提取通知/根运动/等。
 		InOut_P_Original += DeltaMove;
 
 		// Decrease RemainingTime with actual time elapsed 
+		// 随着实际时间的流逝而减少 RemainingTime
 		// So we can take more substeps as needed.
+		// 因此我们可以根据需要采取更多的子步骤。
 		const float TimeStep = DeltaMove / PlayRate;
 		ensure(TimeStep >= 0.f);
 		TimeRemaining = FMath::Max(TimeRemaining - TimeStep, 0.f);
@@ -2294,8 +2494,11 @@ EMontageSubStepResult FMontageSubStepper::Advance(float& InOut_P_Original, const
 void FMontageSubStepper::ConditionallyUpdateTimeStretchCurveCachedData()
 {
 	// CombinedPlayRate defines our overall desired play back time, aka T_Target.
+	// CombinedPlayRate 定义了我们所需的总体播放时间，也称为 T_Target。
 	// When using a TimeStretchCurve, this also defines S and U.
+	// 使用 TimeStretchCurve 时，这还定义了 S 和 U。
 	// Only update these if CombinedPlayRate has changed.
+	// 仅当 CombinedPlayRate 发生更改时才更新这些内容。
 	const float CombinedPlayRate = MontageInstance->PlayRate * Montage->RateScale;
 	if (CombinedPlayRate == Cached_CombinedPlayRate)
 	{
@@ -2304,10 +2507,13 @@ void FMontageSubStepper::ConditionallyUpdateTimeStretchCurveCachedData()
 	Cached_CombinedPlayRate = CombinedPlayRate;
 	
 	// We'll set this to true at the end, if we succeed with valid data.
+	// 如果我们成功获得有效数据，我们将在最后将其设置为 true。
 	bHasValidTimeStretchCurveData = false;
 
 	// We should not be using this code path with a 0 play rate
+	// 我们不应该以 0 播放率使用此代码路径
 	// or a 1 play rate. we can use traditional cheaper update without curve.
+	// 或 1 播放率。我们可以使用传统的更便宜的更新，无需曲线。
 	ensure(!FMath::IsNearlyZero(CombinedPlayRate));
 	ensure(!FMath::IsNearlyEqual(CombinedPlayRate, 1.f));
 
@@ -2336,17 +2542,23 @@ float FMontageSubStepper::FindMontagePosition_Target(float In_P_Original)
 	check(bHasValidTimeStretchCurveData);
 
 	// See if our cached version is not up to date.
+	// 查看我们的缓存版本是否是最新的。
 	// Then we need to update it.
+	// 然后我们需要更新它。
 	if (In_P_Original != Cached_P_Original)
 	{
 		// Update cached value.
+		// 更新缓存值。
 		Cached_P_Original = In_P_Original;
 
 		// Update TimeStretchMarkerIndex if needed.
+		// 如果需要，更新 TimeStretchMarkerIndex。
 		// This would happen if we jumped position due to sections or external input.
+		// 如果我们由于部分或外部输入而跳跃位置，就会发生这种情况。
 		TimeStretchCurveInstance.UpdateMarkerIndexForPosition(TimeStretchMarkerIndex, Cached_P_Original, TimeStretchCurveInstance.GetMarkers_Original());
 
 		// With an accurate TimeStretchMarkerIndex, we can map P_Original to P_Target
+		// 有了准确的 TimeStretchMarkerIndex，我们就可以将 P_Original 映射到 P_Target
 		Cached_P_Target = TimeStretchCurveInstance.Convert_P_Original_To_Target(TimeStretchMarkerIndex, Cached_P_Original);
 	}
 
@@ -2358,17 +2570,23 @@ float FMontageSubStepper::FindMontagePosition_Original(float In_P_Target)
 	check(bHasValidTimeStretchCurveData);
 
 	// See if our cached version is not up to date.
+	// 查看我们的缓存版本是否是最新的。
 	// Then we need to update it.
+	// 然后我们需要更新它。
 	if (In_P_Target != Cached_P_Target)
 	{
 		// Update cached value.
+		// 更新缓存值。
 		Cached_P_Target = In_P_Target;
 
 		// Update TimeStretchMarkerIndex if needed.
+		// 如果需要，更新 TimeStretchMarkerIndex。
 		// This would happen if we jumped position due to sections or external input.
+		// 如果我们由于部分或外部输入而跳跃位置，就会发生这种情况。
 		TimeStretchCurveInstance.UpdateMarkerIndexForPosition(TimeStretchMarkerIndex, Cached_P_Target, TimeStretchCurveInstance.GetMarkers_Target());
 
 		// With an accurate TimeStretchMarkerIndex, we can map P_Original to P_Target
+		// 有了准确的 TimeStretchMarkerIndex，我们就可以将 P_Original 映射到 P_Target
 		Cached_P_Original = TimeStretchCurveInstance.Convert_P_Target_To_Original(TimeStretchMarkerIndex, Cached_P_Target);
 	}
 
@@ -2415,18 +2633,22 @@ float FMontageSubStepper::GetCurrSectionEndPosition_Target() const
 float FMontageSubStepper::GetRemainingPlayTimeToSectionEnd(const float In_P_Original)
 {
 	// If our current play rate is zero, we can't predict our remaining play time.
+	// 如果我们当前的游戏率为零，我们就无法预测剩余的游戏时间。
 	if (FMath::IsNearlyZero(PlayRate))
 	{
 		return UE_BIG_NUMBER;
 	}
 
 	// Find position in montage where current section ends.
+	// 查找蒙太奇中当前部分结束的位置。
 	const float CurrSectionEnd_Original = bPlayingForward
 		? (CurrentSectionStartTime + CurrentSectionLength)
 		: CurrentSectionStartTime;
 
 	// If we have no TimeStretchCurve, it's pretty straight forward.
+	// 如果我们没有 TimeStretchCurve，那就非常简单了。
 	// Assume constant play rate.
+	// 假设播放速率恒定。
 	if (TimeStretchMarkerIndex == INDEX_NONE)
 	{
 		const float DeltaPositionToEnd = CurrSectionEnd_Original - In_P_Original;
@@ -2435,13 +2657,16 @@ float FMontageSubStepper::GetRemainingPlayTimeToSectionEnd(const float In_P_Orig
 	}
 
 	// We're using a TimeStretchCurve.
+	// 我们正在使用 TimeStretchCurve。
 	check(bHasValidTimeStretchCurveData);
 
 	// Find our position in 'target' space. This is in play back time.
+	// 找到我们在“目标”空间中的位置。这是回放时间。
 	const float P_Target = FindMontagePosition_Target(In_P_Original);
 	if (bPlayingForward)
 	{
 		// Find CurrSectionEnd_Target.
+		// 找到 CurrSectionEnd_Target。
 		if (FMath::IsNearlyEqual(CurrSectionEnd_Original, TimeStretchCurveInstance.Get_T_Original()))
 		{
 			const float RemainingPlayTime = (TimeStretchCurveInstance.Get_T_Target() - P_Target);
@@ -2455,9 +2680,11 @@ float FMontageSubStepper::GetRemainingPlayTimeToSectionEnd(const float In_P_Orig
 		}
 	}
 	// Playing Backwards
+	// [翻译失败: Playing Backwards]
 	else
 	{
 		// Find CurrSectionEnd_Target.
+		// [翻译失败: Find CurrSectionEnd_Target.]
 		if (FMath::IsNearlyEqual(CurrSectionEnd_Original, 0.f))
 		{
 			const float RemainingPlayTime = P_Target;
@@ -2476,19 +2703,25 @@ float FMontageSubStepper::GetRemainingPlayTimeToSectionEnd(const float In_P_Orig
 void FAnimMontageInstance::EditorOnly_PreAdvance()
 {
 	// this is necessary and it is not easy to do outside of here
+	// [翻译失败: this is necessary and it is not easy to do outside of here]
 	// since undo also can change composite sections
+	// [翻译失败: since undo also can change composite sections]
 	if ((Montage->CompositeSections.Num() != NextSections.Num()) || (Montage->CompositeSections.Num() != PrevSections.Num()))
 	{
 		RefreshNextPrevSections();
 	}
 
 	// Auto refresh this in editor to catch changes being made to AnimNotifies.
+	// [翻译失败: Auto refresh this in editor to catch changes being made to AnimNotifies.]
 	// RefreshCacheData should handle this but I'm not 100% sure it will cover all existing cases
+	// RefreshCacheData 应该处理这个问题，但我不能 100% 确定它会涵盖所有现有情况
 	Montage->RefreshBranchingPointMarkers();
 
 	// Bake TimeStretchCurve in editor to catch any edits made to source curve.
+	// 在编辑器中烘焙 TimeStretchCurve 以捕获对源曲线所做的任何编辑。
 	Montage->BakeTimeStretchCurve();
 	// Clear cached data, so it can be recached from updated time stretch curve.
+	// 清除缓存数据，以便可以从更新的时间拉伸曲线重新缓存数据。
 	MontageSubStepper.ClearCachedData();
 }
 #endif
@@ -2501,8 +2734,11 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 	if (IsValid())
 	{
 		// with custom curves, we can't just filter by weight
+		// 使用自定义曲线，我们不能只按重量过滤
 		// also if you have custom curve with longer 0, you'll likely to pause montage during that blending time
+		// 另外，如果您有更长 0 的自定义曲线，您可能会在混合时间内暂停蒙太奇
 		// I think that is a bug. It still should move, the weight might come back later. 
+		// [翻译失败: I think that is a bug. It still should move, the weight might come back later.]
 		if (bPlaying)
 		{
 			const bool bExtractRootMotion = (OutRootMotionParams != nullptr) && Montage->HasRootMotion();
@@ -2532,6 +2768,7 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 			}
 
 			// Gather active anim state notifies if DeltaTime == 0 (happens when TimeDilation is 0.f), so these are not prematurely ended
+			// [翻译失败: Gather active anim state notifies if DeltaTime == 0 (happens when TimeDilation is 0.f), so these are not prematurely ended]
 			if (DeltaTime == 0.f)
 			{
 				HandleEvents(Position, Position, nullptr);
@@ -2549,6 +2786,7 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 					|| SubStepResult == EMontageSubStepResult::InvalidMontage)
 				{
 					// stop and leave this loop
+					// 停止并离开这个循环
 					Stop(FAlphaBlend(Montage->BlendOut, Montage->BlendOut.GetBlendTime() * DefaultBlendTimeMultiplier), false);
 					break;
 				}
@@ -2558,8 +2796,11 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 				const bool bPlayingForward = MontageSubStepper.GetbPlayingForward();
 
 				// If current section is last one, check to trigger a blend out and if it hasn't stopped yet, see if we should stop
+				// 如果当前部分是最后一个，请检查是否触发混合，如果尚未停止，看看我们是否应该停止
 				// We check this even if we haven't moved, in case our position was different from last frame.
+				// 即使我们没有移动，我们也会检查这一点，以防我们的位置与上一帧不同。
 				// (Code triggered a position jump).
+				// （代码触发了位置跳转）。
 				if (!IsStopped() && bEnableAutoBlendOut)
 				{
 					const int32 CurrentSectionIndex = MontageSubStepper.GetCurrentSectionIndex();
@@ -2574,6 +2815,7 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 						const float BlendOutTriggerTime = bCustomBlendOutTriggerTime ? Montage->BlendOutTriggerTime : DefaultBlendOutTime;
 
 						// ... trigger blend out if within blend out time window.
+						// ...如果在混合时间窗口内，则触发混合。
 						if (PlayTimeToEnd <= FMath::Max<float>(BlendOutTriggerTime, UE_KINDA_SMALL_NUMBER))
 						{
 							const float BlendOutTime = bCustomBlendOutTriggerTime ? DefaultBlendOutTime : PlayTimeToEnd;
@@ -2591,13 +2833,16 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 					}
 
 					// Extract Root Motion for this time slice, and accumulate it.
+					// 提取该时间片的根运动并累加。
 					// IsRootMotionDisabled() can be changed by AnimNotifyState BranchingPoints while advancing, so it needs to be checked here.
+					// IsRootMotionDisabled()在前进时可以被AnimNotifyState BranchingPoints改变，所以需要在这里检查。
 					if (bExtractRootMotion && AnimInstance.IsValid() && !IsRootMotionDisabled())
 					{
 						const FTransform RootMotion = Montage->ExtractRootMotionFromTrackRange(PreviousSubStepPosition, Position, FAnimExtractContext());
 						if (bBlendRootMotion)
 						{
 							// Defer blending in our root motion until after we get our slot weight updated
+							// 推迟根运动的混合，直到我们更新插槽权重之后
 							const float Weight = Blend.GetBlendedValue();
 							AnimInstance.Get()->QueueRootMotionBlend(RootMotion, Montage->SlotAnimTracks[0].SlotName, Weight);
 						}
@@ -2615,22 +2860,29 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 				}
 
 				// Delegate has to be called last in this loop
+				// 必须在此循环中最后调用委托
 				// so that if this changes position, the new position will be applied in the next loop
+				// 这样，如果位置发生变化，新位置将应用于下一个循环
 				// first need to have event handler to handle it
+				// 首先需要有事件处理程序来处理它
 				// Save off position before triggering events, in case they cause a jump to another position
+				// 在触发事件之前保存关闭位置，以防它们导致跳转到另一个位置
 				const float PositionBeforeFiringEvents = Position;
 
 				if(bHaveMoved)
 				{
 					// Save position before firing events.
+					// 在触发事件之前保存位置。
 					if (!bInterrupted)
 					{
 						// Must grab a reference on the stack in case "this" is deleted during iteration
+						// 必须获取堆栈上的引用，以防“this”在迭代过程中被删除
 						TWeakObjectPtr<UAnimInstance> AnimInstanceLocal = AnimInstance;
 
 						HandleEvents(PreviousSubStepPosition, Position, BranchingPointMarker);
 
 						// Break out if we no longer have active montage instances. This may happen when we call UninitializeAnimation from a notify
+						// 如果我们不再有活动的蒙太奇实例，请中断。当我们从通知中调用 UninitializeAnimation 时可能会发生这种情况
 						if (AnimInstanceLocal.IsValid() && AnimInstanceLocal->MontageInstances.Num() == 0)
 						{
 							return;
@@ -2639,15 +2891,21 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 				}
 
 				// Note that we have to check this even if there is no time remaining, in order to correctly handle loops
+				// 请注意，即使没有剩余时间，我们也必须检查这一点，以便正确处理循环
 				// CVar allows reverting to old behavior, in case a project relies on it
+				// CVar 允许恢复到旧的行为，以防项目依赖它
 				if (MontageCVars::bEndSectionRequiresTimeRemaining == false || MontageSubStepper.HasTimeRemaining())
 				{
 					// if we reached end of section, and we were not processing a branching point, and no events has messed with out current position..
+					// 如果我们到达部分末尾，并且我们没有处理分支点，并且没有事件扰乱当前位置..
 					// .. Move to next section.
+					// .. 移至下一节。
 					// (this also handles looping, the same as jumping to a different section).
+					// （这也处理循环，与跳转到不同的部分相同）。
 					if (MontageSubStepper.HasReachedEndOfSection() && !BranchingPointMarker && (PositionBeforeFiringEvents == Position))
 					{
 						// Get recent NextSectionIndex in case it's been changed by previous events.
+						// 获取最近的 NextSectionIndex，以防它被之前的事件更改。
 						const int32 CurrentSectionIndex = MontageSubStepper.GetCurrentSectionIndex();
 						const int32 RecentNextSectionIndex = bPlayingForward ? NextSections[CurrentSectionIndex] : PrevSections[CurrentSectionIndex];
 						const float EndOffset = UE_KINDA_SMALL_NUMBER / 2.f; //KINDA_SMALL_NUMBER/2 because we use KINDA_SMALL_NUMBER to offset notifies for triggering and SMALL_NUMBER is too small
@@ -2658,6 +2916,7 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 							Montage->GetSectionStartAndEndTime(RecentNextSectionIndex, LatestNextSectionStartTime, LatestNextSectionEndTime);
 
 							// Jump to next section's appropriate starting point (start or end).
+							// 跳转到下一部分的适当起点（开始或结束）。
 							Position = bPlayingForward ? LatestNextSectionStartTime : (LatestNextSectionEndTime - EndOffset);
 							SubStepResult = EMontageSubStepResult::Moved;
 							
@@ -2667,9 +2926,12 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 						else
 						{
 							// If there is no next section and we've reached the end of this one, exit
+							// 如果没有下一节并且我们已到达本节的末尾，请退出
 
 							// Stop playing and clamp position to prevent playing animation data past the end of the current section
+							// [翻译失败: Stop playing and clamp position to prevent playing animation data past the end of the current section]
 							// We already called Stop above if needed, like if bEnableAutoBlendOut is true
+							// [翻译失败: We already called Stop above if needed, like if bEnableAutoBlendOut is true]
 							bPlaying = false;
 
 							float CurrentSectionStartTime, CurrentSectionEndTime;
@@ -2686,11 +2948,13 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 				if (SubStepResult == EMontageSubStepResult::NotMoved)
 				{
 					// If it hasn't moved, there is nothing much to do but weight update
+					// 如果它没有移动，除了权重更新之外没有什么可做的
 					break;
 				}
 			}
 		
 			// if we had a ForcedNextPosition set, reset it.
+			// 如果我们设置了 ForcedNextPosition，请重置它。
 			ForcedNextToPosition.Reset();
 			ForcedNextFromPosition.Reset();
 		}
@@ -2704,9 +2968,11 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 #endif
 
 	// If this Montage has no weight, it should be terminated.
+	// 如果这个蒙太奇没有重量，它应该被终止。
 	if (IsStopped() && (Blend.IsComplete()))
 	{
 		// nothing else to do
+		// 没有别的事可做
 		Terminate();
 		return;
 	}
@@ -2716,9 +2982,11 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 		SCOPE_CYCLE_COUNTER(STAT_AnimMontageInstance_TickBranchPoints);
 
 		// Must grab a reference on the stack in case "this" is deleted during iteration
+		// 必须获取堆栈上的引用，以防“this”在迭代过程中被删除
 		TWeakObjectPtr<UAnimInstance> AnimInstanceLocal = AnimInstance;
 
 		// Tick all active state branching points
+		// 勾选所有活动状态分支点
 		for (int32 Index = 0; Index < ActiveStateBranchingPoints.Num(); Index++)
 		{
 			FAnimNotifyEvent& NotifyEvent = ActiveStateBranchingPoints[Index];
@@ -2728,6 +2996,7 @@ void FAnimMontageInstance::Advance(float DeltaTime, struct FRootMotionMovementPa
 				NotifyEvent.NotifyStateClass->BranchingPointNotifyTick(BranchingPointNotifyPayload, DeltaTime);
 
 				// Break out if we no longer have active montage instances. This may happen when we call UninitializeAnimation from a notify
+				// 如果我们不再有活动的蒙太奇实例，请中断。当我们从通知中调用 UninitializeAnimation 时可能会发生这种情况
 				if (!ValidateInstanceAfterNotifyState(AnimInstanceLocal, NotifyEvent.NotifyStateClass))
 				{
 					return;
@@ -2742,37 +3011,46 @@ void FAnimMontageInstance::HandleEvents(float PreviousTrackPos, float CurrentTra
 	SCOPE_CYCLE_COUNTER(STAT_AnimMontageInstance_HandleEvents);
 
 	// Skip notifies and branching points if montage has been interrupted.
+	// 如果蒙太奇被中断，则跳过通知和分支点。
 	if (bInterrupted)
 	{
 		return;
 	}
 
 	// Now get active Notifies based on how it advanced
+	// 现在根据进展情况激活通知
 	if (AnimInstance.IsValid())
 	{
 		FAnimTickRecord TickRecord;
 
 		// Used to ensure all gathered notifies know the current montage time at the point they were queued.
+		// 用于确保所有收集的通知都知道它们排队时的当前剪辑时间。
 		TickRecord.TimeAccumulator = &CurrentTrackPos;
 		
 		// Add instance ID to context to differentiate notifies between different instances of the same montage
+		// 将实例 ID 添加到上下文以区分同一蒙太奇的不同实例之间的通知
 		TickRecord.MakeContextData<UE::Anim::FAnimNotifyMontageInstanceContext>(InstanceID);
 
 		FAnimNotifyContext NotifyContext(TickRecord);
 
 		// Queue all notifies fired from the AnimMontage's Notify Track.
+		// 对从 AnimMontage 的通知轨道发出的所有通知进行排队。
 		{
 			// We already break up AnimMontage update to handle looping, so we guarantee that PreviousPos and CurrentPos are contiguous.
+			// 我们已经分解了 AnimMontage 更新来处理循环，因此我们保证 PreviousPos 和 CurrentPos 是连续的。
 			Montage->GetAnimNotifiesFromDeltaPositions(PreviousTrackPos, CurrentTrackPos, NotifyContext);
 
 			// For Montage only, remove notifies marked as 'branching points'. They are not queued and are handled separately.
+			// [翻译失败: For Montage only, remove notifies marked as 'branching points'. They are not queued and are handled separately.]
 			Montage->FilterOutNotifyBranchingPoints(NotifyContext.ActiveNotifies);
 
 			// Queue active non-'branching point' notifies.
+			// [翻译失败: Queue active non-'branching point' notifies.]
 			AnimInstance->NotifyQueue.AddAnimNotifies(NotifyContext.ActiveNotifies, NotifyWeight);
 		}
 
 		// Queue all notifies fired by all the animations within the AnimMontage. We'll do this for all slot tracks.
+		// 将 AnimMontage 中所有动画触发的所有通知排队。我们将对所有老虎机轨道执行此操作。
 		{
 			TMap<FName, TArray<FAnimNotifyEventReference>> NotifyMap;
 			
@@ -2781,6 +3059,7 @@ void FAnimMontageInstance::HandleEvents(float PreviousTrackPos, float CurrentTra
 				TArray<FAnimNotifyEventReference>& CurrentSlotNotifies = NotifyMap.FindOrAdd(SlotTrack->SlotName);
 
 				// Queue active notifies from current slot.
+				// [翻译失败: Queue active notifies from current slot.]
 				{
 					NotifyContext.ActiveNotifies.Reset();
 					SlotTrack->AnimTrack.GetAnimNotifiesFromTrackPositions(PreviousTrackPos, CurrentTrackPos, NotifyContext);
@@ -2789,19 +3068,24 @@ void FAnimMontageInstance::HandleEvents(float PreviousTrackPos, float CurrentTra
 			}
 
 			// Queue active unfiltered notifies from slot tracks.
+			// [翻译失败: Queue active unfiltered notifies from slot tracks.]
 			AnimInstance->NotifyQueue.AddAnimNotifies(NotifyMap, NotifyWeight);	
 		}
 	}
 
 	// Update active state branching points, before we handle the immediate tick marker.
+	// [翻译失败: Update active state branching points, before we handle the immediate tick marker.]
 	// In case our position jumped on the timeline, we need to begin/end state branching points accordingly.
+	// 如果我们的位置在时间线上跳跃，我们需要相应地开始/结束状态分支点。
 	// If this fails, this montage instance is no longer valid. Return to avoid crash.
+	// 如果失败，则该蒙太奇实例不再有效。返回以避免崩溃。
 	if (!UpdateActiveStateBranchingPoints(CurrentTrackPos))
 	{
 		return;
 	}
 
 	// Trigger ImmediateTickMarker event if we have one
+	// 如果有一个，则触发 ImmediateTickMarker 事件
 	if (BranchingPointMarker)
 	{
 		BranchingPointEventHandler(BranchingPointMarker);
@@ -2815,9 +3099,11 @@ bool FAnimMontageInstance::UpdateActiveStateBranchingPoints(float CurrentTrackPo
 	if (AnimInstance.IsValid() && NumStateBranchingPoints > 0)
 	{
 		// Must grab a reference on the stack in case "this" is deleted during iteration
+		// 必须获取堆栈上的引用，以防“this”在迭代过程中被删除
 		TWeakObjectPtr<UAnimInstance> AnimInstanceLocal = AnimInstance;
 
 		// End no longer active events first. We want this to happen before we trigger NotifyBegin on newly active events.
+		// 首先结束不再活动的事件。我们希望在对新活动事件触发 NotifyBegin 之前发生这种情况。
 		for (int32 Index = ActiveStateBranchingPoints.Num() - 1; Index >= 0; Index--)
 		{
 			FAnimNotifyEvent& NotifyEvent = ActiveStateBranchingPoints[Index];
@@ -2835,6 +3121,7 @@ bool FAnimMontageInstance::UpdateActiveStateBranchingPoints(float CurrentTrackPo
 					NotifyEvent.NotifyStateClass->BranchingPointNotifyEnd(BranchingPointNotifyPayload);
 
 					// Break out if we no longer have active montage instances. This may happen when we call UninitializeAnimation from a notify
+					// 如果我们不再有活动的蒙太奇实例，请中断。当我们从通知中调用 UninitializeAnimation 时可能会发生这种情况
 					if (!ValidateInstanceAfterNotifyState(AnimInstanceLocal, NotifyEvent.NotifyStateClass))
 					{
 						return false;
@@ -2846,6 +3133,7 @@ bool FAnimMontageInstance::UpdateActiveStateBranchingPoints(float CurrentTrackPo
 		}
 
 		// Then, begin newly active notifies
+		// 然后，开始新的活动通知
 		for (int32 Index = 0; Index < NumStateBranchingPoints; Index++)
 		{
 			const int32 NotifyIndex = Montage->BranchingPointStateNotifyIndices[Index];
@@ -2864,6 +3152,7 @@ bool FAnimMontageInstance::UpdateActiveStateBranchingPoints(float CurrentTrackPo
 					NotifyEvent.NotifyStateClass->BranchingPointNotifyBegin(BranchingPointNotifyPayload);
 
 					// Break out if we no longer have active montage instances. This may happen when we call UninitializeAnimation from a notify
+					// 如果我们不再有活动的蒙太奇实例，请中断。当我们从通知中调用 UninitializeAnimation 时可能会发生这种情况
 					if (!ValidateInstanceAfterNotifyState(AnimInstanceLocal, NotifyEvent.NotifyStateClass))
 					{
 						return false;
@@ -2883,12 +3172,14 @@ void FAnimMontageInstance::BranchingPointEventHandler(const FBranchingPointMarke
 	if (AnimInstance.IsValid() && Montage && BranchingPointMarker)
 	{
 		// Must grab a reference on the stack in case "this" is deleted during iteration
+		// 必须获取堆栈上的引用，以防“this”在迭代过程中被删除
 		TWeakObjectPtr<UAnimInstance> AnimInstanceLocal = AnimInstance;
 
 		FAnimNotifyEvent* NotifyEvent = (BranchingPointMarker->NotifyIndex < Montage->Notifies.Num()) ? &Montage->Notifies[BranchingPointMarker->NotifyIndex] : nullptr;
 		if (NotifyEvent)
 		{
 			// Handle backwards compatibility with older BranchingPoints.
+			// 处理与旧分支点的向后兼容性。
 			if (NotifyEvent->bConvertedFromBranchingPoint && (NotifyEvent->NotifyName != NAME_None))
 			{
 				FString FuncName = FString::Printf(TEXT("MontageBranchingPoint_%s"), *NotifyEvent->NotifyName.ToString());
@@ -2900,6 +3191,7 @@ void FAnimMontageInstance::BranchingPointEventHandler(const FBranchingPointMarke
 					AnimInstance.Get()->ProcessEvent(Function, nullptr);
 				}
 				// In case older BranchingPoint has been re-implemented as a new Custom Notify, this is if BranchingPoint function hasn't been found.
+				// [翻译失败: In case older BranchingPoint has been re-implemented as a new Custom Notify, this is if BranchingPoint function hasn't been found.]
 				else
 				{
 					AnimInstance.Get()->TriggerSingleAnimNotify(NotifyEvent);
@@ -2935,14 +3227,17 @@ void FAnimMontageInstance::BranchingPointEventHandler(const FBranchingPointMarke
 				}
 			}
 			// Non state notify with a native notify class
+			// [翻译失败: Non state notify with a native notify class]
 			else if	(NotifyEvent->Notify != nullptr)
 			{
 				// Implemented notify: just call Notify. UAnimNotify will forward this to the event which will do the work.
+				// [翻译失败: Implemented notify: just call Notify. UAnimNotify will forward this to the event which will do the work.]
 				FBranchingPointNotifyPayload BranchingPointNotifyPayload(AnimInstance->GetSkelMeshComponent(), Montage, NotifyEvent, InstanceID);
 				TRACE_ANIM_NOTIFY(AnimInstance.Get(), *NotifyEvent, Event);
 				NotifyEvent->Notify->BranchingPointNotify(BranchingPointNotifyPayload);
 			}
 			// Try to match a notify function by name.
+			// 尝试按名称匹配通知函数。
 			else
 			{
 				AnimInstance.Get()->TriggerSingleAnimNotify(NotifyEvent);
@@ -2987,6 +3282,7 @@ UAnimMontage* FAnimMontageInstance::SetSequencerMontagePosition(FName SlotName, 
 				AnimInst->Montage_Play(PlayingMontage, 1.f, EMontagePlayReturnType::MontageLength, 0.f, false);
 				MontageInstanceToUpdate = AnimInst->GetActiveInstanceForMontage(PlayingMontage);
 				// this is sequencer set up, we disable auto blend out
+				// 这是音序器设置，我们禁用自动混合
 				if (MontageInstanceToUpdate)
 				{
 					MontageInstanceToUpdate->bEnableAutoBlendOut = false;
@@ -3000,6 +3296,7 @@ UAnimMontage* FAnimMontageInstance::SetSequencerMontagePosition(FName SlotName, 
 			InOutInstanceId = MontageInstanceToUpdate->GetInstanceID();
 
 			// ensure full weighting to this instance
+			// 确保对该实例进行充分加权
 			MontageInstanceToUpdate->Blend.SetDesiredValue(Weight);
 			MontageInstanceToUpdate->Blend.SetAlpha(Weight);
 			MontageInstanceToUpdate->BlendStartAlpha = MontageInstanceToUpdate->Blend.GetAlpha();
@@ -3036,8 +3333,10 @@ UAnimMontage* FAnimMontageInstance::PreviewSequencerMontagePosition(FName SlotNa
 		if (PlayingMontage)
 		{
 			// we have to get it again in case if this is new
+			// 如果这是新的，我们必须再次获取它
 			MontageInstanceToUpdate = AnimInst->GetMontageInstanceForID(InOutInstanceId);
 			// since we don't advance montage in the tick, we manually have to handle notifies
+			// 由于我们不在勾选中提前蒙太奇，因此我们必须手动处理通知
 			MontageInstanceToUpdate->HandleEvents(InFromPosition, InToPosition, nullptr);
 			if (!bFireNotifies)
 			{
@@ -3057,6 +3356,7 @@ UAnimMontage* UAnimMontage::CreateSlotAnimationAsDynamicMontage(UAnimSequenceBas
 	FMontageBlendSettings BlendOutSettings(BlendOutTime);
 
 	// InTimeToStartMontageAt is an unused argument. Keeping it to avoid changing public api.
+	// InTimeToStartMontageAt 是一个未使用的参数。保留它以避免更改公共 api。
 	return CreateSlotAnimationAsDynamicMontage_WithBlendSettings(Asset, SlotNodeName, BlendInSettings, BlendOutSettings, InPlayRate, LoopCount, BlendOutTriggerTime);
 }
 
@@ -3087,6 +3387,7 @@ UAnimMontage* UAnimMontage::CreateSlotAnimationAsDynamicMontage_WithFractionalLo
 	if (LoopCount < 1.0)
 	{
 		// Need to shorten the existing segment
+		// 需要缩短现有段
 		OriginalSegment.AnimEndTime = Asset->GetPlayLength() * LoopCount;
 	}
 	else
@@ -3095,9 +3396,11 @@ UAnimMontage* UAnimMontage::CreateSlotAnimationAsDynamicMontage_WithFractionalLo
 		float FractionalLoop = LoopCount - NumFullLoops;
 
 		// Need to lengthen the existing segment
+		// 需要延长现有段
 		OriginalSegment.LoopingCount = NumFullLoops;
 
 		// Need to add a new fractional segment onto the end of the montage
+		// 需要在蒙太奇的末尾添加一个新的分数段
 		FAnimSegment& NewSegment = SlotTrack.AnimTrack.AnimSegments.AddDefaulted_GetRef();
 		NewSegment.SetAnimReference(Asset, true);
 
@@ -3115,10 +3418,12 @@ UAnimMontage* UAnimMontage::CreateSlotAnimationAsDynamicMontage_WithFractionalLo
 UAnimMontage* UAnimMontage::CreateSlotAnimationAsDynamicMontage_WithBlendSettings(UAnimSequenceBase* Asset, FName SlotNodeName, const FMontageBlendSettings& BlendInSettings, const FMontageBlendSettings& BlendOutSettings, float InPlayRate, int32 LoopCount, float InBlendOutTriggerTime)
 {
 	// create temporary montage and play
+	// [翻译失败: create temporary montage and play]
 	bool bValidAsset = Asset && !Asset->IsA(UAnimMontage::StaticClass());
 	if (!bValidAsset)
 	{
 		// user warning
+		// 用户警告
 		UE_LOG(LogAnimMontage, Warning, TEXT("PlaySlotAnimationAsDynamicMontage: Invalid input asset(%s). If Montage, please use Montage_Play"), *GetNameSafe(Asset));
 		return nullptr;
 	}
@@ -3126,6 +3431,7 @@ UAnimMontage* UAnimMontage::CreateSlotAnimationAsDynamicMontage_WithBlendSetting
 	if (SlotNodeName == NAME_None)
 	{
 		// user warning
+		// 用户警告
 		UE_LOG(LogAnimMontage, Warning, TEXT("SlotNode Name is required. Make sure to add Slot Node in your anim graph and name it."));
 		return nullptr;
 	}
@@ -3138,10 +3444,12 @@ UAnimMontage* UAnimMontage::CreateSlotAnimationAsDynamicMontage_WithBlendSetting
 	}
 
 	// now play
+	// 现在玩
 	UAnimMontage* NewMontage = NewObject<UAnimMontage>();
 	NewMontage->SetSkeleton(AssetSkeleton);
 
 	// add new track
+	// 添加新曲目
 	FSlotAnimationTrack& NewTrack = NewMontage->SlotAnimTracks[0];
 	NewTrack.SlotName = SlotNodeName;
 	FAnimSegment NewSegment;
@@ -3158,6 +3466,7 @@ UAnimMontage* UAnimMontage::CreateSlotAnimationAsDynamicMontage_WithBlendSetting
 	NewSection.SetTime(0.0f);
 
 	// add new section
+	// 添加新部分
 	NewMontage->CompositeSections.Add(NewSection);
 
 	NewMontage->BlendIn = FAlphaBlend(BlendInSettings.Blend);
@@ -3178,6 +3487,7 @@ UAnimMontage* UAnimMontage::CreateSlotAnimationAsDynamicMontage_WithBlendSetting
 bool FAnimMontageInstance::CanUseMarkerSync() const
 {
 	// for now we only allow non-full weight and when blending out
+	// [翻译失败: for now we only allow non-full weight and when blending out]
 	return SyncGroupName != NAME_None && IsStopped() && Blend.IsComplete() == false;
 }
 
@@ -3187,6 +3497,7 @@ void UAnimMontage::BakeTimeStretchCurve()
 	TimeStretchCurve.Reset();
 
 	// See if Montage is hosting a curve named 'TimeStretchCurveName'
+	// [翻译失败: See if Montage is hosting a curve named 'TimeStretchCurveName']
 	const FFloatCurve* TimeStretchFloatCurve = nullptr;
 	if (ShouldDataModelBeValid())
 	{		
@@ -3208,6 +3519,7 @@ void UAnimMontage::PopulateWithExistingModel(TScriptInterface<IAnimationDataMode
 	Super::PopulateWithExistingModel(ExistingDataModel);
 	
 	// Set composite length while model is being populated
+	// [翻译失败: Set composite length while model is being populated]
 	const float CurrentCalculatedLength = CalculateSequenceLength();
 	SetCompositeLength(CurrentCalculatedLength);
 }

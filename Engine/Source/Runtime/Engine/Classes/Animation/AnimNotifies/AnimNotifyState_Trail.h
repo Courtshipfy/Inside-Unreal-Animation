@@ -21,6 +21,7 @@ class UAnimNotifyState_Trail : public UAnimNotifyState
 	GENERATED_UCLASS_BODY()
 	
 	/** The particle system to use for this trail. */
+	/** 用于此轨迹的粒子系统。 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Trail)
 	TObjectPtr<UParticleSystem> PSTemplate;
 
@@ -32,10 +33,12 @@ class UAnimNotifyState_Trail : public UAnimNotifyState
 	ENGINE_API virtual float GetCurveWidth(USkeletalMeshComponent* MeshComp) const;
 
 	/** Name of the first socket defining this trail. */
+	/** 定义此跟踪的第一个套接字的名称。 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Trail)
 	FName FirstSocketName;
 
 	/** Name of the second socket defining this trail. */
+	/** 定义此跟踪的第二个套接字的名称。 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Trail)
 	FName SecondSocketName;
 	
@@ -49,6 +52,7 @@ class UAnimNotifyState_Trail : public UAnimNotifyState
 	TEnumAsByte<enum ETrailWidthMode> WidthScaleMode;
 
 	/** Name of the curve to drive the width scale. */
+	/** 驱动宽度比例的曲线名称。 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Trail)
 	FName WidthScaleCurve;
 
@@ -57,23 +61,28 @@ class UAnimNotifyState_Trail : public UAnimNotifyState
 
 #if WITH_EDITORONLY_DATA
 	/** If true, render the trail geometry (this should typically be on) */
+	/** 如果为 true，则渲染轨迹几何图形（通常应该打开） */
 	UPROPERTY(transient, EditAnywhere, Category = Rendering)
 	uint32 bRenderGeometry : 1;
 
 	/** If true, render stars at each spawned particle point along the trail */
+	/** 如果为 true，则在沿轨迹的每个生成的粒子点处渲染星星 */
 	UPROPERTY(transient, EditAnywhere, Category = Rendering)
 	uint32 bRenderSpawnPoints : 1;
 
 	/** If true, render a line showing the tangent at each spawned particle point along the trail */
+	/** 如果为 true，则渲染一条线，显示沿轨迹的每个生成粒子点处的切线 */
 	UPROPERTY(transient, EditAnywhere, Category = Rendering)
 	uint32 bRenderTangents : 1;
 
 	/** If true, render the tessellated path between spawned particles */
+	/** 如果为 true，则渲染生成粒子之间的镶嵌路径 */
 	UPROPERTY(transient, EditAnywhere, Category = Rendering)
 	uint32 bRenderTessellation : 1;
 #endif // WITH_EDITORONLY_DATA
 
 	/** Helper function for outside code to get PSC that we are using */
+	/** 外部代码的辅助函数来获取我们正在使用的 PSC */
 	ENGINE_API UParticleSystemComponent* GetParticleSystemComponent(USkeletalMeshComponent* MeshComp) const;
 
 	UE_DEPRECATED(5.0, "Please use the other NotifyBegin function instead")

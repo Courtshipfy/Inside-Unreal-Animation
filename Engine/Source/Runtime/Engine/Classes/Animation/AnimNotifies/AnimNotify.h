@@ -63,10 +63,12 @@ class UAnimNotify : public UObject
 
 #if WITH_EDITORONLY_DATA
 	/** Color of Notify in editor */
+	/** 编辑器中通知的颜色 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AnimNotify)
 	FColor NotifyColor;
 
 	/** Whether this notify instance should fire in animation editors */
+	/** 此通知实例是否应在动画编辑器中触发 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category=AnimNotify)
 	bool bShouldFireInEditor;
 #endif // WITH_EDITORONLY_DATA
@@ -79,6 +81,7 @@ class UAnimNotify : public UObject
 	virtual void DrawCanvasInEditor(FCanvas& Canvas, FSceneView& View, USkeletalMeshComponent* MeshComp, const UAnimSequenceBase* Animation, const FAnimNotifyEvent& NotifyEvent) const {}
 
 	/** Override this to prevent firing this notify type in animation editors */
+	/** 覆盖此设置以防止在动画编辑器中触发此通知类型 */
 	virtual bool ShouldFireInEditor() { return bShouldFireInEditor; }
 #endif
 
@@ -88,16 +91,19 @@ class UAnimNotify : public UObject
 	ENGINE_API virtual void BranchingPointNotify(FBranchingPointNotifyPayload& BranchingPointPayload);
 
 	// @todo document 
+	// @todo文档
 	virtual FString GetEditorComment() 
 	{ 
 		return TEXT(""); 
 	}
 
 	/** TriggerWeightThreshold to use when creating notifies of this type */
+	/** 创建此类通知时使用的 TriggerWeightThreshold */
 	UFUNCTION(BlueprintNativeEvent)
 	ENGINE_API float GetDefaultTriggerWeightThreshold() const;
 
 	// @todo document 
+	// @todo文档
 	virtual FLinearColor GetEditorColor() 
 	{ 
 #if WITH_EDITORONLY_DATA
@@ -117,11 +123,14 @@ class UAnimNotify : public UObject
 	ENGINE_API virtual class UWorld* GetWorld() const override;
 
 	/** UObject Interface */
+	/** U对象接口 */
 	ENGINE_API virtual void PostLoad() override;
 	ENGINE_API virtual void PreSave(FObjectPreSaveContext ObjectSaveContext) override;
 	/** End UObject Interface */
+	/** 结束UObject接口 */
 
 	/** This notify is always a branching point when used on Montages. */
+	/** 当在 Montage 上使用时，此通知始终是一个分支点。 */
 	bool bIsNativeBranchingPoint;
 
 protected:
@@ -129,6 +138,7 @@ protected:
 
 private:
 	/* The mesh we're currently triggering a UAnimNotify for (so we can retrieve per instance information) */
+	/* 我们当前正在触发 UAnimNotify 的网格物体（因此我们可以检索每个实例的信息） */
 	class USkeletalMeshComponent* MeshContext;
 };
 

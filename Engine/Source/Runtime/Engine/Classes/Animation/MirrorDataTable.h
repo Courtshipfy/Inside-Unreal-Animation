@@ -8,6 +8,7 @@
 #include "MirrorDataTable.generated.h"
 
 /** Type referenced by a row in the mirror data table */
+/** 镜像数据表中的行引用的类型 */
 UENUM()
 namespace EMirrorRowType
 {
@@ -23,22 +24,27 @@ namespace EMirrorRowType
 
 
 /** Find and Replace Method for FMirrorFindReplaceExpression. */
+/** FMirrorFindReplaceExpression 的查找和替换方法。 */
 UENUM()
 namespace EMirrorFindReplaceMethod
 {
 	enum Type : int
 	{
 		/** Only find and replace matching strings at the start of the name  */
+		/** 只查找并替换名称开头的匹配字符串  */
 		Prefix,
         /** Only find and replace matching strings at the end of the name  */
+        /** 只查找并替换名称末尾的匹配字符串  */
         Suffix,
         /** Use regular expressions for find and replace, including support for captures $1 - $10 */
+        /** 使用正则表达式进行查找和替换，包括支持捕获 $1 - $10 */
         RegularExpression
     };
 }
 
 
 /**  Base Mirror Table containing all data required by the animation mirroring system. */
+/**  基本镜像表包含动画镜像系统所需的所有数据。 */
 USTRUCT()
 struct FMirrorTableRow : public FTableRowBase
 {
@@ -67,6 +73,7 @@ struct FMirrorTableRow : public FTableRowBase
 
 
 /** Find and Replace expressions used to generate mirror tables*/
+/** 用于生成镜像表的查找和替换表达式*/
 USTRUCT()
 struct FMirrorFindReplaceExpression
 {
@@ -214,6 +221,7 @@ public:
 	TObjectPtr<USkeleton> Skeleton; 
 
 	// Index of the mirror bone for a given bone index in the reference skeleton, or INDEX_NONE if the bone is not mirrored
+	// 参考骨骼中给定骨骼索引的镜像骨骼的索引，如果骨骼未镜像，则为 INDEX_NONE
 	TCustomBoneIndexArray<FSkeletonPoseBoneIndex, FSkeletonPoseBoneIndex> BoneToMirrorBoneIndex;
 	
 	UE_DEPRECATED(5.3, "UID-based mirroring has been remove, please use CurveToMirrorCurveMap.")
@@ -223,17 +231,21 @@ public:
 	TArray<SmartName::UID_Type> CurveMirrorTargetUIDArray;
 
 	// Map from animation curve to mirrored animation curve
+	// 从动画曲线映射到镜像动画曲线
 	TMap<FName, FName> CurveToMirrorCurveMap;
 	
 	// Map from animation notify to mirrored animation notify
+	// 从动画通知到镜像动画通知的映射
 	TMap<FName, FName> AnimNotifyToMirrorAnimNotifyMap;
 	
 	// Map from sync marker to mirrored sync marker 
+	// 从同步标记映射到镜像同步标记
 	TMap<FName, FName> SyncToMirrorSyncMap;
 
 protected: 
 
 	// Fill BoneToMirrorBoneIndex, CurveMirrorSourceUIDArray, CurveMirrorTargetUIDArray and NotifyToMirrorNotifyIndex based on the Skeleton and Table Contents
+	// 根据骨架和表内容填充 BoneToMirrorBoneIndex、CurveMirrorSourceUIDArray、CurveMirrorTargetUIDArray 和 NotifyToMirrorNotifyIndex
 	ENGINE_API void FillMirrorArrays();
 };
 

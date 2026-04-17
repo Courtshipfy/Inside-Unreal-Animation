@@ -38,6 +38,7 @@ void FAnimNode_LinkedAnimGraph::InitializeSubGraph_AnyThread(const FAnimationIni
 		FAnimInstanceProxy& Proxy = InstanceToRun->GetProxyOnAnyThread<FAnimInstanceProxy>();
 
 		// Make sure we have valid objects in place for the sub-graph init
+		// [翻译失败: Make sure we have valid objects in place for the sub-graph init]
 		Proxy.InitializeObjects(InstanceToRun);
 
 		Proxy.InitializationCounter.SynchronizeWith(Context.AnimInstanceProxy->InitializationCounter);
@@ -52,6 +53,7 @@ void FAnimNode_LinkedAnimGraph::Initialize_AnyThread(const FAnimationInitializeC
 	InitializeSubGraph_AnyThread(Context);
 
 	// Make sure we propagate down all input poses, as they may not all be linked in the linked graph
+	// [翻译失败: Make sure we propagate down all input poses, as they may not all be linked in the linked graph]
 	for(FPoseLink& InputPose : InputPoses)
 	{
 		InputPose.Initialize(Context);
@@ -67,7 +69,9 @@ void FAnimNode_LinkedAnimGraph::CacheBonesSubGraph_AnyThread(const FAnimationCac
 		Proxy.CachedBonesCounter.SynchronizeWith(Context.AnimInstanceProxy->CachedBonesCounter);
 
 		// Note not calling Proxy.CacheBones_WithRoot here as it is guarded by
+		// 请注意，此处不要调用 Proxy.CacheBones_WithRoot，因为它受以下保护
 		// bBoneCachesInvalidated, which is handled at a higher level
+		// bBoneCachesInvalidated，在更高级别处理
 		FAnimationCacheBonesContext LinkedContext(&Proxy);
 		LinkedContext.SetNodeId(CachedLinkedNodeIndex);
 		LinkedRoot->CacheBones_AnyThread(LinkedContext);
@@ -79,6 +83,7 @@ void FAnimNode_LinkedAnimGraph::CacheBones_AnyThread(const FAnimationCacheBonesC
 	CacheBonesSubGraph_AnyThread(Context);
 
 	// Make sure we propagate down all input poses, as they may not all be linked in the linked graph
+	// 确保我们向下传播所有输入姿势，因为它们可能并未全部链接到链接图中
 	for(FPoseLink& InputPose : InputPoses)
 	{
 		InputPose.CacheBones(Context);
@@ -98,8 +103,11 @@ void FAnimNode_LinkedAnimGraph::Update_AnyThread(const FAnimationUpdateContext& 
 		PropagateInputProperties(InContext.AnimInstanceProxy->GetAnimInstanceObject());
 
 		// We can call this unconditionally here now because linked anim instances are forced to have a parallel update
+		// 我们现在可以在这里无条件地调用它，因为链接的动画实例被迫进行并行更新
 		// in USkeletalMeshComponent::TickAnimation. It used to be the case that we could do non-parallel work in 
+		// 在 USkeletalMeshComponent::TickAnimation 中。过去我们可以进行非并行工作
 		// USkeletalMeshComponent::TickAnimation, which would mean we would have to skip doing that work here.
+		// USkeletalMeshComponent::TickAnimation，这意味着我们必须跳过这里的工作。
 		FAnimationUpdateContext NewContext = InContext.WithOtherProxy(&Proxy);
 		NewContext.SetNodeId(INDEX_NONE);
 		NewContext.SetNodeId(CachedLinkedNodeIndex);
@@ -108,17 +116,21 @@ void FAnimNode_LinkedAnimGraph::Update_AnyThread(const FAnimationUpdateContext& 
 	else if(InputPoses.Num() > 0)
 	{
 		// If we have no valid instance (self or otherwise), we need to propagate down the graph to make sure
+		// 如果我们没有有效的实例（自身或其他），我们需要向下传播图以确保
 		// subsequent nodes get properly updated
+		// [翻译失败: subsequent nodes get properly updated]
 		InputPoses[0].Update(InContext);
 	}
 
 	// Consume pending inertial blend requests
+	// [翻译失败: Consume pending inertial blend requests]
 	if(PendingBlendOutDuration >= 0.0f || PendingBlendInDuration >= 0.0f)
 	{
 		UE::Anim::IInertializationRequester* InertializationRequester = InContext.GetMessage<UE::Anim::IInertializationRequester>();
 		if(InertializationRequester)
 		{
 			// Issue the pending inertialization requests (which will get merged together by the inertialization node itself)
+			// [翻译失败: Issue the pending inertialization requests (which will get merged together by the inertialization node itself)]
 			if (PendingBlendOutDuration >= 0.0f)
 			{
 				FInertializationRequest Request;
@@ -167,6 +179,7 @@ void FAnimNode_LinkedAnimGraph::Evaluate_AnyThread(FPoseContext& Output)
 {
 #if	ANIMNODE_STATS_VERBOSE
 	// Record name of linked graph we are updating
+	// [翻译失败: Record name of linked graph we are updating]
 	FScopeCycleCounter LinkedAnimGraphNameCycleCounter(StatID);
 #endif // ANIMNODE_STATS_VERBOSE
 
@@ -174,6 +187,7 @@ void FAnimNode_LinkedAnimGraph::Evaluate_AnyThread(FPoseContext& Output)
 	if(InstanceToRun && LinkedRoot)
 	{
 		// Stash current proxy for restoration after recursion
+		// [翻译失败: Stash current proxy for restoration after recursion]
 		FAnimInstanceProxy& OldProxy = *Output.AnimInstanceProxy;
 
 		FAnimInstanceProxy& Proxy = InstanceToRun->GetProxyOnAnyThread<FAnimInstanceProxy>();
@@ -184,16 +198,20 @@ void FAnimNode_LinkedAnimGraph::Evaluate_AnyThread(FPoseContext& Output)
 		Output.SetNodeId(CachedLinkedNodeIndex);
 
 		// Run the anim blueprint
+		// [翻译失败: Run the anim blueprint]
 		Proxy.EvaluateAnimation_WithRoot(Output, LinkedRoot);
 
 		// Restore proxy & required bones after evaluation
+		// [翻译失败: Restore proxy & required bones after evaluation]
 		Output.AnimInstanceProxy = &OldProxy;
 		Output.Pose.SetBoneContainer(&OldProxy.GetRequiredBones());
 	}
 	else if(InputPoses.Num() > 0)
 	{
 		// If we have no valid instance (self or otherwise), we need to propagate down the graph to make sure
+		// [翻译失败: If we have no valid instance (self or otherwise), we need to propagate down the graph to make sure]
 		// subsequent nodes get properly evaluated
+		// [翻译失败: subsequent nodes get properly evaluated]
 		InputPoses[0].Evaluate(Output);
 	}
 	else
@@ -205,6 +223,7 @@ void FAnimNode_LinkedAnimGraph::Evaluate_AnyThread(FPoseContext& Output)
 void FAnimNode_LinkedAnimGraph::GatherDebugData(FNodeDebugData& DebugData)
 {
 	// Add our entry
+	// [翻译失败: Add our entry]
 	FString DebugLine = DebugData.GetNodeName(this);
 	DebugLine += FString::Printf(TEXT("Target: %s"), (*InstanceClass) ? *InstanceClass->GetName() : TEXT("None"));
 
@@ -212,6 +231,7 @@ void FAnimNode_LinkedAnimGraph::GatherDebugData(FNodeDebugData& DebugData)
 
 	UAnimInstance* InstanceToRun = GetTargetInstance<UAnimInstance>();
 	// Gather data from the linked instance
+	// [翻译失败: Gather data from the linked instance]
 	if(InstanceToRun && LinkedRoot)
 	{
 		FAnimInstanceProxy& Proxy = InstanceToRun->GetProxyOnAnyThread<FAnimInstanceProxy>();
@@ -220,7 +240,9 @@ void FAnimNode_LinkedAnimGraph::GatherDebugData(FNodeDebugData& DebugData)
 	else if(InputPoses.Num() > 0)
 	{
 		// If we have no valid instance (self or otherwise), we need to propagate down the graph to make sure
+		// [翻译失败: If we have no valid instance (self or otherwise), we need to propagate down the graph to make sure]
 		// subsequent nodes get their debug data properly collected to reflect relevancy
+		// 后续节点正确收集调试数据以反映相关性
 		InputPoses[0].GatherDebugData(DebugData);
 	}
 }
@@ -240,6 +262,7 @@ void FAnimNode_LinkedAnimGraph::OnInitializeAnimInstance(const FAnimInstanceProx
 	else if(InstanceToRun)
 	{
 		// We have an instance but no instance class
+		// 我们有一个实例，但没有实例类
 		TeardownInstance(InAnimInstance);
 	}
 
@@ -255,8 +278,10 @@ void FAnimNode_LinkedAnimGraph::TeardownInstance(const UAnimInstance* InOwningAn
 	if (InstanceToRun)
 	{
 		// trace lifetime end early, because by the time we get UninitializeAnimation below, the Owner has changed, and so the ObjectId has changed.
+		// 跟踪生命周期提前结束，因为当我们得到下面的 UninitializeAnimation 时，Owner 已更改，因此 ObjectId 已更改。
 		DynamicUnlink(const_cast<UAnimInstance*>(InOwningAnimInstance));
 		// Never delete the owning animation instance
+		// 切勿删除所属动画实例
 		if (InstanceToRun != InOwningAnimInstance)
 		{
 			if (CanTeardownLinkedInstance(InstanceToRun))
@@ -266,6 +291,7 @@ void FAnimNode_LinkedAnimGraph::TeardownInstance(const UAnimInstance* InOwningAn
 				check(MeshComp);
 				MeshComp->GetLinkedAnimInstances().Remove(InstanceToRun);
 				// Only call UninitializeAnimation if we are not the owning anim instance
+				// 仅当我们不是拥有动画实例时才调用 UninitializeAnimation
 				InstanceToRun->UninitializeAnimation();
 				InstanceToRun->MarkAsGarbage();
 			}
@@ -284,6 +310,7 @@ void FAnimNode_LinkedAnimGraph::ReinitializeLinkedAnimInstance(const UAnimInstan
 	IAnimClassInterface* PriorAnimBPClass = InstanceToRun ? IAnimClassInterface::GetFromClass(InstanceToRun->GetClass()) : nullptr;
 
 	// Full reinit, kill old instances
+	// 完全重新初始化，杀死旧实例
 	TeardownInstance(InOwningAnimInstance);
 
 	if(*InstanceClass || InNewAnimInstance)
@@ -292,12 +319,16 @@ void FAnimNode_LinkedAnimGraph::ReinitializeLinkedAnimInstance(const UAnimInstan
 		check(MeshComp);
 
 		// Need an instance to run, so create it now
+		// 需要一个实例来运行，所以现在创建它
 		InstanceToRun = InNewAnimInstance ? InNewAnimInstance : NewObject<UAnimInstance>(MeshComp, InstanceClass);
 		if (InNewAnimInstance == nullptr)
 		{
 			// if incoming AnimInstance was null, it was created by this function
+			// 如果传入的 AnimInstance 为 null，则它是由该函数创建的
 			// we mark them as created by linked anim graph
+			// 我们将它们标记为由链接的动画图创建的
 			// this is to know who owns memory instance
+			// 这是为了知道谁拥有内存实例
 			InstanceToRun->bCreatedByLinkedAnimGraph = true;
 			InstanceToRun->bPropagateNotifiesToLinkedInstances = bPropagateNotifiesToLinkedInstances;
 			InstanceToRun->bReceiveNotifiesFromLinkedInstances = bReceiveNotifiesFromLinkedInstances;
@@ -306,11 +337,13 @@ void FAnimNode_LinkedAnimGraph::ReinitializeLinkedAnimInstance(const UAnimInstan
 		SetTargetInstance(InstanceToRun);
 
 		// Link before we call InitializeAnimation() so we propgate the call to linked input poses
+		// 在调用 InitializeAnimation() 之前进行链接，以便我们将调用传播到链接的输入姿势
 		DynamicLink(const_cast<UAnimInstance*>(InOwningAnimInstance));
 
 		if(InNewAnimInstance == nullptr)
 		{
 			// Initialize the new instance
+			// 初始化新实例
 			InstanceToRun->InitializeAnimation();
 
 			if(MeshComp->HasBegunPlay())
@@ -339,6 +372,7 @@ void FAnimNode_LinkedAnimGraph::SetAnimClass(TSubclassOf<UAnimInstance> InClass,
 	UClass* NewClass = InClass.Get();
 
 	// Make sure this is a valid blueprint class
+	// 确保这是一个有效的蓝图类
 	if (NewClass && IAnimClassInterface::GetFromClass(NewClass) == nullptr)
 	{
 		ensure(false);
@@ -346,6 +380,7 @@ void FAnimNode_LinkedAnimGraph::SetAnimClass(TSubclassOf<UAnimInstance> InClass,
 	}
 
 	// Verified OK, so set it now
+	// 已验证OK，立即设置
 	TSubclassOf<UAnimInstance> OldClass = InstanceClass;
 	InstanceClass = InClass;
 
@@ -379,6 +414,7 @@ void FAnimNode_LinkedAnimGraph::DynamicLink(UAnimInstance* InOwningAnimInstance)
 			const FName FunctionToLink = GetDynamicLinkFunctionName();
 
 			// Link input poses
+			// 链接输入姿势
 			const TArray<FAnimBlueprintFunction>& AnimBlueprintFunctions = SubAnimBlueprintClass->GetAnimBlueprintFunctions();
 			const int32 FunctionCount = AnimBlueprintFunctions.Num();
 			for(int32 FunctionIndex = 0; FunctionIndex < FunctionCount; ++FunctionIndex)
@@ -392,6 +428,7 @@ void FAnimNode_LinkedAnimGraph::DynamicLink(UAnimInstance* InOwningAnimInstance)
 					for(int32 InputPoseIndex = 0; InputPoseIndex < AnimBlueprintFunction.InputPoseNames.Num() && InputPoseIndex < InputPoses.Num(); ++InputPoseIndex)
 					{
 						// Make sure we attempt a re-link first, as only this pose link knows its target
+						// 确保我们首先尝试重新链接，因为只有此姿势链接知道其目标
 						FAnimationInitializeContext Context(NonConstProxy);
 						InputPoses[InputPoseIndex].AttemptRelink(Context);
 
@@ -427,9 +464,11 @@ void FAnimNode_LinkedAnimGraph::DynamicLink(UAnimInstance* InOwningAnimInstance)
 void FAnimNode_LinkedAnimGraph::DynamicUnlink(UAnimInstance* InOwningAnimInstance)
 {
 	// unlink root
+	// 取消链接根
 	LinkedRoot = nullptr;
 
 	// unlink input poses
+	// 取消链接输入姿势
 	UAnimInstance* LinkTargetInstance = GetDynamicLinkTarget(InOwningAnimInstance);
 	if(LinkTargetInstance)
 	{
@@ -439,6 +478,7 @@ void FAnimNode_LinkedAnimGraph::DynamicUnlink(UAnimInstance* InOwningAnimInstanc
 			const FName FunctionToLink = GetDynamicLinkFunctionName();
 
 			// Link input poses
+			// 链接输入姿势
 			for(const FAnimBlueprintFunction& AnimBlueprintFunction : SubAnimBlueprintClass->GetAnimBlueprintFunctions())
 			{
 				if(AnimBlueprintFunction.Name == FunctionToLink)
@@ -520,10 +560,13 @@ void FAnimNode_LinkedAnimGraph::HandleObjectsReinstanced_Impl(UObject* InSourceO
 		FAnimInstanceProxy& SourceProxy = SourceAnimInstance->GetProxyOnAnyThread<FAnimInstanceProxy>();
 
 		// Call Initialize here to ensure any custom proxies are initialized (as they may have been re-created during
+		// 在此调用初始化以确保初始化任何自定义代理（因为它们可能已在
 		// re-instancing, and they dont call the constructor that takes a UAnimInstance*)
+		// 重新实例化，并且它们不调用采用 UAnimInstance* 的构造函数）
 		SourceProxy.Initialize(SourceAnimInstance);
 
 		// Similarly call Initialize here to catch any custom target proxies
+		// 同样，在此处调用初始化以捕获任何自定义目标代理
 		UAnimInstance* TargetAnimInstance = CastChecked<UAnimInstance>(InTargetObject);
 		FAnimInstanceProxy& TargetProxy = TargetAnimInstance->GetProxyOnAnyThread<FAnimInstanceProxy>();
 		TargetProxy.Initialize(TargetAnimInstance);
@@ -535,7 +578,9 @@ void FAnimNode_LinkedAnimGraph::HandleObjectsReinstanced_Impl(UObject* InSourceO
 		SourceProxy.InitializeCachedClassData();
 
 		// Ensure we have a valid mesh at this point, as calling into the graph without one can result in crashes
+		// 确保此时我们有一个有效的网格，因为在没有网格的情况下调用图形可能会导致崩溃
 		// as we assume a valid bone container/reference skeleton is present
+		// 因为我们假设存在有效的骨骼容器/参考骨架
 		USkeletalMeshComponent* MeshComponent = SourceAnimInstance->GetSkelMeshComponent();
 		if(MeshComponent && MeshComponent->IsRegistered() && MeshComponent->GetSkeletalMeshAsset())
 		{

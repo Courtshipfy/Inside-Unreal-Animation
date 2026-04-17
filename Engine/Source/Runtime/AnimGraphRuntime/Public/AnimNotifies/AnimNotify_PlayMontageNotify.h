@@ -7,6 +7,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 // UAnimNotify_PlayMontageNotify
+// UAnimNotify_PlayMontageNotify
 //////////////////////////////////////////////////////////////////////////
 
 UCLASS(editinlinenew, const, hidecategories = Object, collapsecategories, meta = (DisplayName = "Montage Notify"), MinimalAPI)
@@ -26,12 +27,14 @@ public:
 protected:
 
 	// Name of notify that is passed to the PlayMontage K2Node.
+	// 传递到 PlayMontage K2Node 的通知名称。
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Notify")
 	FName NotifyName;
 };
 
 
 //////////////////////////////////////////////////////////////////////////
+// UAnimNotify_PlayMontageNotifyWindow
 // UAnimNotify_PlayMontageNotifyWindow
 //////////////////////////////////////////////////////////////////////////
 
@@ -52,6 +55,7 @@ public:
 protected:
 
 	// Name of notify that is passed to ability.
+	// 传递给能力的通知名称。
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Notify")
 	FName NotifyName;
 };

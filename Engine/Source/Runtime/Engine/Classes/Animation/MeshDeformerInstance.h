@@ -49,12 +49,15 @@ public:
 
 
 	/** Called to allocate any persistent render resources */
+	/** 调用以分配任何持久渲染资源 */
 	virtual void AllocateResources() PURE_VIRTUAL(, );
 
 	/** Called when persistent render resources should be released */
+	/** 当应释放持久渲染资源时调用 */
 	virtual void ReleaseResources() PURE_VIRTUAL(, );
 
 	/** Enumeration for workloads to EnqueueWork. */
+	/** EnqueueWork 的工作负载枚举。 */
 	enum EWorkLoad
 	{
 		WorkLoad_Setup,
@@ -63,6 +66,7 @@ public:
 	};
 
 	/** Enumeration for execution groups to EnqueueWork on. */
+	/** 要 EnqueueWork 的执行组的枚举。 */
 	enum EExectutionGroup
 	{
 		ExecutionGroup_Default,
@@ -72,25 +76,31 @@ public:
 	};
 
 	/** Structure of inputs to EnqueueWork. */
+	/** EnqueueWork 的输入结构。 */
 	struct FEnqueueWorkDesc
 	{
 		FSceneInterface* Scene = nullptr;
 		EWorkLoad WorkLoadType = WorkLoad_Update;
 		EExectutionGroup ExecutionGroup = ExecutionGroup_Default;
 		/** Name used for debugging and profiling markers. */
+		/** 用于调试和分析标记的名称。 */
 		FName OwnerName;
 		/** Render thread delegate that will be executed if Enqueue fails at any stage. */
+		/** 如果 Enqueue 在任何阶段失败，将执行渲染线程委托。 */
 		FSimpleDelegate FallbackDelegate;
 	};
 
 	/** Enqueue the mesh deformer workload on a scene. */
+	/** 将网格变形器工作负载排入场景中。 */
 	virtual void EnqueueWork(FEnqueueWorkDesc const& InDesc) PURE_VIRTUAL(, );
 	
 	/** Return the buffers that this deformer can potentially write to */
+	/** 返回此变形器可能写入的缓冲区 */
 	virtual EMeshDeformerOutputBuffer GetOutputBuffers() const PURE_VIRTUAL(, return EMeshDeformerOutputBuffer::None; );
 
 #if WITH_EDITORONLY_DATA
 	/** Reads back the deformed geometry and generates a mesh description */
+	/** 读回变形的几何体并生成网格描述 */
 	virtual bool RequestReadbackDeformerGeometry(TUniquePtr<FMeshDeformerGeometryReadbackRequest> InRequest) PURE_VIRTUAL(, return false; );
 #endif // WITH_EDITORONLY_DATA
 	

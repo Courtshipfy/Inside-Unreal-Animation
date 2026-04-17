@@ -110,9 +110,11 @@ void FReferenceSkeleton::Remove(const FName InBoneName, const bool bRemoveChildr
 	const int32 RawParentIndex = BoneInfo.ParentIndex;
 
 	// is this a root?
+	// 这是根吗？
 	if (RawParentIndex == INDEX_NONE)
 	{
 		// is this the only root?
+		// 这是唯一的根吗？
 		const int32 NumRoots = Algo::CountIf(RawRefBoneInfo, [](const FMeshBoneInfo& BoneInfo) { return BoneInfo.ParentIndex == INDEX_NONE; });
 		if (NumRoots == 1)
 		{
@@ -122,14 +124,17 @@ void FReferenceSkeleton::Remove(const FName InBoneName, const bool bRemoveChildr
 	}
 
 	// Make sure our arrays are in sync.
+	// 确保我们的数组同步。
 	checkSlow((RawRefBoneInfo.Num() == RawRefBonePose.Num()) && (RawRefBoneInfo.Num() == RawNameToIndexMap.Num()));
 
 	// store children indices and sort them from greatest to lowest
+	// 存储子索引并从大到小对它们进行排序
 	TArray<int32> Children;
 	GetRawDirectChildBones(RawBoneIndex, Children);
 	Children.Sort([](const int32 Index0, const int32 Index1) {return Index0 > Index1;} );
 
 	// reindex function
+	// 重新索引功能
 	auto ReIndexBones = [this, RawBoneIndex, RawParentIndex](const bool bUpdateParent)
 	{
 		for (int32 NextIndex=RawBoneIndex+1; NextIndex < GetRawBoneNum(); NextIndex++)
@@ -137,6 +142,7 @@ void FReferenceSkeleton::Remove(const FName InBoneName, const bool bRemoveChildr
 			FMeshBoneInfo& Bone = RawRefBoneInfo[NextIndex];
         
 			// update parent
+			// 更新父级
 			if (Bone.ParentIndex > RawBoneIndex)
 			{
 				Bone.ParentIndex -= 1;
@@ -147,6 +153,7 @@ void FReferenceSkeleton::Remove(const FName InBoneName, const bool bRemoveChildr
 			}
         
 			// update cached index
+			// 更新缓存索引
 			RawNameToIndexMap[Bone.Name] -= 1;
 		}
 	};
@@ -154,15 +161,18 @@ void FReferenceSkeleton::Remove(const FName InBoneName, const bool bRemoveChildr
 	if (bRemoveChildren)
 	{
 		// 1 - treat children first
+		// 1 - 首先治疗儿童
 		for (const int32 ChildIndex: Children)
 		{
 			Remove(RawRefBoneInfo[ChildIndex].Name, bRemoveChildren);
 		}
 
 		// 2 - reindex next bones
+		// 2 - 重新索引下一个骨骼
 		ReIndexBones(false);
 		
 		// 3 - remove useless raw data
+		// 3 - 删除无用的原始数据
 		RawRefBonePose.RemoveAt(RawBoneIndex, 1);
 		RawRefBoneInfo.RemoveAt(RawBoneIndex, 1);
 		RawNameToIndexMap.Remove(InBoneName);
@@ -171,8 +181,10 @@ void FReferenceSkeleton::Remove(const FName InBoneName, const bool bRemoveChildr
 	}
 
 	// 1 - store transforms
+	// 1 - 存储变换
 
 	// store parent's global transform
+	// 存储父级的全局变换
 	FTransform ParentGlobal = FTransform::Identity;
 	int32 ParentIndex = RawParentIndex;
 	while (ParentIndex > INDEX_NONE)
@@ -182,9 +194,11 @@ void FReferenceSkeleton::Remove(const FName InBoneName, const bool bRemoveChildr
 	}
 
 	// store bone's global transform
+	// 存储骨骼的全局变换
 	const FTransform BoneGlobal = RawRefBonePose[RawBoneIndex] * ParentGlobal;
 
 	// 2 - switch children transforms to new parent space
+	// 2 - 切换子级变换到新的父级空间
 	for (const int32 ChildIndex: Children)
 	{
 		const FTransform ChildrenGlobal = RawRefBonePose[ChildIndex] * BoneGlobal;
@@ -192,9 +206,11 @@ void FReferenceSkeleton::Remove(const FName InBoneName, const bool bRemoveChildr
 	}
 
 	// 3 - reindex next bones
+	// 3 - 重新索引下一个骨骼
 	ReIndexBones(true);
 
 	// 4 - remove useless raw data
+	// 4 - 删除无用的原始数据
 	RawRefBonePose.RemoveAt(RawBoneIndex, 1);
 	RawRefBoneInfo.RemoveAt(RawBoneIndex, 1);
 	RawNameToIndexMap.Remove(InBoneName);
@@ -243,6 +259,7 @@ namespace FReferenceSkeletonLocals
 				TBitArray<> TransformCached(false, NumBones);
 
 				// build elements
+				// 构建元素
 				for (int32 Index = 0; Index < NumBones; ++Index)
 				{
 					FElement NewElement({ Index, nullptr, {} });
@@ -251,6 +268,7 @@ namespace FReferenceSkeletonLocals
 				}
 
 				// build hierarchy & global transforms
+				// 构建层次结构和全局转换
 				auto GetGlobalTransform = [this, &TransformCached](const FElement& Element, auto&& GetGlobalTransformArg)
 				{
 					if (TransformCached[Element.RawIndex])
@@ -277,6 +295,7 @@ namespace FReferenceSkeletonLocals
 		}
 
 		// switch parent
+		// 切换父级
 		void SetParent(const int32 InChildIndex, const int32 InParentIndex)
 		{
 			check(Elements.IsValidIndex(InChildIndex));
@@ -298,6 +317,7 @@ namespace FReferenceSkeletonLocals
 		}
 
 		// get the new to old index mapping to update the bone infos and poses
+		// 获取新旧索引映射以更新骨骼信息和姿势
 		void GetNewToOldIndexes(TArray<int32>& OutMapping)
 		{
 			OutMapping.Reset(0); OutMapping.Reserve(Elements.Num());
@@ -307,12 +327,14 @@ namespace FReferenceSkeletonLocals
 			auto ElementToIndex = [this, &Visited, &OutMapping](const FElement& Element, auto&& ElementToIndexArg) -> void
 			{
 				// make sure the parent is added first
+				// [翻译失败: make sure the parent is added first]
 				if (Element.Parent && !Visited[Element.Parent->RawIndex])
 				{
 					ElementToIndexArg(*Element.Parent, ElementToIndexArg);
 				}
 				
 				// add the element
+				// [翻译失败: add the element]
 				if (!Visited[Element.RawIndex])
 				{
 					OutMapping.Add(Element.RawIndex);
@@ -320,6 +342,7 @@ namespace FReferenceSkeletonLocals
 				}
 
 				// add it's direct children
+				// 添加它的直接子项
 				for (const FElement* Child: Element.Children)
 				{
 					if (!Visited[Child->RawIndex])
@@ -330,6 +353,7 @@ namespace FReferenceSkeletonLocals
 				}
 
 				// recurse
+				// 递归
 				for (const FElement* Child: Element.Children)
 				{
 					ElementToIndexArg(*Child, ElementToIndexArg);
@@ -337,7 +361,9 @@ namespace FReferenceSkeletonLocals
 			};
 
 			// look for the first root has it must be inserted first
+			// 查找第一个根，必须先插入它
 			// this can happen if the initial root has been re-parented to a new bone
+			// 如果初始根已重新设置为新骨骼的父级，则可能会发生这种情况
 			const int32 FirstRoot = Elements.IndexOfByPredicate([](const FElement& Element)
 			{
 				return Element.Parent == nullptr;
@@ -349,6 +375,7 @@ namespace FReferenceSkeletonLocals
 			}
 			
 			// parse the full hierarchy
+			// 解析完整的层次结构
 			for (const FElement& Element: Elements)
 			{
 				ElementToIndex(Element, ElementToIndex);
@@ -405,12 +432,15 @@ int32 FReferenceSkeleton::SetParent(const FName InBoneName, const FName InParent
 	using namespace FReferenceSkeletonLocals;
 	
 	// build temp hierarchy
+	// 构建临时层次结构
 	FHierarchy Hierarchy(*this);
 
 	// switch parent
+	// 切换父级
 	Hierarchy.SetParent(BoneIndex, NewParentIndex);
 
 	// update infos, poses and name to index mapping
+	// 更新信息、姿势和名称到索引映射
 	TArray<int32> NewToOldIndexes; Hierarchy.GetNewToOldIndexes(NewToOldIndexes);
 
 	const TArray<FMeshBoneInfo>& Infos = GetRawRefBoneInfo();
@@ -426,16 +456,19 @@ int32 FReferenceSkeleton::SetParent(const FName InBoneName, const FName InParent
 	TMap<FName, int32> NewNameToIndexMap; NewNameToIndexMap.Reserve(NumElements);
 
 	// recreate infos
+	// 重新创建信息
 	for (int32 Index = 0; Index < NumElements; ++Index)
 	{
 		const int32 NewIndex = NewToOldIndexes[Index];
 		const FElement& Element = Elements[NewIndex];
 		
 		// add new info
+		// 添加新信息
 		const int32 OldIndex = Element.RawIndex;
 		FMeshBoneInfo& NewBoneInfo = NewRawRefBoneInfo.Add_GetRef(Infos[OldIndex]);
 		
 		// update parent
+		// 更新父级
 		int32 NewParentIdx = INDEX_NONE;
 		if (const FElement* NewParent = Element.Parent)
 		{
@@ -447,6 +480,7 @@ int32 FReferenceSkeleton::SetParent(const FName InBoneName, const FName InParent
 		NewBoneInfo.ParentIndex = NewParentIdx; 
 
 		// update pose
+		// 更新姿势
 		FTransform& Pose = NewRawRefBonePose.Add_GetRef(Transforms[NewIndex]);
 		if (NewParentIdx != INDEX_NONE)
 		{
@@ -455,10 +489,12 @@ int32 FReferenceSkeleton::SetParent(const FName InBoneName, const FName InParent
 		}
 
 		// update name to index map
+		// 将名称更新为索引图
 		NewNameToIndexMap.Add(NewBoneInfo.Name, Index);
 	}
 
 	// swap data
+	// 交换数据
 	RawRefBonePose = MoveTemp(NewRawRefBonePose);
 	RawRefBoneInfo = MoveTemp(NewRawRefBoneInfo);
 	RawNameToIndexMap = MoveTemp(NewNameToIndexMap);
@@ -471,10 +507,13 @@ int32 FReferenceSkeleton::GetRawSourceBoneIndex(const USkeleton* Skeleton, const
 	for (const FVirtualBone& VB : Skeleton->GetVirtualBones())
 	{
 		//Is our source another virtual bone
+		//我们的来源是另一个虚拟骨骼吗
 		if (VB.VirtualBoneName == SourceBoneName)
 		{
 			//return our source virtual bones target, it is the same transform
+			//返回我们的源虚拟骨骼目标，它是相同的变换
 			//but it exists in the raw bone array
+			//但它存在于原始骨骼数组中
 			return FindBoneIndex(VB.TargetBoneName);
 		}
 	}
@@ -486,6 +525,7 @@ void FReferenceSkeleton::RebuildRefSkeleton(const USkeleton* Skeleton, bool bReb
 	if (bRebuildNameMap)
 	{
 		//On loading FinalRefBone data wont exist but NameToIndexMap will and will be valid
+		//加载 FinalRefBone 时，数据将不存在，但 NameToIndexMap 将有效
 		RebuildNameToIndexMap();
 	}
 
@@ -533,12 +573,14 @@ void FReferenceSkeleton::RebuildRefSkeleton(const USkeleton* Skeleton, bool bReb
 	}
 
 	// Full rebuild of all compatible with this and with ones we are compatible with.
+	// 完全重建所有与此兼容的以及与我们兼容的。
 	UE::Anim::FSkeletonRemappingRegistry::Get().RefreshMappings(Skeleton);
 }
 
 void FReferenceSkeleton::RemoveDuplicateBones(const UObject* Requester, TArray<FBoneIndexType> & DuplicateBones)
 {
 	//Process raw bone data only
+	//仅处理原始骨骼数据
 	const int32 NumBones = RawRefBoneInfo.Num();
 	DuplicateBones.Empty();
 
@@ -550,6 +592,7 @@ void FReferenceSkeleton::RemoveDuplicateBones(const UObject* Requester, TArray<F
 		const int32* FoundBoneIndexPtr = BoneNameCheck.Find(BoneName);
 
 		// Not a duplicate bone, track it.
+		// 不是重复的骨头，跟踪它。
 		if (FoundBoneIndexPtr == NULL)
 		{
 			BoneNameCheck.Add(BoneName, BoneIndex);
@@ -563,11 +606,14 @@ void FReferenceSkeleton::RemoveDuplicateBones(const UObject* Requester, TArray<F
 				*BoneName.ToString(), *GetNameSafe(Requester), DuplicateBoneIndex, BoneIndex);
 
 			// Remove duplicate bone index, which was added later as a mistake.
+			// 删除重复的骨骼索引，这是后来作为错误添加的。
 			RawRefBonePose.RemoveAt(DuplicateBoneIndex, 1);
 			RawRefBoneInfo.RemoveAt(DuplicateBoneIndex, 1);
 
 			// Now we need to fix all the parent indices that pointed to bones after this in the array
+			// 现在我们需要修复数组中在此之后指向骨骼的所有父索引
 			// These must be after this point in the array.
+			// [翻译失败: These must be after this point in the array.]
 			for (int32 j = DuplicateBoneIndex; j < GetRawBoneNum(); j++)
 			{
 				if (GetParentIndex(j) >= DuplicateBoneIndex)
@@ -577,14 +623,17 @@ void FReferenceSkeleton::RemoveDuplicateBones(const UObject* Requester, TArray<F
 			}
 
 			// Update entry in case problem bones were added multiple times.
+			// [翻译失败: Update entry in case problem bones were added multiple times.]
 			BoneNameCheck.Add(BoneName, BoneIndex);
 
 			// We need to make sure that any bone that has this old bone as a parent is fixed up
+			// 我们需要确保以该旧骨骼作为父级的任何骨骼均已修复
 			bRemovedBones = true;
 		}
 	}
 
 	// If we've removed bones, we need to rebuild our name table.
+	// 如果我们删除了骨头，我们需要重建我们的名字表。
 	if (bRemovedBones || (RawNameToIndexMap.Num() == 0))
 	{
 		const USkeleton* Skeleton = Cast<USkeleton>(Requester);
@@ -601,6 +650,7 @@ void FReferenceSkeleton::RemoveDuplicateBones(const UObject* Requester, TArray<F
 		}
 
 		// Additionally normalize all quaternions to be safe.
+		// 此外，为了安全起见，请对所有四元数进行标准化。
 		for (int32 BoneIndex = 0; BoneIndex < GetRawBoneNum(); BoneIndex++)
 		{
 			RawRefBonePose[BoneIndex].NormalizeRotation();
@@ -611,15 +661,18 @@ void FReferenceSkeleton::RemoveDuplicateBones(const UObject* Requester, TArray<F
 	}
 
 	// Make sure our arrays are in sync.
+	// [翻译失败: Make sure our arrays are in sync.]
 	checkSlow((RawRefBoneInfo.Num() == RawRefBonePose.Num()) && (RawRefBoneInfo.Num() == RawNameToIndexMap.Num()));
 }
 
 void FReferenceSkeleton::RebuildNameToIndexMap()
 {
 	// Start by clearing the current map.
+	// [翻译失败: Start by clearing the current map.]
 	RawNameToIndexMap.Empty();
 
 	// Then iterate over each bone, adding the name and bone index.
+	// 然后迭代每个骨骼，添加名称和骨骼索引。
 	const int32 NumBones = RawRefBoneInfo.Num();
 	for (int32 BoneIndex = 0; BoneIndex < NumBones; BoneIndex++)
 	{
@@ -635,6 +688,7 @@ void FReferenceSkeleton::RebuildNameToIndexMap()
 	}
 
 	// Make sure we don't have duplicate bone names. This would be very bad.
+	// 确保我们没有重复的骨骼名称。这将是非常糟糕的。
 	checkSlow(RawNameToIndexMap.Num() == NumBones);
 }
 
@@ -737,6 +791,7 @@ void FReferenceSkeleton::GetRawChildrenIndicesCached(const int32 BoneIndex, TArr
 	if (LastBranchIndex == INDEX_NONE)
 	{
 		// no children (leaf bone)
+		// 没有孩子（叶骨）
 		return;
 	}
 	
@@ -755,6 +810,7 @@ void FReferenceSkeleton::GetRawChildrenIndicesRecursiveCached(const int32 BoneIn
 	if (LastBranchIndex == INDEX_NONE)
 	{
 		// no children (leaf bone)
+		// 没有孩子（叶骨）
 		return;
 	}
 	
@@ -773,6 +829,7 @@ void FReferenceSkeleton::EnsureParentsExist(TArray<FBoneIndexType>& InOutBoneSor
 {
 	const int32 NumBones = GetNum();
 	// Iterate through existing array.
+	// 迭代现有数组。
 	int32 i = 0;
 
 	TArray<bool>& BoneExists = FEnsureParentsExistScratchArea::Get().BoneExists;
@@ -784,12 +841,16 @@ void FReferenceSkeleton::EnsureParentsExist(TArray<FBoneIndexType>& InOutBoneSor
 		const int32 BoneIndex = InOutBoneSortedArray[i];
 
 		// For the root bone, just move on.
+		// 对于根骨骼，继续前进。
 		if (BoneIndex > 0)
 		{
 #if	!(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 			// Warn if we're getting bad data.
+			// 如果我们收到不良数据，请发出警告。
 			// Bones are matched as int32, and a non found bone will be set to INDEX_NONE == -1
+			// 骨骼匹配为 int32，未找到的骨骼将被设置为 INDEX_NONE == -1
 			// This should never happen, so if it does, something is wrong!
+			// [翻译失败: This should never happen, so if it does, something is wrong!]
 			if (BoneIndex >= NumBones)
 			{
 				UE_LOG(LogAnimation, Log, TEXT("FAnimationRuntime::EnsureParentsExist, BoneIndex >= RefSkeleton.GetNum()."));
@@ -802,8 +863,11 @@ void FReferenceSkeleton::EnsureParentsExist(TArray<FBoneIndexType>& InOutBoneSor
 			const int32 ParentIndex = GetParentIndex(BoneIndex);
 
 			// If we do not have this parent in the array, we add it in this location, and leave 'i' where it is.
+			// [翻译失败: If we do not have this parent in the array, we add it in this location, and leave 'i' where it is.]
 			// This can happen if somebody removes bones in the physics asset, then it will try add back in, and in the process, 
+			// 如果有人删除物理资源中的骨骼，然后它会尝试添加回来，并且在此过程中，就会发生这种情况，
 			// parent can be missing
+			// 父母可能会失踪
 			if (!BoneExists[ParentIndex])
 			{
 				InOutBoneSortedArray.InsertUninitialized(i);
@@ -811,6 +875,7 @@ void FReferenceSkeleton::EnsureParentsExist(TArray<FBoneIndexType>& InOutBoneSor
 				BoneExists[ParentIndex] = true;
 			}
 			// If parent was in array, just move on.
+			// [翻译失败: If parent was in array, just move on.]
 			else
 			{
 				i++;
@@ -858,6 +923,7 @@ int32 FReferenceSkeleton::GetCachedEndOfBranchIndex(const int32 InBoneIndex) con
 	}
 
 	// already cached
+	// [翻译失败: already cached]
 	if (CachedEndOfBranchIndicesRaw[InBoneIndex] != BRANCH_CACHE_INVALID_INDEX)
 	{
 		return CachedEndOfBranchIndicesRaw[InBoneIndex];
@@ -866,6 +932,7 @@ int32 FReferenceSkeleton::GetCachedEndOfBranchIndex(const int32 InBoneIndex) con
 	const int32 NumBones = GetRawBoneNum();
 	
 	// if we're asking for the first or last bone, return the last bone  
+	// 如果我们要求第一根或最后一根骨头，则返回最后一根骨头
 	if (InBoneIndex == 0 || InBoneIndex + 1 >= NumBones)
 	{
 		CachedEndOfBranchIndicesRaw[InBoneIndex] = GetRawBoneNum()-1;
@@ -877,7 +944,9 @@ int32 FReferenceSkeleton::GetCachedEndOfBranchIndex(const int32 InBoneIndex) con
 	int32 ParentIndex = GetParentIndex(BoneIndex);
 
 	// if next child bone's parent is less than or equal to StartParentIndex,
+	// 如果下一个子骨骼的父骨骼小于或等于 StartParentIndex，
 	// we are leaving the branch so no need to go further
+	// 我们即将离开分行，因此无需再走得更远
 	int32 BoneIndexAtEndOfBranch = BRANCH_CACHE_INVALID_INDEX;
 	while (ParentIndex > StartParentIndex)
 	{
@@ -891,6 +960,7 @@ int32 FReferenceSkeleton::GetCachedEndOfBranchIndex(const int32 InBoneIndex) con
 	}
 
 	// set once (outside of while loop above) to avoid potential race condition
+	// 设置一次（在上面的 while 循环之外）以避免潜在的竞争条件
 	CachedEndOfBranchIndicesRaw[InBoneIndex] = BoneIndexAtEndOfBranch;
 	
 	return CachedEndOfBranchIndicesRaw[InBoneIndex];
@@ -917,6 +987,7 @@ FArchive & operator<<(FArchive & Ar, FReferenceSkeleton & F)
 	}
 
 	// Fix up any assets that don't have an INDEX_NONE parent for Bone[0]
+	// 修复 Bone[0] 没有 INDEX_NONE 父级的所有资源
 	if (Ar.IsLoading() && Ar.UEVer() < VER_UE4_FIXUP_ROOTBONE_PARENT)
 	{
 		if ((F.RawRefBoneInfo.Num() > 0) && (F.RawRefBoneInfo[0].ParentIndex != INDEX_NONE))

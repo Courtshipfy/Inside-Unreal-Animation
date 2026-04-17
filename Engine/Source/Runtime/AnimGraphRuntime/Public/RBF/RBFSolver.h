@@ -18,6 +18,7 @@
 
 
 /** The solver type to use. The two solvers have different requirements. */
+/** 要使用的求解器类型。这两个求解器有不同的要求。 */
 UENUM()
 enum class ERBFSolverType : uint8
 {
@@ -38,6 +39,7 @@ enum class ERBFSolverType : uint8
 };
 
 /** Function to use for each target falloff */
+/** 用于每个目标衰减的函数 */
 UENUM()
 enum class ERBFFunctionType : uint8
 {
@@ -52,34 +54,43 @@ enum class ERBFFunctionType : uint8
 	Quintic,
 
 	/** Uses the setting of the parent container */
+	/** 使用父容器的设置 */
 	DefaultFunction
 };
 
 /** Method for determining distance from input to targets */
+/** 确定输入到目标距离的方法 */
 UENUM()
 enum class ERBFDistanceMethod : uint8
 {
 	/** Standard n-dimensional distance measure */
+	/** 标准 n 维距离测量 */
 	Euclidean,
 
 	/** Treat inputs as quaternion */
+	/** 将输入视为四元数 */
 	Quaternion,
 
 	/** Treat inputs as quaternion, and find distance between rotated TwistAxis direction */
+	/** 将输入视为四元数，并查找旋转的 TwistAxis 方向之间的距离 */
 	SwingAngle,
 
 	/** Treat inputs as quaternion, and find distance between rotations around the TwistAxis direction */
+	/** 将输入视为四元数，并查找围绕 TwistAxis 方向旋转之间的距离 */
 	TwistAngle,
 
 	/** Uses the setting of the parent container */
+	/** 使用父容器的设置 */
 	DefaultMethod
 };
 
 /** Method to normalize weights */
+/** 权重标准化方法 */
 UENUM()
 enum class ERBFNormalizeMethod : uint8
 {
 	/** Only normalize above one */
+	/** 仅对以上一项进行归一化 */
 	OnlyNormalizeAboveOne,
 
 	/** 
@@ -107,30 +118,37 @@ enum class ERBFNormalizeMethod : uint8
 };
 
 /** Struct storing a particular entry within the RBF */
+/** 在 RBF 中存储特定条目的结构 */
 USTRUCT()
 struct FRBFEntry
 {
 	GENERATED_BODY()
 
 	/** Set of values for this target, size must be TargetDimensions  */
+	/** 该目标的值集，大小必须为 TargetDimensions  */
 	UPROPERTY(EditAnywhere, Category = RBFData)
 	TArray<float> Values;
 
 	/** Return a target as an rotator, assuming Values is a sequence of Euler entries. Index is which Euler to convert.*/
+	/** 返回一个目标作为旋转器，假设 Values 是 Euler 条目的序列。索引是要转换的欧拉。*/
 	ANIMGRAPHRUNTIME_API FRotator AsRotator(int32 Index) const;
 
 	/** Return a target as a quaternion, assuming Values is a sequence of Euler entries. Index is which Euler to convert. */
+	/** 以四元数形式返回目标，假设 Values 是 Euler 条目的序列。索引是要转换的欧拉。 */
 	ANIMGRAPHRUNTIME_API FQuat AsQuat(int32 Index) const;
 
 	ANIMGRAPHRUNTIME_API FVector AsVector(int32 Index) const;
 
 
 	/** Set this entry to 3 floats from supplied rotator */
+	/** 将此条目设置为来自提供的旋转器的 3 个浮点数 */
 	ANIMGRAPHRUNTIME_API void AddFromRotator(const FRotator& InRot);
 	/** Set this entry to 3 floats from supplied vector */
+	/** 将此条目设置为来自提供向量的 3 个浮点数 */
 	ANIMGRAPHRUNTIME_API void AddFromVector(const FVector& InVector);
 
 	/** Return dimensionality of this target */
+	/** 返回该目标的维度 */
 	int32 GetDimensions() const
 	{
 		return Values.Num();
@@ -138,12 +156,14 @@ struct FRBFEntry
 };
 
 /** Data about a particular target in the RBF, including scaling factor */
+/** 有关 RBF 中特定目标的数据，包括比例因子 */
 USTRUCT()
 struct FRBFTarget : public FRBFEntry
 {
 	GENERATED_BODY()
 
 	/** How large the influence of this target. */
+	/** 这个目标的影响有多大。 */
 	UPROPERTY(EditAnywhere, Category = RBFData)
 	float ScaleFactor;
 
@@ -177,11 +197,14 @@ struct FRBFTarget : public FRBFEntry
 };
 
 /** Struct for storing RBF results - target index and corresponding weight */
+/** 存储RBF结果的结构体——目标索引和对应的权重 */
 struct FRBFOutputWeight
 {
 	/** Index of target */
+	/** 目标指标 */
 	int32 TargetIndex;
 	/** Weight of target */
+	/** 目标重量 */
 	float TargetWeight;
 
 	FRBFOutputWeight(int32 InTargetIndex, float InTargetWeight)
@@ -196,12 +219,14 @@ struct FRBFOutputWeight
 };
 
 /** Parameters used by RBF solver */
+/** RBF 求解器使用的参数 */
 USTRUCT(BlueprintType)
 struct FRBFParams
 {
 	GENERATED_BODY()
 
 	/** How many dimensions input data has */
+	/** 输入数据有多少个维度 */
 	UPROPERTY()
 	int32 TargetDimensions;
 
@@ -219,6 +244,7 @@ struct FRBFParams
 	float Radius;
 
 	/* Automatically pick the radius based on the average distance between targets */
+	/* 根据目标之间的平均距离自动选取半径 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RBFData)
 	bool bAutomaticRadius;
 
@@ -229,38 +255,46 @@ struct FRBFParams
 	ERBFDistanceMethod DistanceMethod;
 
 	/** Axis to use when DistanceMethod is SwingAngle */
+	/** DistanceMethod 为 SwingAngle 时使用的轴 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RBFData)
 	TEnumAsByte<EBoneAxis> TwistAxis;
 
 	/** Weight below which we shouldn't bother returning a contribution from a target */
+	/** 权重低于该值我们就不必费心从目标返回贡献 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RBFData)
 	float WeightThreshold;
 
 	/** Method to use for normalizing the weight */
+	/** 用于标准化重量的方法 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RBFData)
 	ERBFNormalizeMethod NormalizeMethod;
 
 	/** Rotation or position of median (used for normalization) */
+	/** 中位数的旋转或位置（用于标准化） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RBFData, meta = (EditCondition = "NormalizeMethod == ERBFNormalizeMethod::NormalizeWithinMedian"))
 	FVector MedianReference;
 
 	/** Minimum distance used for median */
+	/** 用于中位数的最小距离 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RBFData, meta = (UIMin = "0", UIMax = "90", EditCondition = "NormalizeMethod == ERBFNormalizeMethod::NormalizeWithinMedian"))
 	float MedianMin;
 
 	/** Maximum distance used for median */
+	/** 用于中位数的最大距离 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RBFData, meta = (UIMin = "0", UIMax = "90", EditCondition = "NormalizeMethod == ERBFNormalizeMethod::NormalizeWithinMedian"))
 	float MedianMax;
 
 	ANIMGRAPHRUNTIME_API FRBFParams();
 
 	/** Util for returning unit direction vector for swing axis */
+	/** 用于返回摆动轴单位方向向量的实用程序 */
 	ANIMGRAPHRUNTIME_API FVector GetTwistAxisVector() const;
 };
 
 struct ANIMGRAPHRUNTIME_API FRBFSolverData;
 
 /** Library of Radial Basis Function solver functions */
+/** 径向基函数求解器函数库 */
 struct FRBFSolver
 {
 	/** Given a list of targets, verify which ones are valid for solving the RBF setup. This is mostly about removing identical targets
@@ -268,22 +302,28 @@ struct FRBFSolver
 	static ANIMGRAPHRUNTIME_API bool ValidateTargets(const FRBFParams& Params, const TArray<FRBFTarget>& Targets, TArray<int>& InvalidTargets);
 
 	/** Given a set of targets and new input entry, give list of activated targets with weights */
+	/** 给定一组目标和新的输入条目，给出带有权重的激活目标列表 */
 	static ANIMGRAPHRUNTIME_API TSharedPtr<const FRBFSolverData> InitSolver(const FRBFParams& Params, const TArray<FRBFTarget>& Targets);
 
 	static ANIMGRAPHRUNTIME_API bool IsSolverDataValid(const FRBFSolverData& SolverData, const FRBFParams& Params, const TArray<FRBFTarget>& Targets);
 
 	/** Given a set of targets and new input entry, give list of activated targets with weights */
+	/** 给定一组目标和新的输入条目，给出带有权重的激活目标列表 */
 	static ANIMGRAPHRUNTIME_API void Solve(const FRBFSolverData& SolverData, const FRBFParams& Params, const TArray<FRBFTarget>& Targets, const FRBFEntry& Input, TArray<FRBFOutputWeight>& OutputWeights);
 
 	/** Util to find distance to nearest neighbour target for each target */
+	/** 用于查找每个目标到最近邻居目标的距离 */
 	static ANIMGRAPHRUNTIME_API bool FindTargetNeighbourDistances(const FRBFParams& Params, const TArray<FRBFTarget>& Targets, TArray<float>& NeighbourDists);
 
 	/** Util to find distance between two entries, using provided params */
+	/** 实用程序使用提供的参数查找两个条目之间的距离 */
 	static ANIMGRAPHRUNTIME_API float FindDistanceBetweenEntries(const FRBFEntry& A, const FRBFEntry& B, const FRBFParams& Params, ERBFDistanceMethod OverrideMethod = ERBFDistanceMethod::DefaultMethod);
 
 	/** Returns the radius for a given target */
+	/** 返回给定目标的半径 */
 	static ANIMGRAPHRUNTIME_API float GetRadiusForTarget(const FRBFTarget& Target, const FRBFParams& Params);
 
 	/** Compute the optimal radius for the given targets. Returns the radius */
+	/** 计算给定目标的最佳半径。返回半径 */
 	static ANIMGRAPHRUNTIME_API float GetOptimalRadiusForTargets(const FRBFParams& Params, const TArray<FRBFTarget>& Targets);
 };

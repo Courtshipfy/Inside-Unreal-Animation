@@ -13,6 +13,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_ApplyMeshSpaceAdditive
+// FAnimNode_ApplyMeshSpaceAdditive
 
 void FAnimNode_ApplyMeshSpaceAdditive::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -43,6 +44,7 @@ void FAnimNode_ApplyMeshSpaceAdditive::Update_AnyThread(const FAnimationUpdateCo
 	if (!IsLODEnabled(Context.AnimInstanceProxy))
 	{
 		// Avoid doing work if we're not even going to be used.
+		// 如果我们甚至不被利用，就避免做工作。
 		return;
 	}
 
@@ -81,6 +83,7 @@ void FAnimNode_ApplyMeshSpaceAdditive::Evaluate_AnyThread(FPoseContext& Output)
 	ANIM_MT_SCOPE_CYCLE_COUNTER_VERBOSE(ApplyMeshSpaceAdditive, !IsInGameThread());
 
 	//@TODO: Could evaluate Base into Output and save a copy
+	//@TODO：可以将 Base 评估为输出并保存副本
 	if (FAnimWeight::IsRelevant(ActualAlpha))
 	{
 		const bool bExpectsAdditivePose=true;

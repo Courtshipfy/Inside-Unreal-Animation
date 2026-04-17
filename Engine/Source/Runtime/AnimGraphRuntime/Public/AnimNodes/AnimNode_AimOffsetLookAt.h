@@ -18,9 +18,11 @@ struct FAnimNode_AimOffsetLookAt : public FAnimNode_BlendSpacePlayer
 	GENERATED_BODY()
 
 	/** Cached local transform of the source socket */
+	/** 源套接字的缓存本地转换 */
 	FTransform SocketLocalTransform;
 
 	/** Cached local transform of the pivot socket  */
+	/** 枢轴套接字的缓存本地转换  */
 	FTransform PivotSocketLocalTransform;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Links)
@@ -36,6 +38,7 @@ struct FAnimNode_AimOffsetLookAt : public FAnimNode_BlendSpacePlayer
 	int32 LODThreshold;
 
 	/** Socket or bone to treat as the look at source. This will then be pointed at LookAtLocation */
+	/** 用作查看源的插槽或骨骼。然后它将指向 LookAtLocation */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LookAt, meta = (PinHiddenByDefault))
 	FName SourceSocketName;
 
@@ -48,33 +51,41 @@ struct FAnimNode_AimOffsetLookAt : public FAnimNode_BlendSpacePlayer
 	FName PivotSocketName;
 
 	/** Location, in world space to look at */
+	/** 位置，在世界空间中观察 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LookAt, meta = (PinShownByDefault))
 	FVector LookAtLocation;
 
 	/** Direction in the socket transform to consider the 'forward' or look at axis */
+	/** 套接字变换中的方向考虑“向前”或查看轴 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LookAt, meta = (PinHiddenByDefault))
 	FVector SocketAxis;
 
 	/** Amount of this node to blend into the output pose */
+	/** 该节点混合到输出姿势中的数量 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LookAt, meta = (PinShownByDefault))
 	float Alpha;
 
 	/** Cached calculated blend input */
+	/** 缓存计算的混合输入 */
 	FVector CurrentBlendInput;
 
 	/** Cached reference to the source socket's bone */
+	/** 缓存对源套接字骨骼的引用 */
 	FBoneReference SocketBoneReference;
 
 	/** Cached reference to the pivot socket's bone */
+	/** 缓存对枢轴插槽骨骼的引用 */
 	FBoneReference PivotSocketBoneReference;
 
 	/** Cached flag to indicate whether LOD threshold is enabled */
+	/** 缓存标志指示是否启用 LOD 阈值 */
 	bool bIsLODEnabled;
 
 public:
 	ANIMGRAPHRUNTIME_API FAnimNode_AimOffsetLookAt();
 
 	// FAnimNode_Base interface
+	// FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void OnInitializeAnimInstance(const FAnimInstanceProxy* InProxy, const UAnimInstance* InAnimInstance) override;
 	virtual bool NeedsOnInitializeAnimInstance() const override { return true; }
 	ANIMGRAPHRUNTIME_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
@@ -84,8 +95,10 @@ public:
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	virtual int32 GetLODThreshold() const override { return LODThreshold; }
 	// End of FAnimNode_Base interface
+	// FAnimNode_Base接口结束
 
 	// FAnimNode_BlendSpacePlayer interface
+	// FAnimNode_BlendSpacePlayer接口
 	ANIMGRAPHRUNTIME_API virtual FVector GetPosition() const override;
 
 	ANIMGRAPHRUNTIME_API void UpdateFromLookAtTarget(FPoseContext& LocalPoseContext);

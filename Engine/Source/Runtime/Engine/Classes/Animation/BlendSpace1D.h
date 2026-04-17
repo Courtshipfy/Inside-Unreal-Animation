@@ -37,9 +37,11 @@ public:
 
 protected:
 	//~ Begin UBlendSpace Interface
+	//~ 开始 UBlendSpace 界面
 	virtual EBlendSpaceAxis GetAxisToScale() const override;
 #if WITH_EDITOR
 	virtual void SnapSamplesToClosestGridPoint() override;
 #endif
 	//~ End UBlendSpace Interface
+	//~ 结束UBlendSpace界面
 };

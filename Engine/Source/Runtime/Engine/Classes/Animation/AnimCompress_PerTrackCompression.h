@@ -21,54 +21,67 @@ class UAnimCompress_PerTrackCompression : public UAnimCompress_RemoveLinearKeys
 	GENERATED_UCLASS_BODY()
 
 	/** Maximum threshold to use when replacing a component with zero. Lower values retain more keys, but yield less compression. */
+	/** 用零替换组件时使用的最大阈值。较低的值保留更多的键，但产生的压缩较少。 */
 	UPROPERTY(EditAnywhere, Category=PerTrack)
 	float MaxZeroingThreshold;
 
 	/** Maximum position difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression. */
+	/** 测试是否可以删除动画关键点时要使用的最大位置差异。较低的值保留更多的键，但产生的压缩较少。 */
 	UPROPERTY(EditAnywhere, Category=PerTrack)
 	float MaxPosDiffBitwise;
 
 	/** Maximum angle difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression. */
+	/** 测试是否可以删除动画关键点时要使用的最大角度差。较低的值保留更多的键，但产生的压缩较少。 */
 	UPROPERTY(EditAnywhere, Category=PerTrack)
 	float MaxAngleDiffBitwise;
 
 	/** Maximum position difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression. */
+	/** 测试是否可以删除动画关键点时要使用的最大位置差。较低的值保留更多的键，但产生的压缩较少。 */
 	UPROPERTY(EditAnywhere, Category=PerTrack)
 	float MaxScaleDiffBitwise;
 
 	/** Which encoding formats is the per-track compressor allowed to try on rotation keys */
+	/** 每轨压缩器允许尝试旋转键的编码格式 */
 	UPROPERTY(EditAnywhere, Category=PerTrack)
 	TArray<TEnumAsByte<enum AnimationCompressionFormat> > AllowedRotationFormats;
 
 	/** Which encoding formats is the per-track compressor allowed to try on translation keys */
+	/** 每轨压缩器允许在翻译键上尝试哪些编码格式 */
 	UPROPERTY(EditAnywhere, Category=PerTrack)
 	TArray<TEnumAsByte<enum AnimationCompressionFormat> > AllowedTranslationFormats;
 
 	/** Which encoding formats is the per-track compressor allowed to try on scale keys */
+	/** 每轨压缩器允许在音阶键上尝试哪些编码格式 */
 	UPROPERTY(EditAnywhere, Category=PerTrack, meta = (InvalidEnumValues = "ACF_Fixed32NoW,ACF_Float32NoW"))
 	TArray<TEnumAsByte<enum AnimationCompressionFormat> > AllowedScaleFormats;
 
 	/** If true, resample the animation to ResampleFramerate frames per second */
+	/** 如果为 true，则将动画重新采样为每秒 ResampleFramerate 帧数 */
 	UPROPERTY(EditAnywhere, Category=Resampling)
 	uint32 bResampleAnimation:1;
 
 	/** When bResampleAnimation is true, this defines the desired framerate */
+	/** 当 bResampleAnimation 为 true 时，这定义了所需的帧速率 */
 	UPROPERTY(EditAnywhere, Category=Resampling, meta=(ClampMin = "1.0", ClampMax = "30.0", editcondition = "bResampleAnimation"))
 	float ResampledFramerate;
 
 	/** Animations with fewer keys than MinKeysForResampling will not be resampled. */
+	/** 关键点少于 MinKeysForResampling 的动画将不会被重新采样。 */
 	UPROPERTY(EditAnywhere, Category=Resampling, meta=(editcondition = "bResampleAnimation"))
 	int32 MinKeysForResampling;
 
 	/** If true, adjust the error thresholds based on the 'height' within the skeleton */
+	/** 如果为 true，则根据骨架内的“高度”调整错误阈值 */
 	UPROPERTY(EditAnywhere, Category=AdaptiveError)
 	uint32 bUseAdaptiveError:1;
 
 	/** If true, uses MinEffectorDiff as the threshold for end effectors */
+	/** 如果为 true，则使用 MinEffectorDiff 作为末端执行器的阈值 */
 	UPROPERTY(EditAnywhere, Category=AdaptiveError, meta=(editcondition = "bUseAdaptiveError"))
 	uint32 bUseOverrideForEndEffectors:1;
 
 	/** A bias added to the track height before using it to calculate the adaptive error */
+	/** 在使用轨道高度计算自适应误差之前添加偏差 */
 	UPROPERTY(EditAnywhere, Category=AdaptiveError, meta=(editcondition = "bUseAdaptiveError"))
 	int32 TrackHeightBias;
 
@@ -134,15 +147,18 @@ public:
 
 protected:
 	//~ Begin UAnimCompress Interface
+	//~ 开始 UAnimCompress 界面
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual bool DoReduction(const FCompressibleAnimData& CompressibleAnimData, FCompressibleAnimDataResult& OutResult) override;
 	virtual void PopulateDDCKey(const UE::Anim::Compression::FAnimDDCKeyArgs& KeyArgs, FArchive& Ar) override;
 #endif // WITH_EDITOR
 	//~ Begin UAnimCompress Interface
+	//~ 开始 UAnimCompress 界面
 
 #if WITH_EDITOR
 	//~ Begin UAnimCompress_RemoveLinearKeys Interface
+	//~ 开始 UAnimCompress_RemoveLinearKeys 接口
 	virtual void CompressUsingUnderlyingCompressor(
 		const FCompressibleAnimData& CompressibleAnimData,
 		FCompressibleAnimDataResult& OutCompressedData,
@@ -157,6 +173,7 @@ protected:
 		TArray<FRotationTrack>& RotationData,
 		TArray<FScaleTrack>& ScaleData) override;
 	//~ End UAnimCompress_RemoveLinearKeys Interface
+	//~ 结束 UAnimCompress_RemoveLinearKeys 接口
 #endif // WITH_EDITOR
 };
 

@@ -100,6 +100,7 @@ FVector FRBFParams::GetTwistAxisVector() const
 //////////////////////////////////////////////////////////////////////////
 
 /* Returns the distance between entries, using different metrics, in radians. */
+/* 使用不同的度量返回条目之间的距离（以弧度为单位）。 */
 static float GetDistanceBetweenEntries(
 	const FRBFEntry& A,
 	const FRBFEntry& B,
@@ -152,6 +153,7 @@ float FRBFSolver::FindDistanceBetweenEntries(const FRBFEntry& A, const FRBFEntry
 
 
 // Sigma controls the falloff width. The larger the value the narrower the falloff
+// Sigma 控制衰减宽度。值越大衰减越窄
 static float GetWeightedValue(
 	float Value, 
 	float KernelWidth, 
@@ -169,7 +171,9 @@ static float GetWeightedValue(
 			if (bBackCompFix)
 			{
 				// This is how the old code formulated it. It has no control over the falloff
+				// 这就是旧代码的表述方式。它无法控制衰减
 				// but ignores all values that have a distance greater than 1.0.
+				// 但忽略距离大于 1.0 的所有值。
 				return FMath::Max(1.0f - Value, 0.0f);
 			}
 			else
@@ -181,7 +185,9 @@ static float GetWeightedValue(
 			if (bBackCompFix)
 			{
 				// This is how the old code formulated it. It has a much wider falloff than the
+				// 这就是旧代码的表述方式。它的衰减范围比
 				// one below it.
+				// 下面有一个。
 				return FMath::Exp(-Value * Value);
 			}
 			else
@@ -193,7 +199,9 @@ static float GetWeightedValue(
 			if (bBackCompFix)
 			{
 				// This is how the old code formulated it. It has a much wider falloff than the
+				// 这就是旧代码的表述方式。它的衰减范围比
 				// one below it.
+				// 下面有一个。
 				return 1.f / FMath::Exp(Value);
 			}
 			else
@@ -278,7 +286,9 @@ static bool ValidateInterpolative(
 	if (TRBFInterpolator<FRBFEntry>::GetIdenticalNodePairs(EntryTargets, InterpolativeWeightFunction(Params, EntryTargets), InvalidPairs))
 	{
 		// We mark the second of the pair to be invalid. Given how GetInvalidNodePairs iterates over all possible pairs,
+		// 我们将这对中的第二个标记为无效。鉴于 GetInvalidNodePairs 如何迭代所有可能的对，
 		// this should guarantee to catch them all.
+		// 这应该保证能抓住他们所有人。
 		for (const auto& IP : InvalidPairs)
 			InvalidTargetSet.Add(IP.Get<1>());
 
@@ -286,6 +296,7 @@ static bool ValidateInterpolative(
 			InvalidTargets.Add(IT);
 
 		// Return things in a nice sorted order, rather than TSet's hash order.
+		// 以良好的排序顺序返回内容，而不是 TSet 的哈希顺序。
 		InvalidTargets.Sort();
 	}
 
@@ -303,6 +314,7 @@ bool FRBFSolver::ValidateTargets(
 	case ERBFSolverType::Additive:
 	default:
 		// The additive solver does not care
+		// 加性求解器不关心
 		return true;
 
 	case ERBFSolverType::Interpolative:
@@ -319,27 +331,33 @@ static void SolveAdditive(
 	)
 {
 	// Iterate over each pose, adding its contribution
+	// 迭代每个姿势，添加其贡献
 	for (int32 TargetIdx = 0; TargetIdx < Targets.Num(); TargetIdx++)
 	{
 		const FRBFTarget& Target = Targets[TargetIdx];
 		ERBFFunctionType FunctionType = Target.FunctionType == ERBFFunctionType::DefaultFunction ? Params.Function : Target.FunctionType;
 
 		// Find distance
+		// 求距离
 		const float Distance = FRBFSolver::FindDistanceBetweenEntries(Target, Input, Params, Target.DistanceMethod);
 		const float Scaling = FRBFSolver::GetRadiusForTarget(Target, Params);
 		const float X = Distance / Scaling;
 
 		// Evaluate radial basis function to find weight. We default to sigma = 1.0 and scale instead
+		// 评估径向基函数以找到权重。我们默认 sigma = 1.0 并改为缩放
 		// using the radius value. We use the old formulation for Gauss + 
+		// 使用半径值。我们使用高斯 + 的旧公式
 		float Weight = GetWeightedValue(X, 1.0f, FunctionType, /*BackCompFix=*/ true);
 
 		// Apply custom curve if desired
+		// 如果需要，应用自定义曲线
 		if (Target.bApplyCustomCurve)
 		{
 			Weight = Target.CustomCurve.Eval(Weight, Weight); // default is un-mapped Weight
 		}
 
 		// Add to array of all weights. Don't threshold yet, wait for normalization step.
+		// 添加到所有权重的数组中。还没有阈值，等待标准化步骤。
 		AllWeights[TargetIdx] = Weight;
 	}
 }
@@ -422,6 +440,7 @@ void FRBFSolver::Solve(
 		SolverData.Rbf.Interpolate(AllWeights, Input);
 
 		// Scale the weight by the scale factor on the target.
+		// 按目标上的比例因子缩放重量。
 		for (int32 i = 0; i < Targets.Num(); i++)
 		{
 			AllWeights[i] *= Targets[i].ScaleFactor;
@@ -437,6 +456,7 @@ void FRBFSolver::Solve(
 	}
 
 	// Only normalize and apply if we got some kind of weight
+	// 仅当我们获得某种重量时才标准化并应用
 	if (TotalWeight > KINDA_SMALL_NUMBER)
 	{
 		float WeightScale = 1.f;
@@ -489,11 +509,13 @@ void FRBFSolver::Solve(
 		}
 		
 		/// TotalWeight : (Params.bNormalizeWeightsBelowSumOfOne ? 1.f / TotalWeight : 1.f);
+		/// TotalWeight : (Params.bNormalizeWeightsBelowSumOfOne ? 1.f / TotalWeight : 1.f);
 		for (int32 TargetIdx = 0; TargetIdx < Targets.Num(); TargetIdx++)
 		{
 			float NormalizedWeight = AllWeights[TargetIdx] * WeightScale;
 
 			// If big enough, add to output list
+			// 如果足够大，添加到输出列表
 			if (NormalizedWeight > Params.WeightThreshold)
 			{
 				OutputWeights.Add(FRBFOutputWeight(TargetIdx, NormalizedWeight));
@@ -513,6 +535,7 @@ bool FRBFSolver::FindTargetNeighbourDistances(const FRBFParams& Params, const TA
 	if (NumTargets > 1)
 	{
 		// Iterate over targets
+		// 迭代目标
 		for (int32 TargetIdx = 0; TargetIdx < NumTargets; TargetIdx++)
 		{
 			float& NearestDist = NeighbourDists[TargetIdx];
@@ -523,12 +546,14 @@ bool FRBFSolver::FindTargetNeighbourDistances(const FRBFParams& Params, const TA
 				if (OtherTargetIdx != TargetIdx) // If not ourself..
 				{
 					// Get distance between poses
+					// 获取姿势之间的距离
 					float Dist = FindDistanceBetweenEntries(Targets[TargetIdx], Targets[OtherTargetIdx], Params, Targets[TargetIdx].DistanceMethod);
 					NearestDist = FMath::Min(Dist, NearestDist);
 				}
 			}
 
 			// Avoid zero dist if poses are all on top of each other
+			// 如果姿势全部重叠，请避免零距离
 			NearestDist = FMath::Max(NearestDist, KINDA_SMALL_NUMBER);
 		}
 

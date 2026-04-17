@@ -132,8 +132,10 @@ bool UAnimCurveCompressionCodec_UniformIndexable::Compress(const FCompressibleAn
 		BufferOffset += sizeof(float) * NumCurves * NumSamples;
 
 		// Write out samples by curve so that we can more easily index curve keys
+		// 按曲线写出样本，以便我们可以更轻松地索引曲线键
 
 		// Curve 0 Key 0, Curve 0 Key 1, Curve 0 Key N, Curve 1 Key 0, Curve 1 Key 1, Curve 1 Key N, Curve M Key 0, ...
+		// 曲线 0 关键点 0、曲线 0 关键点 1、曲线 0 关键点 N、曲线 1 关键点 0、曲线 1 关键点 1、曲线 1 关键点 N、曲线 M 关键点 0、...
 		for (const FFloatCurve& Curve : AnimSeq.RawFloatCurves)
 		{
 			for (int32 SampleIndex = 0; SampleIndex < NumSamples; ++SampleIndex)

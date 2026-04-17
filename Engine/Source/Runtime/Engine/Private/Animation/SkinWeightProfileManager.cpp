@@ -152,9 +152,11 @@ void FSkinWeightProfileManager::RequestSkinWeightProfileStack(
 	)
 {
 	// Make sure we have an actual skeletal mesh
+	// 确保我们有一个实际的骨架网格物体
 	if (USkeletalMesh* const Mesh = Cast<USkeletalMesh>(SkinnedAsset))
 	{
 		// Setup a request structure
+		// 设置请求结构
 		FSetProfileRequest ProfileRequest;
 		ProfileRequest.ProfileStack = InProfileStack.Normalized();
 		ProfileRequest.Callback = Callback;
@@ -166,6 +168,7 @@ void FSkinWeightProfileManager::RequestSkinWeightProfileStack(
 		if (LODIndex == INDEX_NONE)
 		{
 			// Match what rendering does.
+			// 匹配渲染的作用。
 			constexpr bool bForceLowestLODIdx = true;
 			const int32 NumLODS = Mesh->GetLODNum();
 			for (int32 index = Mesh->GetMinLodIdx(bForceLowestLODIdx); index < NumLODS; ++index)
@@ -179,9 +182,11 @@ void FSkinWeightProfileManager::RequestSkinWeightProfileStack(
 		}
 		
 		// Add the profile request
+		// 添加个人资料请求
 		const int32 Index = PendingSetProfileRequests.Add(ProfileRequest);
 
 		// Check whether or not we might have already setup a readback for this skeletal mesh, and add a request to it
+		// 检查我们是否已经为此骨架网格物体设置了读回，并向其添加请求
 		int32& NumRequestsForMesh = PendingMeshes.FindOrAdd(Mesh, 0);
 		++NumRequestsForMesh;
 
@@ -243,6 +248,7 @@ void FSkinWeightProfileManager::DoTick(float DeltaTime, ENamedThreads::Type Curr
 			Request.ExpectedResidentLODs = INDEX_NONE;
 			
 			// Remove if canceled or objects have gone stale 
+			// 如果取消或对象已过时则删除
 			bool bRemove = Request.IdentifyingObject.IsStale() || Request.WeakSkeletalMesh.IsStale() ||
 				CanceledRequest.ContainsByPredicate([Request](FSetProfileRequest& B)
 			{
@@ -252,6 +258,7 @@ void FSkinWeightProfileManager::DoTick(float DeltaTime, ENamedThreads::Type Curr
 			const USkeletalMesh* SkeletalMesh = Request.WeakSkeletalMesh.Get();
 			FSkeletalMeshRenderData* RenderData = SkeletalMesh ? SkeletalMesh->GetResourceForRendering() : nullptr;
 			// Or if skeletal mesh / render data is invalid
+			// 或者如果骨架网格物体/渲染数据无效
 			bRemove = bRemove ? true : (RenderData == nullptr);
 
 			if (!bRemove)
@@ -270,7 +277,9 @@ void FSkinWeightProfileManager::DoTick(float DeltaTime, ENamedThreads::Type Curr
 						if (ShouldIgnoreLOD(SkinWeightProfilesData, *SkeletalMesh, NumResidentLODsRequired))
 						{
 							// This LOD isn't streamed in and has no requests for that. There may be several such LODs for the current model.
+							// 此 LOD 未流式传输，也没有对此的请求。当前模型可能有多个这样的 LOD。
 							// We will create a record in StreamingBlockedMeshes to track when any of these LODs will be streamed in
+							// 我们将在 StreamingBlockedMeshes 中创建一条记录，以跟踪这些 LOD 中的任何一个何时将被流式传输
 							MinResidentLODsToWaitFor = (MinResidentLODsToWaitFor == INDEX_NONE) ?
 								NumResidentLODsRequired :
 								FMath::Min(MinResidentLODsToWaitFor, NumResidentLODsRequired);
@@ -311,6 +320,7 @@ void FSkinWeightProfileManager::DoTick(float DeltaTime, ENamedThreads::Type Curr
 		if (bInProgressRequestsExist || !GSkipLODWithoutDataOrStreamingRequest)
 		{
 			// This is the last index that we will process asynchronously, while the task is running we do not remove request from the array so access should be safe
+			// 这是我们将异步处理的最后一个索引，在任务运行时我们不会从数组中删除请求，因此访问应该是安全的
 			LastGamethreadProfileIndex = PendingSetProfileRequests.Num() - 1;
 
 			if (MyCompletionGraphEvent)
@@ -322,6 +332,7 @@ void FSkinWeightProfileManager::DoTick(float DeltaTime, ENamedThreads::Type Curr
 		else
 		{
 			// This is set when we still have pending requests, but all their unprocessed LODs have not been streamed in.
+			// 当我们仍有待处理的请求，但所有未处理的 LOD 尚未流入时，就会设置此值。
 			WaitingForStreaming = true;
 		}
 	}
@@ -350,12 +361,14 @@ void FSkinWeightProfileManager::CleanupRequest(const FSetProfileRequest& Request
 {
 	QUICK_SCOPE_CYCLE_COUNTER(STAT_SkinWeightProfileManager_CleanupRequest);
 	// Remove request for its pending skeletal mesh
+	// 删除对其待处理骨架网格物体的请求
 	if (int32* RequestsPtr = PendingMeshes.Find(Request.WeakSkeletalMesh))
 	{
 		int32& NumPendingRequests = *RequestsPtr;
 		--NumPendingRequests;
 
 		// In case all requests have finished clean up the readback data and remove skeletal mesh as pending
+		// 如果所有请求都已完成，则清理回读数据并删除待处理的骨架网格物体
 		if (NumPendingRequests == 0)
 		{
 			PendingMeshes.Remove(Request.WeakSkeletalMesh);
@@ -384,6 +397,7 @@ bool FSkinWeightProfileManager::ShouldIgnoreLOD(const FSkinWeightProfilesData& S
 	}
 
 	// Do we have enough LODs in memory?
+	// 内存中是否有足够的 LOD？
 	const FStreamableRenderResourceState& SRRState = SkeletalMesh.GetStreamableResourceState();
 	if (SRRState.NumResidentLODs >= NumResidentLODsRequired)
 	{
@@ -391,16 +405,19 @@ bool FSkinWeightProfileManager::ShouldIgnoreLOD(const FSkinWeightProfilesData& S
 	}
 
 	// Are they scheduled to be streamed in?
+	// 他们计划进行直播吗？
 	if (SkeletalMesh.HasPendingInitOrStreaming())
 	{
 		return false;
 	}
 
 	// This mesh LOD isn't loaded and not scheduled for streaming, we can ignore it
+	// 该网格 LOD 未加载且未安排流式传输，我们可以忽略它
 	return true;
 }
 
 // Used to return early from DoTick if the entire request queue consists of LOD meshes that have not yet been streamed in.
+// 如果整个请求队列由尚未流入的 LOD 网格组成，则用于提前从 DoTick 返回。
 bool FSkinWeightProfileManager::ShouldSkipTick() const
 {
 	if (!WaitingForStreaming || PendingSetProfileRequests.IsEmpty() || !GSkipLODWithoutDataOrStreamingRequest)
@@ -460,6 +477,7 @@ ENamedThreads::Type FSkinWeightProfileManagerAsyncTask::GetDesiredThread()
 {
 #if WITH_EDITOR
 	// Force task to run on GT since it can cause a stall waiting for RT
+	// 强制任务在 GT 上运行，因为它可能导致等待 RT 的停顿
 	return ENamedThreads::GameThread;
 #else
 
@@ -505,12 +523,14 @@ void FSkinWeightProfileManagerAsyncTask::DoTask(ENamedThreads::Type CurrentThrea
 					FSkinWeightProfilesData& SkinweightData = LODRenderData.SkinWeightProfilesData;
 
 					// Don't try to initialize or do a GPU readback for a profile that's already completed.
+					// 不要尝试对已完成的配置文件进行初始化或执行 GPU 读回。
 					if (FSkinWeightProfileManager::HandleDelayedLoads() && SkinweightData.HasProfileStack(Request.ProfileStack))
 					{
 						continue;
 					}
 					
 					// If we have CPU-side weights available, use them right away.
+					// 如果我们有可用的 CPU 端权重，请立即使用它们。
 					if (FSkinWeightProfileManager::AllowCPU() &&
 						((FSkinWeightProfileManager::HandleDelayedLoads() && LODRenderData.SkinWeightVertexBuffer.GetDataVertexBuffer()->IsWeightDataValid()) ||
 						(!FSkinWeightProfileManager::HandleDelayedLoads() && LODRenderData.SkinWeightVertexBuffer.GetNeedsCPUAccess())))

@@ -69,24 +69,29 @@ struct FEulerTransform
 	}
 
 	/** The translation of this transform */
+	/** 这个变换的翻译 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Transform")
 	FVector Location;
 
 	/** The rotation of this transform */
+	/** 这个变换的旋转 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Transform")
 	FRotator Rotation;
 
 	/** The scale of this transform */
+	/** 此次转变的规模 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Transform")
 	FVector Scale;
 
 	/** Convert to an FTransform */
+	/** 转换为 FTransform */
 	inline FTransform ToFTransform() const
 	{
 		return FTransform(Rotation.Quaternion(), Location, Scale);
 	}
 
 	/** Convert from an FTransform */
+	/** 从 FTransform 转换 */
 	inline void FromFTransform(const FTransform& InTransform)
 	{
 		Location = InTransform.GetLocation();
@@ -95,6 +100,7 @@ struct FEulerTransform
 	}
 
 	// Test if all components of the transforms are equal, within a tolerance.
+	// 测试变换的所有分量是否在容差范围内相等。
 	inline bool Equals(const FEulerTransform& Other, FReal Tolerance = KINDA_SMALL_NUMBER) const
 	{
 		return Location.Equals(Other.Location, Tolerance) &&

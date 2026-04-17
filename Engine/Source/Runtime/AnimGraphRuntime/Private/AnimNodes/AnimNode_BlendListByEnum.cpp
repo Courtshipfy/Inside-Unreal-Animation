@@ -6,6 +6,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_BlendListByEnum
+// FAnimNode_BlendListByEnum
 
 int32 FAnimNode_BlendListByEnum::GetActiveChildIndex()
 {

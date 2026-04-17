@@ -17,6 +17,7 @@
 
 /////////////////////////////////////////////////////
 // UAnimNotify_PlaySound
+// UAnimNotify_PlaySound
 
 UAnimNotify_PlaySound::UAnimNotify_PlaySound()
 	: Super()
@@ -40,6 +41,7 @@ void UAnimNotify_PlaySound::Notify(class USkeletalMeshComponent* MeshComp, class
     Notify(MeshComp, Animation);
 	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	// Don't call super to avoid call back in to blueprints
+	// 不要调用 super 以避免回调到蓝图
 	if (Sound && MeshComp)
 	{
 		if (!Sound->IsOneShot())

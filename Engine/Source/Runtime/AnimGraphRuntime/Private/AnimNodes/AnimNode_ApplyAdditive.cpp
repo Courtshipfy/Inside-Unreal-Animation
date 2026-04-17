@@ -11,6 +11,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_ApplyAdditive
+// FAnimNode_ApplyAdditive
 
 void FAnimNode_ApplyAdditive::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -40,7 +41,9 @@ void FAnimNode_ApplyAdditive::Update_AnyThread(const FAnimationUpdateContext& Co
 	if (IsLODEnabled(Context.AnimInstanceProxy))
 	{
 		// @note: If you derive from this class, and if you have input that you rely on for base
+		// @note：如果您从此类派生，并且您有依赖于基础的输入
 		// this is not going to work	
+		// 这是行不通的
 		GetEvaluateGraphExposedInputs().Execute(Context);
 
 		switch (AlphaInputType)
@@ -74,6 +77,7 @@ void FAnimNode_ApplyAdditive::Evaluate_AnyThread(FPoseContext& Output)
 	ANIM_MT_SCOPE_CYCLE_COUNTER_VERBOSE(ApplyAdditive, !IsInGameThread());
 
 	//@TODO: Could evaluate Base into Output and save a copy
+	//@TODO：可以将 Base 评估为输出并保存副本
 	if (FAnimWeight::IsRelevant(ActualAlpha))
 	{
 		const bool bExpectsAdditivePose = true;

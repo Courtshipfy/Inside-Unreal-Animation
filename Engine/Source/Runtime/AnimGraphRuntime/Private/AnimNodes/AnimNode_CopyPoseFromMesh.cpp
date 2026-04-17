@@ -14,6 +14,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_CopyPoseFromMesh
+// FAnimNode_CopyPoseFromMesh
 
 FAnimNode_CopyPoseFromMesh::FAnimNode_CopyPoseFromMesh()
 	: SourceMeshComponent(nullptr)
@@ -30,6 +31,7 @@ void FAnimNode_CopyPoseFromMesh::Initialize_AnyThread(const FAnimationInitialize
 	FAnimNode_Base::Initialize_AnyThread(Context);
 
 	// Initial update of the node, so we dont have a frame-delay on setup
+	// 节点的初始更新，因此我们在设置时没有帧延迟
 	GetEvaluateGraphExposedInputs().Execute(Context);
 }
 
@@ -45,14 +47,17 @@ void FAnimNode_CopyPoseFromMesh::RefreshMeshComponent(USkeletalMeshComponent* Ta
 	{
 		USkeletalMeshComponent* CurrentMeshComponent = CurrentlyUsedSourceMeshComponent.Get();
 		// if current mesh exists, but not same as input mesh
+		// 如果当前网格存在，但与输入网格不同
 		if (CurrentMeshComponent)
 		{
 			// if component has been changed, reinitialize
+			// 如果组件已更改，则重新初始化
 			if (CurrentMeshComponent != InMeshComponent)
 			{
 				ReinitializeMeshComponent(InMeshComponent, InTargetMeshComponent);
 			}
 			// if component is still same but mesh has been changed, we have to reinitialize
+			// 如果组件仍然相同但网格已更改，我们必须重新初始化
 			else if (CurrentMeshComponent->GetSkeletalMeshAsset() != CurrentlyUsedSourceMesh.Get())
 			{
 				ReinitializeMeshComponent(InMeshComponent, InTargetMeshComponent);
@@ -60,6 +65,7 @@ void FAnimNode_CopyPoseFromMesh::RefreshMeshComponent(USkeletalMeshComponent* Ta
 			else if (InTargetMeshComponent)
 			{
 				// see if target mesh has changed
+				// 查看目标网格是否已更改
 				if (InTargetMeshComponent->GetSkeletalMeshAsset() != CurrentlyUsedTargetMesh.Get())
 				{
 					ReinitializeMeshComponent(InMeshComponent, InTargetMeshComponent);
@@ -67,6 +73,7 @@ void FAnimNode_CopyPoseFromMesh::RefreshMeshComponent(USkeletalMeshComponent* Ta
 			}
 		}
 		// if not valid, but input mesh is
+		// 如果无效，但输入网格是
 		else if (!CurrentMeshComponent && InMeshComponent)
 		{
 			ReinitializeMeshComponent(InMeshComponent, InTargetMeshComponent);
@@ -82,6 +89,7 @@ void FAnimNode_CopyPoseFromMesh::RefreshMeshComponent(USkeletalMeshComponent* Ta
 		if (TargetMeshComponent)
 		{
 			// Walk up the attachment chain until we find a skeletal mesh component
+			// 沿着附件链向上走，直到找到骨架网格物体组件
 			USkeletalMeshComponent* ParentMeshComponent = nullptr;
 			for (USceneComponent* AttachParentComp = TargetMeshComponent->GetAttachParent(); AttachParentComp != nullptr; AttachParentComp = AttachParentComp->GetAttachParent())
 			{
@@ -123,12 +131,14 @@ void FAnimNode_CopyPoseFromMesh::PreUpdate(const UAnimInstance* InAnimInstance)
 	if (CurrentMeshComponent && CurrentMeshComponent->GetSkeletalMeshAsset() && CurrentMeshComponent->IsRegistered())
 	{
 		// If our source is running under leader-pose, then get bone data from there
+		// 如果我们的源在领导者姿势下运行，则从那里获取骨骼数据
 		if(USkeletalMeshComponent* LeaderPoseComponent = Cast<USkeletalMeshComponent>(CurrentMeshComponent->LeaderPoseComponent.Get()))
 		{
 			CurrentMeshComponent = LeaderPoseComponent;
 		}
 
 		// re-check mesh component validity as it may have changed to leader
+		// 重新检查网格组件有效性，因为它可能已更改为领导者
 		if(CurrentMeshComponent->GetSkeletalMeshAsset() && CurrentMeshComponent->IsRegistered())
 		{
 			const bool bUROInSync = CurrentMeshComponent->ShouldUseUpdateRateOptimizations() && CurrentMeshComponent->AnimUpdateRateParams != nullptr && CurrentMeshComponent->AnimUpdateRateParams == InAnimInstance->GetSkelMeshComponent()->AnimUpdateRateParams;
@@ -137,10 +147,12 @@ void FAnimNode_CopyPoseFromMesh::PreUpdate(const UAnimInstance* InAnimInstance)
 			const bool bArraySizesMatch = CachedComponentSpaceTransforms.Num() == CurrentMeshComponent->GetComponentSpaceTransforms().Num();
 
 			// Copy source array from the appropriate location
+			// 从适当的位置复制源数组
 			SourceMeshTransformArray.Reset();
 			SourceMeshTransformArray.Append((bUROInSync || bUsingExternalInterpolation) && bArraySizesMatch ? CachedComponentSpaceTransforms : CurrentMeshComponent->GetComponentSpaceTransforms());
 
 			// Ref skeleton is need for parent index lookups later, so store it now
+			// 稍后父索引查找需要引用骨架，所以现在存储它
 			CurrentlyUsedMesh = CurrentMeshComponent->GetSkeletalMeshAsset();
 
 			if(bCopyCurves)
@@ -148,13 +160,17 @@ void FAnimNode_CopyPoseFromMesh::PreUpdate(const UAnimInstance* InAnimInstance)
 				if (CurrentMeshComponent->bEnableAnimation == false)
 				{
 					// Assume this is using the anim next path. Only curves directly in the mesh component are valid.
+					// 假设这是使用动画下一个路径。只有直接位于网格组件中的曲线才有效。
 					// @TODO: Replace the path below with this one after validating performance and behavior.
+					// @TODO：验证性能和行为后，将下面的路径替换为该路径。
 					SourceCurves.CopyFrom(CurrentMeshComponent->GetAnimCurves());
 				}
 				else if (UAnimInstance* SourceAnimInstance = CurrentMeshComponent->GetAnimInstance())
 				{
 					// Potential optimization/tradeoff: If we stored the curve results on the mesh component in non-editor scenarios, this would be
+					// 潜在的优化/权衡：如果我们在非编辑器场景中将曲线结果存储在网格组件上，这将是
 					// much faster (but take more memory). As it is, we need to translate the map stored on the anim instance.
+					// 速度更快（但占用更多内存）。事实上，我们需要翻译存储在动画实例上的地图。
 					const TMap<FName, float>& AnimCurveList = SourceAnimInstance->GetAnimationCurveList(EAnimCurveType::AttributeCurve);
 					UE::Anim::FCurveUtils::BuildUnsorted(SourceCurves, AnimCurveList);
 				}
@@ -180,7 +196,9 @@ void FAnimNode_CopyPoseFromMesh::Update_AnyThread(const FAnimationUpdateContext&
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Update_AnyThread)
 	// This introduces a frame of latency in setting the pin-driven source component,
+	// 这在设置引脚驱动源组件时引入了延迟帧，
 	// but we cannot do the work to extract transforms on a worker thread as it is not thread safe.
+	// 但我们无法在工作线程上提取转换，因为它不是线程安全的。
 	GetEvaluateGraphExposedInputs().Execute(Context);
 
 	TRACE_ANIM_NODE_VALUE(Context, TEXT("Component"), *GetNameSafe(CurrentlyUsedSourceMeshComponent.IsValid() ? CurrentlyUsedSourceMeshComponent.Get() : nullptr));
@@ -229,6 +247,7 @@ void FAnimNode_CopyPoseFromMesh::Evaluate_AnyThread(FPoseContext& Output)
 					const int32 ParentIndex = CurrentMesh->GetRefSkeleton().GetParentIndex(SourceBoneIndex);
 					const FCompactPoseBoneIndex MyParentIndex = RequiredBones.GetParentBoneIndex(PoseBoneIndex);
 					// only apply if I also have parent, otherwise, it should apply the space bases
+					// 仅当我也有父母时才适用，否则，它应该应用太空基地
 					if (SourceMeshTransformArray.IsValidIndex(ParentIndex) && MyParentIndex != INDEX_NONE)
 					{
 						const FTransform& ParentTransform = SourceMeshTransformArray[ParentIndex];
@@ -269,6 +288,7 @@ void FAnimNode_CopyPoseFromMesh::ReinitializeMeshComponent(USkeletalMeshComponen
 {
 	CurrentlyUsedSourceMeshComponent.Reset();
 	// reset source mesh
+	// 重置源网格
 	CurrentlyUsedSourceMesh.Reset();
 	CurrentlyUsedTargetMesh.Reset();
 	BoneMapToSource.Reset();

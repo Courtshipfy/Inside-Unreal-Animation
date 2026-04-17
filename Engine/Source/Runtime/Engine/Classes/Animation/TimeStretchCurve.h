@@ -231,10 +231,12 @@ private:
 	float CurveValueMinPrecision;
 
 	/** Optimized list of markers. */
+	/** 优化的标记列表。 */
 	UPROPERTY(VisibleAnywhere, Category = TimeStretchCurve)
 	TArray<FTimeStretchCurveMarker> Markers;
 
 	/** Cached Sum(dT_i * C_i) */
+	/** 缓存总和(dT_i * C_i) */
 	UPROPERTY(VisibleAnywhere, Category = TimeStretchCurve)
 	float Sum_dT_i_by_C_i[(uint8)ETimeStretchCurveMapping::MAX];
 };
@@ -259,9 +261,11 @@ public:
 	ENGINE_API void UpdateMarkerIndexForPosition(int32& InOutMarkerIndex, float InPosition, const TArray<float>& InMarkerPositions) const;
 
 	/** Validates that the supplied marker index correctly bookends supplied position. */
+	/** 验证提供的标记索引是否正确书挡提供的位置。 */
 	ENGINE_API bool IsValidMarkerForPosition(int32 InMarkerIndex, float InPosition, const TArray<float>& InMarkerPositions) const;
 
 	/** Validates that the supplied marker positions bookend supplied position. */
+	/** 验证提供的标记是否位于书挡提供的位置。 */
 	ENGINE_API bool AreValidMarkerBookendsForPosition(float InPosition, float InP_CurrMarker, float InP_NextMarker) const;
 
 	/**
@@ -285,18 +289,23 @@ public:
 	ENGINE_API float Convert_P_Target_To_Original(int32 InMarkerIndex, float In_P_Target) const;
 
 	/** Make sure In_P_Target stays in valid marker range. */
+	/** 确保 In_P_Target 保持在有效标记范围内。 */
 	ENGINE_API float Clamp_P_Target(float In_P_Target) const;
 
 	/** Read access to markers in original space. */
+	/** 读取对原始空间中标记的访问权限。 */
 	const TArray<float>& GetMarkers_Original() const { return P_Marker_Original; }
 	
 	/** Read access to markers in target space. */
+	/** 对目标空间中标记的读取访问权限。 */
 	const TArray<float>& GetMarkers_Target() const { return P_Marker_Target; }
 
 	/** Get original play back duration */
+	/** 获取原始播放时长 */
 	float Get_T_Original() const { return T_Original; }
 
 	/** Get target play back duration */
+	/** 获取目标播放时长 */
 	float Get_T_Target() const { return T_Target; }
 
 private:

@@ -16,6 +16,7 @@
 
 /////////////////////////////////////////////////////
 // UAnimSingleNodeInstance
+// UAnim单节点实例
 /////////////////////////////////////////////////////
 
 UAnimSingleNodeInstance::UAnimSingleNodeInstance(const FObjectInitializer& ObjectInitializer)
@@ -47,28 +48,36 @@ void UAnimSingleNodeInstance::SetAnimationAsset(class UAnimationAsset* NewAsset,
 		if (MeshComponent->GetSkeletalMeshAsset() == nullptr)
 		{
 			// if it does not have SkeletalMesh, we nullify it
+			// 如果它没有 SkeletalMesh，我们将其取消
 			CurrentAsset = nullptr;
 		}
 		else if (CurrentAsset != nullptr)
 		{
 			// if we have an asset, make sure their skeleton is valid, otherwise, null it
+			// 如果我们有资产，请确保其骨架有效，否则将其清空
 			if (CurrentAsset->GetSkeleton() == nullptr)
 			{
 				// clear asset since we do not have matching skeleton
+				// 清除资产，因为我们没有匹配的骨架
 				CurrentAsset = nullptr;
 			}
 		}
 		
 		// We've changed the animation asset, and the next frame could be wildly different from the frame we're
+		// 我们更改了动画资源，下一帧可能与我们现在的帧有很大不同
 		// on now. In this case of a single node instance, we reset the clothing on the next update.
+		// 现在。在这种单节点实例的情况下，我们在下次更新时重置服装。
 		MeshComponent->ClothTeleportMode = EClothingTeleportMode::TeleportAndReset;
 	}
 	
 	Proxy.SetAnimationAsset(NewAsset, GetSkelMeshComponent(), bInIsLooping, InPlayRate);
 
 	// if composite, we want to make sure this is valid
+	// 如果是复合的，我们要确保这是有效的
 	// this is due to protect recursive created composite
+	// 这是为了保护递归创建的复合材料
 	// however, if we support modifying asset outside of viewport, it will have to be called whenever modified
+	// 但是，如果我们支持在视口之外修改资源，则每次修改时都必须调用它
 	if (UAnimCompositeBase* CompositeBase = Cast<UAnimCompositeBase>(NewAsset))
 	{
 		CompositeBase->InvalidateRecursiveAsset();
@@ -92,6 +101,7 @@ void UAnimSingleNodeInstance::SetAnimationAsset(class UAnimationAsset* NewAsset,
 	else
 	{
 		// otherwise stop all montages
+		// 否则停止所有蒙太奇
 		StopAllMontages(0.25f);
 	}
 }
@@ -122,6 +132,7 @@ void UAnimSingleNodeInstance::SetMontageLoop(UAnimMontage* Montage, bool bIsLoop
 
 		bool bSucceeded = false;
 		// find last section
+		// [翻译失败: find last section]
 		int32 CurSection = Montage->GetSectionIndex(FirstSection);
 
 		int32 Count = TotalSection;
@@ -133,6 +144,7 @@ void UAnimSingleNodeInstance::SetMontageLoop(UAnimMontage* Montage, bool bIsLoop
 			if( CurSection != INDEX_NONE )
 			{
 				// used to rebuild next/prev
+				// [翻译失败: used to rebuild next/prev]
 				Montage_SetNextSection(LastSection, NewLastSection);
 				LastSection = NewLastSection;
 			}
@@ -155,6 +167,7 @@ void UAnimSingleNodeInstance::SetMontageLoop(UAnimMontage* Montage, bool bIsLoop
 			}
 		}
 		// else the default is already looping
+		// [翻译失败: else the default is already looping]
 	}
 }
 
@@ -298,6 +311,7 @@ void UAnimSingleNodeInstance::SetPlaying(bool bIsPlaying)
 bool UAnimSingleNodeInstance::IsPlaying() const
 {
 	// since setPlaying is setting to montage, we should get it as symmmetry
+	// 由于 setPlaying 设置为蒙太奇，我们应该将其设置为对称
 	if (FAnimMontageInstance* CurMontageInstance = GetActiveMontageInstance())
 	{
 		return CurMontageInstance->bPlaying;
@@ -363,8 +377,11 @@ void UAnimSingleNodeInstance::SetPositionWithPreviousTime(float InPosition, floa
 	}
 
 	// Handle notifies
+	// 处理通知
 	// the way AnimInstance handles notifies doesn't work for single node because this does not tick or anything
+	// AnimInstance 处理通知的方式不适用于单个节点，因为这不会打勾或任何东西
 	// this will need to handle manually, emptying, it and collect it, and trigger them at once. 
+	// [翻译失败: this will need to handle manually, emptying, it and collect it, and trigger them at once.]
 	if (bFireNotifies)
 	{
 		UAnimSequenceBase * SequenceBase = Cast<UAnimSequenceBase> (CurrentAsset);
@@ -378,6 +395,7 @@ void UAnimSingleNodeInstance::SetPositionWithPreviousTime(float InPosition, floa
 			if ( NotifyContext.ActiveNotifies.Num() > 0 )
 			{
 				// single node instance only has 1 asset at a time
+				// [翻译失败: single node instance only has 1 asset at a time]
 				NotifyQueue.AddAnimNotifies(NotifyContext.ActiveNotifies, 1.0f);
 			}
 
@@ -423,6 +441,7 @@ float UAnimSingleNodeInstance::GetLength()
 		if (UBlendSpace* BlendSpace = Cast<UBlendSpace>(CurrentAsset))
 		{
 			// Blend space length is normalized to 1 when getting and setting
+			// 获取和设置时混合空间长度归一化为1
 			return 1.0f;
 		}
 		else if (UAnimSequenceBase* SequenceBase = Cast<UAnimSequenceBase>(CurrentAsset))
@@ -443,10 +462,12 @@ void UAnimSingleNodeInstance::StepForward()
 		const FFrameNumber LastSequenceFrameNumber = FrameRate.AsFrameTime(Sequence->GetPlayLength()).RoundToFrame();
 		
 		// Step forward a small amount and ceil to the next frame number 
+		// 向前一小步并向上移动到下一帧编号
 		FFrameNumber StepToFrame = FrameRate.AsFrameTime(Proxy.GetCurrentTime() + UE_KINDA_SMALL_NUMBER).CeilToFrame();		
 		if (IsLooping())
 		{
 			// Wrap around to start of the sequence
+			// 环绕到序列的开头
 			StepToFrame %= (LastSequenceFrameNumber + 1);
 		}
 
@@ -457,6 +478,7 @@ void UAnimSingleNodeInstance::StepForward()
 	else if (UBlendSpace* BlendSpace = Cast<UBlendSpace>(CurrentAsset))
 	{
 		// BlendSpace combines animations so there's no such thing as a frame. However, 1/30 is a sensible/common rate.
+		// BlendSpace 结合了动画，因此不存在框架之类的东西。然而，1/30 是一个合理/常见的比率。
 		FAnimSingleNodeInstanceProxy& Proxy = GetProxyOnGameThread<FAnimSingleNodeInstanceProxy>();
 		float Length = Proxy.GetBlendSpaceLength();
 		if (Length > 0.0f)
@@ -481,10 +503,12 @@ void UAnimSingleNodeInstance::StepBackward()
 		const FFrameNumber LastSequenceFrameNumber = FrameRate.AsFrameTime(Sequence->GetPlayLength()).RoundToFrame();
 
 		// Step backwards a small amount and floor to the previous frame number 
+		// 向后退一小步并回到上一帧编号
 		FFrameNumber StepToFrame = FrameRate.AsFrameTime(Proxy.GetCurrentTime() - UE_KINDA_SMALL_NUMBER).FloorToFrame();
 		if (IsLooping())
 		{
 			// Wrap around to end of sequence
+			// 环绕到序列末尾
 			StepToFrame = StepToFrame.Value < 0 ? LastSequenceFrameNumber : StepToFrame;
 		}
 
@@ -495,6 +519,7 @@ void UAnimSingleNodeInstance::StepBackward()
 	else if (UBlendSpace* BlendSpace = Cast<UBlendSpace>(CurrentAsset))
 	{
 		// BlendSpace combines animations so there's no such thing as a frame. However, 1/30 is a sensible/common rate.
+		// BlendSpace 结合了动画，因此不存在框架之类的东西。然而，1/30 是一个合理/常见的比率。
 		FAnimSingleNodeInstanceProxy& Proxy = GetProxyOnGameThread<FAnimSingleNodeInstanceProxy>();
 		float Length = Proxy.GetBlendSpaceLength();
 		if (Length > 0.0f)

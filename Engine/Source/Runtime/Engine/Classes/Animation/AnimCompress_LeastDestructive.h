@@ -20,6 +20,7 @@ class UAnimCompress_LeastDestructive : public UAnimCompress_BitwiseCompressOnly
 
 #if WITH_EDITORONLY_DATA
 	// Least destructive is high fidelity
+	// 高保真度破坏性最小
 	virtual bool IsHighFidelity(const FCompressibleAnimData& CompressibleAnimData) const override { return true; }
 #endif
 };

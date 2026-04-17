@@ -7,6 +7,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_UseCachedPose
+// FAnimNode_UseCachedPose
 
 FAnimNode_UseCachedPose::FAnimNode_UseCachedPose()
 {
@@ -28,7 +29,9 @@ void FAnimNode_UseCachedPose::Update_AnyThread(const FAnimationUpdateContext& Co
 {
 	{
 		// This makes sure we dont see a 'save cached pose' entry in the debug data.
+		// 这确保我们在调试数据中看不到“保存缓存姿势”条目。
 		// This will be handled later on when the cached pose branch gets taken.
+		// 这将在稍后获取缓存的姿势分支时处理。
 		TRACE_SCOPED_ANIM_NODE_SUSPEND;	
 		LinkToCachingNode.Update(Context);
 	}
@@ -49,6 +52,8 @@ void FAnimNode_UseCachedPose::GatherDebugData(FNodeDebugData& DebugData)
 	DebugData.AddDebugItem(DebugLine, true);
 
 	// we explicitly do not forward this call to the SaveCachePose node here.
+	// 我们明确不将此调用转发到此处的 SaveCachePose 节点。
 	// It is handled in FAnimInstanceProxy::GatherDebugData
+	// 它在 FAnimInstanceProxy::GatherDebugData 中处理
 }
 

@@ -146,6 +146,7 @@ void FAnimNode_MirrorBase::Update_AnyThread(const FAnimationUpdateContext& Conte
 		if (GetBlendTimeOnMirrorStateChange() > SMALL_NUMBER)
 		{
 			// Inertialize when switching between mirrored and unmirrored states to smooth out the pose discontinuity
+			// 在镜像和非镜像状态之间切换时进行惯性化以平滑姿势不连续性
 			UE::Anim::IInertializationRequester* InertializationRequester = Context.GetMessage<UE::Anim::IInertializationRequester>();
 			if (InertializationRequester)
 			{
@@ -168,6 +169,7 @@ void FAnimNode_MirrorBase::Update_AnyThread(const FAnimationUpdateContext& Conte
 		}
 
 		// Optionally reinitialize the source when the mirror state changes
+		// 当镜像状态发生变化时，可以选择重新初始化源
 		if (GetResetChildOnMirrorStateChange())
 		{
 			FAnimationInitializeContext ReinitializeContext(Context.AnimInstanceProxy, Context.SharedContext);
@@ -201,6 +203,7 @@ void FAnimNode_MirrorBase::Evaluate_AnyThread(FPoseContext& Output)
 				Output.LogMessage(EMessageSeverity::Warning, Message);
 
 				// Force a bind pose to make it obvious
+				// 强制绑定姿势使其明显
 				Output.Pose.ResetToAdditiveIdentity();
 			}
 			else

@@ -18,6 +18,7 @@ static_assert(sizeof(ispc::BoneTrackPair) == sizeof(BoneTrackPair), "sizeof(ispc
 #endif
 
 // Support run-time toggling on supported platforms in non-shipping configurations
+// 支持非发货配置中支持的平台上的运行时切换
 #if !INTEL_ISPC || UE_BUILD_SHIPPING
 static constexpr bool bAnim_ConstantKeyLerp_ISPC_Enabled = INTEL_ISPC && ANIM_CONSTANT_KEY_LERP_ISPC_ENABLED_DEFAULT;
 #else
@@ -41,11 +42,13 @@ void AEFConstantKeyLerpShared::ByteSwapRotationIn(
 	int32 NumKeys)
 {
 	// Calculate the effective compression (in a track with only one key, it's always stored lossless)
+	// 计算有效压缩（在只有一个密钥的轨道中，它始终无损存储）
 	const int32 EffectiveFormat = (NumKeys == 1) ? ACF_Float96NoW : (int32)CompressedData.RotationCompressionFormat;
 	const int32 KeyComponentSize = CompressedRotationStrides[EffectiveFormat];
 	const int32 KeyNumComponents = CompressedRotationNum[EffectiveFormat];
 
 	// Load the bounds if present
+	// 加载边界（如果存在）
 	if (EffectiveFormat == ACF_IntervalFixed32NoW)
 	{
 		for (int32 i = 0; i < 6; ++i)
@@ -55,6 +58,7 @@ void AEFConstantKeyLerpShared::ByteSwapRotationIn(
 	}
 
 	// Load the keys
+	// 加载密钥
 	for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 	{
 		for (int32 i = 0; i < KeyNumComponents; ++i)
@@ -79,11 +83,13 @@ void AEFConstantKeyLerpShared::ByteSwapTranslationIn(
 	int32 NumKeys)
 {
 	// Calculate the effective compression (in a track with only one key, it's always stored lossless)
+	// 计算有效压缩（在只有一个密钥的轨道中，它始终无损存储）
 	const int32 EffectiveFormat = (NumKeys == 1) ? ACF_None : (int32) CompressedData.TranslationCompressionFormat;
 	const int32 KeyComponentSize = CompressedTranslationStrides[EffectiveFormat];
 	const int32 KeyNumComponents = CompressedTranslationNum[EffectiveFormat];
 
 	// Load the bounds if present
+	// 加载边界（如果存在）
 	if (EffectiveFormat == ACF_IntervalFixed32NoW)
 	{
 		for (int32 i = 0; i < 6; ++i)
@@ -93,6 +99,7 @@ void AEFConstantKeyLerpShared::ByteSwapTranslationIn(
 	}
 
 	// Load the keys
+	// 加载密钥
 	for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 	{
 		for (int32 i = 0; i < KeyNumComponents; ++i)
@@ -117,11 +124,13 @@ void AEFConstantKeyLerpShared::ByteSwapScaleIn(
 	int32 NumKeys)
 {
 	// Calculate the effective compression (in a track with only one key, it's always stored lossless)
+	// [翻译失败: Calculate the effective compression (in a track with only one key, it's always stored lossless)]
 	const int32 EffectiveFormat = (NumKeys == 1) ? ACF_None : (int32)CompressedData.ScaleCompressionFormat;
 	const int32 KeyComponentSize = CompressedScaleStrides[EffectiveFormat];
 	const int32 KeyNumComponents = CompressedScaleNum[EffectiveFormat];
 
 	// Load the bounds if present
+	// [翻译失败: Load the bounds if present]
 	if (EffectiveFormat == ACF_IntervalFixed32NoW)
 	{
 		for (int32 i = 0; i < 6; ++i)
@@ -131,6 +140,7 @@ void AEFConstantKeyLerpShared::ByteSwapScaleIn(
 	}
 
 	// Load the keys
+	// 加载密钥
 	for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 	{
 		for (int32 i = 0; i < KeyNumComponents; ++i)
@@ -154,11 +164,13 @@ void AEFConstantKeyLerpShared::ByteSwapRotationOut(
 	int32 NumKeys)
 {
 	// Calculate the effective compression (in a track with only one key, it's always stored lossless)
+	// 计算有效压缩（在只有一个密钥的轨道中，它始终无损存储）
 	const int32 EffectiveFormat = (NumKeys == 1) ? ACF_Float96NoW : (int32) CompressedData.RotationCompressionFormat;
 	const int32 KeyComponentSize = CompressedRotationStrides[EffectiveFormat];
 	const int32 KeyNumComponents = CompressedRotationNum[EffectiveFormat];
 
 	// Store the bounds if needed
+	// 如果需要，存储边界
 	if (EffectiveFormat == ACF_IntervalFixed32NoW)
 	{
 		for (int32 i = 0; i < 6; ++i)
@@ -168,6 +180,7 @@ void AEFConstantKeyLerpShared::ByteSwapRotationOut(
 	}
 
 	// Store the keys
+	// 存储密钥
 	for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 	{
 		for (int32 i = 0; i < KeyNumComponents; ++i)
@@ -192,11 +205,13 @@ void AEFConstantKeyLerpShared::ByteSwapTranslationOut(
 	int32 NumKeys)
 {
 	// Calculate the effective compression (in a track with only one key, it's always stored lossless)
+	// 计算有效压缩（在只有一个密钥的轨道中，它始终无损存储）
 	const int32 EffectiveFormat = (NumKeys == 1) ? ACF_None : (int32) CompressedData.TranslationCompressionFormat;
 	const int32 KeyComponentSize = CompressedTranslationStrides[EffectiveFormat];
 	const int32 KeyNumComponents = CompressedTranslationNum[EffectiveFormat];
 
 	// Store the bounds if needed
+	// 如果需要，存储边界
 	if (EffectiveFormat == ACF_IntervalFixed32NoW)
 	{
 		for (int32 i = 0; i < 6; ++i)
@@ -206,6 +221,7 @@ void AEFConstantKeyLerpShared::ByteSwapTranslationOut(
 	}
 
 	// Store the keys
+	// 存储密钥
 	for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 	{
 		for (int32 i = 0; i < KeyNumComponents; ++i)
@@ -230,11 +246,13 @@ void AEFConstantKeyLerpShared::ByteSwapScaleOut(
 	int32 NumKeys)
 {
 	// Calculate the effective compression (in a track with only one key, it's always stored lossless)
+	// 计算有效压缩（在只有一个密钥的轨道中，它始终无损存储）
 	const int32 EffectiveFormat = (NumKeys == 1) ? ACF_None : (int32) CompressedData.ScaleCompressionFormat;
 	const int32 KeyComponentSize = CompressedScaleStrides[EffectiveFormat];
 	const int32 KeyNumComponents = CompressedScaleNum[EffectiveFormat];
 
 	// Store the bounds if needed
+	// [翻译失败: Store the bounds if needed]
 	if (EffectiveFormat == ACF_IntervalFixed32NoW)
 	{
 		for (int32 i = 0; i < 6; ++i)
@@ -244,6 +262,7 @@ void AEFConstantKeyLerpShared::ByteSwapScaleOut(
 	}
 
 	// Store the keys
+	// [翻译失败: Store the keys]
 	for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 	{
 		for (int32 i = 0; i < KeyNumComponents; ++i)
@@ -308,6 +327,7 @@ inline void AEFConstantKeyLerp<FORMAT>::GetPoseRotations(
 			FTransform& BoneAtom = Atoms[AtomIndex];
 
 			// call the decoder directly (not through the vtable)
+			// 直接调用解码器（不通过vtable）
 			AEFConstantKeyLerp<FORMAT>::GetBoneAtomRotation(BoneAtom, DecompContext, TrackIndex);
 		}
 	}
@@ -359,7 +379,9 @@ inline void AEFConstantKeyLerp<FORMAT>::GetPoseTranslations(
 	else
 	{
 		//@TODO: Verify that this prefetch is helping
+		//@TODO：验证此预取是否有帮助
 		// Prefetch the desired pairs array and 2 destination spots; the loop will prefetch one 2 out each iteration
+		// 预取所需的对数组和 2 个目标点；循环将在每次迭代中预取 1 2
 		FPlatformMisc::Prefetch(&(DesiredPairs[0]));
 		const int32 PrefetchCount = FMath::Min(PairCount, 1);
 		for (int32 PairIndex = 0; PairIndex < PairCount; ++PairIndex)
@@ -382,6 +404,7 @@ inline void AEFConstantKeyLerp<FORMAT>::GetPoseTranslations(
 			FTransform& BoneAtom = Atoms[AtomIndex];
 
 			// call the decoder directly (not through the vtable)
+			// 直接调用解码器（不通过vtable）
 			AEFConstantKeyLerp<FORMAT>::GetBoneAtomTranslation(BoneAtom, DecompContext, TrackIndex);
 		}
 	}
@@ -437,7 +460,9 @@ inline void AEFConstantKeyLerp<FORMAT>::GetPoseScales(
 	else
 	{
 		//@TODO: Verify that this prefetch is helping
+		//@TODO：验证此预取是否有帮助
 		// Prefetch the desired pairs array and 2 destination spots; the loop will prefetch one 2 out each iteration
+		// [翻译失败: Prefetch the desired pairs array and 2 destination spots; the loop will prefetch one 2 out each iteration]
 		FPlatformMisc::Prefetch(&(DesiredPairs[0]));
 		const int32 PrefetchCount = FMath::Min(PairCount, 1);
 		for (int32 PairIndex = 0; PairIndex < PairCount; ++PairIndex)
@@ -460,6 +485,7 @@ inline void AEFConstantKeyLerp<FORMAT>::GetPoseScales(
 			FTransform& BoneAtom = Atoms[AtomIndex];
 
 			// call the decoder directly (not through the vtable)
+			// [翻译失败: call the decoder directly (not through the vtable)]
 			AEFConstantKeyLerp<FORMAT>::GetBoneAtomScale(BoneAtom, DecompContext, TrackIndex);
 		}
 	}

@@ -12,7 +12,9 @@
 
 /////////////////////////////////////////////////////
 // AnimNode_CCDIK
+// 动画节点_CCDIK
 // Implementation of the CCDIK IK Algorithm
+// CCDIK IK算法的实现
 
 FAnimNode_CCDIK::FAnimNode_CCDIK()
 	: EffectorLocation(FVector::ZeroVector)
@@ -39,7 +41,9 @@ FTransform FAnimNode_CCDIK::GetTargetTransform(const FTransform& InComponentTran
 	else
 	{
 		// parent bone space still goes through this way
+		// 父骨骼空间仍然经过这种方式
 		// if your target is socket, it will try find parents of joint that socket belongs to
+		// 如果你的目标是socket，它会尝试找到socket所属关节的父级
 		OutTransform.SetLocation(InOffset);
 		FAnimationRuntime::ConvertBoneSpaceTransformToCS(InComponentTransform, MeshBases, OutTransform, InTarget.GetCompactPoseBoneIndex(), Space);
 	}
@@ -55,10 +59,12 @@ void FAnimNode_CCDIK::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseConte
 	const FBoneContainer& BoneContainer = Output.Pose.GetPose().GetBoneContainer();
 
 	// Update EffectorLocation if it is based off a bone position
+	// 如果 EffectorLocation 基于骨骼位置，则更新 EffectorLocation
 	FTransform CSEffectorTransform = GetTargetTransform(Output.AnimInstanceProxy->GetComponentTransform(), Output.Pose, EffectorTarget, EffectorLocationSpace, EffectorLocation);
 	FVector const CSEffectorLocation = CSEffectorTransform.GetLocation();
 
 	// Gather all bone indices between root and tip.
+	// 收集根部和尖端之间的所有骨骼索引。
 	TArray<FCompactPoseBoneIndex> BoneIndices;
 	
 	{
@@ -73,13 +79,16 @@ void FAnimNode_CCDIK::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseConte
 	}
 
 	// Gather transforms
+	// 收集变换
 	int32 const NumTransforms = BoneIndices.Num();
 	OutBoneTransforms.AddUninitialized(NumTransforms);
 
 	// Gather chain links. These are non zero length bones.
+	// 收集链环。这些是非零长度的骨骼。
 	TArray<FCCDIKChainLink> Chain;
 	Chain.Reserve(NumTransforms);
 	// Start with Root Bone
+	// 从根骨开始
 	{
 		const FCompactPoseBoneIndex& RootBoneIndex = BoneIndices[0];
 		const FTransform& LocalTransform = Output.Pose.GetLocalSpaceTransform(RootBoneIndex);
@@ -90,6 +99,7 @@ void FAnimNode_CCDIK::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseConte
 	}
 
 	// Go through remaining transforms
+	// 完成剩余的变换
 	for (int32 TransformIndex = 1; TransformIndex < NumTransforms; TransformIndex++)
 	{
 		const FCompactPoseBoneIndex& BoneIndex = BoneIndices[TransformIndex];
@@ -101,6 +111,7 @@ void FAnimNode_CCDIK::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseConte
 		OutBoneTransforms[TransformIndex] = FBoneTransform(BoneIndex, BoneCSTransform);
 
 		// Calculate the combined length of this segment of skeleton
+		// 计算这一段骨架的总长度
 		double const BoneLength = FVector::Dist(BoneCSPosition, OutBoneTransforms[TransformIndex - 1].Transform.GetLocation());
 
 		if (!FMath::IsNearlyZero(BoneLength))
@@ -110,27 +121,33 @@ void FAnimNode_CCDIK::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseConte
 		else
 		{
 			// Mark this transform as a zero length child of the last link.
+			// 将此转换标记为最后一个链接的零长度子级。
 			// It will inherit position and delta rotation from parent link.
+			// 它将继承父链接的位置和增量旋转。
 			FCCDIKChainLink & ParentLink = Chain[Chain.Num() - 1];
 			ParentLink.ChildZeroLengthTransformIndices.Add(TransformIndex);
 		}
 	}
 
 	// solve
+	// 解决
 	bool bBoneLocationUpdated = AnimationCore::SolveCCDIK(Chain, CSEffectorLocation, Precision, MaxIterations, bStartFromTail, bEnableRotationLimit, RotationLimitPerJoints);
 
 	// If we moved some bones, update bone transforms.
+	// 如果我们移动了一些骨骼，请更新骨骼变换。
 	if (bBoneLocationUpdated)
 	{
 		int32 NumChainLinks = Chain.Num();
 
 		// First step: update bone transform positions from chain links.
+		// 第一步：更新链节的骨骼变换位置。
 		for (int32 LinkIndex = 0; LinkIndex < NumChainLinks; LinkIndex++)
 		{
 			FCCDIKChainLink const & ChainLink = Chain[LinkIndex];
 			OutBoneTransforms[ChainLink.TransformIndex].Transform = ChainLink.Transform;
 
 			// If there are any zero length children, update position of those
+			// 如果有任何零长度子级，请更新它们的位置
 			int32 const NumChildren = ChainLink.ChildZeroLengthTransformIndices.Num();
 			for (int32 ChildIndex = 0; ChildIndex < NumChildren; ChildIndex++)
 			{
@@ -161,6 +178,7 @@ bool FAnimNode_CCDIK::IsValidToEvaluate(const USkeleton* Skeleton, const FBoneCo
 	}
 
 	// Allow evaluation if all parameters are initialized and TipBone is child of RootBone
+	// 如果所有参数均已初始化且 TipBone 是 RootBone 的子级，则允许评估
 	return
 		(
 		TipBone.IsValidToEvaluate(RequiredBones)

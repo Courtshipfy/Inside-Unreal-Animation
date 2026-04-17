@@ -12,6 +12,7 @@
 
 /////////////////////////////////////////////////////
 // FAnimNode_SpringBone
+// FAnimNode_SpringBone
 
 FAnimNode_SpringBone::FAnimNode_SpringBone()
 	: MaxDisplacement(0.0)
@@ -60,6 +61,7 @@ void FAnimNode_SpringBone::UpdateInternal(const FAnimationUpdateContext& Context
 	RemainingTime += Context.GetDeltaTime();
 
 	// Fixed step simulation at 120hz
+	// 120hz 下的固定步进模拟
 	FixedTimeStep = (1.f / 120.f) * TimeDilation;
 }
 
@@ -69,6 +71,7 @@ void FAnimNode_SpringBone::GatherDebugData(FNodeDebugData& DebugData)
 	const float ActualBiasedAlpha = AlphaScaleBias.ApplyTo(Alpha);
 
 	//MDW_TODO Add more output info?
+	//MDW_TODO 添加更多输出信息？
 	FString DebugLine = DebugData.GetNodeName(this);
 	DebugLine += FString::Printf(TEXT("(Alpha: %.1f%% RemainingTime: %.3f)"), ActualBiasedAlpha*100.f, RemainingTime);
 
@@ -106,6 +109,7 @@ void FAnimNode_SpringBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 	}
 
 	// Location of our bone in world space
+	// 我们的骨头在世界空间中的位置
 	const FBoneContainer& BoneContainer = Output.Pose.GetPose().GetBoneContainer();
 
 	const FCompactPoseBoneIndex SpringBoneIndex = SpringBone.GetCompactPoseIndex(BoneContainer);
@@ -115,6 +119,7 @@ void FAnimNode_SpringBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 	FVector const TargetPos = BoneTransformInWorldSpace.GetLocation();
 
 	// Init values first time
+	// 第一次初始化值
 	if (RemainingTime == 0.0f)
 	{
 		BoneLocation = TargetPos;
@@ -126,10 +131,12 @@ void FAnimNode_SpringBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 		while (RemainingTime > FixedTimeStep)
 		{
 			// Update location of our base by how much our base moved this frame.
+			// 通过我们的基地移动此框架的距离来更新我们基地的位置。
 			FVector const BaseTranslation = (OwnerVelocity * FixedTimeStep);
 			BoneLocation += BaseTranslation;
 
 			// Reinit values if outside reset threshold
+			// 如果超出重置阈值，则重新初始化值
 			if (((TargetPos - BoneLocation).SizeSquared() > (ErrorResetThresh*ErrorResetThresh)))
 			{
 				BoneLocation = TargetPos;
@@ -137,15 +144,19 @@ void FAnimNode_SpringBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 			}
 
 			// Calculate error vector.
+			// 计算误差向量。
 			FVector const Error = (TargetPos - BoneLocation);
 			FVector const DampingForce = SpringDamping * BoneVelocity;
 			FVector const SpringForce = SpringStiffness * Error;
 
 			// Calculate force based on error and vel
+			// 根据误差和速度计算力
 			FVector const Acceleration = SpringForce - DampingForce;
 
 			// Integrate velocity
+			// 积分速度
 			// Make sure damping with variable frame rate actually dampens velocity. Otherwise Spring will go nuts.
+			// 确保可变帧速率的阻尼实际上会抑制速度。否则Spring会发疯的。
 			double const CutOffDampingValue = 1.0 / FixedTimeStep;
 			if (SpringDamping > CutOffDampingValue)
 			{
@@ -158,6 +169,7 @@ void FAnimNode_SpringBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 			}
 
 			// Clamp velocity to something sane (|dX/dt| <= ErrorResetThresh)
+			// 将速度限制为正常值 (|dX/dt| <= ErrorResetThresh)
 			double const BoneVelocityMagnitude = BoneVelocity.Size();
 			if (BoneVelocityMagnitude * FixedTimeStep > ErrorResetThresh)
 			{
@@ -165,19 +177,23 @@ void FAnimNode_SpringBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 			}
 
 			// Integrate position
+			// 整合位置
 			FVector const OldBoneLocation = BoneLocation;
 			FVector const DeltaMove = (BoneVelocity * FixedTimeStep);
 			BoneLocation += DeltaMove;
 
 			// Filter out spring translation based on our filter properties
+			// 根据我们的过滤器属性过滤掉 spring 翻译
 			CopyToVectorByFlags(BoneLocation, TargetPos, !bTranslateX, !bTranslateY, !bTranslateZ);
 
 
 			// If desired, limit error
+			// 如果需要，限制误差
 			if (bLimitDisplacement)
 			{
 				FVector CurrentDisp = BoneLocation - TargetPos;
 				// Too far away - project back onto sphere around target.
+				// 距离太远 - 投影回到目标周围的球体上。
 				if (CurrentDisp.SizeSquared() > FMath::Square(MaxDisplacement))
 				{
 					FVector DispDir = CurrentDisp.GetSafeNormal();
@@ -186,6 +202,7 @@ void FAnimNode_SpringBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 			}
 
 			// Update velocity to reflect post processing done to bone location.
+			// 更新速度以反映对骨骼位置进行的后处理。
 			BoneVelocity = (BoneLocation - OldBoneLocation) / FixedTimeStep;
 
 			check(!BoneLocation.ContainsNaN());
@@ -200,6 +217,7 @@ void FAnimNode_SpringBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 		BoneLocation = Output.AnimInstanceProxy->GetComponentTransform().TransformPosition(LocalBoneTransform);
 	}
 	// Now convert back into component space and output - rotation is unchanged.
+	// 现在转换回组件空间并输出 - 旋转不变。
 	FTransform OutBoneTM = SpaceBase;
 	OutBoneTM.SetLocation(LocalBoneTransform);
 
@@ -215,6 +233,7 @@ void FAnimNode_SpringBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 		FQuat AdditionalRotation = FQuat::FindBetweenNormals(ParentToTarget, ParentToCurrent);
 
 		// Filter rotation based on our filter properties
+		// 根据我们的过滤器属性进行过滤器旋转
 		FVector EularRot = AdditionalRotation.Euler();
 		CopyToVectorByFlags(EularRot, FVector::ZeroVector, !bRotateX, !bRotateY, !bRotateZ);
 
@@ -222,6 +241,7 @@ void FAnimNode_SpringBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 	}
 
 	// Output new transform for current bone.
+	// 输出当前骨骼的新变换。
 	OutBoneTransforms.Add(FBoneTransform(SpringBoneIndex, OutBoneTM));
 
 	TRACE_ANIM_NODE_VALUE(Output, TEXT("Remaining Time"), RemainingTime);

@@ -16,6 +16,7 @@ void FAnimNodeFunctionRef::SetFromFunction(UFunction* InFunction)
 		FunctionName = InFunction->GetFName();
 		UClass* OwnerClass = InFunction->GetOwnerClass();
 		// Only need the class name if the function is static, as the function will be called on the passed-in UObject otherwise.
+		// 如果函数是静态的，则仅需要类名，否则将在传入的 UObject 上调用该函数。
 		if(OwnerClass && InFunction->HasAnyFunctionFlags(FUNC_Static))
 		{
 			ensureAlwaysMsgf(OwnerClass->IsChildOf(UAnimInstance::StaticClass()) || OwnerClass->IsChildOf(UBlueprintFunctionLibrary::StaticClass()), TEXT("Function class must derive from either UAnimInstance or UBlueprintFunctionLibrary"));

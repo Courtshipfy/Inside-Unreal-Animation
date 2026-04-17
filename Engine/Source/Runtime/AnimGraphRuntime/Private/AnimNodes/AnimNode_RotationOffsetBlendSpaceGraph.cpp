@@ -44,20 +44,24 @@ void FAnimNode_RotationOffsetBlendSpaceGraph::Update_AnyThread(const FAnimationU
 void FAnimNode_RotationOffsetBlendSpaceGraph::Evaluate_AnyThread(FPoseContext& Context)
 {
 	// Evaluate base pose
+	// 评估基本姿势
 	BasePose.Evaluate(Context);
 
 	if (bIsLODEnabled && FAnimWeight::IsRelevant(ActualAlpha))
 	{
 		// Evaluate MeshSpaceRotation additive blendspace
+		// 评估 MeshSpaceRotation 附加混合空间
 		FPoseContext MeshSpaceRotationAdditivePoseContext(Context);
 		FAnimNode_BlendSpaceGraphBase::Evaluate_AnyThread(MeshSpaceRotationAdditivePoseContext);
 
 		// Accumulate poses together
+		// 一起积累姿势
 		FAnimationPoseData BaseAnimationPoseData(Context);
 		const FAnimationPoseData AdditiveAnimationPoseData(MeshSpaceRotationAdditivePoseContext);
 		FAnimationRuntime::AccumulateMeshSpaceRotationAdditiveToLocalPose(BaseAnimationPoseData, AdditiveAnimationPoseData, ActualAlpha);
 
 		// Resulting rotations are not normalized, so normalize here.
+		// 生成的旋转未标准化，因此请在此处标准化。
 		Context.Pose.NormalizeRotations();
 	}
 }

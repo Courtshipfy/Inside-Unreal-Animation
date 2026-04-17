@@ -29,11 +29,14 @@
 #define LOCTEXT_NAMESPACE "BlendSpace"
 
 // Logs the triangulation/segmentation search to look up the blend samples
+// 记录三角测量/分割搜索以查找混合样本
 //#define DEBUG_LOG_BLENDSPACE_TRIANGULATION
+//#定义DEBUG_LOG_BLENDSPACE_TRIANGULATION
 
 DECLARE_CYCLE_STAT(TEXT("BlendSpace GetAnimPose"), STAT_BlendSpace_GetAnimPose, STATGROUP_Anim);
 
 /** Scratch buffers for multi-threaded usage */
+/** 用于多线程使用的暂存缓冲区 */
 struct FBlendSpaceScratchData : public TThreadSingleton<FBlendSpaceScratchData>
 {
 	TArray<FBlendSampleData> OldSampleDataList;
@@ -48,6 +51,7 @@ UBlendSpace::UBlendSpace(const FObjectInitializer& ObjectInitializer)
 	SampleIndexWithMarkers = INDEX_NONE;
 
 	/** Use highest weighted animation as default */
+	/** 默认使用最高权重的动画 */
 	NotifyTriggerMode = ENotifyTriggerMode::HighestWeightedAnimation;
 
 	if (DimensionIndices.Num() == 0)
@@ -62,6 +66,7 @@ void UBlendSpace::PostLoad()
 
 #if WITH_EDITOR	
 	// Only do this during editor time (could alter the blendspace data during runtime otherwise) 
+	// 仅在编辑器时间内执行此操作（否则可能会在运行时更改混合空间数据）
 	ValidateSampleData();
 #endif // WITH_EDITOR
 
@@ -78,6 +83,7 @@ void UBlendSpace::Serialize(FArchive& Ar)
 	if (Ar.IsLoading() && (Ar.CustomVer(FFrameworkObjectVersion::GUID) < FFrameworkObjectVersion::BlendSpacePostLoadSnapToGrid))
 	{
 		// This will ensure that all grid points are in valid position and the bIsSnapped flag is set
+		// 这将确保所有网格点都处于有效位置并且设置了 bIsSnapped 标志
 		SnapSamplesToClosestGridPoint();
 	}
 
@@ -94,11 +100,15 @@ void UBlendSpace::Serialize(FArchive& Ar)
 		 FUE5MainStreamObjectVersion::BlendSpaceRuntimeTriangulation))
 	{
 		// Make old blend spaces use the grid
+		// 让旧的混合空间使用网格
 		bInterpolateUsingGrid = true;
 		// Force the data to be updated
+		// 强制更新数据
 		ResampleData();
 		// Preserve the constant sample weight speed for old blend spaces, but allow the ease
+		// 为旧的混合空间保留恒定的样品重量速度，但允许轻松
 		// in/out default for new ones.
+		// 新的默认输入/输出。
 		bTargetWeightInterpolationEaseInOut = false;
 	}
 
@@ -106,7 +116,9 @@ void UBlendSpace::Serialize(FArchive& Ar)
 		FUE5MainStreamObjectVersion::BlendSpaceSmoothingImprovements))
 	{
 		// If it's an old asset but has the current default smoothing and that smoothing is in use, then it must
+		// 如果它是旧资产但具有当前默认平滑并且正在使用该平滑，那么它必须
 		// have been using the old default so switch to that.
+		// 一直使用旧的默认设置，因此切换到旧的默认设置。
 		for (int Index = 0 ; Index != 3 ; ++Index)
 		{
 			if (InterpolationParam[Index].InterpolationType == EFilterInterpolationType::BSIT_SpringDamper &&
@@ -117,6 +129,7 @@ void UBlendSpace::Serialize(FArchive& Ar)
 			else if (InterpolationParam[Index].InterpolationType == EFilterInterpolationType::BSIT_Cubic)
 			{
 				// Cubic was broken since it was not cubing the interpolation time
+				// 三次方被破坏，因为它没有计算插值时间的三次方
 				InterpolationParam[Index].InterpolationTime = FMath::Pow(
 					InterpolationParam[Index].InterpolationTime, 1.0f / 3.0f);
 			}
@@ -128,6 +141,7 @@ void UBlendSpace::Serialize(FArchive& Ar)
 		 FUE5MainStreamObjectVersion::BlendSpaceSampleOrdering))
 	{
 		// Force the data to be updated after the ordering of 2D SampleData has been changed to be consistent with 1D
+		// 将 2D SampleData 的排序更改为与 1D 一致后强制更新数据
 		ResampleData();
 	}
 
@@ -140,6 +154,7 @@ void UBlendSpace::PreEditChange(FProperty* PropertyAboutToChange)
 	Super::PreEditChange(PropertyAboutToChange);
 
 	// Cache the axis ranges if it is going to change, this so the samples can be remapped correctly
+	// 如果要更改，则缓存轴范围，这样可以正确地重新映射样本
 	const FName PropertyName = PropertyAboutToChange ? PropertyAboutToChange->GetFName() : NAME_None;
 	if ((PropertyName == GET_MEMBER_NAME_CHECKED(FBlendParameter, Min) || PropertyName == GET_MEMBER_NAME_CHECKED(FBlendParameter, Max)))
 	{
@@ -171,11 +186,13 @@ void UBlendSpace::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyC
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(FBlendParameter, GridNum))
 		{
 			// Tried and snap samples to points on the grid, those who do not fit or cannot be snapped are marked as invalid
+			// 尝试将样本捕捉到网格上的点，那些不适合或无法捕捉的标记为无效
 			SnapSamplesToClosestGridPoint();
 		}
 		else if (PropertyName == GET_MEMBER_NAME_CHECKED(FBlendParameter, Min))
 		{
 			// Preserve/enforce the previous grid spacing if snapping
+			// 如果对齐，保留/强制执行先前的网格间距
 			for (int32 AxisIndex = 0; AxisIndex != 2; ++AxisIndex)
 			{
 				if (BlendParameters[AxisIndex].bSnapToGrid)
@@ -190,6 +207,7 @@ void UBlendSpace::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyC
 		else if (PropertyName == GET_MEMBER_NAME_CHECKED(FBlendParameter, Max))
 		{
 			// Preserve/enforce the previous grid spacing if snapping
+			// 如果对齐，保留/强制执行先前的网格间距
 			for (int32 AxisIndex = 0; AxisIndex != 2; ++AxisIndex)
 			{
 				if (BlendParameters[AxisIndex].bSnapToGrid)
@@ -226,6 +244,7 @@ bool UBlendSpace::UpdateBlendSamples_Internal(
 	int32&                    InOutCachedTriangulationIndex) const
 {
 	// For Target weight interpolation, we'll need to save old data, and interpolate to new data
+	// 对于目标权重插值，我们需要保存旧数据，然后插值到新数据
 	TArray<FBlendSampleData>& NewSampleDataList = FBlendSpaceScratchData::Get().NewSampleDataList;
 	check(!NewSampleDataList.Num()); // this must be called non-recursively
 
@@ -233,17 +252,27 @@ bool UBlendSpace::UpdateBlendSamples_Internal(
 
 #if WITH_EDITOR
 	// If we are in Editor then samples may be added/removed, and when this happens it is not
+	// 如果我们在编辑器中，则可以添加/删除示例，而当发生这种情况时，则不会
 	// practical to find any existing caches that reference affected animations. Note that all the
+	// 可以实用地查找引用受影响动画的任何现有缓存。请注意，所有
 	// indices may become invalid. We can just check here for invalid sample indices - if we find one
+	// 指数可能会失效。我们可以在这里检查无效的样本索引 - 如果我们找到一个
 	// then remove the cache and start again. There will be some situations where the sample indices
+	// 然后删除缓存并重新开始。在某些情况下，样本索引
 	// get shuffled, in which case we will not detect the change, but our cache will now point to
+	// 被洗牌，在这种情况下，我们将不会检测到更改，但我们的缓存现在将指向
 	// incorrect animations. Any glitch that occurs as a result should be removed over the smoothing window. 
+	// 不正确的动画。由此产生的任何故障都应通过平滑窗口消除。
 	//
 	// Note that if this is not sufficient, we could store a GUID in UBlendSpace that gets updated
+	// 请注意，如果这还不够，我们可以在 UBlendSpace 中存储一个可以更新的 GUID
 	// when there is a change, and a GUID in the cache. Then when the GUIDs don't match the cache
+	// 当有变化时，缓存中会有一个 GUID。然后当 GUID 与缓存不匹配时
 	// could be wiped and restarted with the current GUID.
+	// 可以用当前的 GUID 擦除并重新启动。
 	//
 	// See UE-71107
+	// 参见 UE-71107
 	for (int32 Index = 0; Index < InOutOldSampleDataList.Num(); ++Index)
 	{
 		if (!SampleData.IsValidIndex(InOutOldSampleDataList[Index].SampleDataIndex))
@@ -255,31 +284,39 @@ bool UBlendSpace::UpdateBlendSamples_Internal(
 #endif
 
 	// get sample data based on new input
+	// 根据新输入获取样本数据
 	// consolidate all samples and sort them, so that we can handle from biggest weight to smallest
+	// 将所有样本合并并排序，以便我们可以从最大重量到最小重量进行处理
 	InOutSampleDataCache.Reset();
 
 	// get sample data from blendspace
+	// 从混合空间获取样本数据
 	bool bSuccessfullySampled = false;
 	if (GetSamplesFromBlendInput(InBlendSpacePosition, NewSampleDataList, InOutCachedTriangulationIndex, true))
 	{
 		// if target weight interpolation is set
+		// 如果设置了目标权重插值
 		if (TargetWeightInterpolationSpeedPerSec > 0.f || PerBoneBlendValues.Num() > 0)
 		{
 			// target weight interpolation
+			// 目标权重插值
 			if (InterpolateWeightOfSampleData(InDeltaTime, InOutOldSampleDataList, NewSampleDataList, InOutSampleDataCache))
 			{
 				// now I need to normalize
+				// [翻译失败: now I need to normalize]
 				FBlendSampleData::NormalizeDataWeight(InOutSampleDataCache);
 			}
 			else
 			{
 				// if interpolation failed, just copy new sample data to sample data
+				// [翻译失败: if interpolation failed, just copy new sample data to sample data]
 				InOutSampleDataCache = NewSampleDataList;
 			}
 		}
 		else
 		{
 			// when there is no target weight interpolation, just copy new to target
+			// 当没有目标权重插值时，只需将new复制到target
 			InOutSampleDataCache.Append(NewSampleDataList);
 		}
 
@@ -305,40 +342,49 @@ void UBlendSpace::ResetBlendSamples(TArray<FBlendSampleData>& InOutSampleDataCac
 	const bool bCanDoMarkerSync = SampleIndexWithMarkers != INDEX_NONE && SampleData.Num() > SampleIndexWithMarkers;
 
 	// Ensure we have a valid normalized time.
+	// 确保我们有一个有效的标准化时间。
 	InNormalizedCurrentTime = bLooping ? FMath::Wrap(InNormalizedCurrentTime, 0.0f, 1.0f) : FMath::Clamp(InNormalizedCurrentTime, 0.0f, 1.0f);
 	
 	// Query highest weighted sample with marker information. This will become the leader for all other samples to follow.
+	// 查询具有标记信息的最高权重样本。这将成为所有其他样本的领导者。
 	const int32 HighestMarkerSyncWeightIndex = bCanDoMarkerSync ? FBlendSpaceUtilities::GetHighestWeightMarkerSyncSample(InOutSampleDataCache, SampleData) : INDEX_NONE;
 		
 	if (HighestMarkerSyncWeightIndex != INDEX_NONE)
 	{
 		// Query leader sample information.
+		// [翻译失败: Query leader sample information.]
 		FBlendSampleData& LeaderSampleData = InOutSampleDataCache[HighestMarkerSyncWeightIndex];
 		const FBlendSample& LeaderSample = SampleData[LeaderSampleData.SampleDataIndex];
 
 		ensure(LeaderSample.Animation != nullptr);
 
 		// Leader is known at this point, build it's tick context.
+		// [翻译失败: Leader is known at this point, build it's tick context.]
 		FAnimAssetTickContext Context = { 0.0f, ERootMotionMode::NoRootMotionExtraction, true, *LeaderSampleData.Animation->GetUniqueMarkerNames()};
 		
 		// Reset leader sample to match requested time.
+		// 重置领导样本以匹配请求的时间。
 		LeaderSampleData.MarkerTickRecord.Reset();
 		LeaderSampleData.PreviousTime = InNormalizedCurrentTime * LeaderSample.GetSamplePlayLength();
 		LeaderSampleData.Time = InNormalizedCurrentTime * LeaderSample.GetSamplePlayLength();
 
 		// Query valid marker position for leader.
+		// 查询领导者的有效标记位置。
 		LeaderSample.Animation->GetMarkerIndicesForTime(LeaderSampleData.Time, bLooping, Context.MarkerTickContext.GetValidMarkerNames(), LeaderSampleData.MarkerTickRecord.PreviousMarker, LeaderSampleData.MarkerTickRecord.NextMarker);
 
 		// Get leader sync start position.
+		// 获取领导者同步开始位置。
 		if (bMatchSyncPhases)
 		{
 			FMarkerTickRecord StartMarkerTickRecord;
 
 			// Get sync start position.
+			// 获取同步起始位置。
 			LeaderSample.Animation->GetMarkerIndicesForTime(0, bLooping, Context.MarkerTickContext.GetValidMarkerNames(), StartMarkerTickRecord.PreviousMarker, StartMarkerTickRecord.NextMarker);
 			Context.MarkerTickContext.SetMarkerSyncStartPosition(LeaderSample.Animation->GetMarkerSyncPositionFromMarkerIndicies(StartMarkerTickRecord.PreviousMarker.MarkerIndex, StartMarkerTickRecord.NextMarker.MarkerIndex, 0, nullptr));
 
 			// We need to account for an extra passed marker when the LeaderSample is looping and its last marker is placed at PlayLength, since GetMarkerIndicesForTime() will give us Prev = LastMarkerIndex - 1 and Next = LastMarkerIndex when CurrentTime is 0.
+			// 当 LeaderSample 循环且其最后一个标记放置在 PlayLength 时，我们需要考虑额外传递的标记，因为当 CurrentTime 为 0 时，GetMarkerIndicesForTime() 将为我们提供 Prev = LastMarkerIndex - 1 和 Next = LastMarkerIndex。
 			int LeaderLastMarkerIndex = LeaderSampleData.Animation->AuthoredSyncMarkers.Num() - 1;
 			if (bLooping && StartMarkerTickRecord.NextMarker.MarkerIndex == LeaderLastMarkerIndex)
 			{
@@ -353,9 +399,11 @@ void UBlendSpace::ResetBlendSamples(TArray<FBlendSampleData>& InOutSampleDataCac
 		}
 
 		// Get leader sync end position.
+		// 获取引导同步结束位置。
 		Context.MarkerTickContext.SetMarkerSyncEndPosition(LeaderSample.Animation->GetMarkerSyncPositionFromMarkerIndicies(LeaderSampleData.MarkerTickRecord.PreviousMarker.MarkerIndex, LeaderSampleData.MarkerTickRecord.NextMarker.MarkerIndex, LeaderSampleData.Time, nullptr));
 
 		// Determine how many markers where passed to arrive to the sync phase the leader is currently in.
+		// [翻译失败: Determine how many markers where passed to arrive to the sync phase the leader is currently in.]
 		if (bMatchSyncPhases)
 		{
 			FMarkerSyncData SyncData;
@@ -365,6 +413,7 @@ void UBlendSpace::ResetBlendSamples(TArray<FBlendSampleData>& InOutSampleDataCac
 		}
 		
 		// Reset follower samples.
+		// 重置追随者样本。
 		for (int32 SampleIndex = 0; SampleIndex < InOutSampleDataCache.Num(); ++SampleIndex)
 		{
 			FBlendSampleData& SampleDataItem = InOutSampleDataCache[SampleIndex];
@@ -375,14 +424,17 @@ void UBlendSpace::ResetBlendSamples(TArray<FBlendSampleData>& InOutSampleDataCac
 				if (!Sample.Animation->AuthoredSyncMarkers.IsEmpty())
 				{
 					// Reset time.
+					// 重置时间。
 					SampleDataItem.PreviousTime = 0.0f;
 					SampleDataItem.Time = 0.0f;
 				
 					// Get next marker indices that matches sync start position.
+					// 获取与同步开始位置匹配的下一个标记索引。
 					SampleDataItem.MarkerTickRecord.Reset();
 					Sample.Animation->GetMarkerIndicesForPosition(Context.MarkerTickContext.GetMarkerSyncStartPosition(), bLooping, SampleDataItem.MarkerTickRecord.PreviousMarker, SampleDataItem.MarkerTickRecord.NextMarker, SampleDataItem.Time, nullptr);
 
 					// Ensure we advance and pass all the phases the leader passed.
+					// 确保我们前进并通过领导者经历的所有阶段。
 					if (bMatchSyncPhases)
 					{
 						Sample.Animation->AdvanceMarkerPhaseAsFollower(Context.MarkerTickContext, 0.0f, bLooping, SampleDataItem.Time, SampleDataItem.MarkerTickRecord.PreviousMarker, SampleDataItem.MarkerTickRecord.NextMarker, nullptr);
@@ -391,6 +443,7 @@ void UBlendSpace::ResetBlendSamples(TArray<FBlendSampleData>& InOutSampleDataCac
 				else
 				{
 					// Fallback to length based syncing so it matches default behaviour when ticking a blend space.
+					// 回退到基于长度的同步，因此它与勾选混合空间时的默认行为相匹配。
 					SampleDataItem.MarkerTickRecord.Reset();
 					SampleDataItem.PreviousTime = InNormalizedCurrentTime * Sample.GetSamplePlayLength();
 					SampleDataItem.Time = InNormalizedCurrentTime * Sample.GetSamplePlayLength();
@@ -401,6 +454,7 @@ void UBlendSpace::ResetBlendSamples(TArray<FBlendSampleData>& InOutSampleDataCac
 	else
 	{
 		// Fallback to length based syncing so it matches default behaviour when ticking a blend space.
+		// 回退到基于长度的同步，因此它与勾选混合空间时的默认行为相匹配。
 		for (int32 SampleIndex = 0; SampleIndex < InOutSampleDataCache.Num(); ++SampleIndex)
 		{
 			FBlendSampleData& SampleDataItem = InOutSampleDataCache[SampleIndex];
@@ -431,11 +485,15 @@ float UBlendSpace::ComputeAxisScaleFactor(const FVector& BlendSpacePosition, con
 	float FilterMultiplier = 1.f;
 
 	// first use multiplier using new blendinput
+	// 首先使用乘法器使用新的混合输入
 	// new filtered input is going to be used for sampling animation
+	// 新的过滤输入将用于采样动画
 	// so we'll need to change playrate if you'd like to not slide foot
+	// 因此，如果您不想滑脚，我们需要更改播放速率
 	if (!BlendSpacePosition.Equals(FilteredBlendInput))
 	{
 		// apply speed change if you want
+		// 如果需要，应用速度变化
 		if (AxisToScale == BSA_X)
 		{
 			if (FilteredBlendInput.X != 0.f)
@@ -453,12 +511,16 @@ float UBlendSpace::ComputeAxisScaleFactor(const FVector& BlendSpacePosition, con
 	}
 
 	// Now find if clamped input is different. If different, then apply scale to fit in. This allows
+	// 现在检查钳位输入是否不同。如果不同，则应用比例以适应。这允许
 	// "extrapolation" of the blend space outside of the range by time scaling the animation, which is
+	// 通过时间缩放动画来“外推”范围之外的混合空间，即
 	// appropriate when the specified axis is speed (for example).
+	// 当指定的轴是速度时（例如）是合适的。
 	FVector ClampedInput = GetClampedBlendInput(FilteredBlendInput);
 	if (!ClampedInput.Equals(FilteredBlendInput))
 	{
 		// apply speed change if you want, 
+		// 如果需要的话应用速度变化，
 		if (AxisToScale == BSA_X && !BlendParameters[0].bWrapInput)
 		{
 			if (ClampedInput.X != 0.f)
@@ -483,9 +545,11 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 	check(Instance.BlendSpace.BlendSampleDataCache);
 
 	// Scratch area for old samples
+	// [翻译失败: Scratch area for old samples]
 	TArray<FBlendSampleData>& OldSampleDataList = FBlendSpaceScratchData::Get().OldSampleDataList;
 	check(!OldSampleDataList.Num()); // this must be called non-recursively
 	// new sample data that will be used for evaluation
+	// [翻译失败: new sample data that will be used for evaluation]
 	TArray<FBlendSampleData>& SampleDataList = *Instance.BlendSpace.BlendSampleDataCache;
 
 	const float DeltaTime = Context.GetDeltaTime();
@@ -493,23 +557,33 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 	check(Instance.DeltaTimeRecord);
 
 	// Our current time will normally be the same as the recorded previous time, if we were simply playing animations. 
+	// [翻译失败: Our current time will normally be the same as the recorded previous time, if we were simply playing animations.]
 	// If it's not, then that would be because the time has been explicitly set due to be run as an evaluator, in 
+	// [翻译失败: If it's not, then that would be because the time has been explicitly set due to be run as an evaluator, in]
 	// which case we might want to use that delta in addition to any time delta due to the play rate.
+	// 在这种情况下，由于播放速率的原因，除了任何时间增量之外，我们可能还希望使用该增量。
 	float ExtraNormalizedDeltaTime = 
 		Instance.DeltaTimeRecord->IsPreviousValid() ?
 		FMath::Wrap(*(Instance.TimeAccumulator) - Instance.DeltaTimeRecord->GetPrevious(), -0.5f, 0.5f) :
 		0.0f;
 
 	// The blend space delta time record isn't normally used directly.
+	// 混合空间增量时间记录通常不直接使用。
 	// Instead, the blend sample time record's are used to drive pose evaluation
+	// 相反，混合采样时间记录用于驱动姿势评估
 	// As a consequence, we currently follow the convention that TimeAccumulator and Previous are normalized
+	// 因此，我们目前遵循 TimeAccumulator 和 Previous 标准化的约定
 	Instance.DeltaTimeRecord->Set(*(Instance.TimeAccumulator), Instance.PlayRateMultiplier * DeltaTime); 
 
 	// this happens even if MoveDelta == 0.f. This still should happen if it is being interpolated
+	// 即使 MoveDelta == 0.f 也会发生这种情况。如果进行插值，这种情况仍然会发生
 	// since we allow setting position of blendspace, we can't ignore MoveDelta == 0.f
+	// 由于我们允许设置混合空间的位置，因此我们不能忽略 MoveDelta == 0.f
 	// also now we don't have to worry about not following if DeltaTime = 0.f
+	// 现在我们也不必担心如果 DeltaTime = 0.f 不遵循
 
 	// first filter input using blend filter
+	// 首先使用混合过滤器过滤输入
 	const FVector BlendSpacePosition(Instance.BlendSpace.BlendSpacePositionX, Instance.BlendSpace.BlendSpacePositionY, 0.f);
 	const FVector FilteredBlendInput = FilterInput(Instance.BlendSpace.BlendFilter, BlendSpacePosition, DeltaTime);
 
@@ -521,6 +595,7 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 		if (TargetWeightInterpolationSpeedPerSec > 0.f)
 		{
 			// recalculate AnimLength based on weight of target animations - this is used for scaling animation later (change speed)
+			// 根据目标动画的权重重新计算 AnimLength - 这用于稍后缩放动画（更改速度）
 			PreInterpAnimLength = GetAnimationLengthFromSampleData(*Instance.BlendSpace.BlendSampleDataCache);
 			UE_LOG(LogAnimation, Verbose, TEXT("BlendSpace(%s) - FilteredBlendInput(%s) : PreAnimLength(%0.5f) "), *GetName(), *FilteredBlendInput.ToString(), PreInterpAnimLength);
 		}
@@ -534,16 +609,19 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 		}
 
 		// We can use marker-based syncing when a valid sample with sync marker data exists.
+		// 当存在具有同步标记数据的有效样本时，我们可以使用基于标记的同步。
 		bool bCanDoMarkerSync = (SampleIndexWithMarkers != INDEX_NONE) && (Context.IsSingleAnimationContext() || (Instance.bCanUseMarkerSync && Context.CanUseMarkerPosition()));
 			
 		if (bCanDoMarkerSync)
 		{
 			// Copy previous frame marker data to current frame
+			// 将上一帧标记数据复制到当前帧
 			for (const FBlendSampleData& PrevBlendSampleItem : OldSampleDataList)
 			{
 				for (FBlendSampleData& CurrentBlendSampleItem : SampleDataList)
 				{
 					// it only can have one animation in the sample, make sure to copy Time
+					// 示例中只能有一个动画，请确保复制时间
 					if (PrevBlendSampleItem.Animation && PrevBlendSampleItem.Animation == CurrentBlendSampleItem.Animation)
 					{
 						CurrentBlendSampleItem.Time = PrevBlendSampleItem.Time;
@@ -565,43 +643,61 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 		if (Context.ShouldResyncToSyncGroup() && !Instance.bIsEvaluator)
 		{
 			// Synchronize the asset player time to the other sync group members when (re)joining the group
+			// 当（重新）加入群组时，将资产播放器时间同步到其他同步群组成员
 			NormalizedCurrentTime = Context.GetAnimationPositionRatio();
 		}
 
 		float NormalizedPreviousTime = NormalizedCurrentTime;
 
 		// @note for sync group vs non sync group
+		// @note 同步组与非同步组
 		// in blendspace, it will still sync even if only one node in sync group
+		// 在混合空间中，即使同步组中只有一个节点，它仍然会同步
 		// so you're never non-sync group unless you have situation where some markers are relevant to one sync group but not all the time
+		// 因此，除非您遇到某些标记与一个同步组相关但并非始终相关的情况，否则您永远不会是非同步组
 		// here we save NormalizedCurrentTime as Highest weighted samples' position in sync group
+		// 在这里，我们将 NormalizedCurrentTime 保存为同步组中最高加权样本的位置
 		// if you're not in sync group, NormalizedCurrentTime is based on normalized length by sample weights
+		// 如果您不在同步组中，则 NormalizedCurrentTime 基于样本权重的标准化长度
 		// if you move between sync to non sync within blendspace, you're going to see pop because we'll have to jump
+		// 如果你在混合空间内的同步和非同步之间移动，你会看到弹出，因为我们必须跳跃
 		// for now, our rule is to keep normalized time as highest weighted sample position within its own length
+		// 目前，我们的规则是将标准化时间保持为其自身长度内的最高加权样本位置
 		// also MoveDelta doesn't work if you're in sync group. It will move according to sync group position
+		// 如果您在同步组中，MoveDelta 也不起作用。它将根据同步组位置移动
 		// @todo consider using MoveDelta when  this is leader, but that can be scary because it's not matching with DeltaTime any more. 
+		// @todo 考虑在这是领导者时使用 MoveDelta，但这可能很可怕，因为它不再与 DeltaTime 匹配。
 		// if you have interpolation delay, that value can be applied, but the output might be unpredictable. 
+		// 如果有插值延迟，则可以应用该值，但输出可能无法预测。
 		// 
 		// to fix this better in the future, we should use marker sync position from last tick
+		// 为了将来更好地解决这个问题，我们应该使用最后一个刻度的标记同步位置
 		// but that still doesn't fix if you just join sync group, you're going to see pop since your animation doesn't fix
+		// 但如果你只是加入同步组，这仍然无法解决，你会看到弹出，因为你的动画没有修复
 
 		if (Context.IsLeader())
 		{
 			// advance current time - blend spaces hold normalized time as when dealing with changing anim length it would be possible to go backwards
+			// 提前当前时间 - 混合空间保留标准化时间，因为在处理更改动画长度时可以向后退
 			UE_LOG(LogAnimation, Verbose, TEXT("BlendSpace(%s) - FilteredBlendInput(%s) : AnimLength(%0.5f) "), *GetName(), *FilteredBlendInput.ToString(), NewAnimLength);
 
 			// Set context's data before updating time position.
+			// 在更新时间位置之前设置上下文的数据。
 			Context.SetPreviousAnimationPositionRatio(NormalizedCurrentTime);
 
 			// Get highest weight sample with sync markers. This will become the leader for all other samples to follow.
+			// 使用同步标记获取最高权重样本。这将成为所有其他样本的领导者。
 			const int32 HighestMarkerSyncWeightIndex = bCanDoMarkerSync ? FBlendSpaceUtilities::GetHighestWeightMarkerSyncSample(SampleDataList, SampleData) : INDEX_NONE;
 
 			// Skip syncing, fallback to normal ticking.
+			// 跳过同步，回退到正常滴答声。
 			if (HighestMarkerSyncWeightIndex == INDEX_NONE)
 			{
 				bCanDoMarkerSync = false;
 			}
 
 			// Tick as leader using marked based syncing.
+			// [翻译失败: Tick as leader using marked based syncing.]
 			if (bCanDoMarkerSync)
 			{
 				if (bShouldMatchSyncPhases)
@@ -612,10 +708,12 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 					if (LeaderSample.Animation)
 					{
 						// Update leader delta.
+						// [翻译失败: Update leader delta.]
 						float NewDelta = Instance.DeltaTimeRecord->Delta * LeaderSample.RateScale * LeaderSample.Animation->RateScale;
 						Context.SetLeaderDelta(NewDelta);
 						
 						// Advance time as usual.
+						// [翻译失败: Advance time as usual.]
 						{
 							float CurrentTime = NormalizedCurrentTime * NewAnimLength;
                         	LeaderSampleData.PreviousTime = CurrentTime;
@@ -627,25 +725,31 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 						}
 
 						// Sync position BEFORE advancing time.
+						// 在提前时间之前同步位置。
 						LeaderSample.Animation->GetMarkerIndicesForTime(LeaderSampleData.PreviousTime, Instance.bLooping, Context.MarkerTickContext.GetValidMarkerNames(), LeaderSampleData.MarkerTickRecord.PreviousMarker, LeaderSampleData.MarkerTickRecord.NextMarker);
 						const FMarkerSyncAnimPosition StartSyncPosition = LeaderSample.Animation->GetMarkerSyncPositionFromMarkerIndicies(LeaderSampleData.MarkerTickRecord.PreviousMarker.MarkerIndex, LeaderSampleData.MarkerTickRecord.NextMarker.MarkerIndex, LeaderSampleData.PreviousTime, Instance.MirrorDataTable);
 						Context.MarkerTickContext.SetMarkerSyncStartPosition(StartSyncPosition);
 
 						// @todo: See if we can have reset blend samples directly update the context and/or tick record (no need to compute info twice, if possible). 
+						// @todo：看看我们是否可以重置混合样本直接更新上下文和/或刻度记录（如果可能的话，无需计算信息两次）。
 						// Rest all samples to match current time.
+						// 休息所有样本以匹配当前时间。
 						ResetBlendSamples(SampleDataList, NormalizedCurrentTime, Instance.bLooping, true);
 
 						// Sync position AFTER advancing time.
+						// 提前时间后同步位置。
 						LeaderSample.Animation->GetMarkerIndicesForTime(LeaderSampleData.Time, Instance.bLooping, Context.MarkerTickContext.GetValidMarkerNames(), LeaderSampleData.MarkerTickRecord.PreviousMarker, LeaderSampleData.MarkerTickRecord.NextMarker);
 						*Instance.MarkerTickRecord = LeaderSampleData.MarkerTickRecord;
 						const FMarkerSyncAnimPosition EndSyncPosition = LeaderSample.Animation->GetMarkerSyncPositionFromMarkerIndicies(LeaderSampleData.MarkerTickRecord.PreviousMarker.MarkerIndex, LeaderSampleData.MarkerTickRecord.NextMarker.MarkerIndex, LeaderSampleData.Time, Instance.MirrorDataTable);
 						Context.MarkerTickContext.SetMarkerSyncEndPosition(EndSyncPosition);
 
 						// Update context's position ratios
+						// 更新上下文的位置比率
 						Context.SetAnimationPositionRatio(NormalizedCurrentTime);
 						Context.SetPreviousAnimationPositionRatio(NormalizedPreviousTime);
 						
 						// Keep track of the markers we passed.
+						// 跟踪我们经过的标记。
 						FMarkerSyncData SyncData;
 						SyncData.AuthoredSyncMarkers = LeaderSample.Animation->AuthoredSyncMarkers;
 						SyncData.CollectMarkersInRange(LeaderSampleData.PreviousTime, LeaderSampleData.Time, Context.MarkerTickContext.MarkersPassedThisTick, NewDelta);
@@ -661,6 +765,7 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 						bool bResetMarkerDataOnFollowers = false;
 
 						// Invalidate sample followers' tick records if instance doesn't have any valid sync marker data. 
+						// 如果实例没有任何有效的同步标记数据，则使示例关注者的刻度记录无效。
 						if (!Instance.MarkerTickRecord->IsValid(Instance.bLooping))
 						{
 							LeaderSampleData.MarkerTickRecord.Reset();
@@ -668,37 +773,45 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 							bResetMarkerDataOnFollowers = true;
 						}
 						// Re-compute marker indices since the leader sample's tick record is invalid. Get previous and next markers.
+						// 由于领导者样本的刻度记录无效，因此重新计算标记索引。获取上一个和下一个标记。
 						else if (!LeaderSampleData.MarkerTickRecord.IsValid(Instance.bLooping) && Context.MarkerTickContext.GetMarkerSyncStartPosition().IsValid())
 						{
 							// TODO: Look into the reason for not passing bLooping variable and just forcing the vale to be true. 
+							// TODO：调查不传递 bLooping 变量并仅强制值为 true 的原因。
 							LeaderSample.Animation->GetMarkerIndicesForPosition(Context.MarkerTickContext.GetMarkerSyncStartPosition(), true, LeaderSampleData.MarkerTickRecord.PreviousMarker, LeaderSampleData.MarkerTickRecord.NextMarker, LeaderSampleData.Time, Instance.MirrorDataTable);
 						}
 
 						// Only tick samples if leader sample has any delta time to consume.
+						// 仅当领导样本有任何需要消耗的增量时间时才勾选样本。
 						const float NewDeltaTime = Instance.DeltaTimeRecord->Delta * LeaderSample.RateScale * LeaderSample.Animation->RateScale;
 						Context.SetLeaderDelta(NewDeltaTime);
 
 						if (!FMath::IsNearlyZero(NewDeltaTime))
 						{
 							// Tick leader sample
+							// 蜱领导样本
 							LeaderSample.Animation->TickByMarkerAsLeader(LeaderSampleData.MarkerTickRecord, Context.MarkerTickContext, LeaderSampleData.Time, LeaderSampleData.PreviousTime, NewDeltaTime, Instance.bLooping, Instance.MirrorDataTable);
 
 							check(!Instance.bLooping || Context.MarkerTickContext.IsMarkerSyncStartValid());
 							
 							// Tick all the follower samples
+							// 勾选所有关注者样本
 							TickFollowerSamples(SampleDataList, HighestMarkerSyncWeightIndex, Context, bResetMarkerDataOnFollowers, Instance.bLooping, Instance.MirrorDataTable);
 						}
 						else if (!Instance.MarkerTickRecord->IsValid(Instance.bLooping))
 						{
 							// Re-compute marker indices for leader sample's tick record. Get previous and next markers.
+							// 重新计算领导者样本的刻度记录的标记索引。获取上一个和下一个标记。
 							LeaderSample.Animation->GetMarkerIndicesForTime(LeaderSampleData.Time, Instance.bLooping, Context.MarkerTickContext.GetValidMarkerNames(), LeaderSampleData.MarkerTickRecord.PreviousMarker, LeaderSampleData.MarkerTickRecord.NextMarker);
 
 							// Get sync position for followers to sync up to.
+							// 获取关注者同步的同步位置。
 							const FMarkerSyncAnimPosition SyncPosition = LeaderSample.Animation->GetMarkerSyncPositionFromMarkerIndicies(LeaderSampleData.MarkerTickRecord.PreviousMarker.MarkerIndex, LeaderSampleData.MarkerTickRecord.NextMarker.MarkerIndex, LeaderSampleData.Time, Instance.MirrorDataTable);
 							Context.MarkerTickContext.SetMarkerSyncStartPosition(SyncPosition);
 							Context.MarkerTickContext.SetMarkerSyncEndPosition(SyncPosition);
 							
 							// Make all follower samples match next sync position to equal that of the leader.
+							// 使所有跟随样本匹配下一个同步位置以等于领导者的同步位置。
 							TickFollowerSamples(SampleDataList, HighestMarkerSyncWeightIndex, Context, true, Instance.bLooping, Instance.MirrorDataTable);
 						}
 						
@@ -710,6 +823,7 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 			else
 			{
 				// Advance time using current/new anim length
+				// 使用当前/新的动画长度提前时间
 				float CurrentTime = NormalizedCurrentTime * NewAnimLength;
 				FAnimationRuntime::AdvanceTime(Instance.bLooping, Instance.DeltaTimeRecord->Delta, /*inout*/ CurrentTime, NewAnimLength);
 				NormalizedCurrentTime = NewAnimLength ? (CurrentTime / NewAnimLength) : 0.0f;
@@ -719,17 +833,20 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 			}
 
 			// Update time position after it has undergone all side effects.
+			// 在经历所有副作用后更新时间位置。
 			Context.SetAnimationPositionRatio(NormalizedCurrentTime);
 		}
 		else
 		{
 			// Skip syncing if leader doesn't have a valid sync start position.
+			// 如果领导者没有有效的同步开始位置，则跳过同步。
 			if (!Context.MarkerTickContext.IsMarkerSyncStartValid())
 			{
 				bCanDoMarkerSync = false;
 			}
 
 			// Tick as follower using marked-based syncing.
+			// 使用基于标记的同步标记为关注者。
 			if (bCanDoMarkerSync)
 			{
 				const int32 HighestWeightIndex = FBlendSpaceUtilities::GetHighestWeightSample(SampleDataList);
@@ -739,6 +856,7 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 				if (Sample.Animation)
 				{
 					// Only tick samples if sync group leader has any delta time to consume.
+					// 仅当同步组领导者有任何需要消耗的增量时间时才勾选样本。
 					if (Context.GetDeltaTime() != 0.f)
 					{
 						if (!Instance.MarkerTickRecord->IsValid(Instance.bLooping))
@@ -747,6 +865,7 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 						}
 
 						// Tick all samples as followers
+						// 将所有样本勾选为关注者
 						TickFollowerSamples(SampleDataList, INDEX_NONE, Context, false, Instance.bLooping, Instance.MirrorDataTable);
 					}
 						
@@ -757,6 +876,7 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 			else
 			{
 				// Fallback to length-based syncing. Match sync group leader position.
+				// 回退到基于长度的同步。匹配同步组领导者位置。
 				NormalizedPreviousTime = Context.GetPreviousAnimationPositionRatio();
 				NormalizedCurrentTime = Context.GetAnimationPositionRatio();
 					
@@ -767,6 +887,7 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 		}
 
 		// Generate notifies and sets time.
+		// 生成通知并设置时间。
 		{
 			FAnimNotifyContext NotifyContext(Instance);
 			float ClampedNormalizedPreviousTime = FMath::Clamp<float>(NormalizedPreviousTime, 0.f, 1.f);
@@ -775,12 +896,16 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 			if (Instance.bIsEvaluator && !Instance.BlendSpace.bTeleportToTime)
 			{
 				// When running under an evaluator the time is being set explicitly and we want to add on the deltas.
+				// [翻译失败: When running under an evaluator the time is being set explicitly and we want to add on the deltas.]
 				ClampedNormalizedPreviousTime -= ExtraNormalizedDeltaTime;
 				// Note that ExtraNormalizedDeltaTime can be negative
+				// [翻译失败: Note that ExtraNormalizedDeltaTime can be negative]
 				ClampedNormalizedPreviousTime = FMath::Wrap<float>(ClampedNormalizedPreviousTime, 0.0f, 1.0f);
 
 				// Also when under an evaluator, since the time is explicitly set before the update is called, the desired 
+				// 此外，当在评估器下时，由于时间是在调用更新之前显式设置的，因此所需的时间
 				// current time is actually what we recorded before advancing time (effectively ignoring whatever was added).
+				// 当前时间实际上是我们在推进时间之前记录的时间（实际上忽略了添加的任何内容）。
 				ClampedNormalizedCurrentTime = FMath::Clamp<float>(NormalizedPreviousTime, 0.f, 1.f);
 			}
 
@@ -788,6 +913,7 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 			const bool bGenerateNotifies = NotifyTriggerMode != ENotifyTriggerMode::None;
 
 			// Get the index of the highest weight, assuming that the first is the highest until we find otherwise
+			// [翻译失败: Get the index of the highest weight, assuming that the first is the highest until we find otherwise]
 			const bool bTriggerNotifyHighestWeightedAnim = NotifyTriggerMode == ENotifyTriggerMode::HighestWeightedAnimation && SampleDataList.Num() > 0;
 			const int32 HighestWeightIndex = (bGenerateNotifies && bTriggerNotifyHighestWeightedAnim) ? FBlendSpaceUtilities::GetHighestWeightSample(SampleDataList) : INDEX_NONE;
 
@@ -797,6 +923,7 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 				const int32 SampleDataIndex = SampleEntry.SampleDataIndex;
 
 				// Skip SamplesPoints that has no relevant weight
+				// [翻译失败: Skip SamplesPoints that has no relevant weight]
 				if (SampleData.IsValidIndex(SampleDataIndex) && (SampleEntry.TotalWeight > ZERO_ANIMWEIGHT_THRESH))
 				{
 					const FBlendSample& Sample = SampleData[SampleDataIndex];
@@ -827,10 +954,12 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 						}
 
 						// Figure out delta time 
+						// [翻译失败: Figure out delta time]
 						float DeltaTimePosition = CurrentSampleDataTime - PrevSampleDataTime;
 						const float SampleMoveDelta = Instance.DeltaTimeRecord->Delta * MultipliedSampleRateScale;
 
 						// if we went against play rate, then loop around.
+						// [翻译失败: if we went against play rate, then loop around.]
 						if ((SampleMoveDelta * DeltaTimePosition) < 0.f)
 						{
 							DeltaTimePosition += FMath::Sign<float>(SampleMoveDelta) * Sample.GetSamplePlayLength();
@@ -839,6 +968,7 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 						if (bGenerateNotifies && (!bTriggerNotifyHighestWeightedAnim || (I == HighestWeightIndex)))
 						{
 							// Harvest and record notifies
+							// [翻译失败: Harvest and record notifies]
 							Sample.Animation->GetAnimNotifies(PrevSampleDataTime, DeltaTimePosition, NotifyContext);
 						}
 
@@ -852,6 +982,7 @@ void UBlendSpace::TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQ
 						}
 
 						// Capture the final adjusted delta time and previous frame time as an asset player record
+						// [翻译失败: Capture the final adjusted delta time and previous frame time as an asset player record]
 						SampleEntry.DeltaTimeRecord.Set(PrevSampleDataTime, DeltaTimePosition);
 
 						UE_LOG(LogAnimation, Verbose, TEXT("%d. Blending animation(%s) with %f weight at time %0.2f"), I + 1, *Sample.Animation->GetName(), SampleEntry.GetClampedWeight(), CurrentSampleDataTime);
@@ -882,6 +1013,7 @@ bool UBlendSpace::GetAllAnimationSequencesReferred(TArray<UAnimationAsset*>& Ani
 	for (auto Iter = SampleData.CreateConstIterator(); Iter; ++Iter)
 	{
 		// saves all samples in the AnimSequences
+		// 将所有样本保存在 AnimSequences 中
 		UAnimSequence* Sequence = (*Iter).Animation;
 		if (Sequence)
 		{
@@ -905,6 +1037,7 @@ void UBlendSpace::ReplaceReferredAnimations(const TMap<UAnimationAsset*, UAnimat
 	for (FBlendSample& Sample : SampleData)
 	{
 		// replace the referenced animation sequence (if there was one)
+		// 替换引用的动画序列（如果有）
 		if (Sample.Animation)
 		{
 			if (UAnimationAsset* const* ReplacementAsset = ReplacementMap.Find(Sample.Animation))
@@ -921,6 +1054,7 @@ void UBlendSpace::ReplaceReferredAnimations(const TMap<UAnimationAsset*, UAnimat
 	}
 
 	// replace preview base pose sequence asset (if there was one)
+	// 替换预览基本姿势序列资源（如果有）
 	if (PreviewBasePose)
 	{
 		if (UAnimationAsset* const* ReplacementAsset = ReplacementMap.Find(PreviewBasePose))
@@ -950,6 +1084,7 @@ void UBlendSpace::RuntimeValidateMarkerData()
 		if (Sample.Animation && Sample.CachedMarkerDataUpdateCounter != Sample.Animation->GetMarkerUpdateCounter())
 		{
 			// Revalidate data
+			// 重新验证数据
 			ValidateSampleData();
 			return;
 		}
@@ -959,6 +1094,7 @@ void UBlendSpace::RuntimeValidateMarkerData()
 #endif // WITH_EDITOR
 
 /** When per-bone blend data are required to be sorted, this stores the sorted copy and the index of the original */
+/** [翻译失败: When per-bone blend data are required to be sorted, this stores the sorted copy and the index of the original] */
 struct FSortedPerBoneInterpolation
 {
 	FSortedPerBoneInterpolation(const FPerBoneInterpolation& Original, int32 Index)
@@ -970,6 +1106,7 @@ struct FSortedPerBoneInterpolation
 	FPerBoneInterpolation PerBoneBlend;
 
 	/** Index into the original array */
+	/** [翻译失败: Index into the original array] */
 	int32 OriginalIndex;
 };
 
@@ -999,7 +1136,9 @@ TSharedPtr<IInterpolationIndexProvider::FPerBoneInterpolationData> UBlendSpace::
 		{
 			FBoneReference& Bone = Data->Data[Iter].PerBoneBlend.BoneReference;
 			// Note that for blendspace graphs, the bone index won't have been set since the skeleton wasn't known at
+			// [翻译失败: Note that for blendspace graphs, the bone index won't have been set since the skeleton wasn't known at]
 			// creation time. In that case, look it up (but note that it could be slow).
+			// [翻译失败: creation time. In that case, look it up (but note that it could be slow).]
 			Bone.Initialize(RuntimeSkeleton);
 		}
 	}
@@ -1034,6 +1173,7 @@ int32 UBlendSpace::GetPerBoneInterpolationIndex(
 		FSkeletonPoseBoneIndex SkelBoneIndex = SmoothedBone.GetSkeletonPoseIndex(RequiredBones);
 
 		// Remap to the target skeleton, using skeleton remapping, as we might be applying this blend space onto another skeleton than the asset was created for.
+		// [翻译失败: Remap to the target skeleton, using skeleton remapping, as we might be applying this blend space onto another skeleton than the asset was created for.]
 		if (SkeletonRemapping.IsValid())
 		{
 			const int32 RemappedSkelBoneIndex = SkeletonRemapping.GetTargetSkeletonBoneIndex(SkelBoneIndex.GetInt());
@@ -1047,6 +1187,7 @@ int32 UBlendSpace::GetPerBoneInterpolationIndex(
 		}
 
 		// BoneIsChildOf returns true if InCompactPoseBoneIndex is a child of SmoothedBoneCompactPoseIndex. 
+		// [翻译失败: BoneIsChildOf returns true if InCompactPoseBoneIndex is a child of SmoothedBoneCompactPoseIndex.]
 		if (SmoothedBoneCompactPoseIndex != INDEX_NONE && 
 			RequiredBones.BoneIsChildOf(InCompactPoseBoneIndex, SmoothedBoneCompactPoseIndex))
 		{
@@ -1084,9 +1225,11 @@ int32 UBlendSpace::GetPerBoneInterpolationIndex(
 		const FBoneReference& SmoothedBone = PerBoneInterpolation.BoneReference;
 
 		// Bone references are stored as skeleton bones, we can use a dummy bone container as it isn't required
+		// [翻译失败: Bone references are stored as skeleton bones, we can use a dummy bone container as it isn't required]
 		FSkeletonPoseBoneIndex SmoothedSkelBoneIndex = SmoothedBone.GetSkeletonPoseIndex(UE::Anim::Private::DummyContainer);
 
 		// Remap to the target skeleton, using skeleton remapping, as we might be applying this blend space onto another skeleton than the asset was created for.
+		// [翻译失败: Remap to the target skeleton, using skeleton remapping, as we might be applying this blend space onto another skeleton than the asset was created for.]
 		if (SkeletonRemapping.IsValid())
 		{
 			const int32 RemappedSkelBoneIndex = SkeletonRemapping.GetTargetSkeletonBoneIndex(SmoothedSkelBoneIndex.GetInt());
@@ -1099,6 +1242,7 @@ int32 UBlendSpace::GetPerBoneInterpolationIndex(
 		}
 
 		// BoneIsChildOf returns true if InSkeletonBoneIndex is a child of SmoothedSkelBoneIndex
+		// 如果 InSkeletonBoneIndex 是 SmoothedSkelBoneIndex 的子级，BoneIsChildOf 返回 true
 		if (SmoothedSkelBoneIndex.IsValid() &&
 			TargetReferenceSkeleton.BoneIsChildOf(InSkeletonBoneIndex.GetInt(), SmoothedSkelBoneIndex.GetInt()))
 		{
@@ -1194,6 +1338,7 @@ void UBlendSpace::GetAnimationPose_Internal(TArray<FBlendSampleData>& BlendSampl
 
 	FAnimExtractContext ChildExtractionContext = ExtractionContext;
 	// get all child atoms we interested in
+	// [翻译失败: get all child atoms we interested in]
 	for (int32 I = 0; I < NumPoses; ++I)
 	{
 		FCompactPose& Pose = ChildrenPoses[I];
@@ -1208,10 +1353,12 @@ void UBlendSpace::GetAnimationPose_Internal(TArray<FBlendSampleData>& BlendSampl
 				check(InPoseLinks.IsValidIndex(BlendSampleDataCache[I].SampleDataIndex));
 
 				// Evaluate the linked graphs
+				// [翻译失败: Evaluate the linked graphs]
 				FPoseContext ChildPoseContext(InProxy, bInExpectsAdditivePose);
 				InPoseLinks[BlendSampleDataCache[I].SampleDataIndex].Evaluate(ChildPoseContext);
 
 				// Move out poses etc. for blending
+				// [翻译失败: Move out poses etc. for blending]
 				ChildrenPoses[I] = MoveTemp(ChildPoseContext.Pose);
 				ChildrenCurves[I] = MoveTemp(ChildPoseContext.Curve);
 				ChildrenAttributes[I] = MoveTemp(ChildPoseContext.CustomAttributes);
@@ -1224,6 +1371,7 @@ void UBlendSpace::GetAnimationPose_Internal(TArray<FBlendSampleData>& BlendSampl
 
 					FAnimationPoseData ChildAnimationPoseData = { Pose, ChildrenCurves[I], ChildrenAttributes[I] };
 					// first one always fills up the source one
+					// [翻译失败: first one always fills up the source one]
 					ChildExtractionContext.CurrentTime = static_cast<double>(Time);
 					ChildExtractionContext.DeltaTimeRecord = BlendSampleDataCache[I].DeltaTimeRecord;
 					Sample.Animation->GetAnimationPose(ChildAnimationPoseData, ChildExtractionContext);
@@ -1249,10 +1397,15 @@ void UBlendSpace::GetAnimationPose_Internal(TArray<FBlendSampleData>& BlendSampl
 		if (bAllowMeshSpaceBlending && !bContainsRotationOffsetMeshSpaceSamples)
 		{
 			// Why blend in mesh space when there are per-bone smoothing settings? Because then we
+			// [翻译失败: Why blend in mesh space when there are per-bone smoothing settings? Because then we]
 			// can blend between two aim poses (for example), with the hands moving faster towards
+			// 可以在两个瞄准姿势之间混合（例如），双手更快地向
 			// the target than the spine. This results in nice organic looking movement, rather than
+			// 目标比脊柱更重要。这会产生漂亮的有机外观运动，而不是
 			// everything moving at the same rate. However, note that if the samples contain mesh-space
+			// 一切都以相同的速度移动。但是，请注意，如果样本包含网格空间
 			// rotations then the regular blend will already happen in mesh space automatically.
+			// 旋转，则规则混合已经在网格空间中自动发生。
 			FAnimationRuntime::BlendPosesTogetherPerBoneInMeshSpace(
 				ChildrenPosesView, ChildrenCurves, ChildrenAttributes,
 				this, BlendSampleDataCache, OutAnimationPoseData);
@@ -1267,12 +1420,15 @@ void UBlendSpace::GetAnimationPose_Internal(TArray<FBlendSampleData>& BlendSampl
 	else
 	{
 		// We could allow mesh space blending here, when there are no per-bone smoothing settings. However, it's
+		// 当没有每骨骼平滑设置时，我们可以在此处允许网格空间混合。然而，它是
 		// unlikely that it would actually provide a benefit, but is a lot more expensive.
+		// 它不太可能真正提供好处，但价格要贵得多。
 		FAnimationRuntime::BlendPosesTogether(
 			ChildrenPosesView, ChildrenCurves, ChildrenAttributes, ChildrenWeights, OutAnimationPoseData);
 	}
 
 	// Once all the accumulation and blending has been done, normalize rotations.
+	// 一旦完成所有积累和混合，就可以标准化旋转。
 	OutPose.NormalizeRotations();
 }
 
@@ -1328,6 +1484,7 @@ bool UBlendSpace::GetSamplesFromBlendInput(
 		OutSampleDataList.Reserve(RawGridSamples.Num() * FEditorElement::MAX_VERTICES);
 
 		// Consolidate all samples
+		// 合并所有样本
 		for (int32 SampleNum = 0; SampleNum < RawGridSamples.Num(); ++SampleNum)
 		{
 			FGridBlendSample& GridSample = RawGridSamples[SampleNum];
@@ -1354,10 +1511,13 @@ bool UBlendSpace::GetSamplesFromBlendInput(
 	if (bCombineAnimations)
 	{
 		// At this point we'll only have one of each sample, but different samples can point to the same
+		// [翻译失败: At this point we'll only have one of each sample, but different samples can point to the same]
 		// animation. We can combine those, making sure to interpolate the parameters like play rate too.
+		// [翻译失败: animation. We can combine those, making sure to interpolate the parameters like play rate too.]
 		for (int32 Index1 = 0; Index1 < OutSampleDataList.Num(); ++Index1)
 		{
 			// Use pointers to make it more obvious what happens if we swap the first and second samples
+			// [翻译失败: Use pointers to make it more obvious what happens if we swap the first and second samples]
 			FBlendSampleData* FirstSample = &OutSampleDataList[Index1];
 			for (int32 Index2 = Index1 + 1; Index2 < OutSampleDataList.Num(); ++Index2)
 			{
@@ -1366,20 +1526,25 @@ bool UBlendSpace::GetSamplesFromBlendInput(
 				const bool bBothUseSingleFrameForBlending = SampleData[FirstSample->SampleDataIndex].bUseSingleFrameForBlending && SampleData[SecondSample->SampleDataIndex].bUseSingleFrameForBlending;
 				const bool bFrameIndicesMatch = SampleData[FirstSample->SampleDataIndex].FrameIndexToSample == SampleData[SecondSample->SampleDataIndex].FrameIndexToSample;				
 				// if they have same sample, remove the Index2, and get out
+				// [翻译失败: if they have same sample, remove the Index2, and get out]
 				if (FirstSample->SampleDataIndex == SecondSample->SampleDataIndex || // Shouldn't happen
 					(FirstSample->Animation != nullptr && FirstSample->Animation == SecondSample->Animation && 
 					bBothUseSingleFrameForBlending && bFrameIndicesMatch))
 				{
 					//Calc New Sample Playrate
+					//计算新样本播放率
 					const float TotalWeight = FirstSample->GetClampedWeight() + SecondSample->GetClampedWeight();
 
 					// Only combine playrates if total weight > 0
+					// 仅当总重量 > 0 时才合并播放次数
 					if (!FMath::IsNearlyZero(TotalWeight))
 					{
 						if (FirstSample->GetClampedWeight() < SecondSample->GetClampedWeight())
 						{
 							// Not strictly necessary, but if we swap here then we keep the one that has a higher
+							// 不是绝对必要的，但如果我们在这里交换，那么我们保留具有更高的那个
 							// weight, which can make debugging/viewing the blend space more intuitive.
+							// 权重，可以使调试/查看混合空间更加直观。
 							OutSampleDataList.Swap(Index1, Index2);
 						}
 
@@ -1388,10 +1553,12 @@ bool UBlendSpace::GetSamplesFromBlendInput(
 						FirstSample->SamplePlayRate = OriginalWeightedPlayRate + SecondSampleWeightedPlayRate;
 
 						// add weight
+						// 增加重量
 						FirstSample->AddWeight(SecondSample->GetClampedWeight());
 					}
 
 					// as for time or previous time will be the master one(Index1)
+					// 至于时间还是以前的时间为主(Index1)
 					OutSampleDataList.RemoveAtSwap(Index2, EAllowShrinking::No);
 					--Index2;
 				}
@@ -1402,6 +1569,7 @@ bool UBlendSpace::GetSamplesFromBlendInput(
 	OutSampleDataList.Sort([](const FBlendSampleData& A, const FBlendSampleData& B) { return B.TotalWeight < A.TotalWeight; });
 
 	// Remove any below a threshold
+	// [翻译失败: Remove any below a threshold]
 	int32 TotalSample = OutSampleDataList.Num();
 	float TotalWeight = 0.f;
 	for (int32 I = 0; I < TotalSample; ++I)
@@ -1409,6 +1577,7 @@ bool UBlendSpace::GetSamplesFromBlendInput(
 		if (OutSampleDataList[I].TotalWeight < ZERO_ANIMWEIGHT_THRESH)
 		{
 			// cut anything in front of this 
+			// [翻译失败: cut anything in front of this]
 			OutSampleDataList.RemoveAt(I, TotalSample - I, EAllowShrinking::No); // we won't shrink here, that might screw up alloc optimization at a higher level, if not this is temp anyway
 			break;
 		}
@@ -1419,6 +1588,7 @@ bool UBlendSpace::GetSamplesFromBlendInput(
 	for (int32 I = 0; I < OutSampleDataList.Num(); ++I)
 	{
 		// normalize to all weights
+		// 归一化为所有权重
 		OutSampleDataList[I].TotalWeight /= TotalWeight;
 	}
 	return (OutSampleDataList.Num() != 0);
@@ -1461,6 +1631,7 @@ void UBlendSpace::UpdateFilterParams(FBlendFilter* Filter) const
 void UBlendSpace::ValidateSampleData()
 {
 	// (done here since it won't be triggered in the BlendSpace::PostEditChangeProperty, due to empty property during Undo)
+	// （此处完成是因为它不会在 BlendSpace::PostEditChangeProperty 中触发，因为撤消期间属性为空）
 	SnapSamplesToClosestGridPoint();
 
 	bool bSampleDataChanged = false;
@@ -1476,6 +1647,7 @@ void UBlendSpace::ValidateSampleData()
 		FBlendSample& Sample = SampleData[SampleIndex];
 
 		// see if same data exists, by same, same values
+		// 通过相同的值查看是否存在相同的数据
 		for (int32 ComparisonSampleIndex = SampleIndex + 1; ComparisonSampleIndex < SampleData.Num(); ++ComparisonSampleIndex)
 		{
 			if (IsSameSamplePoint(Sample.SampleValue, SampleData[ComparisonSampleIndex].SampleValue))
@@ -1505,6 +1677,7 @@ void UBlendSpace::ValidateSampleData()
 				if (Sample.GetSamplePlayLength() > AnimLength)
 				{
 					// @todo : should apply scale? If so, we'll need to apply also when blend
+					// @todo：应该应用比例吗？如果是这样，我们还需要在混合时应用
 					AnimLength = Sample.GetSamplePlayLength();
 				}
 
@@ -1583,6 +1756,7 @@ void UBlendSpace::ValidateSampleData()
 					else
 					{
 						// Shouldn't get here
+						// 不应该到这里
 						Message->AddToken(FAssetNameToken::Create(Sample.Animation->GetPathName(), FText::FromString(Sample.Animation->GetName())));
 						Message->AddToken(FTextToken::Create(LOCTEXT("EmptyAnimationData_IsInvalid", "is invalid.")));
 					}
@@ -1628,9 +1802,11 @@ void UBlendSpace::ExpandRangeForSample(const FVector& SampleValue)
 int32 UBlendSpace::AddSample(const FVector& SampleValue)
 {
 	// We should only be adding samples without a source animation if we are not a standalone asset
+	// 如果我们不是独立资产，我们应该只添加没有源动画的示例
 	check(!IsAsset());
 
 	// Expand the range if necessary
+	// 必要时扩大范围
 	ExpandRangeForSample(SampleValue);
 	
 	const bool bValidSampleData = ValidateSampleValue(SampleValue);
@@ -1647,6 +1823,7 @@ int32 UBlendSpace::AddSample(const FVector& SampleValue)
 int32 UBlendSpace::AddSample(UAnimSequence* AnimationSequence, const FVector& SampleValue)
 {
 	// Expand the range if necessary
+	// 必要时扩大范围
 	ExpandRangeForSample(SampleValue);
 
 	const bool bValidSampleData = ValidateSampleValue(SampleValue) && ValidateAnimationSequence(AnimationSequence);
@@ -1663,6 +1840,7 @@ int32 UBlendSpace::AddSample(UAnimSequence* AnimationSequence, const FVector& Sa
 bool UBlendSpace::EditSampleValue(const int32 BlendSampleIndex, const FVector& NewValue)
 {
 	// Expand the range if necessary
+	// 必要时扩大范围
 	ExpandRangeForSample(NewValue);
 
 	const bool bValidValue = SampleData.IsValidIndex(BlendSampleIndex) && ValidateSampleValue(NewValue, BlendSampleIndex);
@@ -1670,6 +1848,7 @@ bool UBlendSpace::EditSampleValue(const int32 BlendSampleIndex, const FVector& N
 	if (bValidValue)
 	{
 		// Set new value if it passes the tests
+		// 如果通过测试则设置新值
 		SampleData[BlendSampleIndex].SampleValue = NewValue;
 		SampleData[BlendSampleIndex].bIsValid = bValidValue;
 	}
@@ -1740,6 +1919,7 @@ bool UBlendSpace::IsSingleFrameBlendingIndexInBounds(const FBlendSample& BlendSa
 		}
 
 		// either we are not using single frame blending or index is outside of bounds (or data model is invalid, in which case can't report this error properly)
+		// 要么我们没有使用单帧混合，要么索引超出范围（或者数据模型无效，在这种情况下无法正确报告此错误）
 		return false;
 	}
 	
@@ -1792,6 +1972,7 @@ void UBlendSpace::FillupGridElements(const TArray<FEditorElement>& GridElements,
 		}
 
 		// Need to normalize the weights
+		// 需要标准化权重
 		if (TotalWeight > 0.f)
 		{
 			for (int32 J = 0; J < FEditorElement::MAX_VERTICES; ++J)
@@ -1833,6 +2014,7 @@ bool UBlendSpace::ShouldAnimationBeAdditive() const
 bool UBlendSpace::IsAnimationCompatibleWithSkeleton(const UAnimSequence* AnimationSequence) const
 {
 	// Check if the animation sequences skeleton is compatible with the blendspace one
+	// 检查动画序列骨架是否与混合空间骨架兼容
 	const USkeleton* MySkeleton = GetSkeleton();
 	bool bIsAnimationCompatible = AnimationSequence && MySkeleton && AnimationSequence->GetSkeleton();
 #if WITH_EDITORONLY_DATA
@@ -1844,6 +2026,7 @@ bool UBlendSpace::IsAnimationCompatibleWithSkeleton(const UAnimSequence* Animati
 bool UBlendSpace::IsAnimationCompatible(const UAnimSequence* AnimationSequence) const
 {
 	// If the supplied animation is of a different additive animation type or this blendspace support non-additive animations
+	// 如果提供的动画属于不同的附加动画类型或者此混合空间支持非附加动画
 	const bool bIsCompatible = IsValidAdditiveType(AnimationSequence->AdditiveAnimType);
 	return bIsCompatible;
 }
@@ -1886,21 +2069,31 @@ bool UBlendSpace::IsTooCloseToExistingSamplePoint(const FVector& SampleValue, in
 #endif // WITH_EDITOR
 
 // When using CriticallyDampedSmoothing, how to go from the interpolation speed to the smooth
+// 使用CriticallyDampedSmoothing时，如何从插值速度到平滑
 // time? What would the critically damped velocity be as it goes from a starting value of 0 to a
+// 时间？当临界阻尼速度从起始值 0 变化到
 // target of 1 (see eq in CriticallyDampedSmoothing), starting with v = 0?
+// 目标为 1（请参阅 CriticallyDampedSmoothing 中的 eq），从 v = 0 开始？
 //
+// v = W^2 t exp(-W t)
 // v = W^2 t exp(-W t)
 //
 // Differentiate and set equal to zero to find maximum v is at t = 1 / W
+// 微分并设置为零以找到最大值 v 位于 t = 1 / W
 //
 // vMax = W / e = 2 / (SmoothingTime * e)
+// vMax = W / e = 2 / (平滑时间 * e)
 //
 // Set this equal to TargetWeightInterpolationSpeedPerSec, we get
+// 将其设置为等于 TargetWeightInterpolationSpeedPerSec，我们得到
 //
 // SmoothingTime = 2 / (e * TargetWeightInterpolationSpeedPerSec)
+// 平滑时间 = 2 / (e * TargetWeightInterpolationSpeedPerSec)
 //
 // However - this looks significantly slower than when using a constant speed, because we're
+// 然而，这看起来比使用恒定速度时慢得多，因为我们
 // easing in/out, so aim for twice this speed (i.e. smooth over half the time)
+// 缓入/缓出，因此目标是该速度的两倍（即平滑超过一半的时间）
 static float SmoothingTimeFromSpeed(float Speed)
 {
 	return Speed > FLT_EPSILON ? 1.0f / (UE_EULERS_NUMBER * Speed) : 0.0f;
@@ -1966,6 +2159,7 @@ void UBlendSpace::TickFollowerSamples(
 			}
 
 			// Update followers who can do marker sync, others will be handled later in TickAssetPlayer
+			// 更新可以进行标记同步的关注者，其他的将在 TickAssetPlayer 中稍后处理
 			if (Sample.Animation->AuthoredSyncMarkers.Num() > 0) 
 			{
 				Sample.Animation->TickByMarkerAsFollower(
@@ -1988,9 +2182,12 @@ float UBlendSpace::GetAnimationLengthFromSampleData(const TArray<FBlendSampleDat
 			if (Sample.Animation)
 			{
 				//Use the SamplePlayRate from the SampleDataList, not the RateScale from SampleData as SamplePlayRate might contain
+				//使用 SampleDataList 中的 SamplePlayRate，而不是 SampleData 中的 RateScale，因为 SamplePlayRate 可能包含
 				//Multiple samples contribution which we would otherwise lose
+				//否则我们会失去多个样本的贡献
 				const float MultipliedSampleRateScale = Sample.Animation->RateScale * SampleDataList[I].SamplePlayRate;
 				// apply rate scale to get actual playback time
+				// 应用速率比例来获取实际播放时间
 				BlendAnimLength += (Sample.GetSamplePlayLength() / ((MultipliedSampleRateScale) != 0.0f ? FMath::Abs(MultipliedSampleRateScale) : 1.0f)) * SampleDataList[I].GetClampedWeight();
 
 				UE_LOG(LogAnimation, Verbose, TEXT("[%d] - Sample Animation(%s) : Weight(%0.5f) "), I + 1, *Sample.Animation->GetName(), SampleDataList[I].GetClampedWeight());
@@ -2084,9 +2281,11 @@ bool UBlendSpace::InterpolateWeightOfSampleData(float DeltaTime, const TArray<FB
 	float TotalFinalPerBoneWeight = 0.0f;
 
 	// now interpolate from old to new target, this is brute-force
+	// 现在从旧目标插值到新目标，这是蛮力
 	for (auto OldIt = OldSampleDataList.CreateConstIterator(); OldIt; ++OldIt)
 	{
 		// Now need to modify old sample, so copy it
+		// 现在需要修改旧样本，所以复制它
 		FBlendSampleData OldSample = *OldIt;
 		bool bTargetSampleExists = false;
 
@@ -2100,6 +2299,7 @@ bool UBlendSpace::InterpolateWeightOfSampleData(float DeltaTime, const TArray<FB
 		{
 			const FBlendSampleData& NewSample = *NewIt;
 			// if same sample is found, interpolate
+			// 如果找到相同的样本，则进行插值
 			if (NewSample.SampleDataIndex == OldSample.SampleDataIndex)
 			{
 				FBlendSampleData InterpData = NewSample;
@@ -2108,6 +2308,7 @@ bool UBlendSpace::InterpolateWeightOfSampleData(float DeltaTime, const TArray<FB
 				InterpData.PerBoneWeightRate = OldSample.PerBoneWeightRate;
 
 				// now interpolate the per bone weights
+				// 现在插入每个骨骼的权重
 				float TotalPerBoneWeight = 0.0f;
 				for (int32 Iter = 0; Iter < InterpData.PerBoneBlendData.Num(); ++Iter)
 				{
@@ -2130,11 +2331,13 @@ bool UBlendSpace::InterpolateWeightOfSampleData(float DeltaTime, const TArray<FB
 		}
 
 		// if new target isn't found, interpolate to 0.f, this is gone
+		// 如果没有找到新目标，则插值到 0.f，这就消失了
 		if (bTargetSampleExists == false)
 		{
 			FBlendSampleData InterpData = OldSample;
 			SmoothWeight(InterpData.TotalWeight, InterpData.WeightRate, OldSample.TotalWeight, OldSample.WeightRate, 0.0f, DeltaTime, TargetWeightInterpolationSpeedPerSec, bTargetWeightInterpolationEaseInOut);
 			// now interpolate the per bone weights
+			// 现在插入每个骨骼的权重
 			float TotalPerBoneWeight = 0.0f;
 			for (int32 Iter = 0; Iter < InterpData.PerBoneBlendData.Num(); ++Iter)
 			{
@@ -2146,6 +2349,7 @@ bool UBlendSpace::InterpolateWeightOfSampleData(float DeltaTime, const TArray<FB
 			}
 
 			// add it if it's not zero
+			// 如果不为零则添加它
 			if (InterpData.TotalWeight > ZERO_ANIMWEIGHT_THRESH || TotalPerBoneWeight > ZERO_ANIMWEIGHT_THRESH)
 			{
 				FinalSampleDataList.Add(InterpData);
@@ -2156,9 +2360,11 @@ bool UBlendSpace::InterpolateWeightOfSampleData(float DeltaTime, const TArray<FB
 	}
 
 	// now find new samples that are not found from old samples
+	// 现在找到旧样本中未找到的新样本
 	for (auto OldIt = NewSampleDataList.CreateConstIterator(); OldIt; ++OldIt)
 	{
 		// Now need to modify old sample, so copy it
+		// 现在需要修改旧样本，所以复制它
 		FBlendSampleData OldSample = *OldIt;
 		bool bOldSampleExists = false;
 
@@ -2179,6 +2385,7 @@ bool UBlendSpace::InterpolateWeightOfSampleData(float DeltaTime, const TArray<FB
 		}
 
 		// add those new samples
+		// 添加这些新样本
 		if (bOldSampleExists == false)
 		{
 			FBlendSampleData InterpData = OldSample;
@@ -2187,6 +2394,7 @@ bool UBlendSpace::InterpolateWeightOfSampleData(float DeltaTime, const TArray<FB
 			OldSample.WeightRate = 0.0f;
 			SmoothWeight(InterpData.TotalWeight, InterpData.WeightRate, OldSample.TotalWeight, OldSample.WeightRate, TargetWeight, DeltaTime, TargetWeightInterpolationSpeedPerSec, bTargetWeightInterpolationEaseInOut);
 			// now interpolate the per bone weights
+			// 现在插入每个骨骼的权重
 			float TotalPerBoneWeight = 0.0f;
 			for (int32 Iter = 0; Iter < InterpData.PerBoneBlendData.Num(); ++Iter)
 			{
@@ -2234,6 +2442,7 @@ FVector UBlendSpace::FilterInput(FBlendFilter* Filter, const FVector& BlendInput
 			}
 		}
 		// Note that if we expose the damping ratio etc as pins, this should be called outside of the editor too.
+		// 请注意，如果我们将阻尼比等公开为引脚，则也应该在编辑器外部调用它。
 		UpdateFilterParams(Filter);
 #endif
 		for (int32 AxisIndex = 0; AxisIndex < Filter->FilterPerAxis.Num(); ++AxisIndex)
@@ -2300,6 +2509,7 @@ void UBlendSpace::UpdatePreviewBasePose()
 #if WITH_EDITORONLY_DATA
 	PreviewBasePose = nullptr;
 	// Check if blendspace is additive and try to find a ref pose 
+	// 检查混合空间是否可加并尝试找到参考姿势
 	if (IsValidAdditive())
 	{
 		for (const FBlendSample& BlendSample : SampleData)
@@ -2382,6 +2592,7 @@ void UBlendSpace::GetRawSamplesFromBlendInput1D(const FVector& BlendInput, TArra
 		FGridBlendSample NewSample;
 		NewSample.GridElement = *BeforeElement;
 		// now calculate weight - GridElement has weights to nearest samples, here we weight the grid element
+		// 现在计算权重 - GridElement 具有最近样本的权重，这里我们对网格元素进行加权
 		NewSample.BlendWeight = (1.f - Remainder);
 		OutBlendSamples.Add(NewSample);
 	}
@@ -2400,6 +2611,7 @@ void UBlendSpace::GetRawSamplesFromBlendInput1D(const FVector& BlendInput, TArra
 		FGridBlendSample NewSample;
 		NewSample.GridElement = *AfterElement;
 		// now calculate weight - GridElement has weights to nearest samples, here we weight the grid element
+		// 现在计算权重 - GridElement 具有最近样本的权重，这里我们对网格元素进行加权
 		NewSample.BlendWeight = (Remainder);
 		OutBlendSamples.Add(NewSample);
 	}
@@ -2420,6 +2632,7 @@ void UBlendSpace::GetRawSamplesFromBlendInput1D(const FVector& BlendInput, TArra
 const FEditorElement* UBlendSpace::GetEditorElement(int32 XIndex, int32 YIndex) const
 {
 	// Needs to match FBlendSpaceGrid::GetElement and FBlendSpaceGrid::GetElement
+	// 需要匹配 FBlendSpaceGrid::GetElement 和 FBlendSpaceGrid::GetElement
 	int32 Index = YIndex * (BlendParameters[0].GridNum + 1) + XIndex;
 	return GetGridSampleInternal(Index);
 }
@@ -2440,11 +2653,13 @@ void UBlendSpace::GetRawSamplesFromBlendInput2D(const FVector& BlendInput, TArra
 	const FVector GridIndex(FMath::TruncToFloat(NormalizedBlendInput.X), FMath::TruncToFloat(NormalizedBlendInput.Y), 0.f);
 	const FVector Remainder = NormalizedBlendInput - GridIndex;
 	// bi-linear very simple interpolation
+	// 双线性非常简单的插值
 	const FEditorElement* EleLT = GetEditorElement(GridIndex.X, GridIndex.Y + 1);
 	if (EleLT)
 	{
 		LeftTop.GridElement = *EleLT;
 		// now calculate weight - distance to each corner since input is already normalized within grid, we can just calculate distance 
+		// 现在计算权重 - 到每个角的距离，因为输入已经在网格内标准化，我们可以只计算距离
 		LeftTop.BlendWeight = (1.f - Remainder.X) * Remainder.Y;
 	}
 	else
@@ -2512,6 +2727,7 @@ FVector UBlendSpace::GetGridPosition(int32 GridX, int32 GridY) const
 FVector UBlendSpace::GetGridPosition(int32 GridIndex) const
 {
 	// Needs to match FBlendSpaceGrid::GetElement and UBlendSpace::GetEditorElement
+	// 需要匹配 FBlendSpaceGrid::GetElement 和 UBlendSpace::GetEditorElement
 	int32 GridX = GridIndex % (BlendParameters[0].GridNum + 1);
 	int32 GridY = (GridIndex - GridX) / (BlendParameters[0].GridNum + 1);
 	return GetGridPosition(GridX, GridY);
@@ -2519,9 +2735,13 @@ FVector UBlendSpace::GetGridPosition(int32 GridIndex) const
 
 //======================================================================================================================
 // Note that this runs and is needed if the axes settings are change to enable snapping - then we do
+// 请注意，如果轴设置更改为启用捕捉，则此操作将运行并且是必需的 - 那么我们就这样做
 // a pass over all the samples and make sure everything is in order. When samples are being dragged
+// 检查所有样品并确保一切正常。当样本被拖动时
 // around/dropped then that moving sample will be handled in SBlendSpaceGridWidget so, whilst this
+// around/dropped 那么移动的样本将在 SBlendSpaceGridWidget 中处理，同时这
 // gets called, it shouldn't really need to do anything.
+// 被调用，它实际上不需要做任何事情。
 void UBlendSpace::SnapSamplesToClosestGridPoint()
 {
 	if (BlendParameters[0].bSnapToGrid && BlendParameters[1].bSnapToGrid)
@@ -2535,12 +2755,14 @@ void UBlendSpace::SnapSamplesToClosestGridPoint()
 		const FVector GridStep(GridRange.X / BlendParameters[0].GridNum, GridRange.Y / BlendParameters[1].GridNum, 0.0f);
 
 		// Snap to nearest in normalized space - not depending on the units of the params (which may be completely different).
+		// 捕捉到标准化空间中最接近的值 - 不依赖于参数的单位（可能完全不同）。
 		const float GridRatio = GridStep.Y / GridStep.X;
 
 		int32 NumGridPoints = (NumGridDivisions.X + 1) * (NumGridDivisions.Y + 1);
 		ClosestSampleToGridPoint.Init(INDEX_NONE, NumGridPoints);
 
 		// Find closest sample to grid point
+		// 找到距离网格点最近的样本
 		for (int32 GridIndex = 0; GridIndex < NumGridPoints; ++GridIndex)
 		{
 			const FVector& GridPoint = GetGridPosition(GridIndex);
@@ -2564,11 +2786,13 @@ void UBlendSpace::SnapSamplesToClosestGridPoint()
 		}
 
 		// Find closest grid point to sample
+		// 找到离样本最近的网格点
 		for (int32 SampleIndex = 0; SampleIndex < SampleData.Num(); ++SampleIndex)
 		{
 			FBlendSample& BlendSample = SampleData[SampleIndex];
 
 			// Find closest grid point
+			// 找到最近的网格点
 			float SmallestDistanceSq = FLT_MAX;
 			int32 Index = INDEX_NONE;
 			for (int32 GridIndex = 0; GridIndex < NumGridPoints; ++GridIndex)
@@ -2584,6 +2808,7 @@ void UBlendSpace::SnapSamplesToClosestGridPoint()
 			}
 
 			// Only move the sample if it is also closest to the grid point
+			// 仅当样本也最接近网格点时才移动样本
 			if (Index != INDEX_NONE && ClosestSampleToGridPoint[Index] == SampleIndex)
 			{
 				for (int32 AxisIndex = 0; AxisIndex != 2; ++AxisIndex)
@@ -2596,7 +2821,9 @@ void UBlendSpace::SnapSamplesToClosestGridPoint()
 	else if (BlendParameters[0].bSnapToGrid || BlendParameters[1].bSnapToGrid)
 	{
 		// We only snap on one axis, but need to make sure we don't collapse samples on top of each
+		// 我们只在一个轴上捕捉，但需要确保我们不会在每个轴上折叠样本
 		// other. Just snap to the nearest grid value, unless it would result in a duplicate
+		// 其他。只需捕捉到最近的网格值，除非它会导致重复
 
 		int32 AxisIndex = BlendParameters[0].bSnapToGrid ? 0 : 1;
 
@@ -2657,6 +2884,7 @@ void UBlendSpace::ResampleData()
 	for (const FBlendSample& Sample : SampleData)
 	{
 		// Add X value from sample (this is the only valid value to be set for 1D blend spaces / aim offsets
+		// 添加样本中的 X 值（这是为 1D 混合空间/目标偏移设置的唯一有效值
 		if (Sample.bIsValid)
 		{
 			AABB += Sample.SampleValue;
@@ -2678,6 +2906,7 @@ void UBlendSpace::ResampleData()
 	}
 
 	// Handle the situation where there is just one point
+	// 处理只有一个点的情况
 	if (DimensionIndices.Num() == 0)
 	{
 		DimensionIndices.Push(0);
@@ -2716,6 +2945,7 @@ void UBlendSpace::ResampleData1D()
 		{
 			const FBlendSample& Sample = SampleData[SampleIndex];
 			// Add X value from sample (this is the only valid value to be set for 1D blend spaces / aim offsets
+			// 添加样本中的 X 值（这是为 1D 混合空间/目标偏移设置的唯一有效值
 			if (Sample.bIsValid)
 			{
 				LineElementGenerator.SamplePointList.Add(FLineVertex(Sample.SampleValue[Index0], SampleIndex));
@@ -2744,17 +2974,24 @@ void UBlendSpace::ResampleData2D()
 	check(DimensionIndices.Num() == 2);
 
 	// TODO for now, Index0 will always be 0 and Index1 will always be 1, since we don't support 3D.
+	// TODO 目前，Index0 将始终为 0，Index1 将始终为 1，因为我们不支持 3D。
 	// However, if/when we support authoring using a third dimension, we could get here with any 2D
+	// 但是，如果/当我们支持使用三维进行创作时，我们可以使用任何 2D
 	// combination - e.g. XY, XZ or YZ. Then we can either make the triangulation code handle the
+	// 组合 - 例如XY、XZ 或 YZ。然后我们可以让三角测量代码处理
 	// indexing, or tweak the triangles going into and out of it.
+	// 索引，或者调整进出它的三角形。
 	int32 Index0 = DimensionIndices[0];
 	int32 Index1 = DimensionIndices[1];
 
 	// clear first
+	// 首先清除
 	FDelaunayTriangleGenerator DelaunayTriangleGenerator;
 
 	// you don't like to overwrite the link here (between visible points vs sample points, 
+	// 您不喜欢覆盖此处的链接（可见点与样本点之间，
 	// so allow this if no triangle is generated
+	// 所以如果没有生成三角形就允许这样做
 	const FBlendParameter& BlendParamX = GetBlendParameter(Index0);
 	const FBlendParameter& BlendParamY = GetBlendParameter(Index1);
 	FBlendSpaceGrid	BlendSpaceGrid;
@@ -2772,6 +3009,7 @@ void UBlendSpace::ResampleData2D()
 			const FBlendSample& Sample = GetBlendSample(SampleIndex);
 
 			// Do not add invalid sample points (user will need to correct them to be incorporated into the blendspace)
+			// 不要添加无效的样本点（用户需要更正它们才能将其合并到混合空间中）
 			if (Sample.bIsValid)
 			{
 				DelaunayTriangleGenerator.AddSamplePoint(FVector2D(Sample.SampleValue[Index0], Sample.SampleValue[Index1]), SampleIndex);
@@ -2779,16 +3017,19 @@ void UBlendSpace::ResampleData2D()
 		}
 
 		// triangulate
+		// 三角测量
 		DelaunayTriangleGenerator.Triangulate(PreferredTriangulationDirection);
 
 		if (bInterpolateUsingGrid)
 		{
 			// once triangulated, generate grid
+			// 一旦三角测量，生成网格
 			const TArray<FVertex>& Points = DelaunayTriangleGenerator.GetSamplePointList();
 			const TArray<FTriangle*>& Triangles = DelaunayTriangleGenerator.GetTriangleList();
 			BlendSpaceGrid.GenerateGridElements(Points, Triangles);
 
 			// now fill up grid elements in BlendSpace using this Element information
+			// 现在使用此元素信息填充 BlendSpace 中的网格元素
 			if (Triangles.Num() > 0)
 			{
 				const TArray<FEditorElement>& GridElements = BlendSpaceGrid.GetElements();
@@ -2849,6 +3090,7 @@ void FBlendSpaceData::GetSamples1D(
 		if (P < Segment.Vertices[0])
 		{
 			// Need to go left
+			// 需要向左走
 			if (InOutSegmentIndex > 0)
 			{
 				--InOutSegmentIndex;
@@ -2862,6 +3104,7 @@ void FBlendSpaceData::GetSamples1D(
 		else if (P > Segment.Vertices[1])
 		{
 			// Need to go right
+			// 需要向右走
 			if (InOutSegmentIndex < Segments.Num() - 1)
 			{
 				++InOutSegmentIndex;
@@ -2875,6 +3118,7 @@ void FBlendSpaceData::GetSamples1D(
 		else
 		{
 			// We're in the segment
+			// [翻译失败: We're in the segment]
 			float P0 = Segment.Vertices[0];
 			float P1 = Segment.Vertices[1];
 			float Frac = FMath::Clamp((P - P0) / (P1 - P0), 0.0f, 1.0f); // Robust to dividing by zero
@@ -2901,26 +3145,33 @@ void FBlendSpaceData::GetSamples2D(
 	OutWeightedSamples.Reset(3);
 
 	// Do an incremental search by tracking through the triangle edges (with the normals). This will
+	// [翻译失败: Do an incremental search by tracking through the triangle edges (with the normals). This will]
 	// be guaranteed to work since the overall triangulation region is convex. Note that the
+	// 由于整个三角剖分区域是凸的，因此可以保证工作。请注意，
 	// triangulation may not include the query point, so if we're not in any triangle we need to
+	// 三角测量可能不包括查询点，所以如果我们不在任何三角形中，我们需要
 	// return the closest point in the triangulated region.
+	// 返回三角区域中最近的点。
 	int32 Index0 = InDimensionIndices[0];
 	int32 Index1 = InDimensionIndices[1];
 	FVector2D P(InNormalizedSamplePosition[Index0], InNormalizedSamplePosition[Index1]);
 
 	// Special case for when there's a single triangle and it is degenerate
+	// 当只有一个三角形并且它是退化的时的特殊情况
 	if (Triangles.Num() == 1)
 	{
 		const FBlendSpaceTriangle& Triangle = Triangles[0];
 		if (Triangle.SampleIndices[0] == Triangle.SampleIndices[1])
 		{
 			// Single point
+			// 单点
 			OutWeightedSamples.Push(FWeightedBlendSample(Triangle.SampleIndices[0], 1.0f));
 			return;
 		}
 		else if (Triangle.SampleIndices[1] == Triangle.SampleIndices[2])
 		{
 			// Two points - blend linearly
+			// 两点 - 线性混合
 			FVector2D Delta = Triangle.Vertices[1] - Triangle.Vertices[0];
 			float T = ((P - Triangle.Vertices[0]) | Delta) / Delta.SizeSquared();
 			if (T < 0)
@@ -2946,14 +3197,19 @@ void FBlendSpaceData::GetSamples2D(
 #endif
 
 	// Where available, start from the the previous/cached result. Also see
+	// 如果可用，从上一个/缓存的结果开始。另请参阅
 	// https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-728.pdf for a method which also works for
+	// https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-728.pdf 的方法也适用于
 	// non-Delaunay triangulations (might be useful if there are precision problems).
+	// 非 Delaunay 三角剖分（如果存在精度问题可能有用）。
 	if (InOutTriangleIndex < 0 || InOutTriangleIndex >= Triangles.Num())
 	{
 		InOutTriangleIndex = Triangles.Num() / 2;
 	}
 	// We should never need more than the number of triangles - if we do then we got caught in a
+	// 我们永远不应该需要超过三角形的数量——如果我们这样做的话，我们就会陷入困境
 	// loop somehow
+	// 以某种方式循环
 	for (int32 Attempt = 0 ; Attempt != Triangles.Num() ; ++Attempt)
 	{
 #ifdef DEBUG_LOG_BLENDSPACE_TRIANGULATION
@@ -2961,6 +3217,7 @@ void FBlendSpaceData::GetSamples2D(
 #endif
 		const FBlendSpaceTriangle* Triangle = &Triangles[InOutTriangleIndex];
 		// Look for the edge which has the target point most outside it
+		// 寻找目标点最外侧的边缘
 		float LargestDistance = UE_KINDA_SMALL_NUMBER;
 		int32 LargestEdgeIndex = INDEX_NONE;
 		for (int32 VertexIndex = 0; VertexIndex != FBlendSpaceTriangle::NUM_VERTICES; ++VertexIndex)
@@ -2977,6 +3234,7 @@ void FBlendSpaceData::GetSamples2D(
 		if (LargestEdgeIndex < 0)
 		{
 			// Point is inside this triangle
+			// 点在这个三角形内
 			FVector Weights = FMath::GetBaryCentric2D(P, Triangle->Vertices[0], Triangle->Vertices[1], Triangle->Vertices[2]);
 			OutWeightedSamples.Push(FWeightedBlendSample(Triangle->SampleIndices[0], Weights[0]));
 			OutWeightedSamples.Push(FWeightedBlendSample(Triangle->SampleIndices[1], Weights[1]));
@@ -2986,15 +3244,21 @@ void FBlendSpaceData::GetSamples2D(
 		if (Triangle->EdgeInfo[LargestEdgeIndex].NeighbourTriangleIndex < 0)
 		{
 			// We're being directed to go outside the perimeter (which is convex). We will "walk"
+			// 我们被引导到外围（凸面）之外。我们将“行走”
 			// around the perimeter until either:
+			// 围绕周边，直到：
 			// 1. The point projected onto the edge is not at an extreme, or
+			// 1. 投影到边缘上的点不在极值处，或者
 			// 2. The direction changes
+			// 2、方向改变
 			// Note that the Triangle pointer will be updated during this walk
+			// 请注意，三角形指针将在此行走过程中更新
 			int32 OrigDir = -1; // will be 0 or 1 when we get going
 			int32 StartIndex = LargestEdgeIndex;
 			int32 EndIndex = (StartIndex + 1) % FBlendSpaceTriangle::NUM_VERTICES;
 
 			// Should only need a few steps
+			// 应该只需要几个步骤
 			int PrevTriangleIndex = InOutTriangleIndex;
 			for (int32 PerimeterAttempt = 0; PerimeterAttempt != Triangles.Num(); ++PerimeterAttempt)
 			{
@@ -3007,9 +3271,11 @@ void FBlendSpaceData::GetSamples2D(
 				FVector2D StartToEnd = End - Start;
 				FVector2D StartToPoint = P - Start;
 				// Parametric distance along the StartToEnd line
+				// 沿 StartToEnd 线的参数距离
 				float T = (StartToEnd | StartToPoint) / (StartToEnd | StartToEnd);
 
 				// Check to see if we're (projected) on a perimeter segment
+				// 检查我们是否（投影）在周边线段上
 				if (T >= 0.0f && T <= 1.0f)
 				{
 					OutWeightedSamples.Push(FWeightedBlendSample(Triangle->SampleIndices[StartIndex], 1.0f - T));
@@ -3018,6 +3284,7 @@ void FBlendSpaceData::GetSamples2D(
 				}
 
 				// Check for a change in direction
+				// 检查方向是否有变化
 				if (OrigDir == -1)
 				{
 					OrigDir = T > 1.0f ? 1 : 0;
@@ -3030,20 +3297,27 @@ void FBlendSpaceData::GetSamples2D(
 					else
 						OutWeightedSamples.Push(FWeightedBlendSample(Triangle->SampleIndices[EndIndex], T));
 					// If we flipped direction then we only found out by moving to a new triangle.
+					// [翻译失败: If we flipped direction then we only found out by moving to a new triangle.]
 					// If we cache the final triangle then next time we'll flip to the other
+					// [翻译失败: If we cache the final triangle then next time we'll flip to the other]
 					// triangle. That's fine, but confusing when debugging! Instead, use the
+					// [翻译失败: triangle. That's fine, but confusing when debugging! Instead, use the]
 					// previous triangle as the cache.
+					// [翻译失败: previous triangle as the cache.]
 					InOutTriangleIndex = PrevTriangleIndex;
 					return;
 				}
 
 				// Walk to the next triangle around the perimeter, but keep track of where we came from
+				// [翻译失败: Walk to the next triangle around the perimeter, but keep track of where we came from]
 				PrevTriangleIndex = InOutTriangleIndex;
 				InOutTriangleIndex = EdgeInfo.AdjacentPerimeterTriangleIndices[Dir];
 				if (InOutTriangleIndex < 0)
 				{
 					// This can happen if there weren't many triangles, in which case there won't be
+					// [翻译失败: This can happen if there weren't many triangles, in which case there won't be]
 					// another triangle in this direction.
+					// [翻译失败: another triangle in this direction.]
 					if (Dir == 0)
 						OutWeightedSamples.Push(FWeightedBlendSample(Triangle->SampleIndices[StartIndex], 1.0f - T));
 					else
@@ -3059,6 +3333,7 @@ void FBlendSpaceData::GetSamples2D(
 		else
 		{
 			// Investigate the new triangle
+			// [翻译失败: Investigate the new triangle]
 			const FBlendSpaceTriangleEdgeInfo& EdgeInfo = Triangle->EdgeInfo[LargestEdgeIndex];
 			InOutTriangleIndex = EdgeInfo.NeighbourTriangleIndex;
 		}

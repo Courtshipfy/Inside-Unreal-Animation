@@ -17,14 +17,17 @@ class UAnimCurveCompressionCodec_CompressedRichCurve : public UAnimCurveCompress
 
 #if WITH_EDITORONLY_DATA
 	/** Max error allowed when compressing the rich curves */
+	/** 压缩丰富曲线时允许的最大误差 */
 	UPROPERTY(Category = Compression, EditAnywhere, meta = (ClampMin = "0"))
 	float MaxCurveError;
 
 	/** Whether to use the animation sequence sample rate or an explicit value */
+	/** [翻译失败: Whether to use the animation sequence sample rate or an explicit value] */
 	UPROPERTY(Category = Compression, EditAnywhere)
 	bool UseAnimSequenceSampleRate;
 
 	/** Sample rate to use when measuring the curve error */
+	/** 测量曲线误差时使用的采样率 */
 	UPROPERTY(Category = Compression, EditAnywhere, meta = (ClampMin = "0", EditCondition = "!UseAnimSequenceSampleRate"))
 	float ErrorSampleRate;
 #endif
@@ -33,6 +36,7 @@ class UAnimCurveCompressionCodec_CompressedRichCurve : public UAnimCurveCompress
 
 #if WITH_EDITORONLY_DATA
 	// UAnimCurveCompressionCodec overrides
+	// UAnimCurveCompressionCodec 覆盖
 	ENGINE_API virtual bool Compress(const FCompressibleAnimData& AnimSeq, FAnimCurveCompressionResult& OutResult) override;
 	ENGINE_API virtual void PopulateDDCKey(FArchive& Ar) override;
 #endif

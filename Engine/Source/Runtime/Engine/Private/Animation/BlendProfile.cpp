@@ -67,6 +67,7 @@ UBlendProfile::UBlendProfile()
 	, Mode(EBlendProfileMode::WeightFactor)
 {
 	// Set up our owning skeleton and initialise bone references
+	// 设置我们自己的骨骼并初始化骨骼引用
 	if(USkeleton* OuterAsSkeleton = Cast<USkeleton>(GetOuter()))
 	{
 		SetSkeleton(OuterAsSkeleton);
@@ -76,6 +77,7 @@ UBlendProfile::UBlendProfile()
 void UBlendProfile::SetBoneBlendScale(int32 InBoneIdx, float InScale, bool bRecurse, bool bCreate)
 {
 	// Set the requested bone, then children if necessary
+	// 设置请求的骨骼，然后根据需要设置子骨骼
 	SetSingleBoneBlendScale(InBoneIdx, InScale, bCreate);
 
 	if(bRecurse)
@@ -180,6 +182,7 @@ void UBlendProfile::SetSkeleton(USkeleton* InSkeleton)
 	if(OwningSkeleton)
 	{
 		// Initialise Current profile entries
+		// 初始化当前配置文件条目
 		for(FBlendProfileBoneEntry& Entry : ProfileEntries)
 		{
 			Entry.BoneReference.Initialize(OwningSkeleton);
@@ -187,6 +190,7 @@ void UBlendProfile::SetSkeleton(USkeleton* InSkeleton)
 	}
 
 	// Remove any entries for bones that aren't mapped
+	// 删除所有未映射的骨骼条目
 	ProfileEntries.RemoveAll([](const FBlendProfileBoneEntry& Current)
 		{
 			return Current.BoneReference.BoneIndex == INDEX_NONE;
@@ -200,6 +204,7 @@ void UBlendProfile::PostLoad()
 	if(OwningSkeleton)
 	{
 		// Initialise Current profile entries
+		// 初始化当前配置文件条目
 		for(FBlendProfileBoneEntry& Entry : ProfileEntries)
 		{
 			Entry.BoneReference.Initialize(OwningSkeleton);
@@ -208,6 +213,7 @@ void UBlendProfile::PostLoad()
 
 #if WITH_EDITOR
 	// Remove any entries for bones that aren't mapped
+	// 删除所有未映射的骨骼条目
 	ProfileEntries.RemoveAll([](const FBlendProfileBoneEntry& Current)
 		{
 			return Current.BoneReference.BoneIndex == INDEX_NONE;
@@ -253,6 +259,7 @@ float UBlendProfile::GetEntryBlendScale(const int32 InEntryIdx) const
 		return ProfileEntries[InEntryIdx].BlendScale;
 	}
 	// No overridden blend scale, return no scale
+	// [翻译失败: No overridden blend scale, return no scale]
 	return GetDefaultBlendScale();
 }
 
@@ -286,6 +293,7 @@ void UBlendProfile::SetSingleBoneBlendScale(int32 InBoneIdx, float InScale, bool
 		Entry->BlendScale = InScale;
 
 		// Remove any entry that gets set back to DefautBlendScale - so we only store entries that actually contain a scale
+		// [翻译失败: Remove any entry that gets set back to DefautBlendScale - so we only store entries that actually contain a scale]
 		if(Entry->BlendScale == GetDefaultBlendScale())
 		{
 			ProfileEntries.RemoveAll([InBoneIdx](const FBlendProfileBoneEntry& Current)
@@ -303,13 +311,16 @@ void UBlendProfile::FillBoneScalesArray(TArray<float>& OutBoneBlendProfileFactor
 	OutBoneBlendProfileFactors.AddUninitialized(NumBones);
 
 	// Fill the bone values with defaults values.
+	// [翻译失败: Fill the bone values with defaults values.]
 	for (int32 Index = 0; Index < NumBones; ++Index)
 	{
 		OutBoneBlendProfileFactors[Index] = 1.0f;
 	}
 
 	// Overwrite the values of the bones that are inside the blend profile.
+	// 覆盖混合配置文件内的骨骼值。
 	// Since the bones in the blend profile are stored as skeleton indices we need to remap them into our compact pose.
+	// [翻译失败: Since the bones in the blend profile are stored as skeleton indices we need to remap them into our compact pose.]
 	const FSkeletonRemapping& SkeletonRemapping = UE::Anim::FSkeletonRemappingRegistry::Get().GetRemapping(OwningSkeleton, BoneContainer.GetSkeletonAsset());
 	if (SkeletonRemapping.IsValid())
 	{
@@ -427,40 +438,54 @@ float UBlendProfile::CalculateBoneWeight(float BoneFactor, EBlendProfileMode Mod
 	switch (Mode)
 	{
 		// The per bone value is a factor of the transition time, where 0.5 means half the transition time, 0.1 means one tenth of the transition time, etc.
+		// 每个骨骼的值是过渡时间的一个因素，其中 0.5 表示过渡时间的一半，0.1 表示过渡时间的十分之一等。
 		case EBlendProfileMode::TimeFactor:
 		{
 			// Most bones will have a bone factor of 1, so let's optimize that case.
+			// 大多数骨骼的骨因子为 1，所以让我们优化这种情况。
 			// Basically it means it will just follow the main weight.
+			// 基本上这意味着它只会跟随主要重量。
 			if (BoneFactor >= 1.0f - ZERO_ANIMWEIGHT_THRESH)
 			{
 				return !bInverse ? MainWeight : 1.0f - MainWeight;
 			}
 
 			// Make sure our input values are valid, which is between 0 and 1.
+			// [翻译失败: Make sure our input values are valid, which is between 0 and 1.]
 			const float ClampedFactor = FMath::Clamp(BoneFactor, 0.0f, 1.0f);
 
 			// Calculate where blend begin value is for this specific bone. So where did our blend start from?
+			// [翻译失败: Calculate where blend begin value is for this specific bone. So where did our blend start from?]
 			// Note that this isn't just the BlendInfo.GetBlendedValue() because it can be different per bone as some bones are further ahead in time.
+			// [翻译失败: Note that this isn't just the BlendInfo.GetBlendedValue() because it can be different per bone as some bones are further ahead in time.]
 			// We also need to sample the actual curve for this to get the real value.
+			// 我们还需要对实际曲线进行采样以获得真实值。
 			const float BeginValue = (ClampedFactor > ZERO_ANIMWEIGHT_THRESH) ? FMath::Clamp(BlendStartAlpha / ClampedFactor, 0.0f, 1.0f) : 1.0f;
 			const float RealBeginValue = FAlphaBlend::AlphaToBlendOption(BeginValue, BlendInfo.GetBlendOption(), BlendInfo.GetCustomCurve());
 
 			// Calculate the current alpha value for the bone.
+			// 计算骨骼的当前 alpha 值。
 			// As some bones can blend faster than others, we basically scale the current blend's alpha by the bone's factor.
+			// 由于某些骨骼的混合速度比其他骨骼快，因此我们基本上按骨骼的因子缩放当前混合的 Alpha。
 			// After that we sample the curve to get the real alpha blend value.
+			// 之后我们对曲线进行采样以获得真正的 alpha 混合值。
 			const float LinearAlpha = (ClampedFactor > ZERO_ANIMWEIGHT_THRESH) ? FMath::Clamp(BlendInfo.GetAlpha() / ClampedFactor, 0.0f, 1.0f) : 1.0f;
 			const float RealBoneAlpha = FAlphaBlend::AlphaToBlendOption(LinearAlpha, BlendInfo.GetBlendOption(), BlendInfo.GetCustomCurve());
 
 			// Now that we know the alpha for our blend, we can calculate the actual weight value.
+			// 现在我们知道了混合的 alpha，我们可以计算实际的重量值。
 			// Also make sure the bone weight is valid. Values can't be zero because this could introduce issues during normalization internally in the pipeline.
+			// [翻译失败: Also make sure the bone weight is valid. Values can't be zero because this could introduce issues during normalization internally in the pipeline.]
 			const float BoneWeight = RealBeginValue + RealBoneAlpha * (BlendInfo.GetDesiredValue() - RealBeginValue);
 			const float ClampedBoneWeight = FMath::Clamp(BoneWeight, ZERO_ANIMWEIGHT_THRESH, 1.0f);
 
 			// Return our calculated weight, depending whether we'd like to invert it or not.
+			// [翻译失败: Return our calculated weight, depending whether we'd like to invert it or not.]
 			return !bInverse ? ClampedBoneWeight : (1.0f - ClampedBoneWeight);
 		}
 
 		// The per bone value is a factor of the main blend's weight.
+		// 每根骨头的价值是主要混合物重量的一个因素。
 		case EBlendProfileMode::WeightFactor:
 		{
 			if (!bInverse)
@@ -469,12 +494,15 @@ float UBlendProfile::CalculateBoneWeight(float BoneFactor, EBlendProfileMode Mod
 			}
 
 			// We're inversing.
+			// 我们正在反转。
 			const float Weight = (BoneFactor > ZERO_ANIMWEIGHT_THRESH) ? MainWeight / BoneFactor : 1.0f;
 			return FMath::Max(Weight, ZERO_ANIMWEIGHT_THRESH);
 		}
 
 		// Handle unsupported modes.
+		// 处理不支持的模式。
 		// If you reach this point you have to add another case statement for your newly added blend profile mode.
+		// 如果达到这一点，您必须为新添加的混合配置文件模式添加另一个 case 语句。
 		default:
 		{
 			checkf(false, TEXT("The selected Blend Profile Mode is not supported (Mode=%d)"), Mode);

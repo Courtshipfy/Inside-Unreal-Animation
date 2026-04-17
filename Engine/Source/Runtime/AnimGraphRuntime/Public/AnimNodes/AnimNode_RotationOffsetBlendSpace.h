@@ -10,6 +10,7 @@
 #include "AnimNode_RotationOffsetBlendSpace.generated.h"
 
 //@TODO: Comment
+//@TODO：评论
 USTRUCT(BlueprintInternalUseOnly)
 struct FAnimNode_RotationOffsetBlendSpace : public FAnimNode_BlendSpacePlayer
 {
@@ -28,6 +29,7 @@ struct FAnimNode_RotationOffsetBlendSpace : public FAnimNode_BlendSpacePlayer
 	int32 LODThreshold;
 
 	// Current strength of the AimOffset
+	// AimOffset 的当前强度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Alpha, meta = (PinShownByDefault))
 	float Alpha;
 
@@ -57,6 +59,7 @@ public:
 	ANIMGRAPHRUNTIME_API FAnimNode_RotationOffsetBlendSpace();
 
 	// FAnimNode_Base interface
+	// FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void UpdateAssetPlayer(const FAnimationUpdateContext& Context) override;
@@ -64,4 +67,5 @@ public:
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	virtual int32 GetLODThreshold() const override { return LODThreshold; }
 	// End of FAnimNode_Base interface
+	// FAnimNode_Base接口结束
 };

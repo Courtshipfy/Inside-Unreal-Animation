@@ -6,6 +6,7 @@
 
 /////////////////////////////////////////////////////
 // UAnimStateMachineTypes
+// UAnimStateMachine类型
 
 UAnimStateMachineTypes::UAnimStateMachineTypes(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -33,6 +34,7 @@ int32 FBakedAnimationStateMachine::FindTransitionIndex(const FName& InStateNameF
 int32 FBakedAnimationStateMachine::FindTransitionIndex(const int32 InStateIdxFrom, const int32 InStateIdxTo) const
 {
 	// Early out if any request is invalid
+	// 如果任何请求无效，请尽早退出
 	if(InStateIdxFrom == INDEX_NONE || InStateIdxTo == INDEX_NONE)
 	{
 		return INDEX_NONE;
@@ -45,6 +47,7 @@ int32 FBakedAnimationStateMachine::FindTransitionIndex(const int32 InStateIdxFro
 		if(Transition.PreviousState == InStateIdxFrom && Transition.NextState == InStateIdxTo)
 		{
 			// If we match the request, output the index.
+			// 如果我们匹配请求，则输出索引。
 			return Index;
 		}
 	}

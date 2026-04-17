@@ -52,7 +52,9 @@ struct FComponentBlendHelper
 	bool GetBlendedParent(FTransform& OutTransform)
 	{
 		// there is no correct value to return if no translation
+		// 如果没有翻译，则没有正确的值可返回
 		// so if false, do not use this value
+		// 所以如果为 false，请勿使用此值
 		if (Transforms.Num() > 0)
 		{
 			float TotalWeight = GetTotalWeight(ParentWeights);
@@ -69,9 +71,11 @@ struct FComponentBlendHelper
 				FVector		OutScale = Transforms[0].GetScale3D() * ParentWeight;
 
 				// otherwise we just purely blend by number, and then later we normalize
+				// 否则我们只是纯粹按数字混合，然后我们标准化
 				for (int32 Index = 1; Index < NumBlends; ++Index)
 				{
 					// Simple linear interpolation for translation and scale.
+					// 用于平移和缩放的简单线性插值。
 					ParentWeight = ParentWeights[Index] * MultiplyWeight;
 					OutTranslation = FMath::Lerp(OutTranslation, Transforms[Index].GetTranslation(), ParentWeight);
 					OutScale = OutScale + Transforms[Index].GetScale3D()*ParentWeight;
@@ -91,7 +95,9 @@ struct FComponentBlendHelper
 	bool GetBlendedTranslation(FVector& Output)
 	{
 		// there is no correct value to return if no translation
+		// 如果没有翻译，则没有正确的值可返回
 		// so if false, do not use this value
+		// 所以如果为 false，请勿使用此值
 		if (Translations.Num() > 0)
 		{
 			float TotalWeight = GetTotalWeight(TranslationWeights);
@@ -117,7 +123,9 @@ struct FComponentBlendHelper
 	bool GetBlendedRotation(FQuat& Output)
 	{
 		// there is no correct value to return if no translation
+		// 如果没有翻译，则没有正确的值可返回
 		// so if false, do not use this value
+		// 所以如果为 false，请勿使用此值
 		if (Rotations.Num() > 0)
 		{
 			float TotalWeight = GetTotalWeight(RotationWeights);
@@ -157,7 +165,9 @@ struct FComponentBlendHelper
 	bool GetBlendedScale(FVector& Output)
 	{
 		// there is no correct value to return if no translation
+		// 如果没有翻译，则没有正确的值可返回
 		// so if false, do not use this value
+		// 所以如果为 false，请勿使用此值
 		if (Scales.Num() > 0)
 		{
 			float TotalWeight = GetTotalWeight(ScaleWeights);
@@ -182,6 +192,7 @@ struct FComponentBlendHelper
 
 private:
 	// data member to accumulate blending intermediate result per component
+	// 用于累积每个组件的混合中间结果的数据成员
 	TArray<FTransform>	Transforms;
 	TArray<FVector>		Translations;
 	TArray<FQuat>		Rotations;
@@ -247,7 +258,9 @@ struct FMultiTransformBlendHelper
 	bool GetBlendedParent(FTransform& OutTransform)
 	{
 		// there is no correct value to return if no translation
+		// 如果没有翻译，则没有正确的值可返回
 		// so if false, do not use this value
+		// 所以如果为 false，请勿使用此值
 		if (Transforms.Num() > 0)
 		{
 			float TotalWeight = GetTotalWeight(ParentWeights);
@@ -261,9 +274,11 @@ struct FMultiTransformBlendHelper
 				OutTransform = Transforms[0] * ScalarRegister(ParentWeights[0] * MultiplyWeight);
 
 				// otherwise we just purely blend by number, and then later we normalize
+				// 否则我们只是纯粹按数字混合，然后我们标准化
 				for (int32 Index = 1; Index < NumBlends; ++Index)
 				{
 					// Simple linear interpolation for translation and scale.
+					// 用于平移和缩放的简单线性插值。
 					OutTransform.AccumulateWithShortestRotation(Transforms[Index], ScalarRegister(ParentWeights[Index] * MultiplyWeight));
 				}
 
@@ -279,7 +294,9 @@ struct FMultiTransformBlendHelper
 	bool GetBlendedTranslation(FVector& Output)
 	{
 		// there is no correct value to return if no translation
+		// 如果没有翻译，则没有正确的值可返回
 		// so if false, do not use this value
+		// 所以如果为 false，请勿使用此值
 		if (Translations.Num() > 0)
 		{
 			float TotalWeight = GetTotalWeight(TranslationWeights);
@@ -305,7 +322,9 @@ struct FMultiTransformBlendHelper
 	bool GetBlendedRotation(FQuat& Output)
 	{
 		// there is no correct value to return if no translation
+		// 如果没有翻译，则没有正确的值可返回
 		// so if false, do not use this value
+		// 所以如果为 false，请勿使用此值
 		if (Rotations.Num() > 0)
 		{
 			float TotalWeight = GetTotalWeight(RotationWeights);
@@ -345,7 +364,9 @@ struct FMultiTransformBlendHelper
 	bool GetBlendedScale(FVector& Output)
 	{
 		// there is no correct value to return if no translation
+		// 如果没有翻译，则没有正确的值可返回
 		// so if false, do not use this value
+		// 所以如果为 false，请勿使用此值
 		if (Scales.Num() > 0)
 		{
 			float TotalWeight = GetTotalWeight(ScaleWeights);
@@ -370,6 +391,7 @@ struct FMultiTransformBlendHelper
 
 private:
 	// data member to accumulate blending intermediate result per component
+	// 用于累积每个组件的混合中间结果的数据成员
 	TArray<FTransform>	Transforms;
 	TArray<FVector>		Translations;
 	TArray<FQuat>		Rotations;

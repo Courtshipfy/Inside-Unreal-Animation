@@ -9,6 +9,7 @@
 class UMeshDeformerInstance;
 
 /** Interface for all the UObject able to add directly mesh deformer instances to the manager */
+/** 所有能够直接将网格变形器实例添加到管理器的 UObject 的接口 */
 UINTERFACE(MinimalAPI)
 class UMeshDeformerProducer: public UInterface
 {
