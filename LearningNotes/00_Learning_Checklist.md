@@ -6,15 +6,18 @@
 *目标：理解动画是如何被驱动的，以及动画数据在引擎中是如何流转的。*
 
 - [ ] **`UAnimInstance` (动画实例) 的生命周期**
-  - [ ] 源码位置: `Engine/Source/Runtime/Engine/Private/Animation/AnimInstance.cpp`
-  - [ ] 重点函数: `NativeInitializeAnimation`, `NativeUpdateAnimation`, `NativePostEvaluateAnimation`
-  - [ ] 核心概念: 它是连接 Gameplay 逻辑和动画蓝图逻辑的桥梁。理解 Event Graph 是如何更新属性的。
+  - 源码位置: `Engine/Source/Runtime/Engine/Private/Animation/AnimInstance.cpp`
+  - 重点函数: 
+    - [x] `InitializeAnimation()` - 初始化入口（第 438 行）
+    - [ ] `UpdateAnimation(float DeltaSeconds)` - 每帧更新入口（第 565 行）
+    - [ ] `PostEvaluateAnimation()` - 求值后处理（第 927 行）
+  - 核心概念: 它是连接 Gameplay 逻辑和动画蓝图逻辑的桥梁。理解 Event Graph 是如何更新属性的。
 - [ ] **动画求值流程 (Evaluation Pipeline)**
-  - [ ] 源码位置: `USkeletalMeshComponent::EvaluateAnimation` 以及 `UAnimInstance::EvaluateAnimation`
-  - [ ] 重点分析: 引擎是在哪个线程（GameThread 还是 WorkerThread）执行动画计算的？了解 `bUseMultiThreadedAnimationUpdate` 的影响。
+  - 源码位置: `USkeletalMeshComponent::EvaluateAnimation` 以及 `UAnimInstance::EvaluateAnimation`
+  - 重点分析: 引擎是在哪个线程（GameThread 还是 WorkerThread）执行动画计算的？了解 `bUseMultiThreadedAnimationUpdate` 的影响。
 - [ ] **动画核心数据结构 (Animation Pose Data)**
-  - [ ] 源码位置: `Engine/Source/Runtime/Engine/Public/Animation/AnimationPoseData.h`, `BonePose.h`
-  - [ ] 核心概念: `FCompactPose`, `FBlendedCurve`, `FStackCustomAttributes`。理解局部空间 (Local Space) 和组件空间 (Component Space) 变换的区别。
+  - 源码位置: `Engine/Source/Runtime/Engine/Public/Animation/AnimationPoseData.h`, `BonePose.h`
+  - 核心概念: `FCompactPose`, `FBlendedCurve`, `FStackCustomAttributes`。理解局部空间 (Local Space) 和组件空间 (Component Space) 变换的区别。
 
 ## 阶段二：动画蓝图与节点图表 (AnimGraph & Nodes)
 *目标：探究连连看的底层原理，理解节点是如何计算出最终位姿的。*

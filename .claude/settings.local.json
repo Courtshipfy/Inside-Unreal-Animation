@@ -6,7 +6,8 @@
       "Bash(grep -r \"FBoneContainer\" Engine/Source/Runtime/Engine/Public/Animation/*.h)",
       "Bash(python *)",
       "Bash(awk '{print $9}')",
-      "Bash(pip install *)"
+      "Bash(pip install *)",
+      "Bash(ls *)"
     ]
   }
 }

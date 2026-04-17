@@ -89,13 +89,30 @@ Output → Blend → Idle
 以 `AnimNode_Root.cpp` 为例（第 37-40 行）：
 
 ```cpp
-// 步骤 1: 引擎从 RootNode 开始求值
+// 步骤 1：从FAnimInstanceProxy::EvaluateAnimation开始
+void FAnimInstanceProxy::EvaluateAnimation(FPoseContext& Output)
+{
+	EvaluateAnimation_WithRoot(Output, RootNode);
+}
+void FAnimInstanceProxy::EvaluateAnimationNode_WithRoot(FPoseContext& Output, FAnimNode_Base* InRootNode)
+{
+    ...
+    
+    // 这个InRootNode就是Init时便获取的根节点，从此遍历向上
+		InRootNode->Evaluate_AnyThread(Output);
+	}
+	else
+	{
+		Output.ResetToRefPose();
+	}
+}
+// 步骤 2: 引擎从 RootNode 开始求值
 void FAnimNode_Root::Evaluate_AnyThread(FPoseContext& Output)
 {
     Result.Evaluate(Output);  // 调用输入节点（Blend）
 }
 
-// 步骤 2: Blend 节点调用它的输入
+// 步骤 3: Blend 节点调用它的输入
 void FAnimNode_BlendListByBool::Evaluate_AnyThread(FPoseContext& Output)
 {
     FPoseContext PoseA_Context(Output);

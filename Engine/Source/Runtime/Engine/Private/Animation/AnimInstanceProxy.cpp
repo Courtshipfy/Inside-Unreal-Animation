@@ -1505,6 +1505,7 @@ void FAnimInstanceProxy::EvaluateAnimationNode_WithRoot(FPoseContext& Output, FA
 
 		TRACE_SCOPED_ANIM_NODE(Output);
 
+		// 从此从根节点遍历向上计算
 		InRootNode->Evaluate_AnyThread(Output);
 	}
 	else
