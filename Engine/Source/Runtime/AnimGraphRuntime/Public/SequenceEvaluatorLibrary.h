@@ -28,10 +28,14 @@ class USequenceEvaluatorLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
+	/** 从动画节点上下文获取序列评估器上下文 */
 public:
+	/** 从动画节点上下文获取序列评估器上下文 */
 	/** Get a sequence evaluator context from an anim node context */
 	/** 从动画节点上下文获取序列评估器上下文 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Sequences", meta=(BlueprintThreadSafe, ExpandEnumAsExecs = "Result"))
+	/** 从动画节点上下文获取序列评估器上下文（纯） */
+	/** 从动画节点上下文获取序列评估器上下文（纯） */
 	static ANIMGRAPHRUNTIME_API FSequenceEvaluatorReference ConvertToSequenceEvaluator(const FAnimNodeReference& Node, EAnimNodeReferenceConversionResult& Result);
 
 	/** Get a sequence evaluator context from an anim node context (pure) */
@@ -41,30 +45,44 @@ public:
 	{
 		EAnimNodeReferenceConversionResult ConversionResult;
 		SequenceEvaluator = ConvertToSequenceEvaluator(Node, ConversionResult);
+	/** 设置序列评估器的当前累计时间 */
+	/** 设置序列评估器的当前累计时间 */
 		Result = (ConversionResult == EAnimNodeReferenceConversionResult::Succeeded);	
 	}
 	
+	/** 使用帧编号设置序列评估器的当前累积时间 */
 	/** Set the current accumulated time of the sequence evaluator */
+	/** 使用帧编号设置序列评估器的当前累积时间 */
 	/** 设置序列评估器的当前累计时间 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Sequences", meta=(BlueprintThreadSafe))
+	/** 提前序列评估器的当前累积时间 */
 	static ANIMGRAPHRUNTIME_API FSequenceEvaluatorReference SetExplicitTime(const FSequenceEvaluatorReference& SequenceEvaluator, float Time);
 
+	/** 提前序列评估器的当前累积时间 */
 	/** Set the current accumulated time, using a frame number, of the sequence evaluator */
+	/** 设置序列评估器的当前序列 */
 	/** 使用帧编号设置序列评估器的当前累积时间 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Sequences", meta=(BlueprintThreadSafe))
 	static ANIMGRAPHRUNTIME_API FSequenceEvaluatorReference SetExplicitFrame(const FSequenceEvaluatorReference& SequenceEvaluator, int32 Frame);
+	/** 设置序列评估器的当前序列 */
+	/** 使用惯性混合时间设置序列赋值器的当前序列 */
 
 	/** Advance the current accumulated time of the sequence evaluator */
 	/** 提前序列评估器的当前累积时间 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Sequences", meta = (BlueprintThreadSafe))
+	/** 获取序列评估器当前的累计时间 */
+	/** 使用惯性混合时间设置序列赋值器的当前序列 */
 	static ANIMGRAPHRUNTIME_API FSequenceEvaluatorReference AdvanceTime(const FAnimUpdateContext& UpdateContext, const FSequenceEvaluatorReference& SequenceEvaluator, float PlayRate = 1.0f);
 
 	/** Set the current sequence of the sequence evaluator */
+	/** 获取序列评估器的当前序列 */
 	/** 设置序列评估器的当前序列 */
+	/** 获取序列评估器当前的累计时间 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Sequences", meta=(BlueprintThreadSafe))
 	static ANIMGRAPHRUNTIME_API FSequenceEvaluatorReference SetSequence(const FSequenceEvaluatorReference& SequenceEvaluator, UAnimSequenceBase* Sequence);
 
 	/** Set the current sequence of the sequence evaluator with an inertial blend time */
+	/** 获取序列评估器的当前序列 */
 	/** 使用惯性混合时间设置序列赋值器的当前序列 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Sequences", meta=(BlueprintThreadSafe))
 	static ANIMGRAPHRUNTIME_API FSequenceEvaluatorReference SetSequenceWithInertialBlending(const FAnimUpdateContext& UpdateContext, const FSequenceEvaluatorReference& SequenceEvaluator, UAnimSequenceBase* Sequence, float BlendTime = 0.2f);

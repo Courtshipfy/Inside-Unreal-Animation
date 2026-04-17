@@ -32,12 +32,12 @@ public:
 
 #if WITH_EDITORONLY_DATA
 	// Set the ref pose type of this node
-	// 设置该节点的参考姿势类型
+ // 设置该节点的参考姿势类型
 	void SetRefPoseType(ERefPoseType InType) { RefPoseType = InType; }
 #endif
 
 	// Get the type of this ref pose
-	// 获取该参考姿势的类型
+ // 获取该参考姿势的类型
 	ANIMGRAPHRUNTIME_API ERefPoseType GetRefPoseType() const;
 	
 	ANIMGRAPHRUNTIME_API virtual void Evaluate_AnyThread(FPoseContext& Output) override;

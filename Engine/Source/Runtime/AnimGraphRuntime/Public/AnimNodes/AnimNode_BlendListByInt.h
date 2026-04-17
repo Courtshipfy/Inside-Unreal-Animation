@@ -23,7 +23,7 @@ public:
 	FAnimNode_BlendListByInt() = default;
 
 	// Get the currently active child index
-	// 获取当前活动的子索引
+ // 获取当前活动的子索引
 	ANIMGRAPHRUNTIME_API virtual int32 GetActiveChildIndex() override;
 	
 protected:

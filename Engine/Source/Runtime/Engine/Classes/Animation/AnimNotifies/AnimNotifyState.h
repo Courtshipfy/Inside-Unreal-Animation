@@ -43,9 +43,13 @@ class UAnimNotifyState : public UObject
 #if WITH_EDITORONLY_DATA
 	/** Color of Notify in editor */
 	/** 编辑器中通知的颜色 */
+	/** 编辑器中通知的颜色 */
+	/** 编辑器中通知的颜色 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AnimNotify)
 	FColor NotifyColor;
+	/** 此通知状态实例是否应在动画编辑器中触发 */
 	
+	/** 此通知状态实例是否应在动画编辑器中触发 */
 	/** Whether this notify state instance should fire in animation editors */
 	/** 此通知状态实例是否应在动画编辑器中触发 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category=AnimNotify)
@@ -56,8 +60,10 @@ class UAnimNotifyState : public UObject
 	virtual void OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent) {};
 	virtual bool CanBePlaced(UAnimSequenceBase* Animation) const { return true; }
 	virtual void ValidateAssociatedAssets() {}
+	/** 覆盖此设置以防止在动画编辑器中触发此通知状态类型 */
 	virtual void DrawInEditor(FPrimitiveDrawInterface* PDI, USkeletalMeshComponent* MeshComp, const UAnimSequenceBase* Animation, const FAnimNotifyEvent& NotifyEvent) const {}
 	virtual void DrawCanvasInEditor(FCanvas& Canvas, FSceneView& View, USkeletalMeshComponent* MeshComp, const UAnimSequenceBase* Animation, const FAnimNotifyEvent& NotifyEvent) const {}
+	/** 覆盖此设置以防止在动画编辑器中触发此通知状态类型 */
 
 	/** Override this to prevent firing this notify state type in animation editors */
 	/** 覆盖此设置以防止在动画编辑器中触发此通知状态类型 */
@@ -80,9 +86,11 @@ class UAnimNotifyState : public UObject
 	ENGINE_API virtual void BranchingPointNotifyEnd(FBranchingPointNotifyPayload& BranchingPointPayload);
 
 	// @todo document 
-	// @todo文档
+ // @todo文档
+	/** 创建此类通知时使用的 TriggerWeightThreshold */
 	virtual FString GetEditorComment() 
 	{ 
+	/** 创建此类通知时使用的 TriggerWeightThreshold */
 		return TEXT(""); 
 	}
 
@@ -92,16 +100,22 @@ class UAnimNotifyState : public UObject
 	ENGINE_API float GetDefaultTriggerWeightThreshold() const;
 
 	// @todo document 
-	// @todo文档
+ // @todo文档
 	virtual FLinearColor GetEditorColor() 
 	{ 
+	/** U对象接口 */
 #if WITH_EDITORONLY_DATA
 		return FLinearColor(NotifyColor); 
+	/** U对象接口 */
+	/** 结束UObject接口 */
 #else
 		return FLinearColor::Black;
+	/** 当在 Montage 上使用时，此通知始终是一个分支点。 */
 #endif // WITH_EDITORONLY_DATA
+	/** 结束UObject接口 */
 	}
 
+	/** 当在 Montage 上使用时，此通知始终是一个分支点。 */
 	/** UObject Interface */
 	/** U对象接口 */
 	ENGINE_API virtual void PostLoad() override;

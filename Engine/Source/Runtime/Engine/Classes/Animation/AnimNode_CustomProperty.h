@@ -35,8 +35,12 @@ public:
 
 	/* Set Target Instance */
 	/* 设置目标实例 */
+	/* 设置目标实例 */
+	/* 设置目标实例 */
 	ENGINE_API void SetTargetInstance(UObject* InInstance);
+	/* 为了方便起见，按类型获取目标实例 */
 
+	/* 为了方便起见，按类型获取目标实例 */
 	/* Get Target Instance by type for convenience */
 	/* 为了方便起见，按类型获取目标实例 */
 	template<class T>
@@ -51,41 +55,55 @@ public:
 	}
 
 	// We only subscribe to the OnInitializeAnimInstance path because we need to cache our source object, so we only
-	// 我们只订阅OnInitializeAnimInstance路径，因为我们需要缓存我们的源对象，所以我们只
+ // 我们只订阅OnInitializeAnimInstance路径，因为我们需要缓存我们的源对象，所以我们只
 	// override these methods in editor at the moment
-	// 目前在编辑器中重写这些方法
+ // 目前在编辑器中重写这些方法
 #if WITH_EDITOR	
 	// FAnimNode_Base interface
-	// FAnimNode_Base接口
+ // FAnimNode_Base接口
 	ENGINE_API virtual void OnInitializeAnimInstance(const FAnimInstanceProxy* InProxy, const UAnimInstance* InAnimInstance) override;
 	virtual bool NeedsOnInitializeAnimInstance() const override { return true; }
 
 	// Handle object reinstancing in editor
-	// 在编辑器中处理对象重新实例化
+ // 在编辑器中处理对象重新实例化
+	/** 要使用的源属性列表，1-1 以及下面的目标名称，由编译器构建 */
+	/** 要使用的源属性列表，1-1 以及下面的目标名称，由编译器构建 */
 	ENGINE_API void HandleObjectsReinstanced(const TMap<UObject*, UObject*>& OldToNewInstanceMap);
 #endif
 
+	/** 要使用的目标属性列表，1-1 上面带有源名称，由编译器构建 */
+	/** 要使用的目标属性列表，1-1 上面带有源名称，由编译器构建 */
 protected:
 	/** List of source properties to use, 1-1 with Dest names below, built by the compiler */
 	/** 要使用的源属性列表，1-1 以及下面的目标名称，由编译器构建 */
 	UPROPERTY(meta=(BlueprintCompilerGeneratedDefaults))
+	/** 这是在运行时分配的将运行的实际实例。由子班设置。 */
+	/** 这是在运行时分配的将运行的实际实例。由子班设置。 */
 	TArray<FName> SourcePropertyNames;
 
 	/** List of destination properties to use, 1-1 with Source names above, built by the compiler */
+	/** 要从中推送的调用源实例实例上的属性列表  */
 	/** 要使用的目标属性列表，1-1 上面带有源名称，由编译器构建 */
+	/** 要从中推送的调用源实例实例上的属性列表  */
 	UPROPERTY(meta=(BlueprintCompilerGeneratedDefaults))
+	/** TargetInstance 上要推送到的属性列表，初始化时根据名称列表构建 */
 	TArray<FName> DestPropertyNames;
 
+	/** TargetInstance 上要推送到的属性列表，初始化时根据名称列表构建 */
 	/** This is the actual instance allocated at runtime that will run. Set by child class. */
 	/** 这是在运行时分配的将运行的实际实例。由子班设置。 */
 	UPROPERTY(Transient)
 	TObjectPtr<UObject> TargetInstance;
+	/* 将源实例的属性传播到目标实例*/
 
 	/** List of properties on the calling Source Instances instance to push from  */
 	/** 要从中推送的调用源实例实例上的属性列表  */
+	/** 获取目标类别 */
+	/* 将源实例的属性传播到目标实例*/
 	TArray<FProperty*> SourceProperties;
 
 	/** List of properties on the TargetInstance to push to, built from name list when initialised */
+	/** 获取目标类别 */
 	/** TargetInstance 上要推送到的属性列表，初始化时根据名称列表构建 */
 	TArray<FProperty*> DestProperties;
 	
@@ -96,11 +114,13 @@ protected:
 	/* Propagate the Source Instances' properties to Target Instance*/
 	/* 将源实例的属性传播到目标实例*/
 	ENGINE_API virtual void PropagateInputProperties(const UObject* InSourceInstance);
+	/** 这是源实例，已缓存以帮助重新实例化 */
 
 	/** Get Target Class */
 	/** 获取目标类别 */
 	virtual UClass* GetTargetClass() const PURE_VIRTUAL(FAnimNode_CustomProperty::GetTargetClass, return nullptr;);
 
+	/** 这是源实例，已缓存以帮助重新实例化 */
 #if WITH_EDITOR
 	/**
 	 * Handle object reinstancing override point.
@@ -120,10 +140,10 @@ protected:
 #endif
 
 	// Stats
-	// 统计数据
+ // 统计数据
 #if ANIMNODE_STATS_VERBOSE
 	// Cached StatID for this node
-	// 该节点的缓存 StatID
+ // 该节点的缓存 StatID
 	TStatId StatID;
 	virtual void InitializeStatID() { StatID = FDynamicStats::CreateStatId<FStatGroup_STATGROUP_Anim>(FString(TEXT("Unknown"))); }
 #endif // ANIMNODE_STATS_VERBOSE

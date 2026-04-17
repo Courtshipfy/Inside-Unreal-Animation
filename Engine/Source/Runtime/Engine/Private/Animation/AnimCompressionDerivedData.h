@@ -22,19 +22,19 @@ class FDerivedDataAnimationCompression : public FDerivedDataPluginInterface
 {
 private:
 	// The anim data to compress
-	// 要压缩的动画数据
+ // 要压缩的动画数据
 	FCompressibleAnimPtr DataToCompressPtr;
 
 	// The Type of anim data to compress (makes up part of DDC key)
-	// 要压缩的动画数据的类型（构成 DDC 密钥的一部分）
+ // 要压缩的动画数据的类型（构成 DDC 密钥的一部分）
 	const TCHAR* TypeName;
 
 	// Bulk of asset DDC key
-	// 批量资产DDC密钥
+ // 批量资产DDC密钥
 	const FString AssetDDCKey;
 
 	// FAnimCompressContext to use during compression if we don't pull from the DDC
-	// 如果我们不从 DDC 中提取数据，则在压缩期间使用 FAnimCompressContext
+ // 如果我们不从 DDC 中提取数据，则在压缩期间使用 FAnimCompressContext
 	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	TSharedPtr<FAnimCompressContext> CompressContext;
 public:
@@ -71,10 +71,12 @@ public:
 	virtual bool IsBuildThreadsafe() const override
 	{
 		return true;
+	/** 如果我们可以构建，则返回 true **/
 	}
 
 	virtual bool Build( TArray<uint8>& OutDataArray) override;
 
+	/** 如果我们可以构建，则返回 true **/
 	/** Return true if we can build **/
 	/** [翻译失败: Return true if we can build] **/
 	bool CanBuild()

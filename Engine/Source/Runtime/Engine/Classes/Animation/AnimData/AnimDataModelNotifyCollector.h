@@ -21,6 +21,8 @@ struct FAnimDataModelNotifyCollector
 
 	/** Handle a broadcasted notify, reset if we are opening a new top-level bracket*/
 	/** 处理广播通知，如果我们打开一个新的顶级括号则重置*/
+	/** 处理广播通知，如果我们打开一个新的顶级括号则重置*/
+	/** 处理广播通知，如果我们打开一个新的顶级括号则重置*/
 	void Handle(EAnimDataModelNotifyType NotifyType)
 	{
 		if (BracketDepth == 0)
@@ -40,13 +42,17 @@ struct FAnimDataModelNotifyCollector
 			--BracketDepth;
 		}
 	}
+	/** 返回所提供类型的通知是否已广播 */
 	
+	/** 返回所提供类型的通知是否已广播 */
 	/** Returns whether or not the notify of the provided types was broadcasted */
 	/** 返回所提供类型的通知是否已广播 */
 	bool Contains(EAnimDataModelNotifyType NotifyType) const
 	{
+	/** 返回是否广播了任何提供的通知类型 */
 		return NotifyTypes.Find(NotifyType) != nullptr;
 	}
+	/** 返回是否广播了任何提供的通知类型 */
 
 	/** Returns whether or not any of the provided notify types were broadcasted */
 	/** 返回是否广播了任何提供的通知类型 */
@@ -58,12 +64,16 @@ struct FAnimDataModelNotifyCollector
 			{
 				return true;
 			}
+	/** 返回括号是否仍然打开 */
 		}
 
 		return false;
+	/** 返回是否所有括号都已关闭 */
+	/** 返回括号是否仍然打开 */
 	}
 
 	/** Returns whether or not a bracket is still open */
+	/** 返回是否所有括号都已关闭 */
 	/** 返回括号是否仍然打开 */
 	bool IsWithinBracket() const { return BracketDepth > 0; }
 

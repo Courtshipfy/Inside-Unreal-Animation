@@ -69,7 +69,7 @@ void FPoseDataContainer::PostSerialize(const FArchive& Ar)
 void FPoseDataContainer::Reset()
 {
 	// clear everything
-	// 清除一切
+ // 清除一切
 	PoseFNames.Reset();
 	SortedCurveIndices.Reset();
 	Poses.Reset();
@@ -169,20 +169,20 @@ FTransform FPoseDataContainer::GetDefaultTransform(int32 SkeletonIndex, const TA
 void FPoseDataContainer::AddOrUpdatePose(const FName& InPoseName, const TArray<FTransform>& InLocalSpacePose, const TArray<float>& InCurveData)
 {
 	// make sure the transforms and curves are the correct size
-	// 确保变换和曲线的大小正确
+ // 确保变换和曲线的大小正确
 	if (ensureAlways(InLocalSpacePose.Num() == Tracks.Num()) && ensureAlways(InCurveData.Num() == Curves.Num()))
 	{
 		// find or add pose data
-		// 查找或添加姿势数据
+  // 查找或添加姿势数据
 		FPoseData* PoseDataPtr = FindOrAddPoseData(InPoseName);
 		// now add pose
-		// 现在添加姿势
+  // 现在添加姿势
 		PoseDataPtr->SourceLocalSpacePose = InLocalSpacePose;
 		PoseDataPtr->SourceCurveData = InCurveData;
 	}
 
 	// for now we only supports same tracks
-	// 目前我们只支持相同的曲目
+ // 目前我们只支持相同的曲目
 }
 
 bool FPoseDataContainer::InsertTrack(const FName& InTrackName, USkeleton* InSkeleton, const TArray<FTransform>& RefPose)
@@ -190,7 +190,7 @@ bool FPoseDataContainer::InsertTrack(const FName& InTrackName, USkeleton* InSkel
 	check(InSkeleton);
 
 	// make sure the transform is correct size
-	// 确保变换尺寸正确
+ // 确保变换尺寸正确
 	if (Tracks.Contains(InTrackName) == false)
 	{
 		int32 SkeletonIndex = InSkeleton->GetReferenceSkeleton().FindBoneIndex(InTrackName);
@@ -201,7 +201,7 @@ bool FPoseDataContainer::InsertTrack(const FName& InTrackName, USkeleton* InSkel
 			TrackIndex = Tracks.Num() - 1;
 
 			// now insert default refpose
-			// 现在插入默认引用
+   // 现在插入默认引用
 			const FTransform DefaultPose = GetDefaultTransform(SkeletonIndex, RefPose);
 
 			for (FPoseData& PoseData : Poses)
@@ -211,7 +211,7 @@ bool FPoseDataContainer::InsertTrack(const FName& InTrackName, USkeleton* InSkel
 				PoseData.SourceLocalSpacePose.Add(DefaultPose);
 
 				// make sure they always match
-				// 确保它们始终匹配
+    // 确保它们始终匹配
 				ensureAlways(PoseData.SourceLocalSpacePose.Num() == Tracks.Num());
 			}
 
@@ -273,7 +273,7 @@ bool FPoseDataContainer::DeleteCurve(FName CurveName)
 			Curves.RemoveAt(CurveIndex);
 
 			// delete this index from all poses
-			// 从所有姿势中删除该索引
+   // 从所有姿势中删除该索引
 			for (int32 PoseIndex = 0; PoseIndex < Poses.Num(); ++PoseIndex)
 			{
 				Poses[PoseIndex].CurveData.RemoveAt(CurveIndex);
@@ -294,7 +294,7 @@ void FPoseDataContainer::RetrieveSourcePoseFromExistingPose(bool bAdditive, int3
 		FPoseData& PoseData = Poses[PoseIndex];
 
 		// if this pose is not base pose
-		// 如果这个姿势不是基本姿势
+  // 如果这个姿势不是基本姿势
 		if (bAdditive && PoseIndex != InBasePoseIndex)
 		{
 			PoseData.SourceLocalSpacePose.Reset(InBasePose.Num());
@@ -304,7 +304,7 @@ void FPoseDataContainer::RetrieveSourcePoseFromExistingPose(bool bAdditive, int3
 			PoseData.SourceCurveData.AddUninitialized(InBaseCurve.Num());
 
 			// should it be move? Why? I need that buffer still
-			// 应该移动吗？为什么？我仍然需要那个缓冲区
+   // 应该移动吗？为什么？我仍然需要那个缓冲区
 			TArray<FTransform> AdditivePose = PoseData.LocalSpacePose;
 			const ScalarRegister AdditiveWeight(1.f);
 
@@ -325,7 +325,7 @@ void FPoseDataContainer::RetrieveSourcePoseFromExistingPose(bool bAdditive, int3
 		else
 		{
 			// otherwise, the base pose is the one
-			// 否则，基本姿势就是那个
+   // 否则，基本姿势就是那个
 			PoseData.SourceLocalSpacePose = PoseData.LocalSpacePose;
 			PoseData.SourceCurveData = PoseData.CurveData;
 		}
@@ -340,7 +340,7 @@ void FPoseDataContainer::ConvertToFullPose(USkeleton* InSkeleton, const TArray<F
 	TrackPoseInfluenceIndices.SetNum(Tracks.Num());
 	
 	// first create pose buffer that only has valid data
-	// 首先创建仅包含有效数据的姿势缓冲区
+ // 首先创建仅包含有效数据的姿势缓冲区
 	for (int32 PoseIndex = 0; PoseIndex < Poses.Num(); ++PoseIndex)
 	{
 		FPoseData& Pose = Poses[PoseIndex];
@@ -351,7 +351,7 @@ void FPoseDataContainer::ConvertToFullPose(USkeleton* InSkeleton, const TArray<F
 			for (int32 TrackIndex = 0; TrackIndex < Tracks.Num(); ++TrackIndex)
 			{
 				// we only add to local space poses if it's not same as default pose
-				// 如果局部空间姿势与默认姿势不同，我们只添加它
+    // 如果局部空间姿势与默认姿势不同，我们只添加它
 				FTransform DefaultTransform = GetDefaultTransform(Tracks[TrackIndex], InSkeleton, RefPose);
 				if (!Pose.SourceLocalSpacePose[TrackIndex].Equals(DefaultTransform, UE_KINDA_SMALL_NUMBER))
 				{
@@ -362,7 +362,7 @@ void FPoseDataContainer::ConvertToFullPose(USkeleton* InSkeleton, const TArray<F
 		}
 
 		// for now we just copy curve directly
-		// 现在我们直接复制曲线
+  // 现在我们直接复制曲线
 		Pose.CurveData = Pose.SourceCurveData;
 	}
 }
@@ -379,7 +379,7 @@ void FPoseDataContainer::ConvertToAdditivePose(const TArray<FTransform>& InBaseP
 	{
 		FPoseData& PoseData = Poses[PoseIndex];
 		// set up buffer
-		// 设置缓冲区
+  // 设置缓冲区
 		PoseData.LocalSpacePose.Reset();
 		PoseData.CurveData.Reset(PoseData.SourceCurveData.Num());
 		PoseData.CurveData.AddUninitialized(PoseData.SourceCurveData.Num());
@@ -388,7 +388,7 @@ void FPoseDataContainer::ConvertToAdditivePose(const TArray<FTransform>& InBaseP
 		for (int32 BoneIndex = 0; BoneIndex < InBasePose.Num(); ++BoneIndex)
 		{
 			// we only add to local space poses if it has any changes in additive
-			// 如果附加的有任何变化，我们只添加到局部空间姿势
+   // 如果附加的有任何变化，我们只添加到局部空间姿势
 			FTransform NewTransform = PoseData.SourceLocalSpacePose[BoneIndex];
 			FAnimationRuntime::ConvertTransformToAdditive(NewTransform, InBasePose[BoneIndex]);
 			if (!NewTransform.Equals(AdditiveIdentity))
@@ -411,7 +411,7 @@ void FPoseDataContainer::ConvertToAdditivePose(const TArray<FTransform>& InBaseP
 void FPoseDataContainer::RebuildCurveIndexTable()
 {
 	// Recreate sorted curve index table
-	// 重新创建排序曲线索引表
+ // 重新创建排序曲线索引表
 	SortedCurveIndices.SetNumUninitialized(Curves.Num());
 	for(int32 NameIndex = 0; NameIndex < SortedCurveIndices.Num(); ++NameIndex)
 	{
@@ -476,7 +476,7 @@ void UPoseAsset::GetBaseAnimationPose(FAnimationPoseData& OutAnimationPoseData) 
 		OutPose.ResetToRefPose();
 
 		// this contains compact bone pose list that this pose cares
-		// 这包含该姿势关心的紧凑骨骼姿势列表
+  // 这包含该姿势关心的紧凑骨骼姿势列表
 		FPoseAssetEvalData& EvalData = FPoseAssetEvalData::Get();
 		TArray<FBoneIndices>& BoneIndices = EvalData.BoneIndices;
         const int32 TrackNum = PoseContainer.Tracks.Num();
@@ -488,7 +488,7 @@ void UPoseAsset::GetBaseAnimationPose(FAnimationPoseData& OutAnimationPoseData) 
 			const int32 SkeletonBoneIndex = SkeletonRemapping.IsValid() ? SkeletonRemapping.GetTargetSkeletonBoneIndex(PoseContainer.TrackBoneIndices[TrackIndex]) : PoseContainer.TrackBoneIndices[TrackIndex];
 			const FCompactPoseBoneIndex PoseBoneIndex = RequiredBones.GetCompactPoseIndexFromSkeletonIndex(SkeletonBoneIndex);
 			// we add even if it's invalid because we want it to match with track index
-			// 即使它无效我们也会添加，因为我们希望它与轨道索引匹配
+   // 即使它无效我们也会添加，因为我们希望它与轨道索引匹配
 			BoneIndices[TrackIndex].SkeletonBoneIndex = SkeletonBoneIndex;
 			BoneIndices[TrackIndex].CompactBoneIndex = PoseBoneIndex;
 		}
@@ -525,7 +525,7 @@ FORCEINLINE void BlendFromIdentityAndAccumulateAdditively_Custom(FTransform& Fin
 
 	FTransform Delta = SourceAtom;
 	// Scale delta by weight
-	// [翻译失败: Scale delta by weight]
+ // 按重量缩放增量
 	if (BlendWeight < (1.f - ZERO_ANIMWEIGHT_THRESH))
 	{
 		Delta.Blend(AdditiveIdentity, Delta, BlendWeight);
@@ -534,7 +534,7 @@ FORCEINLINE void BlendFromIdentityAndAccumulateAdditively_Custom(FTransform& Fin
 	FinalAtom.SetRotation(Delta.GetRotation() * FinalAtom.GetRotation());
 	FinalAtom.SetTranslation(FinalAtom.GetTranslation() + Delta.GetTranslation());
 	// this ADDS scale
-	// [翻译失败: this ADDS scale]
+ // 这个 ADDS 量表
 	FinalAtom.SetScale3D(FinalAtom.GetScale3D() + Delta.GetScale3D());
 
 	FinalAtom.DiagnosticCheckNaN_All();
@@ -545,7 +545,7 @@ FORCEINLINE void BlendFromIdentityAndAccumulateAdditively_Custom(FTransform& Fin
 void UPoseAsset::GetAnimationCurveOnly(TArray<FName>& InCurveNames, TArray<float>& InCurveValues, TArray<FName>& OutCurveNames, TArray<float>& OutCurveValues) const
 {
 	// if we have any pose curve
-	// [翻译失败: if we have any pose curve]
+ // 如果我们有任何姿态曲线
 	if (ensure(InCurveNames.Num() == InCurveValues.Num()) && InCurveNames.Num() > 0)
 	{
 		USkeleton* MySkeleton = GetSkeleton();
@@ -563,7 +563,7 @@ void UPoseAsset::GetAnimationCurveOnly(TArray<FName>& InCurveNames, TArray<float
 		bool bNormalizeWeight = bAdditivePose == false;
 		float TotalWeight = 0.f;
 		// we iterate through to see if we have that corresponding pose
-		// [翻译失败: we iterate through to see if we have that corresponding pose]
+  // 我们迭代看看是否有相应的姿势
 		for (int32 CurveIndex = 0; CurveIndex < InCurveNames.Num(); ++CurveIndex)
 		{
 			int32 PoseIndex = PoseContainer.PoseFNames.Find(InCurveNames[CurveIndex]);
@@ -573,9 +573,9 @@ void UPoseAsset::GetAnimationCurveOnly(TArray<FName>& InCurveNames, TArray<float
 				const float Value = InCurveValues[CurveIndex];
 
 				// we only add to the list if it's not additive Or if it's additive, we don't want to add base pose index
-				// [翻译失败: we only add to the list if it's not additive Or if it's additive, we don't want to add base pose index]
+    // 如果它不是可加的，我们只添加到列表中或者如果它是可加的，我们不想添加基本姿势索引
 				// and has weight
-				// [翻译失败: and has weight]
+    // 并且有重量
 				if ((!bAdditivePose || PoseIndex != BasePoseIndex) && FAnimationRuntime::HasWeight(Value))
 				{
 					TotalWeight += Value;												
@@ -589,11 +589,11 @@ void UPoseAsset::GetAnimationCurveOnly(TArray<FName>& InCurveNames, TArray<float
 		if (TotalNumberOfValidPoses > 0)
 		{
 			// blend curves
-			// [翻译失败: blend curves]
+   // 混合曲线
 			FBlendedCurve BlendedCurve;
 
 			//if full pose, we'll have to normalize by weight
-			//如果是完整姿势，我们必须按体重标准化
+   // 如果是完整姿势，我们必须按体重标准化
 			if (bNormalizeWeight && TotalWeight > 1.f)
 			{
 				for (const int32& WeightedPoseIndex : WeightedPoseIndices)
@@ -640,7 +640,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 	ANIM_MT_SCOPE_CYCLE_COUNTER(PoseAssetGetAnimationPose, !IsInGameThread());
 
 	// if we have any pose curve
-	// 如果我们有任何姿态曲线
+ // 如果我们有任何姿态曲线
 	if (ExtractionContext.PoseCurves.Num() > 0)
 	{
 		FCompactPose& OutPose = OutAnimationPoseData.GetPose();
@@ -664,7 +664,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 
 		const FSkeletonRemapping& SkeletonRemapping = UE::Anim::FSkeletonRemappingRegistry::Get().GetRemapping(GetSkeleton(), RequiredBones.GetSkeletonAsset());
 		// Single pose optimized evaluation path - explicitly used by PoseByName Animation Node
-		// 单姿势优化评估路径 - 由 PoseByName 动画节点显式使用
+  // 单姿势优化评估路径 - 由 PoseByName 动画节点显式使用
 		if (ExtractionContext.PoseCurves.Num() == 1)
 		{
 			const FPoseCurve& Curve = ExtractionContext.PoseCurves[0];
@@ -673,33 +673,33 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 			{
 				const FPoseData& Pose = PoseContainer.Poses[PoseIndex];
 				// Clamp weight for non-additive pose assets rather than normalizing the weight
-				// 钳制非附加姿势资产的权重而不是标准化权重
+    // 钳制非附加姿势资产的权重而不是标准化权重
 				const float Weight = bAdditivePose ? Curve.Value : FMath::Clamp(Curve.Value, 0.f, 1.f);
 
 				// Only generate pose if the single weight is actually relevant
-				// 仅当单个权重实际相关时才生成姿势
+    // 仅当单个权重实际相关时才生成姿势
 				if(FAnimWeight::IsRelevant(Weight))
 				{
 					// Blend curve
-					// [翻译失败: Blend curve]
+     // 混合曲线
 					PoseContainer.BlendPoseCurve(&Pose, OutCurve, Weight);
 
 					// Per-track (bone) transform
-					// [翻译失败: Per-track (bone) transform]
+     // 每轨（骨骼）变换
 					for (int32 TrackIndex = 0; TrackIndex < TrackNum; ++TrackIndex)
 					{
 						const FSkeletonPoseBoneIndex SkeletonBoneIndex = FSkeletonPoseBoneIndex(SkeletonRemapping.IsValid() ? SkeletonRemapping.GetTargetSkeletonBoneIndex(PoseContainer.TrackBoneIndices[TrackIndex]) : PoseContainer.TrackBoneIndices[TrackIndex]);
 						const FCompactPoseBoneIndex CompactIndex = RequiredBones.GetCompactPoseIndexFromSkeletonPoseIndex(SkeletonBoneIndex);
 						
 						// If bone index is invalid, or not required for the pose - skip
-						// 如果骨骼索引无效，或者姿势不需要 - 跳过
+      // 如果骨骼索引无效，或者姿势不需要 - 跳过
 						if (!CompactIndex.IsValid() || !ExtractionContext.IsBoneRequired(CompactIndex.GetInt()))
 						{
 							continue;
 						}
 					
 						// Check if this track is part of the pose
-						// 检查该轨迹是否是姿势的一部分
+      // 检查该轨迹是否是姿势的一部分
 						const TArray<FPoseAssetInfluence>& PoseInfluences = PoseContainer.TrackPoseInfluenceIndices[TrackIndex].Influences;
 						const int32 InfluenceIndex = PoseInfluences.IndexOfByPredicate([PoseIndex](const FPoseAssetInfluence& Influence) -> bool
 						{
@@ -716,7 +716,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 							const FTransform& BonePose = PoseData.LocalSpacePose[BonePoseIndex];
 
 							// Apply additive, overriede or blend using pose weight
-							// 使用姿势权重应用添加剂、覆盖或混合
+       // 使用姿势权重应用添加剂、覆盖或混合
 							if (bAdditivePose)
 							{
 								BlendFromIdentityAndAccumulateAdditively_Custom(OutBoneTransform, BonePose, Weight);
@@ -732,7 +732,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 							}
 
 							// Retarget the bone transform
-							// 重新定位骨骼变换
+       // 重新定位骨骼变换
 							FAnimationRuntime::RetargetBoneTransform(MySkeleton, GetRetargetTransformsSourceName(), GetRetargetTransforms(), OutBoneTransform, SkeletonBoneIndex.GetInt(), CompactIndex, RequiredBones, bAdditivePose);
 							OutBoneTransform.NormalizeRotation();
 						}
@@ -745,11 +745,11 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 		else
 		{
 			// TLS storage for working data
-			// 工作数据的 TLS 存储
+   // 工作数据的 TLS 存储
 			FPoseAssetEvalData& EvalData = FPoseAssetEvalData::Get();
 
 			// this contains compact bone pose list that this pose cares
-			// [翻译失败: this contains compact bone pose list that this pose cares]
+   // 这包含该姿势关心的紧凑骨骼姿势列表
 			TArray<FBoneIndices>& BoneIndices = EvalData.BoneIndices;
 			BoneIndices.SetNumUninitialized(TrackNum, EAllowShrinking::No);
 
@@ -759,15 +759,15 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 				const FCompactPoseBoneIndex CompactIndex = RequiredBones.GetCompactPoseIndexFromSkeletonPoseIndex(SkeletonBoneIndex);
 
 				// we add even if it's invalid because we want it to match with track index
-				// [翻译失败: we add even if it's invalid because we want it to match with track index]
+    // 即使它无效我们也会添加，因为我们希望它与轨道索引匹配
 				BoneIndices[TrackIndex].SkeletonBoneIndex = SkeletonBoneIndex.GetInt();
 				BoneIndices[TrackIndex].CompactBoneIndex = CompactIndex;
 			}
 
 			// you could only have morphtargets
-			// 你只能有变形目标
+   // 你只能有变形目标
 			// so can't return here yet when bone indices is empty
-			// 所以当骨骼索引为空时还无法返回这里
+   // 所以当骨骼索引为空时还无法返回这里
 			const bool bNormalizeWeight = bAdditivePose == false;
 			const int32 NumPoses = PoseContainer.Poses.Num();
 			TArray<float>& PoseWeights = EvalData.PoseWeights;
@@ -783,7 +783,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 
 			float TotalWeight = 0.f;
 			// we iterate through to see if we have that corresponding pose
-			// 我们迭代看看是否有相应的姿势
+   // 我们迭代看看是否有相应的姿势
 
 			const int32 NumPoseCurves = ExtractionContext.PoseCurves.Num();
 			for (int32 CurveIndex = 0; CurveIndex < NumPoseCurves; ++CurveIndex)
@@ -796,15 +796,15 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 					const float Value = Curve.Value;
 
 					// we only add to the list if it's not additive Or if it's additive, we don't want to add base pose index
-					// 如果它不是可加的，我们只添加到列表中或者如果它是可加的，我们不想添加基本姿势索引
+     // 如果它不是可加的，我们只添加到列表中或者如果它是可加的，我们不想添加基本姿势索引
 					// and has weight
-					// 并且有重量
+     // 并且有重量
 					if ((!bAdditivePose || PoseIndex != BasePoseIndex) && FAnimationRuntime::HasWeight(Value))
 					{
 						TotalWeight += Value;
 
 						// Set pose weight and bit, and add weighted pose index
-						// 设置姿势权重和位，并添加加权姿势索引
+      // 设置姿势权重和位，并添加加权姿势索引
 						PoseWeights[PoseIndex] = Value;
 						WeightedPoseIndices.Add(PoseIndex);
 						WeightedPoses[PoseIndex] = true;
@@ -816,7 +816,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 			if (TotalNumberOfValidPoses > 0)
 			{
 				//if full pose, we'll have to normalize by weight
-				//如果是完整姿势，我们必须按体重标准化
+    // 如果是完整姿势，我们必须按体重标准化
 				if (bNormalizeWeight && TotalWeight > 1.f)
 				{
 					for (const int32& WeightedPoseIndex : WeightedPoseIndices)
@@ -825,7 +825,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 						PoseWeight /= TotalWeight;
 
 						// Do curve blending inline as we are looping over weights anyway
-						// 无论如何，当我们循环权重时，进行内联曲线混合
+      // 无论如何，当我们循环权重时，进行内联曲线混合
 						const FPoseData& Pose = PoseContainer.Poses[WeightedPoseIndex];
 						PoseContainer.BlendPoseCurve(&Pose, OutCurve, PoseWeight);
 					}
@@ -833,13 +833,13 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 				else
 				{
 					// Take the matching curve weights from the selected poses, and blend them using the
-					// 从选定的姿势中获取匹配的曲线权重，并使用
+     // 从选定的姿势中获取匹配的曲线权重，并使用
 					// weighting that we need from each pose. This is much faster than grabbing each
-					// 我们需要从每个姿势中获得权重。这比抓取每个要快得多
+     // 我们需要从每个姿势中获得权重。这比抓取每个要快得多
 					// blend curve and blending them in their entirety, especially when there are very
-					// 混合曲线并将它们完全混合，特别是当有很多
+     // 混合曲线并将它们完全混合，特别是当有很多
 					// few active curves for each pose and many curves for the entire pose asset.
-					// 每个姿势很少有活动曲线，整个姿势资源有很多曲线。
+     // 每个姿势很少有活动曲线，整个姿势资源有很多曲线。
 					for (const int32& WeightedPoseIndex : WeightedPoseIndices)
 					{
 						const FPoseData& Pose = PoseContainer.Poses[WeightedPoseIndex];
@@ -849,14 +849,14 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 				}
 
 				// Final per-track (bone) transform
-				// 最终每轨（骨骼）变换
+    // 最终每轨（骨骼）变换
 				FTransform OutBoneTransform;
 				for (int32 TrackIndex = 0; TrackIndex < TrackNum; ++TrackIndex)
 				{
 					const FCompactPoseBoneIndex& CompactIndex = BoneIndices[TrackIndex].CompactBoneIndex;
 
 					// If bone index is invalid, or not required for the pose - skip
-					// 如果骨骼索引无效，或者姿势不需要 - 跳过
+     // 如果骨骼索引无效，或者姿势不需要 - 跳过
 					if (CompactIndex == INDEX_NONE || !ExtractionContext.IsBoneRequired(CompactIndex.GetInt()))
 					{
 						continue;
@@ -865,7 +865,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 					const TArray<FPoseAssetInfluence>& PoseInfluences = PoseContainer.TrackPoseInfluenceIndices[TrackIndex].Influences;
 
 					// When additive, or for any bone that has no pose influences. Set transform to input.
-					// 当添加时，或对于任何没有姿势影响的骨骼。将变换设置为输入。
+     // 当添加时，或对于任何没有姿势影响的骨骼。将变换设置为输入。
 					if (bAdditivePose || PoseInfluences.Num() == 0)
 					{
 						OutBoneTransform = OutPose[CompactIndex];
@@ -877,7 +877,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 						float TotalLocalWeight = 0.f;
 						bool bSet = false;
 						// Only loop over poses known to influence this track its final transform
-						// 仅循环已知会影响该轨道最终变换的姿势
+      // 仅循环已知会影响该轨道最终变换的姿势
 						for (int32 Index = 0; Index < NumInfluences; ++Index)
 						{
 							const FPoseAssetInfluence& Influence = PoseInfluences[Index];
@@ -885,7 +885,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 							const int32& BonePoseIndex = Influence.BoneTransformIndex;
 							
 							// Only processs pose if its weighted
-							// 只有加权的过程才会构成
+       // 只有加权的过程才会构成
 							if(WeightedPoses[PoseIndex])
 							{
 								const float& Weight = PoseWeights[PoseIndex];
@@ -895,7 +895,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 								const FTransform& BonePose = PoseData.LocalSpacePose[BonePoseIndex];
 
 								// Set weighted value For first pose, if applicable
-								// 设置第一个姿势的权重值（如果适用）
+        // 设置第一个姿势的权重值（如果适用）
 								if(!bSet && !bAdditivePose)
 								{
 									OutBoneTransform = BonePose * ScalarRegister(Weight);
@@ -916,7 +916,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 						}
 
 						// In case no influencing poses had any weight, set transform to input
-						// 如果没有影响姿势有任何权重，请将变换设置为输入
+      // 如果没有影响姿势有任何权重，请将变换设置为输入
 						if(!FAnimWeight::IsRelevant(TotalLocalWeight))
 						{
 							OutBoneTransform = OutPose[CompactIndex];
@@ -928,7 +928,7 @@ bool UPoseAsset::GetAnimationPose(struct FAnimationPoseData& OutAnimationPoseDat
 					}
 
 					// Retarget the blended transform, and copy to output pose
-					// 重新定位混合变换，并复制到输出姿势
+     // 重新定位混合变换，并复制到输出姿势
 					FAnimationRuntime::RetargetBoneTransform(MySkeleton, GetRetargetTransformsSourceName(), GetRetargetTransforms(), OutBoneTransform,  BoneIndices[TrackIndex].SkeletonBoneIndex, CompactIndex, RequiredBones, bAdditivePose);
 
 					OutPose[CompactIndex] = OutBoneTransform;
@@ -954,15 +954,15 @@ void UPoseAsset::PostLoad()
 
 #if WITH_EDITORONLY_DATA
 	// moved to PostLoad because Skeleton is not completely loaded when we do this in Serialize
-	// 移至 PostLoad，因为当我们在 Serialize 中执行此操作时，Skeleton 尚未完全加载
+ // 移至 PostLoad，因为当我们在 Serialize 中执行此操作时，Skeleton 尚未完全加载
 	// and we need Skeleton
-	// 我们需要骷髅
+ // 我们需要骷髅
 	if (GetLinkerCustomVersion(FFrameworkObjectVersion::GUID) < FFrameworkObjectVersion::PoseAssetSupportPerBoneMask && GetLinkerCustomVersion(FAnimPhysObjectVersion::GUID) >= FAnimPhysObjectVersion::SaveEditorOnlyFullPoseForPoseAsset)
 	{
 		// fix curve names
-		// 修复曲线名称
+  // 修复曲线名称
 		// copy to source local data FIRST
-		// 首先复制到源本地数据
+  // 首先复制到源本地数据
 		for (FPoseData& Pose : PoseContainer.Poses)
 		{
 			Pose.SourceCurveData = Pose.CurveData;
@@ -977,9 +977,9 @@ void UPoseAsset::PostLoad()
 		TArray<FTransform>	BasePose;
 		TArray<float>		BaseCurves;
 		// since the code change, the LocalSpacePose will have to be copied here manually
-		// 由于代码更改，必须手动将 LocalSpacePose 复制到此处
+  // 由于代码更改，必须手动将 LocalSpacePose 复制到此处
 		// RemoveUnnecessaryTracksFromPose removes LocalSpacePose data, so we're not using it for getting base pose
-		// RemoveUnnecessaryTracksFromPose 删除 LocalSpacePose 数据，因此我们不使用它来获取基本姿势
+  // RemoveUnnecessaryTracksFromPose 删除 LocalSpacePose 数据，因此我们不使用它来获取基本姿势
 		if (PoseContainer.Poses.IsValidIndex(BasePoseIndex))
 		{
 			BasePose = PoseContainer.Poses[BasePoseIndex].LocalSpacePose;
@@ -998,7 +998,7 @@ void UPoseAsset::PostLoad()
 		GetLinkerCustomVersion(FFortniteMainBranchObjectVersion::GUID) < FFortniteMainBranchObjectVersion::RemoveUnnecessaryTracksFromPose)
 	{
 		// fix curve names
-		// 修复曲线名称
+  // 修复曲线名称
 		PostProcessData();
 	}
 
@@ -1012,7 +1012,7 @@ void UPoseAsset::PostLoad()
 		if (SourceAnimation)
 		{
 			// Fully load the source animation to ensure its RawDataGUID is populated
-			// 完全加载源动画以确保填充其 RawDataGUID
+   // 完全加载源动画以确保填充其 RawDataGUID
 			SourceAnimation->ConditionalPreload();
 			SourceAnimation->ConditionalPostLoad();
 
@@ -1033,26 +1033,26 @@ void UPoseAsset::PostLoad()
 	}	
 
 	// fix curve names
-	// 修复曲线名称
+ // 修复曲线名称
 	USkeleton* MySkeleton = GetSkeleton();
 	if (MySkeleton)
 	{
 		// double loop but this check only should happen once per asset
-		// 双循环，但每个资产只应进行一次此检查
+  // 双循环，但每个资产只应进行一次此检查
 		// this should continue to add if skeleton hasn't been saved either 
-		// 如果骨架也没有被保存，这应该继续添加
+  // 如果骨架也没有被保存，这应该继续添加
 		if (GetLinkerCustomVersion(FFrameworkObjectVersion::GUID) < FFrameworkObjectVersion::MoveCurveTypesToSkeleton 
 			|| MySkeleton->GetLinkerCustomVersion(FFrameworkObjectVersion::GUID) < FFrameworkObjectVersion::MoveCurveTypesToSkeleton)
 		{
 			// fix up curve flags to skeleton
-			// 将曲线标志修复到骨架
+   // 将曲线标志修复到骨架
 			for (FAnimCurveBase& Curve : PoseContainer.Curves)
 			{
 				bool bMorphtargetSet = Curve.GetCurveTypeFlag(AACF_DriveMorphTarget_DEPRECATED);
 				bool bMaterialSet = Curve.GetCurveTypeFlag(AACF_DriveMaterial_DEPRECATED);
 
 				// only add this if that has to 
-				// 仅在必须时添加此内容
+    // 仅在必须时添加此内容
 				if (bMorphtargetSet || bMaterialSet)
 				{
 					MySkeleton->AccumulateCurveMetaData(Curve.GetName(), bMaterialSet, bMorphtargetSet);
@@ -1062,7 +1062,7 @@ void UPoseAsset::PostLoad()
 	}
 
 	// I have to fix pose names
-	// 我必须修复姿势名称
+ // 我必须修复姿势名称
 	if(RemoveInvalidTracks())
 	{
 		PostProcessData();
@@ -1107,7 +1107,7 @@ void UPoseAsset::GetAssetRegistryTags(FAssetRegistryTagsContext Context) const
 	Super::GetAssetRegistryTags(Context);
 
 	// Number of poses
-	// 姿势数
+ // 姿势数
 	Context.AddTag(FAssetRegistryTag("Poses", FString::FromInt(GetNumPoses()), FAssetRegistryTag::TT_Numerical));
 #if WITH_EDITOR
 	TArray<FName> Names;
@@ -1124,11 +1124,11 @@ void UPoseAsset::GetAssetRegistryTags(FAssetRegistryTagsContext Context) const
 	}
 	
 	// Add curve IDs to a tag list, or a delimiter if we have no curves.
-	// 将曲线 ID 添加到标签列表，如果没有曲线，则添加分隔符。
+ // 将曲线 ID 添加到标签列表，如果没有曲线，则添加分隔符。
 	// The delimiter is necessary so we can distinguish between data with no curves and old data, as the asset registry
-	// 分隔符是必要的，这样我们就可以区分没有曲线的数据和旧数据，就像资产注册表一样
+ // 分隔符是必要的，这样我们就可以区分没有曲线的数据和旧数据，就像资产注册表一样
 	// strips tags that have empty values 
-	// 删除具有空值的标签
+ // 删除具有空值的标签
 	FString PoseNameList = USkeleton::CurveTagDelimiter;
 	for(const FName& Name : Names)
 	{
@@ -1223,7 +1223,7 @@ const int32 UPoseAsset::GetTrackIndexByName(const FName& InTrackName) const
 	int32 ResultTrackIndex = INDEX_NONE;
 
 	// Only search if valid name passed in
-	// 仅在传入有效名称时搜索
+ // 仅在传入有效名称时搜索
 	if (InTrackName != NAME_None)
 	{
 		ResultTrackIndex = PoseContainer.Tracks.Find(InTrackName);
@@ -1292,7 +1292,7 @@ void UPoseAsset::PostProcessData()
 	RemoveInvalidTracks();
 	
 	// convert back to additive if it was that way
-	// 如果是这样的话，转换回加法
+ // 如果是这样的话，转换回加法
 	if (bAdditivePose)
 	{
 		ConvertToAdditivePose(GetBasePoseIndex());
@@ -1334,11 +1334,15 @@ void UPoseAsset::AddReferencePose(const FName& PoseName, const FReferenceSkeleto
 	{
 		TrackNames.Add(RefSkeleton.GetBoneName(BoneIndex));
 		BoneTransforms.Add(ReferencePose[BoneIndex]);
+		//const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
+  // const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
 	}
 			
 	TArray<float> NewCurveValues;
 	NewCurveValues.AddZeroed(PoseContainer.Curves.Num());
 
+			//int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
+   // int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
 	AddOrUpdatePose(PoseName, TrackNames, BoneTransforms, NewCurveValues);
 	PostProcessData();
 }
@@ -1350,7 +1354,7 @@ void UPoseAsset::AddOrUpdatePose(const FName& PoseName, const USkeletalMeshCompo
 	{
 		TArray<FName> TrackNames;
 		// note this ignores root motion
-		// 请注意，这会忽略根运动
+  // 请注意，这会忽略根运动
 		TArray<FTransform> BoneTransform = MeshComponent->GetComponentSpaceTransforms();
 		const FReferenceSkeleton& RefSkeleton = MeshComponent->GetSkeletalMeshAsset()->GetRefSkeleton();
 		for (int32 BoneIndex = 0; BoneIndex < RefSkeleton.GetNum(); ++BoneIndex)
@@ -1359,7 +1363,7 @@ void UPoseAsset::AddOrUpdatePose(const FName& PoseName, const USkeletalMeshCompo
 		}
 
 		// convert to local space
-		// 转换为本地空间
+  // 转换为本地空间
 		for (int32 BoneIndex = BoneTransform.Num() - 1; BoneIndex >= 0; --BoneIndex)
 		{
 			const int32 ParentIndex = RefSkeleton.GetParentIndex(BoneIndex);
@@ -1384,7 +1388,7 @@ void UPoseAsset::AddOrUpdatePose(const FName& PoseName, const USkeletalMeshCompo
 		BreakAnimationSequenceGUIDComparison();
 
 		// Only update curves if user has requested so - or when setting up a new pose
-		// 仅在用户请求时或设置新姿势时更新曲线
+  // 仅在用户请求时或设置新姿势时更新曲线
 		const FPoseData* PoseData = PoseContainer.FindPoseData(PoseName);
 		AddOrUpdatePose(PoseName, TrackNames, BoneTransform, (PoseData && !bUpdateCurves) ? PoseData->CurveData : NewCurveValues);
 		PostProcessData();
@@ -1397,53 +1401,67 @@ void UPoseAsset::AddOrUpdatePose(const FName& PoseName, const TArray<FName>& Tra
 	if (MySkeleton)
 	{
 		// first combine track, we want to make sure all poses contains tracks with this
-		// 首先组合轨迹，我们要确保所有姿势都包含这样的轨迹
+  // 首先组合轨迹，我们要确保所有姿势都包含这样的轨迹
 		CombineTracks(TrackNames);
 
 		const bool bNewPose = PoseContainer.FindPoseData(PoseName) == nullptr;
 		FPoseData* PoseData = PoseContainer.FindOrAddPoseData(PoseName);
 		// now copy all transform back to it. 
-		// 现在将所有变换复制回其中。
+  // 现在将所有变换复制回其中。
 		check(PoseData);
 		// Make sure this is whole tracks, not tracknames
-		// 确保这是整个曲目，而不是曲目名称
+  // 确保这是整个曲目，而不是曲目名称
 		// TrackNames are what this pose contains
-		// TrackNames 是这个姿势包含的内容
+  // TrackNames 是这个姿势包含的内容
 		// but We have to add all tracks to match poses container
-		// [翻译失败: but We have to add all tracks to match poses container]
+  // 但我们必须添加所有轨道以匹配姿势容器
 		// TrackNames.Num() is subset of PoseContainer.Tracks.Num()
-		// [翻译失败: TrackNames.Num() is subset of PoseContainer.Tracks.Num()]
+  // TrackNames.Num() 是 PoseContainer.Tracks.Num() 的子集
 		// Above CombineTracks will combine both
-		// [翻译失败: Above CombineTracks will combine both]
+  // 上面的CombineTracks将结合两者
 		const int32 TotalTracks = PoseContainer.Tracks.Num();
 		PoseData->SourceLocalSpacePose.Reset(TotalTracks);
 		PoseData->SourceLocalSpacePose.AddUninitialized(TotalTracks);
 		PoseData->SourceLocalSpacePose.SetNumZeroed(TotalTracks, EAllowShrinking::Yes);
 
 		// just fill up skeleton pose
-		// [翻译失败: just fill up skeleton pose]
+  // 只需填充骨架姿势
 		// the reason we use skeleton pose, is that retarget source can change, and 
-		// [翻译失败: the reason we use skeleton pose, is that retarget source can change, and]
+  // 我们使用骨架姿势的原因是重定向源可以改变，并且
 		// it can miss the tracks. 
-		// 它可能会错过轨道。
+  // 它可能会错过轨道。
 		PoseContainer.FillUpSkeletonPose(PoseData, MySkeleton);
 		check(CurveValues.Num() == PoseContainer.Curves.Num());
 		PoseData->SourceCurveData = CurveValues;
+  // const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
+  // const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
+  // const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
+  // const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
 
-		// why do we need skeleton index
-		// [翻译失败: why do we need skeleton index]
 		//const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
-		//[翻译失败: const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();]
+  // const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
+		// why do we need skeleton index
+  // 为什么我们需要骨架索引
+		//const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
+  // const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
+  // int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
+  // int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
 		for (int32 Index = 0; Index < TrackNames.Num(); ++Index)
+  // int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
+  // int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
 		{
 			// now get poseData track index
-			// 现在获取poseData轨迹索引
+   // 现在获取poseData轨迹索引
+			//int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
+   // int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
 			const FName& TrackName = TrackNames[Index];
 			//int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
+   // int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
 			//int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
+   // int32 SkeletonIndex = RefSkeleton.FindBoneIndex(TrackName);
 			const int32 InternalTrackIndex = PoseContainer.Tracks.Find(TrackName);
 			// copy to the internal track index
-			// 复制到内部轨道索引
+   // 复制到内部轨道索引
 			PoseData->SourceLocalSpacePose[InternalTrackIndex] = LocalTransform[Index];
 		}
 				
@@ -1481,7 +1499,7 @@ void UPoseAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 			if (MySkeleton)
 			{
 				// Convert to additive again since retarget source changed
-				// [翻译失败: Convert to additive again since retarget source changed]
+    // 由于重定向源更改，再次转换为加法
 				ConvertToAdditivePose(GetBasePoseIndex());
 			}
 		}
@@ -1503,11 +1521,11 @@ void UPoseAsset::CombineTracks(const TArray<FName>& NewTracks)
 			if (PoseContainer.Tracks.Contains(NewTrack) == false)
 			{
 				// if we don't have it, then we'll have to add this track and then 
-				// [翻译失败: if we don't have it, then we'll have to add this track and then]
+    // 如果我们没有，那么我们必须添加此曲目，然后
 				// right now it doesn't have to be in the hierarchy
-				// [翻译失败: right now it doesn't have to be in the hierarchy]
+    // 现在它不必位于层次结构中
 				// @todo: it is probably best to keep the hierarchy of the skeleton, so in the future, we might like to sort this by track after
-				// @todo：最好保留骨架的层次结构，因此将来，我们可能希望按轨道排序
+    // @todo：最好保留骨架的层次结构，因此将来，我们可能希望按轨道排序
 				PoseContainer.InsertTrack(NewTrack, MySkeleton, GetRetargetTransforms());
 				UpdateTrackBoneIndices();
 			}
@@ -1533,7 +1551,7 @@ void UPoseAsset::RenamePoseOrCurveName(const FName& InOriginalName, const FName&
 	if(PoseContainer.PoseFNames.Contains(InNewName) || PoseContainer.Curves.ContainsByPredicate([InNewName](const FAnimCurveBase& InCurve){ return InCurve.GetName() == InNewName; }))
 	{
 		// Cant rename on top of something we already have - this will create duplicates
-		// 无法在我们已有的内容之上重命名 - 这会创建重复项
+  // 无法在我们已有的内容之上重命名 - 这会创建重复项
 		return;
 	}
 
@@ -1580,7 +1598,7 @@ void UPoseAsset::CreatePoseFromAnimation(class UAnimSequence* AnimSequence, cons
 			SourceAnimation = AnimSequence;
 
 			// reinitialize, now we're making new pose from this animation
-			// 重新初始化，现在我们正在根据这个动画制作新的姿势
+   // 重新初始化，现在我们正在根据这个动画制作新的姿势
 			Reinitialize();
 
 			int32 NumPoses = AnimSequence->GetNumberOfSampledKeys();
@@ -1589,15 +1607,15 @@ void UPoseAsset::CreatePoseFromAnimation(class UAnimSequence* AnimSequence, cons
 				NumPoses=InPoseNames->Num();
 			}
 			// make sure we have more than one pose
-			// 确保我们有不止一个姿势
+   // 确保我们有不止一个姿势
 			if (NumPoses > 0)
 			{
 				// stack allocator for extracting curve
-				// 用于提取曲线的堆栈分配器
+    // 用于提取曲线的堆栈分配器
 				FMemMark Mark(FMemStack::Get());
 
 				// set up track data - @todo: add revaliation code when checked
-				// 设置轨迹数据 - @todo：选中时添加重新验证代码
+    // 设置轨迹数据 - @todo：选中时添加重新验证代码
 				IAnimationDataModel* DataModel = AnimSequence->GetDataModel();
 
 				TArray<FName> TrackNames;
@@ -1609,7 +1627,7 @@ void UPoseAsset::CreatePoseFromAnimation(class UAnimSequence* AnimSequence, cons
 				}
 
 				// now create pose transform
-				// 现在创建姿势变换
+    // 现在创建姿势变换
 				TArray<FTransform> NewPose;
 				
 				const int32 NumTracks = TrackNames.Num();
@@ -1619,7 +1637,7 @@ void UPoseAsset::CreatePoseFromAnimation(class UAnimSequence* AnimSequence, cons
 				const double IntervalBetweenKeys = (NumPoses > 1)? AnimSequence->GetPlayLength() / (NumPoses -1 ) : 0.f;
 
 				// add curves - only float curves
-				// 添加曲线 - 仅浮动曲线
+    // 添加曲线 - 仅浮动曲线
 				const FAnimationCurveData& AnimationCurveData = DataModel->GetCurveData();
 				const int32 TotalFloatCurveCount = AnimationCurveData.FloatCurves.Num();
 
@@ -1632,7 +1650,7 @@ void UPoseAsset::CreatePoseFromAnimation(class UAnimSequence* AnimSequence, cons
 				}
 
 				// add to skeleton UID, so that it knows the curve data
-				// 添加骨架UID，使其知道曲线数据
+    // 添加骨架UID，使其知道曲线数据
 				for (int32 PoseIndex = 0; PoseIndex < NumPoses; ++PoseIndex)
 				{
 					TArray<float> CurveData;
@@ -1640,7 +1658,7 @@ void UPoseAsset::CreatePoseFromAnimation(class UAnimSequence* AnimSequence, cons
 					
 					FName NewPoseName = (InPoseNames && InPoseNames->IsValidIndex(PoseIndex))? (*InPoseNames)[PoseIndex] : GetUniquePoseName(this);
 					// now get rawanimationdata, and each key is converted to new pose
-					// 现在获取原始动画数据，并将每个关键点转换为新的姿势
+     // 现在获取原始动画数据，并将每个关键点转换为新的姿势
 					for (int32 TrackIndex = 0; TrackIndex < NumTracks; ++TrackIndex)
 					{
 						NewPose[TrackIndex] = AnimSequence->GetDataModel()->GetBoneTrackTransform(TrackNames[TrackIndex], FFrameNumber(PoseIndex));
@@ -1649,11 +1667,11 @@ void UPoseAsset::CreatePoseFromAnimation(class UAnimSequence* AnimSequence, cons
 					if (TotalFloatCurveCount > 0)
 					{
 						// get curve data
-						// 获取曲线数据
+      // 获取曲线数据
 						// have to do iterate over time
-						// 必须随着时间的推移进行迭代
+      // 必须随着时间的推移进行迭代
 						// support curve
-						// 支持曲线
+      // 支持曲线
 						FBlendedCurve SourceCurve;
 						AnimSequence->EvaluateCurveData(SourceCurve, FAnimExtractContext(PoseIndex*IntervalBetweenKeys), true);
 						
@@ -1665,7 +1683,7 @@ void UPoseAsset::CreatePoseFromAnimation(class UAnimSequence* AnimSequence, cons
 					}
 				
 					// add new pose
-					// 添加新姿势
+     // 添加新姿势
 					PoseContainer.AddOrUpdatePose(NewPoseName, NewPose, CurveData);
 				}
 
@@ -1673,7 +1691,7 @@ void UPoseAsset::CreatePoseFromAnimation(class UAnimSequence* AnimSequence, cons
 			}
 
 			// Mark PoseAsset as (re-)generated
-			// 将 PoseAsset 标记为（重新）生成
+   // 将 PoseAsset 标记为（重新）生成
 			UE::Anim::GRegeneratedPoseAssets.Set(this);
 			
 			SourceAnimationRawDataGUID = GetSourceAnimationGuid();
@@ -1686,29 +1704,29 @@ void UPoseAsset::UpdatePoseFromAnimation(class UAnimSequence* AnimSequence)
 	if (AnimSequence)
 	{
 		// when you update pose, right now, it just only keeps pose names
-		// 当你更新姿势时，现在它只保留姿势名称
+  // 当你更新姿势时，现在它只保留姿势名称
 		// in the future we might want to make it more flexible
-		// 将来我们可能想让它更加灵活
+  // 将来我们可能想让它更加灵活
 		// back up old pose names
-		// 备份旧的姿势名称
+  // 备份旧的姿势名称
 		const TArray<FName> OldPoseNames = PoseContainer.PoseFNames;
 		const bool bOldAdditive = bAdditivePose;
 		int32 OldBasePoseIndex = BasePoseIndex;
 		CreatePoseFromAnimation(AnimSequence, &OldPoseNames);
 
 		// fix up additive info if it's additive
-		// 修复附加信息（如果它是附加信息）
+  // 修复附加信息（如果它是附加信息）
 		if (bOldAdditive)
 		{
 			if (PoseContainer.Poses.IsValidIndex(OldBasePoseIndex) == false)
 			{
 				// if it's pointing at invalid index, just reset to ref pose
-				// 如果它指向无效索引，只需重置为参考姿势
+    // 如果它指向无效索引，只需重置为参考姿势
 				OldBasePoseIndex = INDEX_NONE;
 			}
 
 			// Convert to additive again
-			// 再次转换为加法
+   // 再次转换为加法
 			ConvertToAdditivePose(OldBasePoseIndex);
 		}
 
@@ -1723,7 +1741,7 @@ bool UPoseAsset::ModifyPoseName(FName OldPoseName, FName NewPoseName)
 	if (ContainsPose(NewPoseName))
 	{
 		// already exists, return 
-		// 已存在，返回
+  // 已存在，返回
 		return false;
 	}
 
@@ -1749,13 +1767,13 @@ int32 UPoseAsset::DeletePoses(TArray<FName> PoseNamesToDelete)
 		{
 			++ItemsDeleted;
 			// if base pose index is same as pose index deleted
-			// 如果基本姿势索引与删除的姿势索引相同
+   // 如果基本姿势索引与删除的姿势索引相同
 			if (BasePoseIndex == PoseIndexDeleted)
 			{
 				BasePoseIndex = INDEX_NONE;
 			}
 			// if base pose index is after this, we reduce the number
-			// 如果基本姿势索引在此之后，我们减少数量
+   // 如果基本姿势索引在此之后，我们减少数量
 			else if (BasePoseIndex > PoseIndexDeleted)
 			{
 				--BasePoseIndex;
@@ -1800,7 +1818,7 @@ void UPoseAsset::ConvertToFullPose()
 void UPoseAsset::ConvertToAdditivePose(int32 NewBasePoseIndex)
 {
 	// make sure it's valid
-	// [翻译失败: make sure it's valid]
+ // 确保它有效
 	check(NewBasePoseIndex == -1 || PoseContainer.Poses.IsValidIndex(NewBasePoseIndex));
 
 	BasePoseIndex = NewBasePoseIndex;
@@ -1822,7 +1840,7 @@ bool UPoseAsset::GetFullPose(int32 PoseIndex, TArray<FTransform>& OutTransforms)
 	}
 
 	// just return source data
-	// [翻译失败: just return source data]
+ // 只返回源数据
 	OutTransforms = PoseContainer.Poses[PoseIndex].SourceLocalSpacePose;
 	return true;
 }
@@ -1832,11 +1850,11 @@ FTransform UPoseAsset::GetComponentSpaceTransform(FName BoneName, const TArray<F
 	const FReferenceSkeleton& RefSkel = GetSkeleton()->GetReferenceSkeleton();
 
 	// Init component space transform with identity
-	// [翻译失败: Init component space transform with identity]
+ // 用恒等式初始化组件空间变换
 	FTransform ComponentSpaceTransform = FTransform::Identity;
 
 	// Start to walk up parent chain until we reach root (ParentIndex == INDEX_NONE)
-	// 开始沿着父链向上走，直到到达根（ParentIndex == INDEX_NONE）
+ // 开始沿着父链向上走，直到到达根（ParentIndex == INDEX_NONE）
 	int32 BoneIndex = RefSkel.FindBoneIndex(BoneName);
 	while (BoneIndex != INDEX_NONE)
 	{
@@ -1844,17 +1862,17 @@ FTransform UPoseAsset::GetComponentSpaceTransform(FName BoneName, const TArray<F
 		int32 TrackIndex = GetTrackIndexByName(BoneName);
 
 		// If a track for parent, get local space transform from that
-		// 如果是父轨道，则从中获取局部空间变换
+  // 如果是父轨道，则从中获取局部空间变换
 		// If not, get from ref pose
-		// 如果没有，则从参考姿势获取
+  // 如果没有，则从参考姿势获取
 		FTransform BoneLocalTM = (TrackIndex != INDEX_NONE) ? LocalTransforms[TrackIndex] : RefSkel.GetRefBonePose()[BoneIndex];
 
 		// Continue to build component space transform
-		// 继续构建组件空间变换
+  // 继续构建组件空间变换
 		ComponentSpaceTransform = ComponentSpaceTransform * BoneLocalTM;
 
 		// Now move up to parent
-		// 现在向上移动到父级
+  // 现在向上移动到父级
 		BoneIndex = RefSkel.GetParentIndex(BoneIndex);
 	}
 
@@ -1875,7 +1893,7 @@ const FTransform& UPoseAsset::GetLocalSpaceTransform(FName BoneName, int32 PoseI
 bool UPoseAsset::ConvertSpace(bool bNewAdditivePose, int32 NewBasePoseIndex)
 {
 	// first convert to full pose first
-	// 首先转换为完整姿势
+ // 首先转换为完整姿势
 	bAdditivePose = bNewAdditivePose;
 	BasePoseIndex = NewBasePoseIndex;
 	PostProcessData();
@@ -1938,7 +1956,7 @@ bool UPoseAsset::RemoveInvalidTracks()
 		const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
 
 		// set up track data 
-		// 设置轨迹数据
+  // 设置轨迹数据
 		for (int32 TrackIndex = 0; TrackIndex < PoseContainer.Tracks.Num(); ++TrackIndex)
 		{
 			const FName& TrackName = PoseContainer.Tracks[TrackIndex];
@@ -1946,7 +1964,7 @@ bool UPoseAsset::RemoveInvalidTracks()
 			if (SkeletonTrackIndex == INDEX_NONE)
 			{
 				// delete this track. It's missing now
-				// 删除该曲目。现在不见了
+    // 删除该曲目。现在不见了
 				PoseContainer.DeleteTrack(TrackIndex);
 				--TrackIndex;
 			}
@@ -2045,7 +2063,7 @@ void FPoseDataContainer::DeleteTrack(int32 TrackIndex)
 	{
 #if WITH_EDITOR
 		// if not editor, they can't save this data, so it will run again when editor runs
-		// 如果不是编辑器，他们无法保存此数据，因此当编辑器运行时它将再次运行
+  // 如果不是编辑器，他们无法保存此数据，因此当编辑器运行时它将再次运行
 		Pose.SourceLocalSpacePose.RemoveAt(TrackIndex);
 #endif // WITH_EDITOR
 	}
@@ -2088,7 +2106,7 @@ FGuid UPoseAsset::GetSourceAnimationGuid() const
 		}		
 
 		// If pose asset was re-generated during editor runtime, use the new GUID format
-		// [翻译失败: If pose asset was re-generated during editor runtime, use the new GUID format]
+  // 如果在编辑器运行时重新生成姿势资源，请使用新的 GUID 格式
 		if(UE::Anim::GRegeneratedPoseAssets.Get(this))
 		{
 			Settings.bIncludeTimingData = true;	
@@ -2158,7 +2176,7 @@ bool UPoseAsset::GetBasePoseTransform(TArray<FTransform>& OutBasePose, TArray<fl
 		}
 
 		// add zero curves
-		// [翻译失败: add zero curves]
+  // 添加零曲线
 		OutCurve.AddZeroed(PoseContainer.Curves.Num());
 		check(OutBasePose.Num() == TotalNumTrack);
 		return true;

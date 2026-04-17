@@ -100,11 +100,11 @@ TArrayView<FName> FAnimBankCompilingManager::GetDependentTypeNames() const
 	static FName DependentTypeNames[] =	
 	{ 
 		// AnimBank can wait on AnimSequence to finish their own compilation before compiling itself
-		// AnimBank 可以等待 AnimSequence 完成自己的编译后再进行自身编译
+  // AnimBank 可以等待 AnimSequence 完成自己的编译后再进行自身编译
 		// so they need to be processed before us. This is especially important when FinishAllCompilation is issued
-		// 所以它们需要在我们之前进行处理。当 FinishAllCompilation 发出时，这一点尤其重要
+  // 所以它们需要在我们之前进行处理。当 FinishAllCompilation 发出时，这一点尤其重要
 		// so that we know once we're called that all anim sequences have finished compiling.
-		// 这样我们一旦被调用就知道所有动画序列都已完成编译。
+  // 这样我们一旦被调用就知道所有动画序列都已完成编译。
 		UE::Anim::FAnimSequenceCompilingManager::GetStaticAssetTypeName() 
 	};
 	return TArrayView<FName>(DependentTypeNames);
@@ -121,7 +121,7 @@ FQueuedThreadPool* FAnimBankCompilingManager::GetThreadPool() const
 	if (GAnimBankThreadPool == nullptr && FAssetCompilingManager::Get().GetThreadPool() != nullptr)
 	{
 		// Animation banks will be scheduled on the asset thread pool, where concurrency limits might by dynamically adjusted depending on memory constraints.
-		// 动画库将在资产线程池上进行调度，其中并发限制可能会根据内存限制动态调整。
+  // 动画库将在资产线程池上进行调度，其中并发限制可能会根据内存限制动态调整。
 		GAnimBankThreadPool = new FQueuedThreadPoolDynamicWrapper(FAssetCompilingManager::Get().GetThreadPool(), -1, [](EQueuedWorkPriority) { return EQueuedWorkPriority::Low; });
 
 		AsyncCompilationHelpers::BindThreadPoolToCVar(
@@ -183,7 +183,7 @@ void FAnimBankCompilingManager::PostCompilation(TArrayView<UAnimBank* const> InA
 		for (UAnimBank* AnimBank : InAnimBanks)
 		{
 			// Do not broadcast an event for unreachable objects
-			// 不要广播无法访问的对象的事件
+   // 不要广播无法访问的对象的事件
 			if (!AnimBank->IsUnreachable())
 			{
 				AssetsData.Emplace(AnimBank);
@@ -208,7 +208,7 @@ void FAnimBankCompilingManager::PostCompilation(UAnimBank* AnimBank)
 	using namespace AnimBankCompilingManagerImpl;
 
 	// If AsyncTask is null here, the task got canceled so we don't need to do anything
-	// 如果此处 AsyncTask 为 null，则任务已取消，因此我们不需要执行任何操作
+ // 如果此处 AsyncTask 为 null，则任务已取消，因此我们不需要执行任何操作
 	if (!IsEngineExitRequested())
 	{
 		check(IsInGameThread());
@@ -217,7 +217,7 @@ void FAnimBankCompilingManager::PostCompilation(UAnimBank* AnimBank)
 		AnimBank->FinishAsyncTasks();
 
 		// Do not do anything else if the AnimBank is being garbage collected
-		// [翻译失败: Do not do anything else if the AnimBank is being garbage collected]
+  // 如果 AnimBank 正在被垃圾回收，请勿执行任何其他操作
 		if (AnimBank->IsUnreachable())
 		{
 			return;
@@ -250,19 +250,19 @@ void FAnimBankCompilingManager::PostCompilation(UAnimBank* AnimBank)
 		}
 
 		// Calling this delegate during app exit might be quite dangerous and lead to crash
-		// [翻译失败: Calling this delegate during app exit might be quite dangerous and lead to crash]
+  // 在应用程序退出期间调用此委托可能非常危险并导致崩溃
 		// if the content browser wants to refresh a thumbnail it might try to load a package
-		// 如果内容浏览器想要刷新缩略图，它可能会尝试加载包
+  // 如果内容浏览器想要刷新缩略图，它可能会尝试加载包
 		// which will then fail due to various reasons related to the editor shutting down.
-		// 然后，由于与编辑器关闭相关的各种原因，该操作将失败。
+  // 然后，由于与编辑器关闭相关的各种原因，该操作将失败。
 		// Triggering this callback while garbage collecting can also result in listeners trying to look up objects
-		// 在垃圾收集时触发此回调还会导致侦听器尝试查找对象
+  // 在垃圾收集时触发此回调还会导致侦听器尝试查找对象
 		if (!GExitPurge && !IsGarbageCollecting())
 		{
 			// Generate an empty property changed event, to force the asset registry tag
-			// 生成一个空的属性更改事件，以强制资产注册表标记
+   // 生成一个空的属性更改事件，以强制资产注册表标记
 			// to be refreshed now that RenderData is available.
-			// 现在 RenderData 可用，请刷新。
+   // 现在 RenderData 可用，请刷新。
 			FPropertyChangedEvent EmptyPropertyChangedEvent(nullptr);
 			FCoreUObjectDelegates::OnObjectPropertyChanged.Broadcast(AnimBank, EmptyPropertyChangedEvent);
 		}
@@ -298,7 +298,7 @@ void FAnimBankCompilingManager::FinishCompilation(TArrayView<UAnimBank* const> I
 	TRACE_CPUPROFILER_EVENT_SCOPE(FAnimBankCompilingManager::FinishCompilation);
 
 	// Allow calls from any thread if the meshes are already finished compiling.
-	// 如果网格体已完成编译，则允许来自任何线程的调用。
+ // 如果网格体已完成编译，则允许来自任何线程的调用。
 	if (Algo::NoneOf(InAnimBanks, &UAnimBank::IsCompiling))
 	{
 		return;
@@ -364,7 +364,7 @@ void FAnimBankCompilingManager::FinishCompilation(TArrayView<UAnimBank* const> I
 void FAnimBankCompilingManager::FinishCompilationsForGame()
 {
 	// Nothing special to do when we PIE for now.
-	// 现在当我们进行 PIE 时，没有什么特别要做的。
+ // 现在当我们进行 PIE 时，没有什么特别要做的。
 }
 
 void FAnimBankCompilingManager::FinishAllCompilation()
@@ -392,7 +392,7 @@ void FAnimBankCompilingManager::FinishAllCompilation()
 void FAnimBankCompilingManager::Reschedule()
 {
 	// TODO Prioritize animation banks that are nearest to the viewport
-	// TODO 优先考虑距离视口最近的动画库
+ // TODO 优先考虑距离视口最近的动画库
 }
 
 void FAnimBankCompilingManager::ProcessAnimBanks(bool bLimitExecutionTime, int32 MinBatchSize)
@@ -403,7 +403,7 @@ void FAnimBankCompilingManager::ProcessAnimBanks(bool bLimitExecutionTime, int32
 	const int32 NumRemainingBanks = GetNumRemainingAssets();
 	
 	// Spread out the load over multiple frames but if too many banks, convergence is more important than frame time
-	// 将负载分散到多个帧上，但如果组太多，收敛比帧时间更重要
+ // 将负载分散到多个帧上，但如果组太多，收敛比帧时间更重要
 	const int32 MaxBankUpdatesPerFrame = bLimitExecutionTime ? FMath::Max(64, NumRemainingBanks / 10) : INT32_MAX;
 
 	FObjectCacheContextScope ObjectCacheScope;

@@ -8,6 +8,16 @@
 /////////////////////////////////////////////////////
 // FAnimNode_ConvertComponentToLocalSpace
 // FAnimNode_ConvertComponentToLocalSpace
+// FAnimNode_ConvertComponentToLocalSpace
+// FAnimNode_ConvertComponentToLocalSpace
+// FAnimNode_ConvertComponentToLocalSpace
+// FAnimNode_ConvertComponentToLocalSpace
+// FAnimNode_ConvertComponentToLocalSpace
+// FAnimNode_ConvertComponentToLocalSpace
+// FAnimNode_ConvertComponentToLocalSpace
+// FAnimNode_ConvertComponentToLocalSpace
+// FAnimNode_ConvertComponentToLocalSpace
+// FAnimNode_ConvertComponentToLocalSpace
 
 FAnimNode_ConvertComponentToLocalSpace::FAnimNode_ConvertComponentToLocalSpace()
 {
@@ -33,11 +43,11 @@ void FAnimNode_ConvertComponentToLocalSpace::Evaluate_AnyThread(FPoseContext & O
 	ANIM_MT_SCOPE_CYCLE_COUNTER_VERBOSE(ConvertComponentToLocalSpace, !IsInGameThread());
 
 	// Evaluate the child and convert
-	// 评估孩子并转换
+ // 评估孩子并转换
 	FComponentSpacePoseContext InputCSPose(Output.AnimInstanceProxy);
 
 	// We need to preserve the node ID chain as we use the proxy-based constructor above
-	// 当我们使用上面基于代理的构造函数时，我们需要保留节点 ID 链
+ // 当我们使用上面基于代理的构造函数时，我们需要保留节点 ID 链
 	InputCSPose.SetNodeIds(Output);
 
 	ComponentPose.EvaluateComponentSpace(InputCSPose);
@@ -52,10 +62,20 @@ void FAnimNode_ConvertComponentToLocalSpace::GatherDebugData(FNodeDebugData& Deb
 {
 	FString DebugLine = DebugData.GetNodeName(this);
 	DebugData.AddDebugItem(DebugLine);
+ // FAnimNode_ConvertLocalToComponentSpace
+ // FAnimNode_ConvertLocalToComponentSpace
 	ComponentPose.GatherDebugData(DebugData);
+ // FAnimNode_ConvertLocalToComponentSpace
+ // FAnimNode_ConvertLocalToComponentSpace
 }
+// FAnimNode_ConvertLocalToComponentSpace
+// FAnimNode_ConvertLocalToComponentSpace
+// FAnimNode_ConvertLocalToComponentSpace
+// FAnimNode_ConvertLocalToComponentSpace
 
 /////////////////////////////////////////////////////
+// FAnimNode_ConvertLocalToComponentSpace
+// FAnimNode_ConvertLocalToComponentSpace
 // FAnimNode_ConvertLocalToComponentSpace
 // FAnimNode_ConvertLocalToComponentSpace
 
@@ -90,11 +110,11 @@ void FAnimNode_ConvertLocalToComponentSpace::EvaluateComponentSpace_AnyThread(FC
 	ANIM_MT_SCOPE_CYCLE_COUNTER_VERBOSE(ConvertLocalToComponentSpace, !IsInGameThread());
 
 	// Evaluate the child and convert
-	// 评估孩子并转换
+ // 评估孩子并转换
 	FPoseContext InputPose(OutputCSPose.AnimInstanceProxy);
 
 	// We need to preserve the node ID chain as we use the proxy-based constructor above
-	// 当我们使用上面基于代理的构造函数时，我们需要保留节点 ID 链
+ // 当我们使用上面基于代理的构造函数时，我们需要保留节点 ID 链
 	InputPose.SetNodeIds(OutputCSPose);
 
 	LocalPose.Evaluate(InputPose);

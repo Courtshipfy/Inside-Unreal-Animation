@@ -71,7 +71,7 @@ void SerializeReferencePose(FArchive& Ar, FReferencePose& P, UObject* Outer)
 	Ar << P.ReferencePose;
 #if WITH_EDITORONLY_DATA
 	//TODO: we should use strip flags but we need to rev the serialization version
-	//TODO：我们应该使用剥离标志，但我们需要修改序列化版本
+ // TODO：我们应该使用剥离标志，但我们需要修改序列化版本
 	if (!Ar.IsCooking() && (!Ar.IsLoading() || !Outer->GetOutermost()->bIsCookedForEditor))
 	{
 		if (Ar.IsLoading() && Ar.CustomVer(FAnimPhysObjectVersion::GUID) < FAnimPhysObjectVersion::ChangeRetargetSourceReferenceToSoftObjectPtr)
@@ -83,7 +83,7 @@ void SerializeReferencePose(FArchive& Ar, FReferencePose& P, UObject* Outer)
 		else
 		{
 			// Scope the soft pointer serialization so we can tag it as editor only
-			// 确定软指针序列化的范围，以便我们可以将其仅标记为编辑器
+   // 确定软指针序列化的范围，以便我们可以将其仅标记为编辑器
 			FName PackageName;
 			FName PropertyName;
 			ESoftObjectPathCollectType CollectType = ESoftObjectPathCollectType::AlwaysCollect;
@@ -145,7 +145,7 @@ bool USkeleton::IsCompatibleForEditor(const FAssetData& AssetData, const TCHAR* 
 bool USkeleton::IsCompatibleForEditor(const FString& SkeletonAssetString) const
 {
 	// First check against itself.
-	// 首先检查自身。
+ // 首先检查自身。
 	TStringBuilder<128> SkeletonStringBuilder;
 	FAssetData(this, FAssetData::ECreationFlags::SkipAssetRegistryTagsGathering).GetExportTextName(SkeletonStringBuilder);
 	const TCHAR* SkeletonString = SkeletonStringBuilder.ToString();
@@ -155,14 +155,14 @@ bool USkeleton::IsCompatibleForEditor(const FString& SkeletonAssetString) const
 	}
 
 	// Let the global delegate override any per-skeleton settings
-	// 让全局委托覆盖任何每个骨架设置
+ // 让全局委托覆盖任何每个骨架设置
 	if(AreAllSkeletonsCompatibleDelegate.IsBound() && AreAllSkeletonsCompatibleDelegate.Execute())
 	{
 		return true;
 	}
 
 	// Now check against the list of compatible skeletons and see if we're dealing with the same asset.
-	// 现在检查兼容骨架列表，看看我们是否正在处理相同的资产。
+ // 现在检查兼容骨架列表，看看我们是否正在处理相同的资产。
 	if(CompatibleSkeletons.Num() > 0)
 	{
 		const FSoftObjectPath InPath(SkeletonAssetString);
@@ -176,7 +176,7 @@ bool USkeleton::IsCompatibleForEditor(const FString& SkeletonAssetString) const
 	}
 
 	// Check if the other skeleton is compatible with this via the asset registry
-	// 通过资产注册表检查其他骨架是否与此兼容
+ // 通过资产注册表检查其他骨架是否与此兼容
 	const IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
 	constexpr bool bIncludeOnlyOnDiskAssets = true;
 	const FAssetData SkeletonAssetData = AssetRegistry.GetAssetByObjectPath(FSoftObjectPath(*SkeletonAssetString), bIncludeOnlyOnDiskAssets);
@@ -209,7 +209,7 @@ void USkeleton::GetCompatibleSkeletonAssets(TArray<FAssetData>& OutAssets) const
 	const IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
 
 	// If we are compatible with all, then just add all skeletons
-	// 如果我们兼容所有，那么只需添加所有骨架
+ // 如果我们兼容所有，那么只需添加所有骨架
 	if(AreAllSkeletonsCompatibleDelegate.IsBound() && AreAllSkeletonsCompatibleDelegate.Execute())
 	{
 		TArray<FAssetData> AllSkeletons;
@@ -222,12 +222,12 @@ void USkeleton::GetCompatibleSkeletonAssets(TArray<FAssetData>& OutAssets) const
 	else
 	{
 		// Always add 'this'
-		// 始终添加“这个”
+  // 始终添加“这个”
 		FAssetData AssetDataThis(this);
 		OutAssets.Add(AssetDataThis);
 		
 		// Add skeletons in our compatibility list
-		// 在我们的兼容性列表中添加骨架
+  // 在我们的兼容性列表中添加骨架
 		for(TSoftObjectPtr<USkeleton> CompatibleSkeleton : CompatibleSkeletons)
 		{
 			const FAssetData SkeletonAssetData = AssetRegistry.GetAssetByObjectPath(CompatibleSkeleton.ToSoftObjectPath());
@@ -238,7 +238,7 @@ void USkeleton::GetCompatibleSkeletonAssets(TArray<FAssetData>& OutAssets) const
 		}
 
 		// Add skeletons where we are listed in their compatibility list
-		// 添加我们在其兼容性列表中列出的骨架
+  // 添加我们在其兼容性列表中列出的骨架
 		{
 			TArray<FAssetData> SkeletonsCompatibleWithThis;
 			FARFilter ARFilter;
@@ -258,7 +258,7 @@ void USkeleton::GetCompatibleAssets(UClass* AssetClass, const TCHAR* InTag, TArr
 	if(AreAllSkeletonsCompatibleDelegate.IsBound() && AreAllSkeletonsCompatibleDelegate.Execute())
 	{
 		// Compatible with all, so return all assets of type
-		// 兼容所有，因此返回该类型的所有资产
+  // 兼容所有，因此返回该类型的所有资产
 		FARFilter ARFilter;
 		ARFilter.ClassPaths.Add(AssetClass->GetClassPathName());
 		ARFilter.bRecursiveClasses = true;
@@ -337,9 +337,9 @@ void USkeleton::PostInitProperties()
 	Super::PostInitProperties();
 
 	// this gets called after constructor, and this data can get
-	// 这在构造函数之后被调用，并且该数据可以获得
+ // 这在构造函数之后被调用，并且该数据可以获得
 	// serialized back if this already has Guid
-	// 如果已经有 Guid 则序列化回来
+ // 如果已经有 Guid 则序列化回来
 	if (!IsTemplate())
 	{
 		RegenerateGuid();
@@ -360,17 +360,17 @@ void USkeleton::PostLoad()
 	if( GetLinker() && (GetLinker()->UEVer() < VER_UE4_REFERENCE_SKELETON_REFACTOR) )
 	{
 		// Convert RefLocalPoses & BoneTree to FReferenceSkeleton
-		// 将 RefLocalPoses 和 BoneTree 转换为 FReferenceSkeleton
+  // 将 RefLocalPoses 和 BoneTree 转换为 FReferenceSkeleton
 		ConvertToFReferenceSkeleton();
 	}
 #endif
 
 	// catch any case if guid isn't valid
-	// 如果 guid 无效，则捕获任何情况
+ // 如果 guid 无效，则捕获任何情况
 	check(Guid.IsValid());
 
 	// Cleanup CompatibleSkeletons for convenience. This basically removes any soft object pointers that has an invalid soft object name.
-	// 为了方便起见，清理兼容的骨架。这基本上会删除任何具有无效软对象名称的软对象指针。
+ // 为了方便起见，清理兼容的骨架。这基本上会删除任何具有无效软对象名称的软对象指针。
 	CompatibleSkeletons = CompatibleSkeletons.FilterByPredicate([](const TSoftObjectPtr<USkeleton>& Skeleton)
 	{
 		return Skeleton.ToSoftObjectPath().IsValid();
@@ -380,7 +380,7 @@ void USkeleton::PostLoad()
 	if(GetLinkerCustomVersion(FUE5MainStreamObjectVersion::GUID) < FUE5MainStreamObjectVersion::AnimationRemoveSmartNames)
 	{
 		// Move curve metadata over to asset user data
-		// 将曲线元数据移至资产用户数据
+  // 将曲线元数据移至资产用户数据
 		UAnimCurveMetaData* AnimCurveMetaData = GetOrCreateCurveMetaDataObject();
 		PRAGMA_DISABLE_DEPRECATION_WARNINGS
 		for(const TPair<FName, FSmartNameMapping>& NameMappingPair : SmartNames_DEPRECATED.NameMappings)
@@ -395,13 +395,13 @@ void USkeleton::PostLoad()
 	else
 	{
 		// Ensure we have curve metadata, even if empty, so we can correctly pick up older objects in the asset registry
-		// 确保我们有曲线元数据，即使是空的，这样我们就可以正确地拾取资产注册表中的旧对象
+  // 确保我们有曲线元数据，即使是空的，这样我们就可以正确地拾取资产注册表中的旧对象
 		GetOrCreateCurveMetaDataObject();
 	}
 #endif
 
 	// refresh linked bone indices
-	// [翻译失败: refresh linked bone indices]
+ // 刷新链接的骨骼索引
 	RefreshSkeletonMetaData();
 
 }
@@ -413,7 +413,7 @@ void USkeleton::PostDuplicate(bool bDuplicateForPIE)
 	if (!bDuplicateForPIE)
 	{
 		// regenerate Guid
-		// [翻译失败: regenerate Guid]
+  // 重新生成指南
 		RegenerateGuid();
 	}
 }
@@ -435,7 +435,7 @@ void USkeleton::Serialize( FArchive& Ar )
 	if (Ar.UEVer() >= VER_UE4_FIX_ANIMATIONBASEPOSE_SERIALIZATION)
 	{
 		// Load Animation RetargetSources
-		// 加载动画重定位源
+  // 加载动画重定位源
 		if (Ar.IsLoading())
 		{
 			int32 NumOfRetargetSources;
@@ -467,7 +467,7 @@ void USkeleton::Serialize( FArchive& Ar )
 	else
 	{
 		// this is broken, but we have to keep it to not corrupt content. 
-		// [翻译失败: this is broken, but we have to keep it to not corrupt content.]
+  // 这已损坏，但我们必须保留它以免损坏内容。
 		for (auto Iter = AnimRetargetSources.CreateIterator(); Iter; ++Iter)
 		{
 			Ar << Iter.Key();
@@ -486,7 +486,7 @@ void USkeleton::Serialize( FArchive& Ar )
 	}
 
 	// If we should be using smartnames, serialize the mappings
-	// [翻译失败: If we should be using smartnames, serialize the mappings]
+ // 如果我们应该使用智能名称，请序列化映射
 	if(Ar.UEVer() >= VER_UE4_SKELETON_ADD_SMARTNAMES)
 	{
 		PRAGMA_DISABLE_DEPRECATION_WARNINGS
@@ -495,11 +495,11 @@ void USkeleton::Serialize( FArchive& Ar )
 	}
 
 	// Build look up table between Slot nodes and their Group.
-	// 在插槽节点及其组之间建立查找表。
+ // 在插槽节点及其组之间建立查找表。
 	if(Ar.UEVer() < VER_UE4_FIX_SLOT_NAME_DUPLICATION)
 	{
 		// In older assets we may have duplicates, remove these while building the map.
-		// 在较旧的资产中，我们可能有重复项，请在构建地图时删除它们。
+  // 在较旧的资产中，我们可能有重复项，请在构建地图时删除它们。
 		BuildSlotToGroupMap(true);
 	}
 	else
@@ -523,6 +523,7 @@ void USkeleton::Serialize( FArchive& Ar )
 		}
 	}
 
+/** 删除 VER_UE4_REFERENCE_SKELETON_REFACTOR 后，删除此函数。 */
 	if (Ar.IsLoading())
 	{
 		const bool bRebuildNameMap = false;
@@ -534,7 +535,7 @@ void USkeleton::Serialize( FArchive& Ar )
 void USkeleton::PreEditUndo()
 {
 	// Undoing so clear cached data as it will now be stale
-	// 撤消如此清晰的缓存数据，因为它现在已经过时了
+ // 撤消如此清晰的缓存数据，因为它现在已经过时了
 	ClearCacheData();
 }
 
@@ -543,13 +544,14 @@ void USkeleton::PostEditUndo()
 	Super::PostEditUndo();
 
 	//If we were undoing virtual bone changes then we need to handle stale cache data
-	//[翻译失败: If we were undoing virtual bone changes then we need to handle stale cache data]
+ // 如果我们要撤消虚拟骨骼更改，那么我们需要处理过时的缓存数据
 	// Cached data is cleared in PreEditUndo to make sure it is done before any object hits their PostEditUndo
-	// [翻译失败: Cached data is cleared in PreEditUndo to make sure it is done before any object hits their PostEditUndo]
+ // 在 PreEditUndo 中清除缓存数据，以确保在任何对象命中其 PostEditUndo 之前完成该操作
 	HandleVirtualBoneChanges();
 }
 #endif // WITH_EDITOR
 
+/** 删除 VER_UE4_REFERENCE_SKELETON_REFACTOR 后，删除此函数。 */
 /** Remove this function when VER_UE4_REFERENCE_SKELETON_REFACTOR is removed. */
 /** [翻译失败: Remove this function when VER_UE4_REFERENCE_SKELETON_REFACTOR is removed.] */
 void USkeleton::ConvertToFReferenceSkeleton()
@@ -569,16 +571,16 @@ void USkeleton::ConvertToFReferenceSkeleton()
 		const FTransform& BoneTransform = RefLocalPoses_DEPRECATED[BoneIndex];
 
 		// All should be good. Parents before children, no duplicate bones?
-		// 一切都应该很好。父母先于孩子，没有重复的骨头吗？
+  // 一切都应该很好。父母先于孩子，没有重复的骨头吗？
 		RefSkelModifier.Add(BoneInfo, BoneTransform);
 	}
 
 	// technically here we should call 	RefershAllRetargetSources(); but this is added after 
-	// 从技术上讲，我们应该调用 RefershAllRetargetSources();但这是在之后添加的
+ // 从技术上讲，我们应该调用 RefershAllRetargetSources();但这是在之后添加的
 	// VER_UE4_REFERENCE_SKELETON_REFACTOR, this shouldn't be needed. It shouldn't have any 
-	// VER_UE4_REFERENCE_SKELETON_REFACTOR，不需要这个。不应该有任何
+ // VER_UE4_REFERENCE_SKELETON_REFACTOR，不需要这个。不应该有任何
 	// AnimatedRetargetSources
-	// 动画重定位源
+ // 动画重定位源
 	ensure (AnimRetargetSources.Num() == 0);
 #endif
 }
@@ -633,17 +635,17 @@ bool USkeleton::DoesParentChainMatch(int32 StartBoneIndex, const USkinnedAsset* 
 	const FReferenceSkeleton& MeshRefSkel = InSkinnedAsset->GetRefSkeleton();
 
 	// if start is root bone
-	// 如果开始是根骨骼
+ // 如果开始是根骨骼
 	if ( StartBoneIndex == 0 )
 	{
 		// verify name of root bone matches
-		// 验证根骨骼的名称是否匹配
+  // 验证根骨骼的名称是否匹配
 		return (SkeletonRefSkel.GetBoneName(0) == MeshRefSkel.GetBoneName(0));
 	}
 
 	int32 SkeletonBoneIndex = StartBoneIndex;
 	// If skeleton bone is not found in mesh, fail.
-	// 如果网格中没有找到骨架，则失败。
+ // 如果网格中没有找到骨架，则失败。
 	int32 MeshBoneIndex = MeshRefSkel.FindBoneIndex( SkeletonRefSkel.GetBoneName(SkeletonBoneIndex) );
 	if( MeshBoneIndex == INDEX_NONE )
 	{
@@ -652,26 +654,26 @@ bool USkeleton::DoesParentChainMatch(int32 StartBoneIndex, const USkinnedAsset* 
 	do
 	{
 		// verify if parent name matches
-		// 验证父母姓名是否匹配
+  // 验证父母姓名是否匹配
 		int32 ParentSkeletonBoneIndex = SkeletonRefSkel.GetParentIndex(SkeletonBoneIndex);
 		int32 ParentMeshBoneIndex = MeshRefSkel.GetParentIndex(MeshBoneIndex);
 
 		// if one of the parents doesn't exist, make sure both end. Otherwise fail.
-		// 如果父母之一不存在，请确保两者都结束。否则失败。
+  // 如果父母之一不存在，请确保两者都结束。否则失败。
 		if( (ParentSkeletonBoneIndex == INDEX_NONE) || (ParentMeshBoneIndex == INDEX_NONE) )
 		{
 			return (ParentSkeletonBoneIndex == ParentMeshBoneIndex);
 		}
 
 		// If parents are not named the same, fail.
-		// 如果父母的名字不同，则失败。
+  // 如果父母的名字不同，则失败。
 		if( SkeletonRefSkel.GetBoneName(ParentSkeletonBoneIndex) != MeshRefSkel.GetBoneName(ParentMeshBoneIndex) )
 		{
 			return false;
 		}
 
 		// move up
-		// 向上移动
+  // 向上移动
 		SkeletonBoneIndex = ParentSkeletonBoneIndex;
 		MeshBoneIndex = ParentMeshBoneIndex;
 	} while ( true );
@@ -681,7 +683,7 @@ bool USkeleton::IsCompatibleMesh(const USkinnedAsset* InSkinnedAsset, bool bDoPa
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(USkeleton::IsCompatibleMesh);
 	// at least % of bone should match 
-	// 至少 % 的骨骼应该匹配
+ // 至少 % 的骨骼应该匹配
 	int32 NumOfBoneMatches = 0;
 
 	const FReferenceSkeleton& SkeletonRefSkel = ReferenceSkeleton;
@@ -689,22 +691,22 @@ bool USkeleton::IsCompatibleMesh(const USkinnedAsset* InSkinnedAsset, bool bDoPa
 	const int32 NumBones = MeshRefSkel.GetRawBoneNum();
 
 	// first ensure the parent exists for each bone
-	// 首先确保每个骨骼都存在父级
+ // 首先确保每个骨骼都存在父级
 	for (int32 MeshBoneIndex=0; MeshBoneIndex<NumBones; MeshBoneIndex++)
 	{
 		FName MeshBoneName = MeshRefSkel.GetBoneName(MeshBoneIndex);
 		// See if Mesh bone exists in Skeleton.
-		// 查看 Skeleton 中是否存在 Mesh 骨骼。
+  // 查看 Skeleton 中是否存在 Mesh 骨骼。
 		int32 SkeletonBoneIndex = SkeletonRefSkel.FindBoneIndex( MeshBoneName );
 
 		// if found, increase num of bone matches count
-		// 如果找到，则增加骨骼匹配数
+  // 如果找到，则增加骨骼匹配数
 		if( SkeletonBoneIndex != INDEX_NONE )
 		{
 			++NumOfBoneMatches;
 
 			// follow the parent chain to verify the chain is same
-			// 跟踪父链以验证链是否相同
+   // 跟踪父链以验证链是否相同
 			if(bDoParentChainCheck && !DoesParentChainMatch(SkeletonBoneIndex, InSkinnedAsset))
 			{
 				UE_LOG(LogAnimation, Verbose, TEXT("%s : Hierarchy does not match."), *MeshBoneName.ToString());
@@ -715,22 +717,22 @@ bool USkeleton::IsCompatibleMesh(const USkinnedAsset* InSkinnedAsset, bool bDoPa
 		{
 			int32 CurrentBoneId = MeshBoneIndex;
 			// if not look for parents that matches
-			// 如果不寻找匹配的父母
+   // 如果不寻找匹配的父母
 			while (SkeletonBoneIndex == INDEX_NONE && CurrentBoneId != INDEX_NONE)
 			{
 				// find Parent one see exists
-				// 找到父级一看到存在
+    // 找到父级一看到存在
 				const int32 ParentMeshBoneIndex = MeshRefSkel.GetParentIndex(CurrentBoneId);
 				if ( ParentMeshBoneIndex != INDEX_NONE )
 				{
 					// @TODO: make sure RefSkeleton's root ParentIndex < 0 if not, I'll need to fix this by checking TreeBoneIdx
-					// @TODO：确保 RefSkeleton 的根 ParentIndex < 0 如果不是，我需要通过检查 TreeBoneIdx 来修复此问题
+     // @TODO：确保 RefSkeleton 的根 ParentIndex < 0 如果不是，我需要通过检查 TreeBoneIdx 来修复此问题
 					FName ParentBoneName = MeshRefSkel.GetBoneName(ParentMeshBoneIndex);
 					SkeletonBoneIndex = SkeletonRefSkel.FindBoneIndex(ParentBoneName);
 				}
 
 				// root is reached
-				// 已到达根
+    // 已到达根
 				if( ParentMeshBoneIndex == 0 )
 				{
 					break;
@@ -742,7 +744,7 @@ bool USkeleton::IsCompatibleMesh(const USkinnedAsset* InSkinnedAsset, bool bDoPa
 			}
 
 			// still no match, return false, no parent to look for
-			// 仍然没有匹配，返回 false，没有父级可供查找
+   // 仍然没有匹配，返回 false，没有父级可供查找
 			if( SkeletonBoneIndex == INDEX_NONE )
 			{
 				UE_LOG(LogAnimation, Verbose, TEXT("%s : Missing joint on skeleton.  Make sure to assign to the skeleton."), *MeshBoneName.ToString());
@@ -750,7 +752,7 @@ bool USkeleton::IsCompatibleMesh(const USkinnedAsset* InSkinnedAsset, bool bDoPa
 			}
 
 			// second follow the parent chain to verify the chain is same
-			// 第二步跟随父链验证链是否相同
+   // 第二步跟随父链验证链是否相同
 			if (bDoParentChainCheck && !DoesParentChainMatch(SkeletonBoneIndex, InSkinnedAsset))
 			{
 				UE_LOG(LogAnimation, Verbose, TEXT("%s : Hierarchy does not match."), *MeshBoneName.ToString());
@@ -760,11 +762,11 @@ bool USkeleton::IsCompatibleMesh(const USkinnedAsset* InSkinnedAsset, bool bDoPa
 	}
 
 	// originally we made sure at least matches more than 50% 
-	// 最初我们确保至少匹配超过 50%
+ // 最初我们确保至少匹配超过 50%
 	// but then follower components can't play since they're only partial
-	// 但跟随者组件无法播放，因为它们只是部分的
+ // 但跟随者组件无法播放，因为它们只是部分的
 	// if the hierarchy matches, and if it's more then 1 bone, we allow
-	// 如果层次结构匹配，并且超过 1 个骨骼，我们允许
+ // 如果层次结构匹配，并且超过 1 个骨骼，我们允许
 	return (NumOfBoneMatches > 0);
 }
 
@@ -803,9 +805,9 @@ const FSkeletonToMeshLinkup& USkeleton::AddMeshLinkupData(const USkinnedAsset* I
 		if (const TUniquePtr<FSkeletonToMeshLinkup>* SkeletonToMeshLinkupPtr = SkinnedAssetLinkupCache.FindByHash(SkinnedAssetHash, SkinnedAssetKey))
 		{
 			// While we were building the linkup data, another thread beat us to it
-			// [翻译失败: While we were building the linkup data, another thread beat us to it]
+   // 当我们构建链接数据时，另一个线程抢先了我们
 			// Discard the work we did to avoid freeing memory other threads might now be using
-			// [翻译失败: Discard the work we did to avoid freeing memory other threads might now be using]
+   // 放弃我们所做的工作以避免释放其他线程现在可能正在使用的内存
 			return *SkeletonToMeshLinkupPtr->Get();
 		}
 
@@ -827,9 +829,9 @@ void USkeleton::BuildLinkupData(const USkinnedAsset* InSkinnedAsset, FSkeletonTo
 	const FReferenceSkeleton& MeshRefSkel = InSkinnedAsset->GetRefSkeleton();
 
 	// First, make sure the Skeleton has all the bones the SkeletalMesh possesses.
-	// [翻译失败: First, make sure the Skeleton has all the bones the SkeletalMesh possesses.]
+ // 首先，确保骨架拥有 SkeletalMesh 拥有的所有骨骼。
 	// This can get out of sync if a mesh was imported on that Skeleton, but the Skeleton was not saved.
-	// 如果在该骨架上导入了网格，但未保存该骨架，则这可能会不同步。
+ // 如果在该骨架上导入了网格，但未保存该骨架，则这可能会不同步。
 
 	const int32 NumMeshBones = MeshRefSkel.GetNum();
 	NewMeshLinkup.MeshToSkeletonTable.Empty(NumMeshBones);
@@ -846,9 +848,9 @@ void USkeleton::BuildLinkupData(const USkinnedAsset* InSkinnedAsset, FSkeletonTo
 
 #if WITH_EDITOR
 			// If we're in editor, and skeleton is missing a bone, fix it.
-			// [翻译失败: If we're in editor, and skeleton is missing a bone, fix it.]
+   // 如果我们在编辑器中，骨架缺少一根骨头，请修复它。
 			// not currently supported in-game.
-			// [翻译失败: not currently supported in-game.]
+   // 目前游戏中不支持。
 
 			static FName NAME_LoadErrors("LoadErrors");
 
@@ -868,18 +870,18 @@ void USkeleton::BuildLinkupData(const USkinnedAsset* InSkinnedAsset, FSkeletonTo
 			}
 
 			// Re-add all SkelMesh bones to the Skeleton.
-			// 将所有 SkelMesh 骨骼重新添加到骨架中。
+   // 将所有 SkelMesh 骨骼重新添加到骨架中。
 			MergeAllBonesToBoneTree(InSkinnedAsset);
 
 			// Fix missing bone.
-			// 修复缺失的骨头。
+   // 修复缺失的骨头。
 			SkeletonBoneIndex = SkeletonRefSkel.FindBoneIndex(MeshBoneName);
 #endif // WITH_EDITOR
 
 			if (!bSpawnedErrorMessage)
 			{
 				// If we're not in editor, we still want to know which skeleton is missing a bone.
-				// 如果我们不在编辑器中，我们仍然想知道哪个骨架缺少一根骨头。
+    // 如果我们不在编辑器中，我们仍然想知道哪个骨架缺少一根骨头。
 				UE_LOG(LogAnimation, Error, TEXT("USkeleton::BuildLinkup: The Skeleton %s, is missing bones that SkeletalMesh %s needs. MeshBoneName %s"),
 					*GetNameSafe(this), *GetNameSafe(InSkinnedAsset), *MeshBoneName.ToString());
 			}
@@ -903,10 +905,10 @@ void USkeleton::BuildLinkupData(const USkinnedAsset* InSkinnedAsset, FSkeletonTo
 void USkeleton::RebuildLinkup(const USkinnedAsset* InSkinnedAsset)
 {
 	// remove the key
-	// 拔掉钥匙
+ // 拔掉钥匙
 	RemoveLinkup(InSkinnedAsset);
 	// build new one
-	// 建造新的
+ // 建造新的
 	AddMeshLinkupData(InSkinnedAsset);
 }
 
@@ -919,7 +921,7 @@ void USkeleton::UpdateReferencePoseFromMesh(const USkinnedAsset* InSkinnedAsset)
 	for (int32 BoneIndex = 0; BoneIndex < ReferenceSkeleton.GetRawBoneNum(); BoneIndex++)
 	{
 		// find index from ref pose array
-		// 从参考位姿数组中查找索引
+  // 从参考位姿数组中查找索引
 		const int32 MeshBoneIndex = InSkinnedAsset->GetRefSkeleton().FindRawBoneIndex(ReferenceSkeleton.GetBoneName(BoneIndex));
 		if (MeshBoneIndex != INDEX_NONE)
 		{
@@ -935,7 +937,7 @@ bool USkeleton::RecreateBoneTree(USkinnedAsset* InSkinnedAsset)
 	if( InSkinnedAsset )
 	{
 		// regenerate Guid
-		// [翻译失败: regenerate Guid]
+  // 重新生成指南
 		RegenerateGuid();	
 		BoneTree.Empty();
 		ReferenceSkeleton.Empty();
@@ -954,10 +956,10 @@ bool USkeleton::MergeAllBonesToBoneTree(const USkinnedAsset* InSkinnedAsset, boo
 		TArray<int32> RequiredBoneIndices;
 
 		// for now add all in this case. 
-		// [翻译失败: for now add all in this case.]
+  // 现在添加本例中的所有内容。
 		RequiredBoneIndices.AddUninitialized(InSkinnedAsset->GetRefSkeleton().GetRawBoneNum());
 		// gather bone list
-		// [翻译失败: gather bone list]
+  // 收集骨骼列表
 		for (int32 I=0; I<InSkinnedAsset->GetRefSkeleton().GetRawBoneNum(); ++I)
 		{
 			RequiredBoneIndices[I] = I;
@@ -966,7 +968,7 @@ bool USkeleton::MergeAllBonesToBoneTree(const USkinnedAsset* InSkinnedAsset, boo
 		if( RequiredBoneIndices.Num() > 0 )
 		{
 			// merge bones to the selected skeleton
-			// [翻译失败: merge bones to the selected skeleton]
+   // 将骨骼合并到选定的骨架
 			return MergeBonesToBoneTree( InSkinnedAsset, RequiredBoneIndices, bShowProgress);
 		}
 	}
@@ -978,7 +980,7 @@ bool USkeleton::CreateReferenceSkeletonFromMesh(const USkinnedAsset* InSkinnedAs
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(USkeleton::CreateReferenceSkeletonFromMesh);
 	// Filter list, we only want bones that have their parents present in this array.
-	// 过滤器列表，我们只想要其父级存在于该数组中的骨骼。
+ // 过滤器列表，我们只想要其父级存在于该数组中的骨骼。
 	TArray<int32> FilteredRequiredBones; 
 	FAnimationRuntime::ExcludeBonesWithNoParents(RequiredRefBones, InSkinnedAsset->GetRefSkeleton(), FilteredRequiredBones);
 
@@ -997,7 +999,7 @@ bool USkeleton::CreateReferenceSkeletonFromMesh(const USkinnedAsset* InSkinnedAs
 
 			FMeshBoneInfo NewMeshBoneInfo = InSkinnedAsset->GetRefSkeleton().GetRefBoneInfo()[BoneIndex];
 			// Fix up ParentIndex for our new Skeleton.
-			// 修复我们的新骨架的 ParentIndex。
+   // 修复我们的新骨架的 ParentIndex。
 			if( BoneIndex == 0 )
 			{
 				NewMeshBoneInfo.ParentIndex = INDEX_NONE; // root
@@ -1021,16 +1023,16 @@ bool USkeleton::CreateReferenceSkeletonFromMesh(const USkinnedAsset* InSkinnedAs
 bool USkeleton::MergeBonesToBoneTree(const USkinnedAsset* InSkinnedAsset, const TArray<int32> & RequiredRefBones, bool bShowProgress /*= true*/)
 {
 	// see if it needs all animation data to remap - only happens when bone structure CHANGED - added
-	// 看看是否需要所有动画数据重新映射 - 仅在骨骼结构更改时发生 - 添加
+ // 看看是否需要所有动画数据重新映射 - 仅在骨骼结构更改时发生 - 添加
 	bool bSuccess = false;
 	bool bShouldHandleHierarchyChange = false;
 
 	// clear cache data since it won't work anymore once this is done
-	// 清除缓存数据，因为完成此操作后它将不再起作用
+ // 清除缓存数据，因为完成此操作后它将不再起作用
 	ClearCacheData();
 
 	// if it's first time
-	// 如果这是第一次
+ // 如果这是第一次
 	if( BoneTree.Num() == 0 )
 	{
 		bSuccess = CreateReferenceSkeletonFromMesh(InSkinnedAsset, RequiredRefBones);
@@ -1039,34 +1041,34 @@ bool USkeleton::MergeBonesToBoneTree(const USkinnedAsset* InSkinnedAsset, const 
 	else
 	{
 		// Check if we can merge in the bones
-		// 检查我们是否可以合并骨骼
+  // 检查我们是否可以合并骨骼
 		const bool bDoParentChainCheck = !CVarAllowIncompatibleSkeletalMeshMerge.GetValueOnGameThread();
 		if( IsCompatibleMesh(InSkinnedAsset, bDoParentChainCheck) )
 		{
 			TRACE_CPUPROFILER_EVENT_SCOPE(USkeleton::MergeBonesToBoneTree::CompatibleBranch);
 			// Exclude bones who do not have a parent.
-			// 排除没有父母的骨骼。
+   // 排除没有父母的骨骼。
 			TArray<int32> FilteredRequiredBones;
 			FAnimationRuntime::ExcludeBonesWithNoParents(RequiredRefBones, InSkinnedAsset->GetRefSkeleton(), FilteredRequiredBones);
 
 			// Two modifier passes: add bones that dont already exist, then set bone parents that have changed
-			// 两个修改器通道：添加尚不存在的骨骼，然后设置已更改的骨骼父级
+   // 两个修改器通道：添加尚不存在的骨骼，然后设置已更改的骨骼父级
 			{
 				FReferenceSkeletonModifier RefSkelModifier(ReferenceSkeleton, this);
 
 				// Check for bone's existence
-				// [翻译失败: Check for bone's existence]
+    // 检查骨头是否存在
 				for (const int32 MeshBoneIndex : FilteredRequiredBones)
 				{
 					const int32 SkeletonBoneIndex = ReferenceSkeleton.FindRawBoneIndex(InSkinnedAsset->GetRefSkeleton().GetBoneName(MeshBoneIndex));
 					
 					// Bone doesn't already exist. Add it.
-					// 骨头还不存在。添加它。
+     // 骨头还不存在。添加它。
 					if( SkeletonBoneIndex == INDEX_NONE )
 					{
 						FMeshBoneInfo NewMeshBoneInfo = InSkinnedAsset->GetRefSkeleton().GetRefBoneInfo()[MeshBoneIndex];
 						// Fix up ParentIndex for our new Skeleton.
-						// 修复我们的新骨架的 ParentIndex。
+      // 修复我们的新骨架的 ParentIndex。
 						if( ReferenceSkeleton.GetRawBoneNum() == 0 )
 						{
 							NewMeshBoneInfo.ParentIndex = INDEX_NONE; // root
@@ -1091,7 +1093,7 @@ bool USkeleton::MergeBonesToBoneTree(const USkinnedAsset* InSkinnedAsset, const 
 				check(NumBones == ReferenceSkeleton.GetRawRefBoneInfo().Num());
 
 				// Check for different parents
-				// [翻译失败: Check for different parents]
+    // 检查不同的父母
 				for (const int32 MeshBoneIndex : FilteredRequiredBones)
 				{
 					const FName BoneName = InSkinnedAsset->GetRefSkeleton().GetBoneName(MeshBoneIndex);
@@ -1100,7 +1102,7 @@ bool USkeleton::MergeBonesToBoneTree(const USkinnedAsset* InSkinnedAsset, const 
 					if(SkeletonBoneIndex != INDEX_NONE)
 					{
 						// Bone exists, check if it is in the same place in the hierarchy
-						// [翻译失败: Bone exists, check if it is in the same place in the hierarchy]
+      // 骨骼存在，检查它是否位于层次结构中的同一位置
 						const int32 MeshParentIndex = InSkinnedAsset->GetRefSkeleton().GetParentIndex(MeshBoneIndex);
 						const int32 SkeletonParentIndex = ReferenceSkeleton.GetRawParentIndex(SkeletonBoneIndex);
 						const FName MeshParentName = MeshParentIndex != INDEX_NONE ? InSkinnedAsset->GetRefSkeleton().GetBoneName(MeshParentIndex) : NAME_None;
@@ -1109,7 +1111,7 @@ bool USkeleton::MergeBonesToBoneTree(const USkinnedAsset* InSkinnedAsset, const 
 						if(MeshParentName != SkeletonParentName)
 						{
 							// Cache the bone tree if we are going to change the structure
-							// [翻译失败: Cache the bone tree if we are going to change the structure]
+       // 如果我们要更改结构，请缓存骨骼树
 							if(NameToBoneNode.Num() == 0)
 							{
 								NameToBoneNode.Reserve(NumBones);
@@ -1128,7 +1130,7 @@ bool USkeleton::MergeBonesToBoneTree(const USkinnedAsset* InSkinnedAsset, const 
 				if(NameToBoneNode.Num() > 0)
 				{
 					// Setting parent can re-order bones, so the skeleton's BoneTree needs to update to reflect that
-					// 设置parent可以重新排序骨骼，因此骨架的BoneTree需要更新以反映这一点
+     // 设置parent可以重新排序骨骼，因此骨架的BoneTree需要更新以反映这一点
 					BoneTree.Reset();
 					for(int32 BoneTreeIndex = 0; BoneTreeIndex < NumBones; ++BoneTreeIndex)
 					{
@@ -1143,7 +1145,7 @@ bool USkeleton::MergeBonesToBoneTree(const USkinnedAsset* InSkinnedAsset, const 
 	}
 
 	// if succeed
-	// 如果成功
+ // 如果成功
 	if (bShouldHandleHierarchyChange)
 	{
 #if WITH_EDITOR
@@ -1161,7 +1163,7 @@ void USkeleton::SetBoneTranslationRetargetingMode(const int32 BoneIndex, EBoneTr
 	if( bChildrenToo )
 	{
 		// Bones are guaranteed to be sorted in increasing order. So children will be after this bone.
-		// 骨头保证按升序排序。所以孩子们会追寻这块骨头。
+  // 骨头保证按升序排序。所以孩子们会追寻这块骨头。
 		const int32 NumBones = ReferenceSkeleton.GetRawBoneNum();
 		for(int32 ChildIndex=BoneIndex+1; ChildIndex<NumBones; ChildIndex++)
 		{
@@ -1262,7 +1264,7 @@ USkeletalMesh* USkeleton::GetPreviewMesh(bool bFindIfNotSet/*=false*/)
 	}
 
 	// if not existing, and if bFindIfNotExisting is true, then try find one
-	// 如果不存在，并且 bFindIfNotExisting 为 true，则尝试查找一个
+ // 如果不存在，并且 bFindIfNotExisting 为 true，则尝试查找一个
 	if(!PreviewMesh && bFindIfNotSet)
 	{
 		USkeletalMesh* CompatibleSkeletalMesh = FindCompatibleMesh();
@@ -1270,7 +1272,7 @@ USkeletalMesh* USkeleton::GetPreviewMesh(bool bFindIfNotSet/*=false*/)
 		{
 			SetPreviewMesh(CompatibleSkeletalMesh, false);
 			// update PreviewMesh
-			// 更新预览网格
+   // 更新预览网格
 			PreviewMesh = PreviewSkeletalMesh.Get();
 		}
 	}
@@ -1281,6 +1283,7 @@ USkeletalMesh* USkeleton::GetPreviewMesh(bool bFindIfNotSet/*=false*/)
 #endif
 }
 
+	//AnimationNotify.Empty();
 USkeletalMesh* USkeleton::GetPreviewMesh() const
 {
 #if WITH_EDITORONLY_DATA
@@ -1357,7 +1360,7 @@ void USkeleton::CollectAnimationNotifies()
 void USkeleton::CollectAnimationNotifies(TArray<FName>& OutNotifies) const
 {
 	// first merge in AnimationNotifies
-	// 首先合并到AnimationNotify中
+ // 首先合并到AnimationNotify中
 	if(&AnimationNotifies != &OutNotifies)
 	{
 		for(const FName& NotifyName : AnimationNotifies)
@@ -1366,19 +1369,23 @@ void USkeleton::CollectAnimationNotifies(TArray<FName>& OutNotifies) const
 		}
 	}
 
+ // AnimationNotify.Empty();
+ // AnimationNotify.Empty();
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
 
+	//AnimationNotify.Empty();
 	// @Todo : remove it when we know the asset registry is updated
-	// @Todo：当我们知道资产注册表已更新时将其删除
+ // @Todo：当我们知道资产注册表已更新时将其删除
 	// meanwhile if you remove this, this will miss the links
-	// 同时如果你删除它，这将错过链接
+ // 同时如果你删除它，这将错过链接
 	//AnimationNotifies.Empty();
+ // AnimationNotify.Empty();
 	//AnimationNotify.Empty();
 	TArray<FAssetData> AssetList;
 	AssetRegistryModule.Get().GetAssetsByClass(UAnimSequenceBase::StaticClass()->GetClassPathName(), AssetList, true);
 
 	// do not clear AnimationNotifies. We can't remove old ones yet. 
-	// 不要清除AnimationNotify。我们还不能删除旧的。
+ // 不要清除AnimationNotify。我们还不能删除旧的。
 	FString CurrentSkeletonName = FAssetData(this).GetExportTextName();
 	for (auto Iter = AssetList.CreateConstIterator(); Iter; ++Iter)
 	{
@@ -1458,9 +1465,9 @@ USkeletalMesh* USkeleton::GetAssetPreviewMesh(UObject* InAsset)
 	USkeletalMesh* PreviewMesh = nullptr;
 
 	// return asset preview asset
-	// 返回资产预览资产
+ // 返回资产预览资产
 	// if nothing is assigned, return skeleton asset
-	// 如果没有分配任何内容，则返回骨架资产
+ // 如果没有分配任何内容，则返回骨架资产
 	if (UAnimationAsset* AnimAsset = Cast<UAnimationAsset>(InAsset))
 	{
 		PreviewMesh = AnimAsset->GetPreviewMesh();
@@ -1473,13 +1480,13 @@ USkeletalMesh* USkeleton::GetAssetPreviewMesh(UObject* InAsset)
 	if (!PreviewMesh)
 	{
 		//The const version avoid verifying the skeleton compatibility, which can stall the thread
-		//const 版本避免验证骨架兼容性，这可能会导致线程停顿
+  // const 版本避免验证骨架兼容性，这可能会导致线程停顿
 		const USkeleton* ThisSkeleton = this;
 		PreviewMesh = ThisSkeleton->GetPreviewMesh();
 		if (PreviewMesh && !PreviewMesh->IsCompiling())
 		{
 			//Verify the compatibility only if we are not building
-			//仅当我们不构建时才验证兼容性
+   // 仅当我们不构建时才验证兼容性
 			PreviewMesh = GetPreviewMesh(false);
 		}
 	}
@@ -1539,7 +1546,7 @@ void USkeleton::HandleSkeletonHierarchyChange(bool bShowProgress /*= true*/)
 	RegenerateGuid();
 
 	// Clear exiting MeshLinkUp tables.
-	// 清除现有的 MeshLinkUp 表。
+ // 清除现有的 MeshLinkUp 表。
 	ClearCacheData();
 
 	for (int i = VirtualBones.Num() - 1; i >= 0; --i)
@@ -1547,22 +1554,22 @@ void USkeleton::HandleSkeletonHierarchyChange(bool bShowProgress /*= true*/)
 		FVirtualBone& VB = VirtualBones[i];
 
 		// Note: here virtual bones can have source bound to other virtual bones
-		// 注意：这里虚拟骨骼可以将源绑定到其他虚拟骨骼
+  // 注意：这里虚拟骨骼可以将源绑定到其他虚拟骨骼
 		if (ReferenceSkeleton.FindBoneIndex(VB.SourceBoneName) == INDEX_NONE ||
 			ReferenceSkeleton.FindBoneIndex(VB.TargetBoneName) == INDEX_NONE)
 		{
 			//Virtual Bone no longer valid
-			//虚拟骨骼不再有效
+   // 虚拟骨骼不再有效
 			VirtualBones.RemoveAt(i);
 		}
 	}
 
 	// Full rebuild of all compatible with this and with ones we are compatible with.
-	// 完全重建所有与此兼容的以及与我们兼容的。
+ // 完全重建所有与此兼容的以及与我们兼容的。
 	UE::Anim::FSkeletonRemappingRegistry::Get().RefreshMappings(this);
 
 	// Fix up loaded animations (any animations that aren't loaded will be fixed on load)
-	// 修复加载的动画（任何未加载的动画将在加载时修复）
+ // 修复加载的动画（任何未加载的动画将在加载时修复）
 	int32 NumLoadedAssets = 0;
 	for (TObjectIterator<UAnimationAsset> It; It; ++It)
 	{
@@ -1600,7 +1607,7 @@ void USkeleton::HandleSkeletonHierarchyChange(bool bShowProgress /*= true*/)
 	RefreshSkeletonMetaData();
 
 	// Remove entries from Blend Profiles for bones that no longer exists
-	// 从混合配置文件中删除不再存在的骨骼条目
+ // 从混合配置文件中删除不再存在的骨骼条目
 	for (UBlendProfile* Profile : BlendProfiles)
 	{
 		Profile->RefreshBoneEntriesFromName();
@@ -1642,7 +1649,7 @@ void USkeleton::BuildSlotToGroupMap(bool bInRemoveDuplicates)
 	}
 
 	// Use the map we've just build to rebuild the slot groups
-	// 使用我们刚刚构建的地图来重建插槽组
+ // 使用我们刚刚构建的地图来重建插槽组
 	if(bInRemoveDuplicates)
 	{
 		for(FAnimSlotGroup& SlotGroup : SlotGroups)
@@ -1685,7 +1692,7 @@ bool USkeleton::ContainsSlotName(const FName& InSlotName) const
 bool USkeleton::RegisterSlotNode(const FName& InSlotName)
 {
 	// verify the slot name exists, if not create it in the default group.
-	// 验证插槽名称是否存在，如果不存在，请在默认组中创建它。
+ // 验证插槽名称是否存在，如果不存在，请在默认组中创建它。
 	if (!ContainsSlotName(InSlotName))
 	{
 		SetSlotGroupName(InSlotName, FAnimSlotGroup::DefaultGroupName);
@@ -1702,7 +1709,7 @@ void USkeleton::SetSlotGroupName(const FName& InSlotName, const FName& InGroupNa
 	const FName* FoundGroupNamePtr = SlotToGroupNameMap.Find(InSlotName);
 
 	// If slot exists, but is not in the right group, remove it from there
-	// 如果插槽存在，但不在正确的组中，请将其从那里删除
+ // 如果插槽存在，但不在正确的组中，请将其从那里删除
 	if (FoundGroupNamePtr && ((*FoundGroupNamePtr) != InGroupName))
 	{
 		FAnimSlotGroup* OldSlotGroupPtr = FindAnimSlotGroup(*FoundGroupNamePtr);
@@ -1713,11 +1720,11 @@ void USkeleton::SetSlotGroupName(const FName& InSlotName, const FName& InGroupNa
 	}
 
 	// Add the slot to the right group if it's not
-	// 如果不是，请将插槽添加到右侧组
+ // 如果不是，请将插槽添加到右侧组
 	if ((FoundGroupNamePtr == NULL) || (*FoundGroupNamePtr != InGroupName))
 	{
 		// If the SlotGroup does not exist, create it.
-		// 如果 SlotGroup 不存在，则创建它。
+  // 如果 SlotGroup 不存在，则创建它。
 		FAnimSlotGroup* SlotGroupPtr = FindAnimSlotGroup(InGroupName);
 		if (SlotGroupPtr == NULL)
 		{
@@ -1726,10 +1733,10 @@ void USkeleton::SetSlotGroupName(const FName& InSlotName, const FName& InGroupNa
 			SlotGroupPtr->GroupName = InGroupName;
 		}
 		// Add Slot to group.
-		// 将插槽添加到组中。
+  // 将插槽添加到组中。
 		SlotGroupPtr->SlotNames.Add(InSlotName);
 		// Keep our TMap up to date.
-		// 让我们的 TMap 保持最新状态。
+  // 让我们的 TMap 保持最新状态。
 		SlotToGroupNameMap.Add(InSlotName, InGroupName);
 	}
 }
@@ -1740,7 +1747,7 @@ bool USkeleton::AddSlotGroupName(const FName& InNewGroupName)
 	if (ExistingSlotGroupPtr == NULL)
 	{
 		// if not found, create a new one.
-		// 如果没有找到，则创建一个新的。
+  // 如果没有找到，则创建一个新的。
 		SlotGroups.AddZeroed(1);
 		ExistingSlotGroupPtr = &SlotGroups.Last();
 		ExistingSlotGroupPtr->GroupName = InNewGroupName;
@@ -1759,7 +1766,7 @@ FName USkeleton::GetSlotGroupName(const FName& InSlotName) const
 	}
 
 	// If Group name cannot be found, use DefaultSlotGroupName.
-	// 如果找不到组名称，请使用 DefaultSlotGroupName。
+ // 如果找不到组名称，请使用 DefaultSlotGroupName。
 	return FAnimSlotGroup::DefaultGroupName;
 }
 
@@ -1778,14 +1785,14 @@ void USkeleton::RemoveSlotGroup(const FName& InSlotGroupName)
 {
 	FAnimSlotGroup* SlotGroup = FindAnimSlotGroup(InSlotGroupName);
 	// Remove slot mappings
-	// 删除插槽映射
+ // 删除插槽映射
 	for(const FName& SlotName : SlotGroup->SlotNames)
 	{
 		SlotToGroupNameMap.Remove(SlotName);
 	}
 
 	// Remove group
-	// 删除组
+ // 删除组
 	SlotGroups.RemoveAll([&InSlotGroupName](const FAnimSlotGroup& Item)
 	{
 		return Item.GroupName == InSlotGroupName;
@@ -1795,7 +1802,7 @@ void USkeleton::RemoveSlotGroup(const FName& InSlotGroupName)
 void USkeleton::RenameSlotName(const FName& OldName, const FName& NewName)
 {
 	// Can't rename a name that doesn't exist
-	// 无法重命名不存在的名称
+ // 无法重命名不存在的名称
 	check(ContainsSlotName(OldName))
 
 	FName GroupName = GetSlotGroupName(OldName);
@@ -1945,7 +1952,7 @@ void USkeleton::AccumulateCurveMetaData(FName CurveName, bool bMaterialSet, bool
 	if (bMaterialSet || bMorphtargetSet)
 	{
 		// Add curve if not already present
-		// 添加曲线（如果尚不存在）
+  // 添加曲线（如果尚不存在）
 		AddCurveMetaData(CurveName);
 
 		FCurveMetaData* FoundCurveMetaData = GetCurveMetaData(CurveName);
@@ -1954,7 +1961,7 @@ void USkeleton::AccumulateCurveMetaData(FName CurveName, bool bMaterialSet, bool
 		bool bOldMaterial = FoundCurveMetaData->Type.bMaterial;
 		bool bOldMorphtarget = FoundCurveMetaData->Type.bMorphtarget;
 		// we don't want to undo previous flags, if it was true, we just allow more to it. 
-		// 我们不想撤消以前的标志，如果这是真的，我们只是允许更多。
+  // 我们不想撤消以前的标志，如果这是真的，我们只是允许更多。
 		FoundCurveMetaData->Type.bMaterial |= bMaterialSet;
 		FoundCurveMetaData->Type.bMorphtarget |= bMorphtargetSet;
 
@@ -2050,7 +2057,7 @@ void USkeleton::RemoveVirtualBones(const TArray<FName>& BonesToRemove)
 			VirtualBones.RemoveAt(Idx,EAllowShrinking::No);
 
 			// @todo: This might be a slow operation if there's a large amount of blend profiles and entries
-			// @todo：如果有大量混合配置文件和条目，这可能是一个缓慢的操作
+   // @todo：如果有大量混合配置文件和条目，这可能是一个缓慢的操作
 			int32 BoneIdx = GetReferenceSkeleton().FindBoneIndex(BoneName);
 			if(BoneIdx != INDEX_NONE)
 			{
@@ -2066,7 +2073,7 @@ void USkeleton::RemoveVirtualBones(const TArray<FName>& BonesToRemove)
 	HandleVirtualBoneChanges();
 
 	// Blend profiles cache bone names and indices, make sure they remain in sync when the indices change
-	// 混合配置文件缓存骨骼名称和索引，确保它们在索引更改时保持同步
+ // 混合配置文件缓存骨骼名称和索引，确保它们在索引更改时保持同步
 	for (UBlendProfile* Profile : BlendProfiles)
 	{
 		Profile->RefreshBoneEntriesFromName();
@@ -2107,7 +2114,7 @@ void USkeleton::RenameVirtualBone(const FName OriginalBoneName, const FName NewB
 		HandleVirtualBoneChanges();
 
 		// @todo: This might be a slow operation if there's a large amount of blend profiles and entries
-		// @todo：如果有大量混合配置文件和条目，这可能是一个缓慢的操作
+  // @todo：如果有大量混合配置文件和条目，这可能是一个缓慢的操作
 		int32 BoneIdx = GetReferenceSkeleton().FindBoneIndex(NewBoneName);
 		if (BoneIdx != INDEX_NONE)
 		{
@@ -2127,9 +2134,9 @@ void USkeleton::HandleVirtualBoneChanges()
 	UE::Anim::FSkeletonRemappingRegistry::Get().RefreshMappings(this);
 
 	// store skeletal meshes that are also transacting to avoid re-registering the component here
-	// 存储也在进行事务处理的骨架网格物体，以避免在此处重新注册组件
+ // 存储也在进行事务处理的骨架网格物体，以避免在此处重新注册组件
 	// as it will be done later in USkeletalMesh::PostEditUndo()
-	// [翻译失败: as it will be done later in USkeletalMesh::PostEditUndo()]
+ // 因为稍后将在 USkeletalMesh::PostEditUndo() 中完成
 	TArray<USkeletalMesh*> SkeletalMeshTransacting;
 	
 	for (TObjectIterator<USkeletalMesh> ItMesh; ItMesh; ++ItMesh)
@@ -2138,7 +2145,7 @@ void USkeleton::HandleVirtualBoneChanges()
 		if (SkelMesh->GetSkeleton() == this)
 		{
 			// also have to update retarget base pose
-			// [翻译失败: also have to update retarget base pose]
+   // 还必须更新重定位基本姿势
 			SkelMesh->GetRefSkeleton().RebuildRefSkeleton(this, bRebuildNameMap);
 			RebuildLinkup(SkelMesh);
 
@@ -2152,7 +2159,7 @@ void USkeleton::HandleVirtualBoneChanges()
 	}
 
 	// refresh curve meta data that contains joint info
-	// [翻译失败: refresh curve meta data that contains joint info]
+ // 刷新包含关节信息的曲线元数据
 	RefreshSkeletonMetaData();
 
 	auto NeedsReRegistration = [this, &SkeletalMeshTransacting](const USkinnedMeshComponent* InMeshComponent)
@@ -2214,7 +2221,7 @@ void USkeleton::GetAssetRegistryTags(FAssetRegistryTagsContext Context) const
 	Context.AddTag(FAssetRegistryTag(USkeleton::CompatibleSkeletonsNameTag, CompatibleSkeletonsBuilder.ToString(), FAssetRegistryTag::TT_Hidden));
 
 	// Output sync notify names we use
-	// [翻译失败: Output sync notify names we use]
+ // 我们使用的输出同步通知名称
 	TStringBuilder<256> NotifiesBuilder;
 	NotifiesBuilder.Append(USkeleton::AnimNotifyTagDelimiter);
 
@@ -2227,7 +2234,7 @@ void USkeleton::GetAssetRegistryTags(FAssetRegistryTagsContext Context) const
 	Context.AddTag(FAssetRegistryTag(USkeleton::AnimNotifyTag, NotifiesBuilder.ToString(), FAssetRegistryTag::TT_Hidden));
 	
 	// Output sync marker names we use
-	// 我们使用的输出同步标记名称
+ // 我们使用的输出同步标记名称
 	TStringBuilder<256> SyncMarkersBuilder;
 	SyncMarkersBuilder.Append(USkeleton::AnimSyncMarkerTagDelimiter);
 
@@ -2240,7 +2247,7 @@ void USkeleton::GetAssetRegistryTags(FAssetRegistryTagsContext Context) const
 	Context.AddTag(FAssetRegistryTag(USkeleton::AnimSyncMarkerTag, SyncMarkersBuilder.ToString(), FAssetRegistryTag::TT_Hidden));
 	
 	// Allow asset user data to output tags
-	// 允许资产用户数据输出标签
+ // 允许资产用户数据输出标签
 	for(const UAssetUserData* AssetUserDataItem : *GetAssetUserDataArray())
 	{
 		if (AssetUserDataItem)

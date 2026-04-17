@@ -83,5 +83,7 @@ private:
 
 	/** Clear Invalid Data Sources that are GC-ed */
 	/** 清除经过 GC 处理的无效数据源 */
+	/** 清除经过 GC 处理的无效数据源 */
+	/** 清除经过 GC 处理的无效数据源 */
 	ANIMATIONCORE_API void ClearInvalidDataSource();
 };

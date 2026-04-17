@@ -21,11 +21,15 @@ struct FAnimNode_PoseBlendNode : public FAnimNode_PoseHandler
 	GENERATED_USTRUCT_BODY()
 public:
 	UPROPERTY(EditAnywhere, EditFixedSize, BlueprintReadWrite, Category = Links)
+	/** 使用的混合类型（线性、三次等） */
 	FPoseLink SourcePose;
 
+	/** 使用的混合类型（线性、三次等） */
 	/** Type of blending used (Linear, Cubic, etc.) */
 	/** 使用的混合类型（线性、三次等） */
+	/** 如果您使用自定义混合选项，则可以指定曲线 */
 	UPROPERTY(EditAnywhere, Category = "Blend")
+	/** 如果您使用自定义混合选项，则可以指定曲线 */
 	EAlphaBlendOption BlendOption;
 
 	/** If you're using Custom BlendOption, you can specify curve */
@@ -35,24 +39,24 @@ public:
 
 private:
 	// Cached curves to extract
-	// 要提取的缓存曲线
+ // 要提取的缓存曲线
 	UE::Anim::TNamedValueArray<FDefaultAllocator, UE::Anim::FNamedIndexElement> BulkCurves;
 
 public:	
 	ANIMGRAPHRUNTIME_API FAnimNode_PoseBlendNode();
 
 	// FAnimNode_Base interface
-	// FAnimNode_Base接口
+ // FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void UpdateAssetPlayer(const FAnimationUpdateContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
-	// FAnimNode_Base接口结束
+ // FAnimNode_Base接口结束
 
 	// FAnimNode_PoseHandler interface 
-	// FAnimNode_PoseHandler接口
+ // FAnimNode_PoseHandler接口
 	ANIMGRAPHRUNTIME_API virtual void RebuildPoseList(const FBoneContainer& InBoneContainer, const UPoseAsset* InPoseAsset) override;
 };
 

@@ -38,11 +38,11 @@ FSmartName FSmartNameMapping::AddName(FName Name)
 	FWriteScopeLock Lock(SmartNameRWLock);
 	
 	// Make sure we are not trying to do an invalid add
-	// 确保我们没有尝试进行无效的添加
+ // 确保我们没有尝试进行无效的添加
 	check(Name.IsValid() && !CurveNameList.Contains(Name));
 
 	// Make sure we didn't reach the UID limit
-	// 确保我们没有达到 UID 限制
+ // 确保我们没有达到 UID 限制
 	check(CurveNameList.Num() < (SmartName::MaxUID-1));
 
 	PRAGMA_DISABLE_DEPRECATION_WARNINGS
@@ -107,7 +107,7 @@ bool FSmartNameMapping::Rename(const SmartName::UID_Type& Uid, FName NewName)
 	if(GetName_NoLock(Uid, ExistingName))
 	{
 		// fix up meta data
-		// 修复元数据
+  // 修复元数据
 		FCurveMetaData* MetaDataToCopy = CurveMetaDataMap.Find(ExistingName);
 		if (MetaDataToCopy)
 		{
@@ -115,7 +115,6 @@ bool FSmartNameMapping::Rename(const SmartName::UID_Type& Uid, FName NewName)
 			NewMetaData = *MetaDataToCopy;
 			
 			// remove old one
-			// [翻译失败: remove old one]
 			CurveMetaDataMap.Remove(ExistingName);			
 		}
 
@@ -199,7 +198,7 @@ void FSmartNameMapping::FillUidArray(TArray<SmartName::UID_Type>& Array) const
 	for (int32 NameIndex = 0; NameIndex < CurveNameList.Num(); ++NameIndex)
 	{
 		//In editor names can be removed and so have to deal with empty slots
-		//[翻译失败: In editor names can be removed and so have to deal with empty slots]
+  // 在编辑器中，名称可以被删除，因此必须处理空槽
 #if WITH_EDITOR
 		if (CurveNameList[NameIndex] != NAME_None)
 		{
@@ -216,7 +215,7 @@ void FSmartNameMapping::FillNameArray(TArray<FName>& Array) const
 	FReadScopeLock Lock(SmartNameRWLock);
 	
 	//In editor names can be removed and so have to deal with empty slots
-	//[翻译失败: In editor names can be removed and so have to deal with empty slots]
+ // 在编辑器中，名称可以被删除，因此必须处理空槽
 #if WITH_EDITOR
 	Array.Reset(CurveNameList.Num());
 	for (const FName& Name : CurveNameList)
@@ -247,7 +246,7 @@ void FSmartNameMapping::FillCurveTypeArray(TArray<FAnimCurveType>& Array) const
 		FAnimCurveType AnimCurveType = MetaData ? MetaData->Type : FAnimCurveType();
 
 		//In editor names can be removed and so have to deal with empty slots
-		//[翻译失败: In editor names can be removed and so have to deal with empty slots]
+  // 在编辑器中，名称可以被删除，因此必须处理空槽
 #if WITH_EDITOR
 		if (Name != NAME_None)
 		{
@@ -271,7 +270,7 @@ void FSmartNameMapping::FillUIDToCurveTypeArray(TArray<FAnimCurveType>& Array) c
 		FAnimCurveType AnimCurveType = MetaData ? MetaData->Type : FAnimCurveType();
 
 		//In editor names can be removed and so have to deal with empty slots
-		//[翻译失败: In editor names can be removed and so have to deal with empty slots]
+  // 在编辑器中，名称可以被删除，因此必须处理空槽
 #if WITH_EDITOR
 		if (Name != NAME_None)
 		{
@@ -351,6 +350,7 @@ bool FSmartNameMapping::FindSmartNameByUID(SmartName::UID_Type UID, FSmartName& 
 	FName ExistingName;
 	if (GetName_NoLock(UID, ExistingName))
 	{
+/* 初始化容器的曲线元数据 */
 		OutName.DisplayName = ExistingName;
 		OutName.UID = UID;
 		return true;
@@ -359,6 +359,7 @@ bool FSmartNameMapping::FindSmartNameByUID(SmartName::UID_Type UID, FSmartName& 
 	return false;
 }
 
+/* 初始化容器的曲线元数据 */
 /* initialize curve meta data for the container */
 /* 初始化容器的曲线元数据 */
 void FSmartNameMapping::InitializeCurveMetaData(class USkeleton* Skeleton)
@@ -366,18 +367,28 @@ void FSmartNameMapping::InitializeCurveMetaData(class USkeleton* Skeleton)
 	FWriteScopeLock Lock(SmartNameRWLock);
 	
 	// initialize bone indices for skeleton
-	// 初始化骨骼的骨骼索引
+ // 初始化骨骼的骨骼索引
 	for (TPair<FName, FCurveMetaData>& Iter : CurveMetaDataMap)
+// FSmartNameContainer
+// FSmartNameContainer
 	{
 		FCurveMetaData& CurveMetaData = Iter.Value;
 		for (int32 LinkedBoneIndex = 0; LinkedBoneIndex < CurveMetaData.LinkedBones.Num(); ++LinkedBoneIndex)
 		{
 			CurveMetaData.LinkedBones[LinkedBoneIndex].Initialize(Skeleton);
 		}
+  // FSmartNameContainer
+  // FSmartNameContainer
+  // FSmartNameContainer
+  // FSmartNameContainer
 	}
 }
+// FSmartNameContainer
+// FSmartNameContainer
 ////////////////////////////////////////////////////////////////////////
 //
+// FSmartNameContainer
+// FSmartNameContainer
 // FSmartNameContainer
 // FSmartNameContainer
 //
@@ -419,7 +430,7 @@ void FSmartNameContainer::PostLoad()
 {
 #if WITH_EDITORONLY_DATA
 	// Preserve Load state for deterministic cooking
-	// 保留负载状态以进行确定性烹​​饪
+ // 保留负载状态以进行确定性烹​​饪
 	LoadedNameMappings = NameMappings;
 #endif
 }
@@ -457,7 +468,7 @@ bool FSmartName::Serialize(FArchive& Ar)
 #endif
 
 	// only save if it's editor build and not cooking
-	// 仅在编辑器构建而不是烹饪时保存
+ // 仅在编辑器构建而不是烹饪时保存
 	if (Ar.CustomVer(FAnimPhysObjectVersion::GUID) < FAnimPhysObjectVersion::SmartNameRefactorForDeterministicCooking)
 	{
 		FGuid TempGUID;

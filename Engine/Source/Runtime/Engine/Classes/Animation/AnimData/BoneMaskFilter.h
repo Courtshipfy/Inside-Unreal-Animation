@@ -19,9 +19,13 @@ struct FBranchFilter
 
 	/** Bone Name to filter **/
 	/** 要过滤的骨骼名称 **/
+	/** 要过滤的骨骼名称 **/
+	/** 要过滤的骨骼名称 **/
 	UPROPERTY(EditAnywhere, Category=Branch)
 	FName BoneName;
+	/** 混合深度 **/
 
+	/** 混合深度 **/
 	/** Blend Depth **/
 	/** 混合深度 **/
 	UPROPERTY(EditAnywhere, Category=Branch)
@@ -30,8 +34,10 @@ struct FBranchFilter
 
 USTRUCT()
 struct FInputBlendPose
+	/** 要过滤的骨骼名称 **/
 {
 	GENERATED_USTRUCT_BODY()
+	/** 要过滤的骨骼名称 **/
 
 	/** Bone Name to filter **/
 	/** 要过滤的骨骼名称 **/

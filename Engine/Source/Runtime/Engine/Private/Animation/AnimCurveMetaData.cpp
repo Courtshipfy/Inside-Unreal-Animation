@@ -50,11 +50,11 @@ void UAnimCurveMetaData::GetAssetRegistryTags(FAssetRegistryTagsContext Context)
 {
 	Super::GetAssetRegistryTags(Context);
 	// Add curve metadata IDs to a tag list, or a delimiter if we have no curve metadata.
-	// 将曲线元数据 ID 添加到标签列表，如果没有曲线元数据，则添加分隔符。
+ // 将曲线元数据 ID 添加到标签列表，如果没有曲线元数据，则添加分隔符。
 	// The delimiter is necessary so we can distinguish between data with no curves and old data, as the asset registry
-	// 分隔符是必要的，这样我们就可以区分没有曲线的数据和旧数据，就像资产注册表一样
+ // 分隔符是必要的，这样我们就可以区分没有曲线的数据和旧数据，就像资产注册表一样
 	// strips tags that have empty values 
-	// 删除具有空值的标签
+ // 删除具有空值的标签
 	TStringBuilder<256> CurvesBuilder;
 	CurvesBuilder << USkeleton::CurveTagDelimiter;
 
@@ -123,7 +123,7 @@ void UAnimCurveMetaData::GetCurveMetaDataNames(TArray<FName>& OutNames) const
 void UAnimCurveMetaData::RefreshBoneIndices(USkeleton* InSkeleton)
 {
 	// initialize bone indices for skeleton
-	// 初始化骨骼的骨骼索引
+ // 初始化骨骼的骨骼索引
 	for (TPair<FName, FCurveMetaData>& CurveMetaDataPair : CurveMetaData)
 	{
 		for (FBoneReference& LinkedBone : CurveMetaDataPair.Value.LinkedBones)
@@ -147,7 +147,7 @@ bool UAnimCurveMetaData::RenameCurveMetaData(FName OldName, FName NewName)
 	if(OldName != NewName)
 	{
 		// Dont allow renaming on top of an existing entry
-		// 不允许在现有条目之上重命名
+  // 不允许在现有条目之上重命名
 		if(CurveMetaData.Contains(NewName))
 		{
 			return false;
@@ -157,7 +157,7 @@ bool UAnimCurveMetaData::RenameCurveMetaData(FName OldName, FName NewName)
 		Modify();
 
 		// Remove & re-add
-		// 删除并重新添加
+  // 删除并重新添加
 		FCurveMetaData ExistingCopy;
 		if(CurveMetaData.RemoveAndCopyValue(OldName, ExistingCopy))
 		{
@@ -236,7 +236,7 @@ void UAnimCurveMetaData::SetCurveMetaDataMaterial(FName CurveName, bool bOverrid
 		Modify();
 
 		// override curve data
-		// 覆盖曲线数据
+  // 覆盖曲线数据
 		MetaData->Type.bMaterial = bOverrideMaterial;
 
 		IncreaseVersionNumber();
@@ -253,7 +253,7 @@ void UAnimCurveMetaData::SetCurveMetaDataMorphTarget(FName CurveName, bool bOver
 		Modify();
 		
 		// override curve data
-		// 覆盖曲线数据
+  // 覆盖曲线数据
 		MetaData->Type.bMorphtarget = bOverrideMorphTarget;
 
 		IncreaseVersionNumber();
@@ -270,7 +270,7 @@ void UAnimCurveMetaData::SetCurveMetaDataBoneLinks(FName CurveName, const TArray
 		Modify();
 
 		// override curve data
-		// 覆盖曲线数据
+  // 覆盖曲线数据
 		MetaData->LinkedBones = BoneLinks;
 		MetaData->MaxLOD = InMaxLOD;
 
@@ -304,7 +304,7 @@ void UAnimCurveMetaData::IncreaseVersionNumber()
 	VersionNumber++;
 
 	// Zero is 'invalid' for cached values elsewhere, so skip it here
-	// 对于其他地方的缓存值来说，零是“无效”的，所以在这里跳过它
+ // 对于其他地方的缓存值来说，零是“无效”的，所以在这里跳过它
 	if(VersionNumber == 0)
 	{
 		VersionNumber++;

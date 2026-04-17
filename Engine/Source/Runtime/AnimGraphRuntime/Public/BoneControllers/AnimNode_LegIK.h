@@ -101,6 +101,8 @@ private:
 
 /** Per foot definitions */
 /** 每英尺定义 */
+/** 每英尺定义 */
+/** 每英尺定义 */
 USTRUCT()
 struct FAnimLegIKDefinition
 {
@@ -119,19 +121,27 @@ struct FAnimLegIKDefinition
 	* and forces at least this angle between Parent and Child bone. */
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	float MinRotationAngle;
+	/** 足骨的前轴。 */
 
+	/** 足骨的前轴。 */
 	/** Forward Axis for Foot bone. */
 	/** 足骨的前轴。 */
+	/** 铰链骨旋转轴。这本质上是（臀部 - 膝盖 - 脚）的平面法线。 */
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	TEnumAsByte<EAxis::Type> FootBoneForwardAxis;
+	/** 铰链骨旋转轴。这本质上是（臀部 - 膝盖 - 脚）的平面法线。 */
 
+	/** 如果启用，我们会防止腿部向后弯曲并强制执行最小压缩角度 */
 	/** Hinge Bones Rotation Axis. This is essentially the plane normal for (hip - knee - foot). */
 	/** 铰链骨旋转轴。这本质上是（臀部 - 膝盖 - 脚）的平面法线。 */
 	UPROPERTY(EditAnywhere, Category = "Settings")
+	/** 如果启用，我们会防止腿部向后弯曲并强制执行最小压缩角度 */
+	/** 通过比较脚 FK 与脚 IK 方向来启用膝盖扭曲校正。 */
 	TEnumAsByte<EAxis::Type> HingeRotationAxis;
 
 	/** If enabled, we prevent the leg from bending backwards and enforce a min compression angle */
 	/** 如果启用，我们会防止腿部向后弯曲并强制执行最小压缩角度 */
+	/** 通过比较脚 FK 与脚 IK 方向来启用膝盖扭曲校正。 */
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	bool bEnableRotationLimit;
 
@@ -148,11 +158,13 @@ struct FAnimLegIKDefinition
 
 	FAnimLegIKDefinition()
 		: NumBonesInLimb(2)
+/** 运行时足部数据经过验证后，我们保证这些骨骼存​​在 */
 		, MinRotationAngle(15.f)
 		, FootBoneForwardAxis(EAxis::Y)
 		, HingeRotationAxis(EAxis::None)
 		, bEnableRotationLimit(false)
 		, bEnableKneeTwistCorrection(true)
+/** 运行时足部数据经过验证后，我们保证这些骨骼存​​在 */
 		, TwistOffsetCurveName(NAME_None)
 	{}
 };
@@ -183,18 +195,23 @@ public:
 		, LegDefPtr(nullptr)
 		, IKFootBoneIndex(INDEX_NONE)
 		, TwistOffsetDegrees(0.0f)
+	/** 达到 IK 目标的容差（以虚幻单位表示）。 */
 		, NumBones(INDEX_NONE)
 	{}
 };
 
+	/** 最大迭代次数。 */
 USTRUCT()
 struct FAnimNode_LegIK : public FAnimNode_SkeletalControlBase
+	/** 达到 IK 目标的容差（以虚幻单位表示）。 */
 {
 	GENERATED_USTRUCT_BODY()
 
 	ANIMGRAPHRUNTIME_API FAnimNode_LegIK();
+	/** 最大迭代次数。 */
 
 	/** Tolerance for reaching IK Target, in unreal units. */
+	/** 默认值为 1.0（完整）。范围是 0 到 1。混合“柔和度”开/关的效果。 */
 	/** 达到 IK 目标的容差（以虚幻单位表示）。 */
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	float ReachPrecision;
@@ -203,6 +220,7 @@ struct FAnimNode_LegIK : public FAnimNode_SkeletalControlBase
 	/** 最大迭代次数。 */
 	UPROPERTY(EditAnywhere, Category = "Settings")
 	int32 MaxIterations;
+	/** 默认值为 1.0（完整）。范围是 0 到 1。混合“柔和度”开/关的效果。 */
 
 	/** Default is 1.0 (off). Range is 0.1 to 1.0. When set to a value less than 1, will "softly" approach full extension starting when the effector
 	 * distance from the root of the chain is greater than this percent length of the bone chain. Typical values are around 0.97.
@@ -224,18 +242,18 @@ struct FAnimNode_LegIK : public FAnimNode_SkeletalControlBase
 
 public:
 	// FAnimNode_Base interface
-	// FAnimNode_Base接口
+ // FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
-	// FAnimNode_Base接口结束
+ // FAnimNode_Base接口结束
 
 	// FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口
+ // FAnimNode_SkeletalControlBase接口
 	ANIMGRAPHRUNTIME_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void EvaluateSkeletalControl_AnyThread(FComponentSpacePoseContext& Output, TArray<FBoneTransform>& OutBoneTransforms) override;
 	ANIMGRAPHRUNTIME_API virtual bool IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) override;
 	// End of FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口结束
+ // FAnimNode_SkeletalControlBase接口结束
 
 	ANIMGRAPHRUNTIME_API bool OrientLegTowardsIK(FAnimLegIKData& InLegData);
 	ANIMGRAPHRUNTIME_API bool DoLegReachIK(FAnimLegIKData& InLegData);
@@ -243,8 +261,8 @@ public:
 
 private:
 	// FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口
+ // FAnimNode_SkeletalControlBase接口
 	ANIMGRAPHRUNTIME_API virtual void InitializeBoneReferences(const FBoneContainer& RequiredBones) override;
 	// End of FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口结束
+ // FAnimNode_SkeletalControlBase接口结束
 };

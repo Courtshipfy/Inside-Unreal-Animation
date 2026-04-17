@@ -137,7 +137,7 @@ FVector CommonAnimationLibrary::RetargetSingleLocation(
 	else if (!FMath::IsNearlyEqual(AxisLengthSquared, 1.f))
 	{
 		// normalize only in this case
-		// 仅在这种情况下标准化
+  // 仅在这种情况下标准化
 		Axis = Axis * (1.f / sqrt(AxisLengthSquared));
 	}
 

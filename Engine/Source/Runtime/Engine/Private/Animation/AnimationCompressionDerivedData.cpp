@@ -130,7 +130,7 @@ void FAnimationSequenceAsyncCacheTask::EndCache(UE::DerivedData::FCacheGetValueR
 
 			{
 				// Release execution resource as soon as the task is done
-				// [翻译失败: Release execution resource as soon as the task is done]
+    // 任务完成后立即释放执行资源
 				ON_SCOPE_EXIT{ if (bIsDataValid) { ExecutionResource = nullptr; } };
 
 				if (UAnimSequence* AnimSequence = WeakAnimSequence.Get())
@@ -170,7 +170,7 @@ void FAnimationSequenceAsyncCacheTask::EndCache(UE::DerivedData::FCacheGetValueR
 			if (!bIsDataValid)
 			{
 				// Our DDC data appears to be corrupted, launch a new compression task to refresh it
-				// [翻译失败: Our DDC data appears to be corrupted, launch a new compression task to refresh it]
+    // 我们的 DDC 数据似乎已损坏，启动新的压缩任务来刷新它
 				LaunchCompressionTask(Name, Key);
 			}
 		});
@@ -182,7 +182,7 @@ void FAnimationSequenceAsyncCacheTask::EndCache(UE::DerivedData::FCacheGetValueR
 	else
 	{
 		// Release execution resource as soon as the task is done
-		// [翻译失败: Release execution resource as soon as the task is done]
+  // 任务完成后立即释放执行资源
 		ExecutionResource = nullptr;
 	}
 }
@@ -190,11 +190,11 @@ void FAnimationSequenceAsyncCacheTask::EndCache(UE::DerivedData::FCacheGetValueR
 bool FAnimationSequenceAsyncCacheTask::BuildData() const
 {	
 	// This is where we should do the compression parts
-	// [翻译失败: This is where we should do the compression parts]
+ // 这是我们应该做压缩部分的地方
 	TRACE_CPUPROFILER_EVENT_SCOPE_TEXT(*(FString(TEXT("FAnimationSequenceAsyncCacheTask::BuildData ") + CompressibleAnimPtr->Name)));
 
 	// Early out before logging if we are canceled (could be retracting this task)
-	// [翻译失败: Early out before logging if we are canceled (could be retracting this task)]
+ // 如果我们被取消，请在登录前尽早退出（可能会撤回此任务）
 	if (Owner.IsCanceled())
 	{
 		return false;
@@ -264,7 +264,7 @@ void FAnimationSequenceAsyncCacheTask::LaunchCompressionTask(const UE::FSharedSt
 		COOK_STAT(auto Timer = AnimSequenceCookStats::UsageStats.TimeSyncWork());
 
 		// Release execution resource as soon as the task is done
-		// [翻译失败: Release execution resource as soon as the task is done]
+  // 任务完成后立即释放执行资源
 		ON_SCOPE_EXIT{ ExecutionResource = nullptr; };
 
 		if (!BuildData())
@@ -306,7 +306,7 @@ void FAnimationSequenceAsyncCacheTask::CalculateRequiredMemoryEstimate()
 	if (const UAnimSequence* AnimSequence = WeakAnimSequence.Get())
 	{
 		// Includes bone/curves
-		// 包括骨骼/曲线
+  // 包括骨骼/曲线
 		const int64 AdditiveAnimSize = !AnimSequence->IsValidAdditive() ? 0 : [AnimSequence]()
 			{
 				if (const UAnimSequence* RefPoseSeq = AnimSequence->RefPoseSeq)
@@ -318,7 +318,7 @@ void FAnimationSequenceAsyncCacheTask::CalculateRequiredMemoryEstimate()
 			}();
 
 		// Includes bone/curves
-		// 包括骨骼/曲线
+  // 包括骨骼/曲线
 		RequiredMemory = AnimSequence->GetApproxRawSize() + AdditiveAnimSize;
 		if (Compression::FAnimationCompressionMemorySummaryScope::ShouldStoreCompressionResults())
 		{
@@ -328,7 +328,7 @@ void FAnimationSequenceAsyncCacheTask::CalculateRequiredMemoryEstimate()
 		if (const UAnimBoneCompressionSettings* BoneCompressionSettings = AnimSequence->BoneCompressionSettings.Get())
 		{
 			// We try out all compression codecs in parallel to find the best one, so we need to sum up the cost for every codec.
-			// [翻译失败: We try out all compression codecs in parallel to find the best one, so we need to sum up the cost for every codec.]
+   // 我们并行尝试所有压缩编解码器以找到最好的一个，因此我们需要总结每个编解码器的成本。
 			for (TObjectPtr<UAnimBoneCompressionCodec> Codec : BoneCompressionSettings->Codecs)
 			{
 				if (Codec)
@@ -337,7 +337,7 @@ void FAnimationSequenceAsyncCacheTask::CalculateRequiredMemoryEstimate()
 					if (PeakMemoryEstimate < 0)
 					{
 						// Assume the worst and default to the default behavior when no estimate is given.
-						// 当没有给出估计时，假设最坏的情况并默认为默认行为。
+      // 当没有给出估计时，假设最坏的情况并默认为默认行为。
 						UE_LOG(LogAnimationCompression, Warning, TEXT("Got invalid memory usage estimate from codec %s for %s. This can negatively affect the time compression takes."), *Codec->GetFullName(), *AnimSequence->GetFullName());
 						RequiredMemory = -1;
 						break;
@@ -349,16 +349,16 @@ void FAnimationSequenceAsyncCacheTask::CalculateRequiredMemoryEstimate()
 		}
 
 		// Curve compression occurs after bone compression and thus executes in its shadow (memory peak wise)
-		// 曲线压缩发生在骨骼压缩之后，因此在其阴影中执行（内存峰值明智）
+  // 曲线压缩发生在骨骼压缩之后，因此在其阴影中执行（内存峰值明智）
 		// but it can still be the case that a sequence has no bone data while having curve data
-		// 但仍然可能出现这样的情况：序列没有骨骼数据，但有曲线数据
+  // 但仍然可能出现这样的情况：序列没有骨骼数据，但有曲线数据
 		if (const UAnimCurveCompressionSettings* CurveCompressionSettings = AnimSequence->CurveCompressionSettings.Get())
 		{
 			const int64 PeakMemoryEstimate = CurveCompressionSettings->Codec->EstimateCompressionMemoryUsage(*AnimSequence);
 			if (PeakMemoryEstimate < 0)
 			{
 				// Assume the worst and default to the default behavior when no estimate is given.
-				// 当没有给出估计时，假设最坏的情况并默认为默认行为。
+    // 当没有给出估计时，假设最坏的情况并默认为默认行为。
 				UE_LOG(LogAnimationCompression, Warning, TEXT("Got invalid memory usage estimate from codec %s for %s. This can negatively affect the time compression takes."), *CurveCompressionSettings->Codec->GetFullName(), *AnimSequence->GetFullName());
 				RequiredMemory = -1;
 			}
@@ -382,9 +382,9 @@ void FAnimationSequenceAsyncBuildWorker::DoWork() const
 	if (const UAnimSequence* AnimSequence = Owner->WeakAnimSequence.Get())
 	{
 		// Grab any execution resources currently assigned to this worker so that we maintain
-		// 获取当前分配给该工作人员的所有执行资源，以便我们维护
+  // 获取当前分配给该工作人员的所有执行资源，以便我们维护
 		// concurrency limit and memory pressure until the whole multi-step task is done.
-		// 并发限制和内存压力，直到整个多步骤任务完成。
+  // 并发限制和内存压力，直到整个多步骤任务完成。
 		Owner->ExecutionResource = FExecutionResourceContext::Get();
 
 		const ECachePolicy Policy = GSkipDDC ? ECachePolicy::None : ECachePolicy::Default;

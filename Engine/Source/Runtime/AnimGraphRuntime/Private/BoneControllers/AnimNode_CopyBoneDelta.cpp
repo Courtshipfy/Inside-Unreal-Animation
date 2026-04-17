@@ -48,16 +48,16 @@ void FAnimNode_CopyBoneDelta::EvaluateSkeletalControl_AnyThread(FComponentSpaceP
 	FTransform TargetTM = Output.Pose.GetComponentSpaceTransform(TargetBoneIndex);
 
 	// Convert to parent space
-	// 转换到父空间
+ // 转换到父空间
 	FAnimationRuntime::ConvertCSTransformToBoneSpace(Output.AnimInstanceProxy->GetComponentTransform(), Output.Pose, SourceTM, SourceBoneIndex, BCS_ParentBoneSpace);
 	FAnimationRuntime::ConvertCSTransformToBoneSpace(Output.AnimInstanceProxy->GetComponentTransform(), Output.Pose, TargetTM, TargetBoneIndex, BCS_ParentBoneSpace);
 
 	// Ref pose transform
-	// 参考姿态变换
+ // 参考姿态变换
 	FTransform RefLSTransform = BoneContainer.GetReferenceSkeleton().GetRefBonePose()[SourceBone.GetMeshPoseIndex(BoneContainer).GetInt()];
 
 	// Get transform relative to ref pose
-	// 获取相对于参考姿势的变换
+ // 获取相对于参考姿势的变换
 	SourceTM.SetToRelativeTransform(RefLSTransform);
 
 	if(CopyMode == CopyBoneDeltaMode::Accumulate)
@@ -102,7 +102,7 @@ void FAnimNode_CopyBoneDelta::EvaluateSkeletalControl_AnyThread(FComponentSpaceP
 	}
 
 	// Back out to component space
-	// 返回组件空间
+ // 返回组件空间
 	FAnimationRuntime::ConvertBoneSpaceTransformToCS(Output.AnimInstanceProxy->GetComponentTransform(), Output.Pose, TargetTM, TargetBoneIndex, BCS_ParentBoneSpace);
 
 	OutBoneTransforms.Add(FBoneTransform(TargetBoneIndex, TargetTM));

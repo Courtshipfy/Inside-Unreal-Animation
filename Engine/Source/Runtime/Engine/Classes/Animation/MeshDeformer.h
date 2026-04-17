@@ -22,10 +22,14 @@ class UMeshDeformer : public UObject
 public:
 	/** Create persistent settings for the mesh deformer instance */ 
 	/** 为网格变形器实例创建持久设置 */
+	/** 为网格变形器实例创建持久设置 */
+	/** 为网格变形器实例创建持久设置 */
 	virtual UMeshDeformerInstanceSettings* CreateSettingsInstance(
 		UMeshComponent* InMeshComponent
 		) PURE_VIRTUAL(, return nullptr;);
+	/** 创建网格变形器的实例。 */
 	
+	/** 创建网格变形器的实例。 */
 	/** Create an instance of the mesh deformer. */
 	/** 创建网格变形器的实例。 */
 	virtual UMeshDeformerInstance* CreateInstance(

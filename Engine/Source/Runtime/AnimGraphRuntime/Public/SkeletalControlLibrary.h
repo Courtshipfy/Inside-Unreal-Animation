@@ -27,10 +27,14 @@ class USkeletalControlLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
+	/** 从动画节点获取骨骼控制 */
 public:
+	/** 从动画节点获取骨骼控制 */
 	/** Get a skeletal control from an anim node */
 	/** 从动画节点获取骨骼控制 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Skeletal Controls", meta=(BlueprintThreadSafe, ExpandEnumAsExecs = "Result"))
+	/** 从动画节点获取骨骼控制（纯） */
+	/** 从动画节点获取骨骼控制（纯） */
 	static ANIMGRAPHRUNTIME_API FSkeletalControlReference ConvertToSkeletalControl(const FAnimNodeReference& Node, EAnimNodeReferenceConversionResult& Result);
 
 	/** Get a skeletal control from an anim node (pure) */
@@ -40,10 +44,14 @@ public:
 	{
 		EAnimNodeReferenceConversionResult ConversionResult;
 		SkeletalControl = ConvertToSkeletalControl(Node, ConversionResult);
+	/** 设置此骨架控件的 alpha 值 */
+	/** 设置此骨架控件的 alpha 值 */
 		Result = (ConversionResult == EAnimNodeReferenceConversionResult::Succeeded);
 	}
 	
+	/** 获取该骨骼控制的alpha值 */
 	/** Set the alpha value of this skeletal control */
+	/** 获取该骨骼控制的alpha值 */
 	/** 设置此骨架控件的 alpha 值 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Skeletal Controls", meta=(BlueprintThreadSafe))
 	static ANIMGRAPHRUNTIME_API FSkeletalControlReference SetAlpha(const FSkeletalControlReference& SkeletalControl, float Alpha);

@@ -27,10 +27,14 @@ class UAnimComposite : public UAnimCompositeBase
 public:
 	/** Serializable data that stores section/anim pairing **/
 	/** 存储部分/动画配对的可序列化数据 **/
+	/** 存储部分/动画配对的可序列化数据 **/
+	/** 存储部分/动画配对的可序列化数据 **/
 	UPROPERTY()
 	struct FAnimTrack AnimationTrack;
 
+	/** 预览附加 BlendSpace 的基本姿势 **/
 #if WITH_EDITORONLY_DATA
+	/** 预览附加 BlendSpace 的基本姿势 **/
 	/** Preview Base pose for additive BlendSpace **/
 	/** 预览附加 BlendSpace 的基本姿势 **/
 	UPROPERTY(EditAnywhere, Category=AdditiveSettings)
@@ -38,17 +42,17 @@ public:
 #endif // WITH_EDITORONLY_DATA
 
 	//~ Begin UObject Interface
-	//~ 开始 UObject 接口
+ // ~ 开始 UObject 接口
 	virtual void GetResourceSizeEx(FResourceSizeEx& CumulativeResourceSize) override;
 	//~ End UObject Interface
-	//~ 结束 UObject 接口
+ // ~ 结束 UObject 接口
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif // WITH_EDITOR
 
 	//~ Begin UAnimSequenceBase Interface
-	//~ 开始 UAnimSequenceBase 接口
+ // ~ 开始 UAnimSequenceBase 接口
 	ENGINE_API virtual void HandleAssetPlayerTickedInternal(FAnimAssetTickContext &Context, const float PreviousTime, const float MoveDelta, const FAnimTickRecord &Instance, struct FAnimNotifyQueue& NotifyQueue) const override;
 
 	virtual void GetAnimationPose(FAnimationPoseData& OutAnimationPoseData, const FAnimExtractContext& ExtractionContext) const override;
@@ -62,9 +66,9 @@ public:
 	virtual void GetAnimNotifiesFromDeltaPositions(const float& PreviousPosition, const float & CurrentPosition, FAnimNotifyContext& NotifyContext) const override;
 	virtual bool IsNotifyAvailable() const override;
 	//~ End UAnimSequenceBase Interface
-	//~ 结束 UAnimSequenceBase 接口
+ // ~ 结束 UAnimSequenceBase 接口
 	//~ Begin UAnimSequence Interface
-	//~ 开始 UAnimSequence 接口
+ // ~ 开始 UAnimSequence 接口
 #if WITH_EDITOR
 	virtual class UAnimSequence* GetAdditiveBasePose() const override;
 	virtual bool GetAllAnimationSequencesReferred(TArray<UAnimationAsset*>& AnimationAssets, bool bRecursive = true) override;
@@ -72,16 +76,16 @@ public:
 	virtual void UpdateCommonTargetFrameRate() override;	
 #endif
 	//~ End UAnimSequence Interface
-	//~ 结束 UAnimSequence 接口
+ // ~ 结束 UAnimSequence 接口
 
 	//~ Begin UAnimCompositeBase Interface
-	//~ 开始 UAnimCompositeBase 接口
+ // ~ 开始 UAnimCompositeBase 接口
 	virtual void InvalidateRecursiveAsset() override;
 	virtual bool ContainRecursive(TArray<UAnimCompositeBase*>& CurrentAccumulatedList) override;
 	virtual void SetCompositeLength(float InLength) override;
 	virtual void PostLoad() override;
 	virtual FFrameRate GetSamplingFrameRate() const override;
 	//~End UAnimCompositeBase Interface
-	//~UAnimCompositeBase 接口结束
+ // ~UAnimCompositeBase 接口结束
 };
 

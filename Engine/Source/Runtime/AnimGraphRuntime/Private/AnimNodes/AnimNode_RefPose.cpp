@@ -7,9 +7,21 @@
 /////////////////////////////////////////////////////
 // FAnimRefPoseNode
 // FAnimRefPoseNode
+// FAnimRefPoseNode
+// FAnimRefPoseNode
+// FAnimRefPoseNode
+// FAnimRefPoseNode
+// FAnimRefPoseNode
+// FAnimRefPoseNode
+// FAnimRefPoseNode
+// FAnimRefPoseNode
+// FAnimRefPoseNode
+// FAnimRefPoseNode
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AnimNode_RefPose)
+/** 枚举输出的助手... */
 
+/** 枚举输出的助手... */
 /** Helper for enum output... */
 /** 枚举输出的助手... */
 #ifndef CASE_ENUM_TO_TEXT
@@ -22,15 +34,20 @@ const TCHAR* GetRefPostTypeText(ERefPoseType RefPose)
 	{
 		FOREACH_ENUM_EREFPOSETYPE(CASE_ENUM_TO_TEXT)
 	}
+ // EvaluateGraphExposeInputs.Execute(Context);
 	return TEXT("Unknown Ref Pose Type");
+ // EvaluateGraphExposeInputs.Execute(Context);
 }
 
 void FAnimNode_RefPose::Evaluate_AnyThread(FPoseContext& Output)
+	// EvaluateGraphExposeInputs.Execute(Context);
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Evaluate_AnyThread)
+	// EvaluateGraphExposeInputs.Execute(Context);
 	// I don't have anything to evaluate. Should this be even here?
-	// 我没有什么可以评价的。这应该也在这里吗？
+ // 我没有什么可以评价的。这应该也在这里吗？
 	// EvaluateGraphExposedInputs.Execute(Context);
+ // EvaluateGraphExposeInputs.Execute(Context);
 	// EvaluateGraphExposeInputs.Execute(Context);
 
     ERefPoseType CurrentRefPoseType = GetRefPoseType(); 

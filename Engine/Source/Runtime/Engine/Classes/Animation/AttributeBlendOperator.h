@@ -22,15 +22,21 @@ namespace UE
 		public:
 			/** Begin IAttributeBlendOperator overrides */
 			/** 开始 IAttributeBlendOperator 覆盖 */
+			/** 开始 IAttributeBlendOperator 覆盖 */
+			/** 开始 IAttributeBlendOperator 覆盖 */
 			virtual void Accumulate(const FAttributeBlendData& BlendData, FStackAttributeContainer* OutAttributes) const final { Accumulate_Internal<AttributeType>(BlendData, OutAttributes); }
 			virtual void Interpolate(const void* FromData, const void* ToData, float Alpha, void* InOutData) const final { Interpolate_Internal<AttributeType>(FromData, ToData, Alpha, InOutData); }
 			virtual void Override(const FAttributeBlendData& BlendData, FStackAttributeContainer* OutAttributes) const final { Override_Internal<AttributeType>(BlendData, OutAttributes); }
 			virtual void Blend(const FAttributeBlendData& BlendData, FStackAttributeContainer* OutAttributes) const final { Blend_Internal<AttributeType>(BlendData, OutAttributes); }
 			virtual void BlendPerBone(const FAttributeBlendData& BlendData, FStackAttributeContainer* OutAttributes) const final { BlendPerBone_Internal<AttributeType>(BlendData, OutAttributes); }
+			/** 结束 IAttributeBlendOperator 覆盖 */
 			virtual void ConvertToAdditive(const FAttributeBlendData& BlendData, FStackAttributeContainer* OutAdditiveAttributes) const final { ConvertToAdditive_Internal<AttributeType>(BlendData, OutAdditiveAttributes);	}
+			/** 结束 IAttributeBlendOperator 覆盖 */
 			/** End IAttributeBlendOperator overrides */
+			/** 可混合属性类型的混合操作 */
 			/** 结束 IAttributeBlendOperator 覆盖 */
 
+			/** 可混合属性类型的混合操作 */
 		protected:
 			/** Blend operation for blendable attribute types */
 			/** 可混合属性类型的混合操作 */
@@ -48,13 +54,13 @@ namespace UE
 					if (BlendType == ECustomAttributeBlendType::Override)
 					{
 						// Not iterating over each attribute, but just picking highest weighted value
-						// 不迭代每个属性，而只是选择最高权重值
+      // 不迭代每个属性，而只是选择最高权重值
 						OutAttribute = It.GetHighestWeightedValue();
 					}
 					else
 					{
 						// Iterate over each attribute while accumulating final value according to provided weightings
-						// 迭代每个属性，同时根据提供的权重累积最终值
+      // 迭代每个属性，同时根据提供的权重累积最终值
 						while (It.Next())
 						{
 							const AttributeType& Attribute = It.GetValue();
@@ -91,7 +97,7 @@ namespace UE
 						AttributeType& OutAttribute = (*OutAttributePtr);
 						
 						// Choose between weighted (blended) assignment vs override
-						// 在加权（混合）分配与覆盖之间进行选择
+      // 在加权（混合）分配与覆盖之间进行选择
 						if (BlendType == ECustomAttributeBlendType::Override)
 						{
 							OutAttribute = Attribute;
@@ -104,6 +110,8 @@ namespace UE
 						if constexpr (UE::Anim::TAttributeTypeTraits<AttributeType>::RequiresNormalization)
 						{
 							OutAttribute.Normalize();
+			/** 不可混合属性类型的混合操作 */
+			/** 不可混合属性类型的混合操作 */
 						}
 					}
 				});				
@@ -120,13 +128,15 @@ namespace UE
 					const ECustomAttributeBlendType BlendType = Attributes::GetAttributeBlendType(Identifier);
 					
 					// Not iterating over each attribute, but just picking highest weighted value
-					// 不迭代每个属性，而只是选择最高权重值
+     // 不迭代每个属性，而只是选择最高权重值
 					OutAttributes->Add<AttributeType>(Identifier, It.GetHighestWeightedValue());			
 				});
 
 				BlendData.ForEachUniqueAttribute<AttributeType>([OutAttributes](typename FAttributeBlendData::template TSingleIterator<AttributeType>& It) -> void
 				{
 					while (It.Next())
+			/* 可混合属性类型的每骨骼加权混合操作 */
+			/* 可混合属性类型的每骨骼加权混合操作 */
 					{
 						const FAttributeId& Identifier = It.GetIdentifier();
 						OutAttributes->Add<AttributeType>(Identifier, It.GetValue());
@@ -151,7 +161,7 @@ namespace UE
 					if (BlendType == ECustomAttributeBlendType::Override)
 					{
 						// Not iterating over each attribute, but just picking highest weighted value
-						// 不迭代每个属性，而只是选择最高权重值
+      // 不迭代每个属性，而只是选择最高权重值
 						OutAttribute = It.GetHighestBoneWeightedValue();
 					}
 					else
@@ -213,6 +223,8 @@ namespace UE
 								OutAttribute.Accumulate(Attribute, AttributeWeight, It.GetAdditiveType());
 							}
 						}
+			/* 针对不可混合属性类型的每骨骼加权混合操作 */
+			/* 针对不可混合属性类型的每骨骼加权混合操作 */
 
 						if constexpr (UE::Anim::TAttributeTypeTraits<AttributeType>::RequiresNormalization)
 						{
@@ -248,8 +260,10 @@ namespace UE
 							AttributeType& OutAttribute = *OutAttributePtr;
 							const AttributeType& Attribute = It.GetValue();
 
+			/* 可混合属性类型的覆盖操作 */
 							// 'Blend' value if the attribute did not yet exist, or based upon being the highest weighted attribute
-							// 如果该属性尚不存在，或者基于权重最高的属性，则为“混合”值
+       // 如果该属性尚不存在，或者基于权重最高的属性，则为“混合”值
+			/* 可混合属性类型的覆盖操作 */
 							const bool bHighestWeight = It.IsHighestBoneWeighted();
 							if (bHighestWeight || ExistingIndex == INDEX_NONE)
 							{
@@ -273,7 +287,9 @@ namespace UE
 						const FAttributeId& Identifier = It.GetIdentifier();
 
 						// Find or add as the attribute might already exist, so Add would fail
-						// 查找或添加，因为该属性可能已存在，因此添加将失败
+      // 查找或添加，因为该属性可能已存在，因此添加将失败
+			/* 不可混合属性类型的覆盖操作 */
+			/* 不可混合属性类型的覆盖操作 */
 						AttributeType& OutAttribute = *OutAttributes->FindOrAdd<AttributeType>(Identifier);
 
 						const float AttributeWeight = It.GetWeight();
@@ -291,7 +307,9 @@ namespace UE
 			/* 不可混合属性类型的覆盖操作 */
 			template <typename Type>
 			inline typename TEnableIf<!TAttributeTypeTraits<Type>::IsBlendable, void>::Type Override_Internal(const FAttributeBlendData& BlendData, FStackAttributeContainer* OutAttributes) const
+			/* 可混合属性类型的累加操作 */
 			{
+			/* 可混合属性类型的累加操作 */
 				BlendData.ForEachUniqueAttribute<AttributeType>([OutAttributes](typename FAttributeBlendData::template TSingleIterator<AttributeType>& It) -> void
 				{
 					while (It.Next())
@@ -300,7 +318,7 @@ namespace UE
 						const FAttributeId& Identifier = It.GetIdentifier();
 
 						// Find or add as the attribute might already exist, so Add would fail
-						// 查找或添加，因为该属性可能已存在，因此添加将失败
+      // 查找或添加，因为该属性可能已存在，因此添加将失败
 						AttributeType& OutAttribute = *OutAttributes->FindOrAdd<AttributeType>(Identifier);
 						AttributeType::StaticStruct()->CopyScriptStruct(&OutAttribute, &Attribute);
 					}
@@ -323,8 +341,10 @@ namespace UE
 						AttributeType& OutAttribute = *OutAttributePtr;
 						
 						// Accumulate with weighted add
-						// 加权累加累加
+      // 加权累加累加
 						const float AttributeWeight = It.GetWeight();
+			/* 不可混合属性类型的累积操作 */
+			/* 不可混合属性类型的累积操作 */
 						if (ExistingIndex != INDEX_NONE)
 						{						
 							OutAttribute.Accumulate(Attribute, AttributeWeight, It.GetAdditiveType());
@@ -348,7 +368,9 @@ namespace UE
 			inline typename TEnableIf<!TAttributeTypeTraits<Type>::IsBlendable, void>::Type Accumulate_Internal(const FAttributeBlendData& BlendData, FStackAttributeContainer* OutAttributes) const
 			{
 				BlendData.ForEachUniqueAttribute<AttributeType>([OutAttributes](typename FAttributeBlendData::template TSingleIterator<AttributeType>& It) -> void
+			/* 对可混合属性类型进行加法运算 */
 				{
+			/* 对可混合属性类型进行加法运算 */
 					while (It.Next())
 					{						
 						const AttributeType& Attribute = It.GetValue();
@@ -358,7 +380,7 @@ namespace UE
 						AttributeType& OutAttribute = *OutAttributePtr;
 
 						// 'Accumulate' value if the attribute did not yet exist, or based upon being the highest weighted attribute
-						// 如果该属性尚不存在，或者基于权重最高的属性，则“累积”值
+      // 如果该属性尚不存在，或者基于权重最高的属性，则“累积”值
 						const float AttributeWeight = It.GetWeight();
 						if (ExistingIndex == INDEX_NONE || AttributeWeight > 0.5f)
 						{
@@ -372,7 +394,9 @@ namespace UE
 			/* 对可混合属性类型进行加法运算 */
 			template <typename Type>
 			inline typename TEnableIf<TAttributeTypeTraits<Type>::IsBlendable, void>::Type ConvertToAdditive_Internal(const FAttributeBlendData& BlendData, FStackAttributeContainer* OutAdditiveAttributes) const
+			/* 对不可混合的属性类型进行加法运算 */
 			{
+			/* 对不可混合的属性类型进行加法运算 */
 				BlendData.ForEachUniqueAttribute<AttributeType>([OutAdditiveAttributes](typename FAttributeBlendData::template TSingleIterator<AttributeType>& It) -> void
 				{
 					while (It.Next())
@@ -395,8 +419,10 @@ namespace UE
 
 			/* Make additive operation for non-blendable attribute types */
 			/* 对不可混合的属性类型进行加法运算 */
+			/* 可混合的插值操作；非步进插值属性类型 */
 			template <typename Type>
 			inline typename TEnableIf<!TAttributeTypeTraits<Type>::IsBlendable, void>::Type ConvertToAdditive_Internal(const FAttributeBlendData& BlendData, FStackAttributeContainer* OutAdditiveAttributes) const
+			/* 可混合的插值操作；非步进插值属性类型 */
 			{
 				BlendData.ForEachUniqueAttribute<AttributeType>([OutAdditiveAttributes](typename FAttributeBlendData::template TSingleIterator<AttributeType>& It) -> void
 				{
@@ -409,11 +435,13 @@ namespace UE
 						AttributeType& OutAttribute = *OutAttributePtr;
 
 						// 'Accumulate' value if the attribute did not yet exist, or based upon being the highest weighted attribute
-						// 如果该属性尚不存在，或者基于权重最高的属性，则“累积”值
+      // 如果该属性尚不存在，或者基于权重最高的属性，则“累积”值
 						const float AttributeWeight = It.GetWeight();
 						if (ExistingIndex == INDEX_NONE)
+			/* 不可混合的插值操作；步进插值属性类型 */
 						{							
 							AttributeType::StaticStruct()->CopyScriptStruct(OutAttributePtr, &Attribute);
+			/* 不可混合的插值操作；步进插值属性类型 */
 						}
 					}
 				});
@@ -427,9 +455,11 @@ namespace UE
 				const AttributeType& TypedFrom = *(const AttributeType*)FromData;
 				const AttributeType& TypedTo = *(const AttributeType*)ToData;
 				AttributeType& Output = *(AttributeType*)InOutData;				
+			/** 开始 IAttributeBlendOperator 覆盖 */
 
 				Output = TypedFrom;
 				Output.Interpolate(TypedTo, Alpha);
+			/** 开始 IAttributeBlendOperator 覆盖 */
 
 				if constexpr (UE::Anim::TAttributeTypeTraits<AttributeType>::RequiresNormalization)
 				{
@@ -443,10 +473,10 @@ namespace UE
 			inline typename TEnableIf<!TAttributeTypeTraits<Type>::IsBlendable || TAttributeTypeTraits<AttributeType>::StepInterpolate, void>::Type Interpolate_Internal(const void* FromData, const void* ToData, float Alpha, void* InOutData) const
 			{
 				// Determine stepped value to copy
-				// 确定要复制的步进值
+    // 确定要复制的步进值
 				const void* CopySource = Alpha > 0.5f ? ToData : FromData;
 				// Using CopyScriptStruct as assignment operator might not be implemented for attribute type
-				// 使用 CopyScriptStruct 作为赋值运算符可能无法针对属性类型实现
+    // 使用 CopyScriptStruct 作为赋值运算符可能无法针对属性类型实现
 				AttributeType::StaticStruct()->CopyScriptStruct(InOutData, CopySource);
 			}
 		};
@@ -470,7 +500,7 @@ namespace UE
 						uint8* OutAttributePtr = OutAttributes->FindOrAdd(ScriptStructPtr.Get(), Identifier);
 
 						// 'Accumulate' value if the attribute did not yet exist, or based upon being the highest weighted attribute
-						// 如果该属性尚不存在，或者基于权重最高的属性，则“累积”值
+      // 如果该属性尚不存在，或者基于权重最高的属性，则“累积”值
 						const float AttributeWeight = It.GetWeight();
 						if (ExistingIndex == INDEX_NONE || AttributeWeight > 0.5f)
 						{
@@ -482,10 +512,10 @@ namespace UE
 			virtual void Interpolate(const void* FromData, const void* ToData, float Alpha, void* InOutData) const final
 			{
 				// Determine stepped value to copy
-				// 确定要复制的步进值
+    // 确定要复制的步进值
 				const void* CopySource = Alpha > 0.5f ? ToData : FromData;
 				// Using CopyScriptStruct as assignment operator might not be implemented for attribute type
-				// 使用 CopyScriptStruct 作为赋值运算符可能无法针对属性类型实现
+    // 使用 CopyScriptStruct 作为赋值运算符可能无法针对属性类型实现
 				ScriptStructPtr.Get()->CopyScriptStruct(InOutData, CopySource);	
 			};
 			virtual void Override(const FAttributeBlendData& BlendData, FStackAttributeContainer* OutAttributes) const final
@@ -498,7 +528,7 @@ namespace UE
 						const FAttributeId& Identifier = It.GetIdentifier();
 
 						// Find or add as the attribute might already exist, so Add would fail
-						// 查找或添加，因为该属性可能已存在，因此添加将失败
+      // 查找或添加，因为该属性可能已存在，因此添加将失败
 						uint8* OutAttribute = OutAttributes->FindOrAdd(ScriptStructPtr.Get(),Identifier);
 						ScriptStructPtr.Get()->CopyScriptStruct(OutAttribute, Attribute);
 					}
@@ -512,7 +542,7 @@ namespace UE
 					const ECustomAttributeBlendType BlendType = Attributes::GetAttributeBlendType(Identifier);
 					
 					// Not iterating over each attribute, but just picking highest weighted value
-					// 不迭代每个属性，而只是选择最高权重值
+     // 不迭代每个属性，而只是选择最高权重值
 					uint8* OutAttribute = OutAttributes->Add(ScriptStructPtr.Get(), Identifier);
 
 					ScriptStructPtr.Get()->CopyScriptStruct(OutAttribute, It.GetHighestWeightedValue());
@@ -552,7 +582,7 @@ namespace UE
 							const uint8* Attribute = It.GetValuePtr();
 
 							// 'Blend' value if the attribute did not yet exist, or based upon being the highest weighted attribute
-							// 如果该属性尚不存在，或者基于权重最高的属性，则为“混合”值
+       // 如果该属性尚不存在，或者基于权重最高的属性，则为“混合”值
 							const bool bHighestWeight = It.IsHighestBoneWeighted();
 							if (bHighestWeight || ExistingIndex == INDEX_NONE)
 							{
@@ -574,7 +604,7 @@ namespace UE
 						uint8* OutAttributePtr = OutAdditiveAttributes->FindOrAdd(ScriptStructPtr.Get(),Identifier);
 
 						// 'Accumulate' value if the attribute did not yet exist, or based upon being the highest weighted attribute
-						// 如果该属性尚不存在，或者基于权重最高的属性，则“累积”值
+      // 如果该属性尚不存在，或者基于权重最高的属性，则“累积”值
 						const float AttributeWeight = It.GetWeight();
 						if (ExistingIndex == INDEX_NONE)
 						{							

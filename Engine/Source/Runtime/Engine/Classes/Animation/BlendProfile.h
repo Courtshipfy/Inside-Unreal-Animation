@@ -19,34 +19,38 @@ namespace UE { namespace Anim { struct FStackAttributeContainer; } }
 
 /** The mode in which the blend profile should be applied. */
 /** 应应用混合配置文件的模式。 */
+/** 应应用混合配置文件的模式。 */
+/** 应应用混合配置文件的模式。 */
 UENUM()
 enum class EBlendProfileMode : uint8
 {
 	// The bone's transition time is a factor based on the transition time. 
-	// 骨骼的过渡时间是基于过渡时间的一个因素。
+ // 骨骼的过渡时间是基于过渡时间的一个因素。
 	// For example 0.5 means it takes half the time of the transition.
-	// 例如 0.5 表示需要一半的转换时间。
+ // 例如 0.5 表示需要一半的转换时间。
 	// Values should be between 0 and 1. They will be clamped if they go out of this range.
-	// 值应介于 0 和 1 之间。如果超出此范围，它们将被限制。
+ // 值应介于 0 和 1 之间。如果超出此范围，它们将被限制。
 	// A bone value of 0 means the bone will instantly transition into the target state.
-	// 骨骼值为 0 意味着骨骼将立即转换到目标状态。
+ // 骨骼值为 0 意味着骨骼将立即转换到目标状态。
 	TimeFactor = 0,
 
 	// The bone's transition weight is multiplied by this factor.
-	// 骨骼的过渡权重乘以该因子。
+ // 骨骼的过渡权重乘以该因子。
 	// For example 2.0 means the bone's blend weight is twice as high as the transition's blend weight.
-	// 例如，2.0 表示骨骼的混合权重是过渡的混合权重的两倍。
+ // 例如，2.0 表示骨骼的混合权重是过渡的混合权重的两倍。
 	// Values should typically be equal or greater than 1.0.
-	// 值通常应等于或大于 1.0。
+ // 值通常应等于或大于 1.0。
 	// If you want certain bones to instantly transition into the target state
-	// 如果您希望某些骨骼立即过渡到目标状态
+ // 如果您希望某些骨骼立即过渡到目标状态
+/** 轮廓内混合比例的单个条目，将骨骼映射到混合比例 */
 	// the Time Factor based method might be a better choice.
-	// 基于时间因子的方法可能是更好的选择。
+ // 基于时间因子的方法可能是更好的选择。
 	WeightFactor,
 
 	// Used for blend masks. Per bone alpha
-	// 用于混合蒙版。每骨 alpha
+ // 用于混合蒙版。每骨 alpha
 	BlendMask UMETA(Hidden),
+/** 轮廓内混合比例的单个条目，将骨骼映射到混合比例 */
 };
 
 /** A single entry for a blend scale within a profile, mapping a bone to a blendscale */
@@ -96,7 +100,7 @@ class IBlendProfileProviderInterface
 
 public:
 	// Convert the custom internal data struct into a regular blend profile
-	// 将自定义内部数据结构转换为常规混合配置文件
+ // 将自定义内部数据结构转换为常规混合配置文件
 	virtual void ConstructBlendProfile(const TObjectPtr<UBlendProfile> OutBlendProfile) const = 0;
 };
 
@@ -127,16 +131,17 @@ private:
 	bool bIsSkeletonBlendProfile = true;
 
 	// The object responsible for constructing the blend profile
-	// 负责构建混合配置文件的对象
+ // 负责构建混合配置文件的对象
 	UPROPERTY()
 	TScriptInterface<IBlendProfileProviderInterface> BlendProfileProvider;
 
 	// The actual blend profile to use
-	// 实际使用的混合配置文件
+ // 实际使用的混合配置文件
 	UPROPERTY()
 	TObjectPtr<UBlendProfile> BlendProfile;
 };
 
+	/** 获取配置文件中的条目数（条目是不是 1.0f 的任何混合比例） */
 //////////////////////////////////////////////////////////////////////////
 
 /** A blend profile is a set of per-bone scales that can be used in transitions and blend lists
@@ -147,6 +152,7 @@ class UBlendProfile : public UObject, public IBlendProfileInterface
 {
 public:
 
+	/** 获取配置文件中的条目数（条目是不是 1.0f 的任何混合比例） */
 	GENERATED_BODY()
 
 	ENGINE_API UBlendProfile();
@@ -166,17 +172,21 @@ public:
 	/** Set the blend scale for a specific bone 
 	 *  @param InBoneName Name of the bone to set the blend scale of
 	 *  @param InScale The scale to set the bone to
+	/** 使用骨骼名称作为查找键，确保骨骼名称与骨骼索引匹配。 */
 	 *  @param bRecurse Whether or not to set the scale on all children of this bone
 	 *  @param bCreate Whether or not to create a blend profile entry if one does not exist for the specified bone
 	 */
+	/** 删除对无效骨骼有骨骼引用的条目 */
 	ENGINE_API void SetBoneBlendScale(const FName& InBoneName, float InScale, bool bRecurse = false, bool bCreate = false);
 
 	/** Removes the entry for the specified bone index (does nothing if it doesn't exist) 
 	 *  @param InBoneIdx Index of the bone to remove from this blend profile
 	 */
+	/** 使用骨骼名称作为查找键，确保骨骼名称与骨骼索引匹配。 */
 	ENGINE_API void RemoveEntry(int32 InBoneIdx);
 
 	/** Ensures the bone name of the specified entry matches the skeleton index (does nothing if it doesn't exist)
+	/** 删除对无效骨骼有骨骼引用的条目 */
 	 *  @param InBoneIdx Index of the bone to refresh
 	 */
 	ENGINE_API void RefreshBoneEntry(int32 InBoneIndex);
@@ -251,13 +261,21 @@ public:
 	/** Resize and fill an array of floats with the bone factor values. One for each bone inside the compact pose.
 	 *  @param OutBoneBlendProfileFactors This array will be resized and filled with the factors for each bone in the compact pose, as setup in the blend profile editor.
 	 *  @param BoneContainer The bone container which is used to extract how many bones are inside the compact pose and to figure out what factor value to place at what array element.
+	// IInterpolationIndexProvider
+ // IInterpolationIndexProvider
 	 */
+  // IInterpolationIndexProvider
+  // IInterpolationIndexProvider
+  // IInterpolationIndexProvider
+  // IInterpolationIndexProvider
 	ENGINE_API void FillBoneScalesArray(TArray<float>& OutBoneBlendProfileFactors, const FBoneContainer& BoneContainer) const;
 
 	/** Fill an array of floats with the bone duration values. One for each bone in the skeleton pose.
 	 * @param OutDurationPerBone Must be sized to the number bones in the skeleton pose. It will be filled with the durations of each bone as setup in the blend profile editor.
 	 * @param Duration The duration of the blend.
 	 */
+	// IInterpolationIndexProvider
+ // IInterpolationIndexProvider
 	UE_DEPRECATED(5.4, "Please use the FillSkeletonBoneDurationsArray that takes a target skeleton as parameter.")
 	ENGINE_API void FillSkeletonBoneDurationsArray(TCustomBoneIndexArrayView<float, FSkeletonPoseBoneIndex> OutDurationPerBone, float Duration) const;
 
@@ -268,22 +286,28 @@ public:
 	 */
 	ENGINE_API void FillSkeletonBoneDurationsArray(TCustomBoneIndexArrayView<float, FSkeletonPoseBoneIndex> OutDurationPerBone, float Duration, const USkeleton* TargetSkeleton) const;
 
+	/** 设置与此混合配置文件一起使用的骨架 */
 	// IInterpolationIndexProvider
+ // IInterpolationIndexProvider
 	// IInterpolationIndexProvider
+ // IInterpolationIndexProvider
 	ENGINE_API virtual int32 GetPerBoneInterpolationIndex(const FCompactPoseBoneIndex& InCompactPoseBoneIndex, const FBoneContainer& BoneContainer, const IInterpolationIndexProvider::FPerBoneInterpolationData* Data) const override;
 	ENGINE_API virtual int32 GetPerBoneInterpolationIndex(const FSkeletonPoseBoneIndex InSkeletonBoneIndex, const USkeleton* TargetSkeleton, const IInterpolationIndexProvider::FPerBoneInterpolationData* Data) const override;
 	// End IInterpolationIndexProvider
-	// 结束 IInterpolationIndexProvider
+ // 结束 IInterpolationIndexProvider
 
+	/** 设置与此混合配置文件一起使用的骨架 */
+	/** 设置单个骨骼的混合比例（忽略子骨骼） */
 	// UObject
-	// U对象
+ // U对象
 	virtual bool IsSafeForRootSet() const override {return false;}
 	ENGINE_API virtual void PostLoad() override;
 	// End UObject
-	// 结束U对象
+ // 结束U对象
 
 	// Default value of entries. Default values are not saved
-	// 条目的默认值。默认值不保存
+ // 条目的默认值。默认值不保存
+	/** 设置单个骨骼的混合比例（忽略子骨骼） */
 	virtual float GetDefaultBlendScale() const { return IsBlendMask() ? 0.0f : 1.0f; }
 
 	bool IsBlendMask() const { return Mode == EBlendProfileMode::BlendMask;  }
@@ -295,7 +319,7 @@ public:
 	ENGINE_API void SetSkeleton(USkeleton* InSkeleton);
 
 	// Empties the bone enties array
-	// 清空骨骼实体数组
+ // 清空骨骼实体数组
 	void ClearEntries();
 
 private:
@@ -305,17 +329,17 @@ private:
 
 public:
 	// The skeleton that owns this profile
-	// 拥有此配置文件的骨架
+ // 拥有此配置文件的骨架
 	UPROPERTY()
 	TObjectPtr<USkeleton> OwningSkeleton;
 
 	// List of blend scale entries
-	// 混合比例条目列表
+ // 混合比例条目列表
 	UPROPERTY()
 	TArray<FBlendProfileBoneEntry> ProfileEntries;
 
 	// Blend Profile Mode. Read EBlendProfileMode for more details
-	// 混合配置文件模式。阅读 EBlendProfileMode 了解更多详细信息
+ // 混合配置文件模式。阅读 EBlendProfileMode 了解更多详细信息
 	UPROPERTY()
 	EBlendProfileMode Mode;
 };

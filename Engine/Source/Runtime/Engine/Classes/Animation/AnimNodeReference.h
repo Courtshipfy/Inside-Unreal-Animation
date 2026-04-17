@@ -36,7 +36,7 @@ public:
 	ENGINE_API FAnimNodeReference(UAnimInstance* InAnimInstance, int32 InIndex);
 	
 	// Get the node we wrap. If the context is invalid or the node is not of the specified type then this will return nullptr.
-	// 获取我们包裹的节点。如果上下文无效或节点不是指定类型，则将返回 nullptr。
+ // 获取我们包裹的节点。如果上下文无效或节点不是指定类型，则将返回 nullptr。
 	template<typename NodeType>
 	NodeType* GetAnimNodePtr() const
 	{
@@ -49,7 +49,7 @@ public:
 	}
 
 	// Get the node we wrap. If the reference is invalid or node is not of the specified type then this will return assert.
-	// 获取我们包裹的节点。如果引用无效或节点不是指定类型，则将返回断言。
+ // 获取我们包裹的节点。如果引用无效或节点不是指定类型，则将返回断言。
 	template<typename NodeType>
 	NodeType& GetAnimNode() const
 	{
@@ -60,7 +60,7 @@ public:
 	}
 
 	// Call a function if this context is valid
-	// 如果此上下文有效，则调用函数
+ // 如果此上下文有效，则调用函数
 	template<typename NodeType>
 	void CallAnimNodeFunction(const TCHAR* InFunctionNameForErrorReporting, TFunctionRef<void(NodeType&)> InFunction) const
 	{
@@ -75,7 +75,7 @@ public:
 	}
 	
 	// Convert to a derived type
-	// 转换为派生类型
+ // 转换为派生类型
 	template<typename OtherContextType>
 	static OtherContextType ConvertToType(const FAnimNodeReference& InReference, EAnimNodeReferenceConversionResult& OutResult)
 	{
@@ -98,10 +98,10 @@ public:
 
 private:
 	// The node we wrap
-	// 我们包裹的节点
+ // 我们包裹的节点
 	FAnimNode_Base* AnimNode = nullptr;
 
 	// The struct type of the anim node
-	// 动画节点的结构类型
+ // 动画节点的结构类型
 	UScriptStruct* AnimNodeStruct = nullptr;
 };

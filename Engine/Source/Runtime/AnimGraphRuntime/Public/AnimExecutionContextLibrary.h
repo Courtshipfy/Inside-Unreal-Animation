@@ -19,47 +19,69 @@ class UAnimExecutionContextLibrary : public UBlueprintFunctionLibrary
 	
 public:
 #if WITH_EDITOR
+	/** 线程安全动画节点调用的原型函数 */
+	/** 线程安全动画节点调用的原型函数 */
 	/** Prototype function for thread-safe anim node calls */
 	/** 线程安全动画节点调用的原型函数 */
 	UFUNCTION(BlueprintInternalUseOnly, meta=(BlueprintThreadSafe))
 	void Prototype_ThreadSafeAnimNodeCall(const FAnimExecutionContext& Context, const FAnimNodeReference& Node) {}
+	/** 线程安全动画更新调用的原型函数 */
+	/** 线程安全动画更新调用的原型函数 */
 
 	/** Prototype function for thread-safe anim update calls */
 	/** 线程安全动画更新调用的原型函数 */
 	UFUNCTION(BlueprintInternalUseOnly, meta=(BlueprintThreadSafe))
+	/** 获取托管此上下文的动画实例 */
 	void Prototype_ThreadSafeAnimUpdateCall(const FAnimUpdateContext& Context, const FAnimNodeReference& Node) {}	
+	/** 获取托管此上下文的动画实例 */
 #endif
 	
+	/** 仅供内部编译器使用 - 通过索引获取对动画节点的引用 */
 	/** Get the anim instance that hosts this context */
 	/** 获取托管此上下文的动画实例 */
+	/** 仅供内部编译器使用 - 通过索引获取对动画节点的引用 */
 	UFUNCTION(BlueprintPure, Category = "Animation|Utilities", meta=(BlueprintThreadSafe))
+	/** 转换为初始化上下文 */
 	static ANIMGRAPHRUNTIME_API UAnimInstance* GetAnimInstance(const FAnimExecutionContext& Context);
 
 	/** Internal compiler use only - Get a reference to an anim node by index */
+	/** 转换为初始化上下文 */
+	/** 转换为更新上下文 */
 	/** 仅供内部编译器使用 - 通过索引获取对动画节点的引用 */
 	UFUNCTION(BlueprintPure, BlueprintInternalUseOnly, meta=(BlueprintThreadSafe, DefaultToSelf = "Instance"))
 	static ANIMGRAPHRUNTIME_API FAnimNodeReference GetAnimNodeReference(UAnimInstance* Instance, int32 Index);
 
+	/** 获取当前增量时间（以秒为单位） */
+	/** 转换为更新上下文 */
 	/** Convert to an initialization context */
 	/** 转换为初始化上下文 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Utilities", meta=(BlueprintThreadSafe, ExpandEnumAsExecs = "Result"))
+	/** 获取图的该分支的当前权重 */
 	static ANIMGRAPHRUNTIME_API FAnimInitializationContext ConvertToInitializationContext(const FAnimExecutionContext& Context, EAnimExecutionContextConversionResult& Result);
+	/** 获取当前增量时间（以秒为单位） */
 	
 	/** Convert to an update context */
+	/** 获取图表的这个分支是否处于活动状态（即不混合）。 */
 	/** 转换为更新上下文 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Utilities", meta=(BlueprintThreadSafe, ExpandEnumAsExecs = "Result"))
+	/** 获取图的该分支的当前权重 */
 	static ANIMGRAPHRUNTIME_API FAnimUpdateContext ConvertToUpdateContext(const FAnimExecutionContext& Context, EAnimExecutionContextConversionResult& Result);
+	/** 转换为姿势上下文 */
 
 	/** Get the current delta time in seconds */
 	/** 获取当前增量时间（以秒为单位） */
+	/** 获取图表的这个分支是否处于活动状态（即不混合）。 */
+	/** 转换为组件空间姿势上下文 */
 	UFUNCTION(BlueprintPure, Category = "Animation|Utilities", meta=(BlueprintThreadSafe))
 	static ANIMGRAPHRUNTIME_API float GetDeltaTime(const FAnimUpdateContext& Context);
 
 	/** Get the current weight of this branch of the graph */
+	/** 转换为姿势上下文 */
 	/** 获取图的该分支的当前权重 */
 	UFUNCTION(BlueprintPure, Category = "Animation|Utilities", meta=(BlueprintThreadSafe))
 	static ANIMGRAPHRUNTIME_API float GetCurrentWeight(const FAnimUpdateContext& Context);
 	
+	/** 转换为组件空间姿势上下文 */
 	/** Get whether this branch of the graph is active (i.e. NOT blending out). */
 	/** 获取图表的这个分支是否处于活动状态（即不混合）。 */
 	UFUNCTION(BlueprintPure, Category = "Animation|Utilities", meta=(BlueprintThreadSafe))

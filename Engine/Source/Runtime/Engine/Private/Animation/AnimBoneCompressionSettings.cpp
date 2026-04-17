@@ -65,7 +65,7 @@ bool UAnimBoneCompressionSettings::AreSettingsValid() const
 		if (Codec != nullptr)
 		{
 			// If one codec isn't valid, the settings are invalid
-			// 如果一种编解码器无效，则设置无效
+   // 如果一种编解码器无效，则设置无效
 			if (!Codec->IsCodecValid())
 			{
 				return false;
@@ -85,7 +85,7 @@ bool UAnimBoneCompressionSettings::IsHighFidelity(const FCompressibleAnimData& C
 		if (Codec != nullptr && Codec->IsHighFidelity(CompressibleAnimData))
 		{
 			// At least one codec is high fidelity
-			// 至少一种编解码器是高保真的
+   // 至少一种编解码器是高保真的
 			return true;
 		}
 	}
@@ -94,12 +94,18 @@ bool UAnimBoneCompressionSettings::IsHighFidelity(const FCompressibleAnimData& C
 }
 
 struct FAnimBoneCompressionContext
+	/** 我们正在压缩的动画序列。 */
 {
+	/** 我们正在压缩的动画序列。 */
 	/** The animation sequence we are compressing. */
 	/** 我们正在压缩的动画序列。 */
+	/** 用于压缩的编解码器。请注意，结果结构中包含的编解码器最终可能会有所不同。 */
+	/** 用于压缩的编解码器。请注意，结果结构中包含的编解码器最终可能会有所不同。 */
 	const FCompressibleAnimData& AnimSeq;
 
 	/** The codec used to compress with. Note that the codec contained within the result struct can end up different. */
+	/** 压缩结果。 */
+	/** 压缩结果。 */
 	/** 用于压缩的编解码器。请注意，结果结构中包含的编解码器最终可能会有所不同。 */
 	UAnimBoneCompressionCodec* Codec;
 
@@ -138,9 +144,9 @@ bool UAnimBoneCompressionSettings::Compress(const FCompressibleAnimData& AnimSeq
 	if (AnimSeq.RawAnimationData.Num() == 0)
 	{
 		// this can happen if the animation only contains curve - i.e. blendshape curves
-		// 如果动画仅包含曲线（即混合形状曲线），则可能会发生这种情况
+  // 如果动画仅包含曲线（即混合形状曲线），则可能会发生这种情况
 		// when this happens, compression is considered a success but no codec is selected as none is needed
-		// 发生这种情况时，压缩被认为是成功的，但没有选择编解码器，因为不需要
+  // 发生这种情况时，压缩被认为是成功的，但没有选择编解码器，因为不需要
 		return true;
 	}
 
@@ -192,7 +198,7 @@ bool UAnimBoneCompressionSettings::Compress(const FCompressibleAnimData& AnimSeq
 		const int32 RawSize = AnimSeq.GetApproxRawSize();
 
 		// Find the best codec
-		// 找到最好的编解码器
+  // 找到最好的编解码器
 		int32 BestSize = BestContext->GetCompressedSize();
 
 		AnimationErrorStats BestErrorStats = BestContext->Result.AnimData->BoneCompressionErrorStats;
@@ -206,18 +212,24 @@ bool UAnimBoneCompressionSettings::Compress(const FCompressibleAnimData& AnimSeq
 			if (!Context->bSuccess)
 			{
 				// Compression failed for this codec, ignore it
-				// 该编解码器压缩失败，忽略它
+    // 该编解码器压缩失败，忽略它
 				continue;
 			}
+			/* 或者如果我们想强制误差低于阈值并减少误差 */
 
 			const FAnimationErrorStats& ErrorStats = Context->Result.AnimData->BoneCompressionErrorStats;
+			/* 或者如果我们想强制误差低于阈值并减少误差 */
 			const int32 CurrentSize = Context->GetCompressedSize();
 			const int32 MemorySavingsFromPrevious = BestSize - CurrentSize;
 
+			/* 或者如果有可接受的错误并节省空间  */
 			const bool bLowersError = ErrorStats.MaxError < BestErrorStats.MaxError;
+			/* 或者如果有可接受的错误并节省空间  */
 			const bool bErrorUnderThreshold = ErrorStats.MaxError <= ErrorThresholdToUse;
 
 			/* or if it we want to force the error below the threshold and it reduces error */
+			/* 或者如果节省了相同的金额并且可接受的误差低于之前的最佳值 */
+			/* 或者如果节省了相同的金额并且可接受的误差低于之前的最佳值 */
 			/* 或者如果我们想强制误差低于阈值并减少误差 */
 			const bool bReducesErrorBelowThreshold = bLowersError && (BestErrorStats.MaxError > ErrorThresholdToUse) && bForceBelowThreshold;
 			
@@ -258,12 +270,12 @@ bool UAnimBoneCompressionSettings::Compress(const FCompressibleAnimData& AnimSeq
 	if (Success)
 	{
 		// Move our compressed data and the relevant metadata for decompression
-		// 移动我们的压缩数据和相关元数据以进行解压
+  // 移动我们的压缩数据和相关元数据以进行解压
 		OutCompressedData = MoveTemp(BestContext->Result);
 	}
 
 	// Cleanup
-	// 清理
+ // 清理
 	for (FAnimBoneCompressionContext* Context : ContextList)
 	{
 		delete Context;
@@ -315,13 +327,13 @@ void UAnimBoneCompressionSettings::PopulateDDCKey(const UE::Anim::Compression::F
 			if (ArchiveOffset == Ar.Tell())
 			{
 				// If nothing was written, perhaps the codec implements the old deprecated API, call it just in case
-				// 如果没有编写任何内容，则编解码器可能实现了旧的已弃用的 API，请调用它以防万一
+    // 如果没有编写任何内容，则编解码器可能实现了旧的已弃用的 API，请调用它以防万一
 				PRAGMA_DISABLE_DEPRECATION_WARNINGS
 				Codec->PopulateDDCKey(KeyArgs.AnimSequence, Ar);
 				PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 				// Again, If nothing was written, call the older deprecated API
-				// 再次强调，如果没有编写任何内容，请调用旧的已弃用的 API
+    // 再次强调，如果没有编写任何内容，请调用旧的已弃用的 API
 				if (ArchiveOffset == Ar.Tell())
 				{
 					PRAGMA_DISABLE_DEPRECATION_WARNINGS
@@ -385,9 +397,9 @@ void UAnimBoneCompressionSettings::PopulateDDCKey(FArchive& Ar)
 		if (Codec != nullptr)
 		{
 			// We have no choice but to call the deprecated version, might not work correctly with newer codecs
-			// 我们别无选择，只能调用已弃用的版本，可能无法与较新的编解码器正常工作
+   // 我们别无选择，只能调用已弃用的版本，可能无法与较新的编解码器正常工作
 			// that leverage the new argument
-			// 利用新的论点
+   // 利用新的论点
 			PRAGMA_DISABLE_DEPRECATION_WARNINGS
 			Codec->PopulateDDCKey(Ar);
 			PRAGMA_ENABLE_DEPRECATION_WARNINGS

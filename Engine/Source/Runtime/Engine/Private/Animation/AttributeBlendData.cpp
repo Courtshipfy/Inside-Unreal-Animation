@@ -150,7 +150,7 @@ namespace UE { namespace Anim {
 		for (const FPerBoneBlendWeight& BoneWeight : InPerBoneBlendWeights)
 		{
 			// First input takes precedence with equal weighting
-			// 第一个输入优先且权重相等
+   // 第一个输入优先且权重相等
 			if (BoneWeight.BlendWeight > 0.5f)
 			{
 				HighestBoneWeightedIndices.Add(BoneWeight.SourceIndex + 1);
@@ -170,7 +170,7 @@ namespace UE { namespace Anim {
 		for (const float& BoneWeight : WeightsOfSource2)
 		{
 			// First input takes precedence with equal weighting
-			// 第一个输入优先且权重相等
+   // 第一个输入优先且权重相等
 			if (BoneWeight > 0.5f)
 			{
 				HighestBoneWeightedIndices.Add(1);
@@ -243,7 +243,7 @@ namespace UE { namespace Anim {
 				if (ExistingAttributeSetIndex != INDEX_NONE)
 				{
 					// Add entry to the set
-					// 将条目添加到集合中
+     // 将条目添加到集合中
 					FAttributeSet& ExistingSet = AttributeSets[ExistingAttributeSetIndex];
 					AddAttributeToSet(ExistingSet, ValuesArray[AttributeIndex].GetPtr<uint8>(), WeightIndex);
 				}
@@ -253,7 +253,7 @@ namespace UE { namespace Anim {
 					if (ExistingUniqueAttributeIndex != INDEX_NONE)
 					{
 						// Need to create a set
-						// 需要创建一个集合
+      // 需要创建一个集合
 						const FUniqueAttribute& ExistingUniqueAttribute = UniqueAttributes[ExistingUniqueAttributeIndex];
 
 						FAttributeSet& AttributeSet = AttributeSets.AddZeroed_GetRef();
@@ -262,21 +262,21 @@ namespace UE { namespace Anim {
 						AttributeSet.HighestWeightedIndex = -1;
 
 						// Add existing data
-						// 添加现有数据
+      // 添加现有数据
 						AddAttributeToSet(AttributeSet, ExistingUniqueAttribute.DataPtr, ExistingUniqueAttribute.WeightIndex);
 
 						// Add new data
-						// [翻译失败: Add new data]
+      // 添加新数据
 						AddAttributeToSet(AttributeSet, ValuesArray[AttributeIndex].GetPtr<uint8>(), WeightIndex);
 
 						// Remove as a unique attribute
-						// [翻译失败: Remove as a unique attribute]
+      // 作为唯一属性删除
 						UniqueAttributes.RemoveAtSwap(ExistingUniqueAttributeIndex);
 					}
 					else
 					{
 						// Create a unique attribute
-						// [翻译失败: Create a unique attribute]
+      // 创建独特的属性
 						FUniqueAttribute& NewUniqueAttribute = UniqueAttributes.AddZeroed_GetRef();
 						NewUniqueAttribute.Identifier = &AttributeIdentifier;
 						NewUniqueAttribute.WeightIndex = WeightIndex;
@@ -290,13 +290,13 @@ namespace UE { namespace Anim {
 	float FAttributeBlendData::GetContainerWeight(int32 ContainerIndex) const
 	{
 		// Check for float weights
-		// 检查浮子重量
+  // 检查浮子重量
 		if (Weights.Num())
 		{
 			int32 WeightIndex = ContainerIndex;
 
 			// Remap weight index if necessary
-			// 如有必要，重新映射权重指数
+   // 如有必要，重新映射权重指数
 			if (WeightIndices.Num())
 			{
 				check(WeightIndices.IsValidIndex(ContainerIndex));
@@ -312,19 +312,19 @@ namespace UE { namespace Anim {
 	float FAttributeBlendData::GetBoneWeight(int32 ContainerIndex, int32 BoneIndex) const
 	{
 		// Check for FPerBoneBlendWeight data
-		// 检查 FPerBoneBlendWeight 数据
+  // 检查 FPerBoneBlendWeight 数据
 		if (PerBoneWeights.Num())
 		{
 			ensure(PerBoneWeights.IsValidIndex(BoneIndex));
 
 			// The ContainerIndex is offset by one when doing a filtered bone blend, as the Base Attributes take the 0 index
-			// 进行过滤骨骼混合时，ContainerIndex 会偏移 1，因为基本属性采用 0 索引
+   // 进行过滤骨骼混合时，ContainerIndex 会偏移 1，因为基本属性采用 0 索引
 			if ((PerBoneWeights[BoneIndex].SourceIndex + 1) == ContainerIndex)
 			{
 				return PerBoneWeights[BoneIndex].BlendWeight;
 			}
 			// The base attributes weighting is the inverse of the filtered bone weight
-			// [翻译失败: The base attributes weighting is the inverse of the filtered bone weight]
+   // 基本属性权重是过滤后骨骼权重的倒数
 			else if (ContainerIndex == 0)
 			{
 				return 1.0f - PerBoneWeights[BoneIndex].BlendWeight;
@@ -332,31 +332,31 @@ namespace UE { namespace Anim {
 		}
 
 		// Check for float bone weights
-		// [翻译失败: Check for float bone weights]
+  // 检查浮骨重量
 		if (GetBoneWeights().Num())
 		{
 			ensure(Weights.IsValidIndex(BoneIndex));
 
 			float BoneWeight = GetBoneWeights()[BoneIndex];
 			// First attribute containers weighting is the inverse of the second container its weights
-			// 第一个属性容器权重是第二个容器权重的倒数
+   // 第一个属性容器权重是第二个容器权重的倒数
 			BoneWeight = ContainerIndex == 0 ? 1.f - BoneWeight : BoneWeight;
 			return BoneWeight;
 		}
 
 		// Check for FBlendSampleData data 
-		// 检查 FBlendSampleData 数据
+  // 检查 FBlendSampleData 数据
 		if (BlendSampleDataCache.Num())
 		{
 			// Remap index if necessary
-			// 如有必要，重新映射索引
+   // 如有必要，重新映射索引
 			const int32 SampleDataIndex = GetBlendSampleDataCacheIndices().Num() ? GetBlendSampleDataCacheIndices()[ContainerIndex] : ContainerIndex;
 						
 			const FBlendSampleData& BlendSampleData = BlendSampleDataCache[SampleDataIndex];
 			const int32 PerBoneIndex = PerBoneInterpolationIndices[BoneIndex];
 
 			// Blend-sample blending is only performed when they contain per-bone weights, if INDEX_NONE or out of range use the total weight instead
-			// [翻译失败: Blend-sample blending is only performed when they contain per-bone weights, if INDEX_NONE or out of range use the total weight instead]
+   // 混合样本混合仅在包含每个骨骼权重时执行，如果 INDEX_NONE 或超出范围，则使用总权重
 			if (PerBoneIndex != INDEX_NONE && BlendSampleData.PerBoneBlendData.IsValidIndex(PerBoneIndex))
 			{
 				return BlendSampleData.PerBoneBlendData[PerBoneIndex];

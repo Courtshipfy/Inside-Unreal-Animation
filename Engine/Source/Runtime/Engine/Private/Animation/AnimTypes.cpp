@@ -39,7 +39,7 @@ float GetTriggerTimeOffsetForType(EAnimEventTriggerOffsets::Type OffsetType)
 
 /////////////////////////////////////////////////////
 // FAnimNotifyEvent
-// [翻译失败: FAnimNotifyEvent]
+// FAnimNotify事件
 
 #if WITH_EDITORONLY_DATA
 
@@ -56,7 +56,7 @@ void FAnimNotifyEvent::PostSerialize(const FArchive& Ar)
 		if (!Guid.IsValid())
 		{
 			// Create a new Guid if this one is invalid
-			// [翻译失败: Create a new Guid if this one is invalid]
+   // 如果该 Guid 无效，则创建一个新的 Guid
 			Guid = FGuid::NewGuid();
 		}
 	}
@@ -155,7 +155,7 @@ FName FAnimNotifyEvent::GetNotifyEventName(const UMirrorDataTable* MirrorDataTab
 ////////////////////////////
 //
 // FAnimSyncMarker
-// [翻译失败: FAnimSyncMarker]
+// FAnimSync标记
 // 
 ////////////////////////////
 
@@ -176,7 +176,7 @@ bool FAnimSyncMarker::Serialize(FArchive& Ar)
 		if(!Guid.IsValid())
 		{
 			// Create a new Guid if this one is invalid
-			// 如果该 Guid 无效，则创建一个新的 Guid
+   // 如果该 Guid 无效，则创建一个新的 Guid
 			Guid = FGuid::NewGuid();
 		}
 	}
@@ -226,7 +226,7 @@ void FMarkerSyncData::GetMarkerIndicesForTime(float CurrentTime, bool bLooping, 
 		}
 
 		// Continue looking for an authored next sync marker.
-		// 继续寻找创作的下一个同步标记。
+  // 继续寻找创作的下一个同步标记。
 		if (OutNextMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary)
 		{
 			break; // Done
@@ -245,7 +245,7 @@ FMarkerSyncAnimPosition FMarkerSyncData::GetMarkerSyncPositionFromMarkerIndicies
 	float PrevTime, NextTime;
 
 	// Get previous marker's time and name.
-	// 获取前一个标记的时间和名称。
+ // 获取前一个标记的时间和名称。
 	if (PrevMarker != MarkerIndexSpecialValues::AnimationBoundary && AuthoredSyncMarkers.IsValidIndex(PrevMarker))
 	{
 		PrevTime = AuthoredSyncMarkers[PrevMarker].Time;
@@ -265,7 +265,7 @@ FMarkerSyncAnimPosition FMarkerSyncData::GetMarkerSyncPositionFromMarkerIndicies
 	}
 
 	// Get next marker's time and name.
-	// 获取下一个标记的时间和名称。
+ // 获取下一个标记的时间和名称。
 	if (NextMarker != MarkerIndexSpecialValues::AnimationBoundary && AuthoredSyncMarkers.IsValidIndex(NextMarker))
 	{
 		NextTime = AuthoredSyncMarkers[NextMarker].Time;
@@ -285,7 +285,7 @@ FMarkerSyncAnimPosition FMarkerSyncData::GetMarkerSyncPositionFromMarkerIndicies
 	}
 
 	// Account for looping
-	// 考虑循环
+ // 考虑循环
 	if (PrevTime > NextTime)
 	{
 		PrevTime = (PrevTime > CurrentTime) ? PrevTime - SequenceLength : PrevTime;
@@ -304,7 +304,7 @@ FMarkerSyncAnimPosition FMarkerSyncData::GetMarkerSyncPositionFromMarkerIndicies
 	check(NextTime > PrevTime);
 
 	// Store the encoded current time position as a ratio between markers.
-	// 将编码的当前时间位置存储为标记之间的比率。
+ // 将编码的当前时间位置存储为标记之间的比率。
 	SyncPosition.PositionBetweenMarkers = (CurrentTime - PrevTime) / (NextTime - PrevTime);
 	return SyncPosition;
 }

@@ -44,7 +44,7 @@ FAnimSubsystem_Base::FAnimSubsystem_Base(const FAnimSubsystem_Base& Other)
 FAnimSubsystem_Base& FAnimSubsystem_Base::operator =(const FAnimSubsystem_Base& Other)
 {
 	// Need to perform a lock as copying can race with PatchValueHandlers in async loading thread-enabled builds
-	// 需要执行锁定，因为在异步加载启用线程的构建中，复制可能会与 PatchValueHandler 竞争
+ // 需要执行锁定，因为在异步加载启用线程的构建中，复制可能会与 PatchValueHandler 竞争
 	FScopeLock Lock(&ValueHandlersCriticalSection);
 	FScopeLock OtherLock(&Other.ValueHandlersCriticalSection);
 

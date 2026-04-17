@@ -296,7 +296,7 @@ namespace Anim {
 
 #if WITH_EDITOR
 		// RAII helper to temporarily block Animation compression requests for specified AnimationSequence
-		// RAII 帮助程序暂时阻止指定动画序列的动画压缩请求
+  // RAII 帮助程序暂时阻止指定动画序列的动画压缩请求
 		struct FScopedCompressionGuard
 		{
 			FScopedCompressionGuard() = delete;

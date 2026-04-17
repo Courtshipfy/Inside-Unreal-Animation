@@ -25,10 +25,14 @@ class ULinkedAnimGraphLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	/** 从动画节点引用获取链接的动画图引用 */
+	/** 从动画节点引用获取链接的动画图引用 */
 	/** Get a linked anim graph reference from an anim node reference */
 	/** 从动画节点引用获取链接的动画图引用 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Linked Anim Graphs", meta=(BlueprintThreadSafe, ExpandEnumAsExecs = "Result"))
 	static ANIMGRAPHRUNTIME_API FLinkedAnimGraphReference ConvertToLinkedAnimGraph(const FAnimNodeReference& Node, EAnimNodeReferenceConversionResult& Result);
+	/** 从动画节点引用获取链接的动画图引用（纯） */
+	/** 从动画节点引用获取链接的动画图引用（纯） */
 
 	/** Get a linked anim graph reference from an anim node reference (pure) */
 	/** 从动画节点引用获取链接的动画图引用（纯） */
@@ -37,11 +41,15 @@ public:
 	{
 		EAnimNodeReferenceConversionResult ConversionResult;
 		LinkedAnimGraph = ConvertToLinkedAnimGraph(Node, ConversionResult);
+	/** 返回节点是否托管实例（例如链接的动画图或图层） */
 		Result = (ConversionResult == EAnimNodeReferenceConversionResult::Succeeded);
+	/** 返回节点是否托管实例（例如链接的动画图或图层） */
 	}
 	
+	/** 获取此节点托管的链接实例。如果节点没有托管实例，则 HasLinkedAnimInstance 将返回 false */
 	/** Returns whether the node hosts an instance (e.g. linked anim graph or layer) */
 	/** 返回节点是否托管实例（例如链接的动画图或图层） */
+	/** 获取此节点托管的链接实例。如果节点没有托管实例，则 HasLinkedAnimInstance 将返回 false */
 	UFUNCTION(BlueprintPure, Category = "Animation|Linked Anim Graphs", meta=(BlueprintThreadSafe))
 	static ANIMGRAPHRUNTIME_API bool HasLinkedAnimInstance(const FLinkedAnimGraphReference& Node);
 

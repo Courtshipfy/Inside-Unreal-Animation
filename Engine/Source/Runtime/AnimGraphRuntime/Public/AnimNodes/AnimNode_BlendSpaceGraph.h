@@ -14,6 +14,6 @@ struct FAnimNode_BlendSpaceGraph : public FAnimNode_BlendSpaceGraphBase
 	GENERATED_BODY()
 
 	// @return the sync group that this blendspace uses
-	// @return 此混合空间使用的同步组
+ // @return 此混合空间使用的同步组
 	FName GetGroupName() const { return GroupName; }
 };

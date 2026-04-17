@@ -164,7 +164,7 @@ struct FInputClampConstants
 
 #if WITH_EDITOR
 	// Get a friendly name to display on a pin
-	// 获取一个友好的名称以显示在图钉上
+ // 获取一个友好的名称以显示在图钉上
 	ENGINE_API FText GetFriendlyName(FText InFriendlyName) const;
 #endif
 };
@@ -177,15 +177,15 @@ struct FInputClampState
 	GENERATED_BODY()
 
 	// The interpolated result
-	// 插值结果
+ // 插值结果
 	float InterpolatedResult = 0.f;
 
 	// Whether this state is initialized
-	// 该状态是否已初始化
+ // 该状态是否已初始化
 	bool bInitialized = false;
 
 	// Apply scale, bias, and clamp to value
-	// 对值应用缩放、偏差和限制
+ // 对值应用缩放、偏差和限制
 	ENGINE_API float ApplyTo(const FInputClampConstants& InConstants, float InValue, float InDeltaTime);
 
 	void Reinitialize() { bInitialized = false; }
@@ -245,11 +245,11 @@ public:
 
 #if WITH_EDITOR
 	// Get a friendly name to display on a pin
-	// 获取一个友好的名称以显示在图钉上
+ // 获取一个友好的名称以显示在图钉上
 	ENGINE_API FText GetFriendlyName(FText InFriendlyName) const;
 
 	// Copy parameters from the legacy combined constants/state structure
-	// 从旧的组合常量/状态结构中复制参数
+ // 从旧的组合常量/状态结构中复制参数
 	ENGINE_API void CopyFromLegacy(const FInputScaleBiasClamp& InLegacy);
 #endif
 };
@@ -262,11 +262,11 @@ struct FInputScaleBiasClampState
 	GENERATED_BODY()
 
 	// The interpolated result
-	// 插值结果
+ // 插值结果
 	float InterpolatedResult;
 
 	// Whether this state is initialized
-	// 该状态是否已初始化
+ // 该状态是否已初始化
 	bool bInitialized;
 
 public:
@@ -277,11 +277,11 @@ public:
 	}
 
 	// Apply scale, bias, and clamp to value
-	// 对值应用缩放、偏差和限制
+ // 对值应用缩放、偏差和限制
 	ENGINE_API float ApplyTo(const FInputScaleBiasClampConstants& InConstants, float Value, float InDeltaTime);
 
 	// Apply but dont modify InterpolatedResult
-	// 应用但不修改 InterpolatedResult
+ // 应用但不修改 InterpolatedResult
 	ENGINE_API float ApplyTo(const FInputScaleBiasClampConstants& InConstants, float Value) const;
 
 	void Reinitialize() { bInitialized = false; }

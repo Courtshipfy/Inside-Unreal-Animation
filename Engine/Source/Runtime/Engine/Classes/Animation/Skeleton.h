@@ -43,6 +43,8 @@ class FEditableSkeleton;
 // 用于控制全局骨架兼容性的委托
 DECLARE_DELEGATE_RetVal(bool, FAreAllSkeletonsCompatible);
 
+/** 这是特定骨架网格物体中的骨骼与该骨架组的骨骼之间的映射表。 */
+/** 这是特定骨架网格物体中的骨骼与该骨架组的骨骼之间的映射表。 */
 /** This is a mapping table between bone in a particular skeletal mesh and bone of this skeleton set. */
 /** 这是特定骨架网格物体中的骨骼与该骨架组的骨骼之间的映射表。 */
 USTRUCT()
@@ -67,44 +69,66 @@ struct FSkeletonToMeshLinkup
 	TArray<int32> MeshToSkeletonTable;
 
 };
+/** 骨骼翻译重定向模式。 */
+/** 骨骼翻译重定向模式。 */
 
 /** Bone translation retargeting mode. */
 /** 骨骼翻译重定向模式。 */
 UENUM()
 namespace EBoneTranslationRetargetingMode
+		/** 使用动画数据的翻译。 */
 {
+		/** 使用动画数据的翻译。 */
+		/** 使用 Skeleton 的固定翻译。 */
 	enum Type : int
 	{
+		/** 使用动画平移，但根据骨架的比例缩放长度。 */
+		/** 使用 Skeleton 的固定翻译。 */
 		/** Use translation from animation data. */
+		/** 使用动画翻译，但也发挥与重定向姿势的差异作为添加剂。 */
 		/** 使用动画数据的翻译。 */
+		/** 使用动画平移，但根据骨架的比例缩放长度。 */
+		/** 应用参考姿势的增量方向和比例 */
 		Animation,
 		/** Use fixed translation from Skeleton. */
+		/** 使用动画翻译，但也发挥与重定向姿势的差异作为添加剂。 */
 		/** 使用 Skeleton 的固定翻译。 */
 		Skeleton,
+/** 考虑“方向和比例”重定向的骨骼平移时允许的最大错误。 */
+		/** 应用参考姿势的增量方向和比例 */
 		/** Use Translation from animation, but scale length by Skeleton's proportions. */
 		/** 使用动画平移，但根据骨架的比例缩放长度。 */
+/** BoneTree 中的每个 Bone 节点 */
 		AnimationScaled,
 		/** Use Translation from animation, but also play the difference from retargeting pose as an additive. */
 		/** 使用动画翻译，但也发挥与重定向姿势的差异作为添加剂。 */
+/** 考虑“方向和比例”重定向的骨骼平移时允许的最大错误。 */
 		AnimationRelative,
 		/** Apply delta orientation and scale from ref pose */
 		/** 应用参考姿势的增量方向和比例 */
+	/** 骨骼名称，这是与网格骨骼匹配的搜索条件。如果删除，这将是 NAME_None。 */
+/** BoneTree 中的每个 Bone 节点 */
 		OrientAndScale,
 	};
 }
+	/** 父索引。如果不使用则为-1。根的父级为 0。不要删除该元素，而是将其设置为 -1。如果由于其他原因恢复，请修复此链接。 */
 
 /** Max error allowed when considering bone translations for 'Orient And Scale' retargeting. */
 /** 考虑“方向和比例”重定向的骨骼平移时允许的最大错误。 */
 #define BONE_TRANS_RT_ORIENT_AND_SCALE_PRECISION (0.001f) 
+	/** 骨骼名称，这是与网格骨骼匹配的搜索条件。如果删除，这将是 NAME_None。 */
+	/** 翻译组件的重定向模式。 */
 
 /** Each Bone node in BoneTree */
 /** BoneTree 中的每个 Bone 节点 */
 USTRUCT()
+	/** 父索引。如果不使用则为-1。根的父级为 0。不要删除该元素，而是将其设置为 -1。如果由于其他原因恢复，请修复此链接。 */
 struct FBoneNode
 {
 	GENERATED_USTRUCT_BODY()
 
 #if WITH_EDITORONLY_DATA
+	/** 翻译组件的重定向模式。 */
 	/** Name of bone, this is the search criteria to match with mesh bone. This will be NAME_None if deleted. */
 	/** 骨骼名称，这是与网格骨骼匹配的搜索条件。如果删除，这将是 NAME_None。 */
 	UPROPERTY()
@@ -118,6 +142,7 @@ struct FBoneNode
 
 	/** Retargeting Mode for Translation Component. */
 	/** 翻译组件的重定向模式。 */
+/** 这是特定骨架网格物体中的骨骼与该骨架组的骨骼之间的映射表。 */
 	UPROPERTY(EditAnywhere, Category=BoneNode)
 	TEnumAsByte<EBoneTranslationRetargetingMode::Type> TranslationRetargetingMode;
 
@@ -129,6 +154,7 @@ struct FBoneNode
 		TranslationRetargetingMode(EBoneTranslationRetargetingMode::Animation)
 	{
 	}
+/** 这是特定骨架网格物体中的骨骼与该骨架组的骨骼之间的映射表。 */
 
 	FBoneNode(FName InBoneName, int32 InParentIndex)
 		:
@@ -288,11 +314,13 @@ public:
 	{
 	}
 
+	/** 骨骼树 - 每个骨骼都包含名称和父索引**/
 	FVirtualBone(FName InSource, FName InTarget)
 		: SourceBoneName(InSource)
 		, TargetBoneName(InTarget)
 	{
 		FString VBNameString = VirtualBoneNameHelpers::AddVirtualBonePrefix(SourceBoneName.ToString() + TEXT("_") + TargetBoneName.ToString());
+	/** 局部空间中的参考骨架姿势 */
 		VirtualBoneName = FName(*VBNameString);
 	}
 };
@@ -300,23 +328,30 @@ public:
 
 /**
  *	USkeleton : that links between mesh and animation
+	/** 骨骼树 - 每个骨骼都包含名称和父索引**/
  *		- Bone hierarchy for animations
+	/** 参考骨架 */
  *		- Bone/track linkup between mesh and animation
  *		- Retargetting related
  */
+	/** 骨架指南 */
 UCLASS(hidecategories=Object, MinimalAPI, BlueprintType)
+	/** 局部空间中的参考骨架姿势 */
 class USkeleton : public UObject, public IInterface_AssetUserData, public IInterface_PreviewMeshProvider
 {
 	friend class UAnimationBlueprintLibrary;
 	friend class FSkeletonDetails;
 
 	GENERATED_UCLASS_BODY()
+	/** 转换功能。当 VER_UE4_REFERENCE_SKELETON_REFACTOR 被移除时移除。 */
 
 protected:
 	/** Skeleton bone tree - each contains name and parent index**/
+	/** 参考骨架 */
 	/** 骨骼树 - 每个骨骼都包含名称和父索引**/
 	UPROPERTY(VisibleAnywhere, Category=Skeleton)
 	TArray<struct FBoneNode> BoneTree;
+	/** 骨架指南 */
 
 #if WITH_EDITORONLY_DATA
 	/** Reference skeleton poses in local space */
@@ -325,7 +360,8 @@ protected:
 	TArray<FTransform> RefLocalPoses_DEPRECATED;
 
 	// Preview axis to consider as "forward" for the skeleton. Only used for preview purposes.
-	// 预览轴被视为骨架的“向前”。仅用于预览目的。
+ // 预览轴被视为骨架的“向前”。仅用于预览目的。
+	/** 转换功能。当 VER_UE4_REFERENCE_SKELETON_REFACTOR 被移除时移除。 */
 	UPROPERTY(EditAnywhere, Category = Preview)
 	TEnumAsByte<EAxis::Type> PreviewForwardAxis;
 #endif
@@ -347,12 +383,14 @@ protected:
 	/** 转换功能。当 VER_UE4_REFERENCE_SKELETON_REFACTOR 被移除时移除。 */
 	void ConvertToFReferenceSkeleton();
 
+	/** 访问参考骨架以使数据只读 */
 	/**
 	*  Array of this skeletons virtual bones. These are new bones are links between two existing bones
 	*  and are baked into all the skeletons animations
 	*/
 	UPROPERTY()
 	TArray<FVirtualBone> VirtualBones;
+	/** 该骨架上虚拟骨骼数组的访问器 */
 
 	/**
 	 * The list of compatible skeletons. This skeleton will be able to use animation data originating from skeletons within this array, such as animation sequences.
@@ -363,22 +401,27 @@ protected:
 	 **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CompatibleSkeletons)
 	TArray<TSoftObjectPtr<USkeleton>> CompatibleSkeletons;
+	/** 该骨架的可序列化重定向源 **/
+	/** 访问参考骨架以使数据只读 */
 
 	/**
 	 * Should we use the per bone translational retarget mode from the source (compatible) skeleton's instead of from this skeleton? On default this is disabled.
 	 * Enabling this would allow you to have one shared set of animations. You would configure the retarget settings on the animation skeleton.
 	 * Then every character that plays animations from this source skeleton will use the translational retarget settings from the source skeleton, which saves you from
 	 * having to configure the retarget modes for every bone in every character as they can be setup just once now on the animation skeleton.
+	/** 该骨架上虚拟骨骼数组的访问器 */
 	 */
 	UPROPERTY(EditAnywhere, Category = CompatibleSkeletons)
 	bool bUseRetargetModesFromCompatibleSkeleton = false;
 
 public:
 	//~ Begin UObject Interface.
-	//~ 开始 UObject 接口。
+ // ~ 开始 UObject 接口。
 #if WITH_EDITOR
+	/** @return 曲线元数据条目的数量 **/
 	ENGINE_API virtual void PreEditUndo() override;
 	ENGINE_API virtual void PostEditUndo() override;
+	/** 该骨架的可序列化重定向源 **/
 	EAxis::Type GetPreviewForwardAxis() const { return PreviewForwardAxis; }
 #endif
 	ENGINE_API virtual void BeginDestroy() override;
@@ -394,6 +437,7 @@ public:
 	/** 该骨架上虚拟骨骼数组的访问器 */
 	const TArray<FVirtualBone>& GetVirtualBones() const { return VirtualBones; }
 
+	/** @return 曲线元数据条目的数量 **/
 	/** 
 	 *	Array of named socket locations, set up in editor and used as a shortcut instead of specifying 
 	 *	everything explicitly to AttachComponent in the SkeletalMeshComponent.
@@ -489,7 +533,7 @@ public:
 #endif
 
 	// this is called when you know both flags - called by post serialize and import
-	// 当您知道两个标志时，就会调用此方法 - 由后序列化和导入调用
+ // 当您知道两个标志时，就会调用此方法 - 由后序列化和导入调用
 	ENGINE_API void AccumulateCurveMetaData(FName CurveName, bool bMaterialSet, bool bMorphtargetSet);
 
 	ENGINE_API bool AddNewVirtualBone(const FName SourceBoneName, const FName TargetBoneName);
@@ -505,67 +549,86 @@ public:
 	void HandleVirtualBoneChanges();
 
 	// return version of AnimCurveUidVersion
-	// 返回 AnimCurveUidVersion 的版本
+ // 返回 AnimCurveUidVersion 的版本
+	/** 该骨架中可用的混合配置文件列表 */
 	uint16 GetAnimCurveUidVersion() const;
 
 	const TArray<TSoftObjectPtr<USkeleton>>& GetCompatibleSkeletons() const { return CompatibleSkeletons; }
 
+	/** 按名称获取指定的混合配置文件 */
 	UE_DEPRECATED(5.2, "Please use UE::Anim::FSkeletonRemappingRegistry::GetRemapping.")
 	ENGINE_API const FSkeletonRemapping* GetSkeletonRemapping(const USkeleton* SourceSkeleton) const;
 
 	ENGINE_API bool GetUseRetargetModesFromCompatibleSkeleton() const;
+	/** 使用指定名称创建新的混合配置文件 */
 	ENGINE_API void SetUseRetargetModesFromCompatibleSkeleton(bool bUse);
 
 #if WITH_EDITOR
+	/** 使用指定名称重命名现有混合配置文件。如果成功则返回指针，如果失败则返回 nullptr */
 	// Get existing (seen) sync marker names for this Skeleton
-	// 获取此骨架的现有（已看到）同步标记名称
+ // 获取此骨架的现有（已看到）同步标记名称
 	const TArray<FName>& GetExistingMarkerNames() const { return ExistingMarkerNames; }
 
 	// Register a new sync marker name
-	// 注册新的同步标记名称
+ // 注册新的同步标记名称
+	/** 该骨架中可用的混合配置文件列表 */
 	void RegisterMarkerName(FName MarkerName) { ExistingMarkerNames.AddUnique(MarkerName); ExistingMarkerNames.Sort(FNameLexicalLess()); }
+	/* 插槽组 */
 
 	// Remove a sync marker name
-	// 删除同步标记名称
+ // 删除同步标记名称
+	/** 按名称获取指定的混合配置文件 */
 	ENGINE_API bool RemoveMarkerName(FName MarkerName);
 
 	// Rename a sync marker name
-	// 重命名同步标记名称
+ // 重命名同步标记名称
+	/** 使用指定名称创建新的混合配置文件 */
+	/** SlotName 到 GroupName TMap，仅在运行时，未序列化。 **/
 	ENGINE_API bool RenameMarkerName(FName InOldName, FName InNewName);
 #endif
 
+	/** 使用指定名称重命名现有混合配置文件。如果成功则返回指针，如果失败则返回 nullptr */
 protected:
 	UE_DEPRECATED(5.7, "SmartNames in Skeleton have been deprecated, use CurveMetaData instead.")
 	UPROPERTY()
 	FSmartNameContainer SmartNames_DEPRECATED;
 
 	//Cached marker sync marker names (stripped for non editor)
-	//缓存的标记同步标记名称（对于非编辑器来说被删除）
+ // 缓存的标记同步标记名称（对于非编辑器来说被删除）
+	/* 插槽组 */
+	/** 注册插槽名称。如果插槽已注册，则返回 true；如果已注册，则返回 false。 */
 	TArray<FName> ExistingMarkerNames;
 
 private:
 	// Refresh skeleton metadata (updates bone indices for linked bone references)
-	// 刷新骨骼元数据（更新链接骨骼引用的骨骼索引）
+ // 刷新骨骼元数据（更新链接骨骼引用的骨骼索引）
+	/** 如果添加了组，则返回 true；如果组已存在，则返回 false */
 	void RefreshSkeletonMetaData();
+	/** SlotName 到 GroupName TMap，仅在运行时，未序列化。 **/
 
 	// Returns the UAnimCurveMetaData from this skeleton's AssetUserData, creating one if it doesn't exist
-	// 从该骨架的 AssetUserData 返回 UAnimCurveMetaData，如果不存在则创建一个
+ // 从该骨架的 AssetUserData 返回 UAnimCurveMetaData，如果不存在则创建一个
 	UAnimCurveMetaData* GetOrCreateCurveMetaDataObject();
 
 public:
 	//////////////////////////////////////////////////////////////////////////
 	// Blend Profiles
-	// 混合配置文件
+ // 混合配置文件
 
 	/** List of blend profiles available in this skeleton */
+	/** 注册插槽名称。如果插槽已注册，则返回 true；如果已注册，则返回 false。 */
 	/** 该骨架中可用的混合配置文件列表 */
+	/** 预览此骨架时使用的默认骨架网格物体 */
 	UPROPERTY(Instanced)
 	TArray<TObjectPtr<UBlendProfile>> BlendProfiles;
 
+	/** 如果添加了组，则返回 true；如果组已存在，则返回 false */
+	/** 预览此骨架时要使用的附加骨架网格物体 */
 	/** Get the specified blend profile by name */
 	/** 按名称获取指定的混合配置文件 */
 	UFUNCTION(BlueprintPure, Category = Skeleton, meta = (BlueprintThreadSafe))
 	ENGINE_API UBlendProfile* GetBlendProfile(const FName& InProfileName);
+	/** 钻机属性将单独保存 */
 
 	/** Create a new blend profile with the specified name */
 	/** 使用指定名称创建新的混合配置文件 */
@@ -573,27 +636,35 @@ public:
 
 	/** Rename an existing blend profile with the specified name. Returns the pointer if success, nullptr on failure */
 	/** 使用指定名称重命名现有混合配置文件。如果成功则返回指针，如果失败则返回 nullptr */
+	/** 已创建的 AnimNotifier。目前没有删除步骤，但将来我们将提供删除**/
 	ENGINE_API UBlendProfile* RenameBlendProfile(const FName& InProfileName, const FName& InNewProfileName);
 
+	/** 预览此骨架时使用的默认骨架网格物体 */
 	//////////////////////////////////////////////////////////////////////////
+	/* 该骨架的附加资产组件 */
 
 	/************************************************************************/
 	/* Slot Groups */
+	/** 预览此骨架时要使用的附加骨架网格物体 */
 	/* 插槽组 */
 	/************************************************************************/
 private:
 	// serialized slot groups and slot names.
-	// 序列化的插槽组和插槽名称。
+ // 序列化的插槽组和插槽名称。
+	/** 钻机属性将单独保存 */
 	UPROPERTY()
 	TArray<FAnimSlotGroup> SlotGroups;
 
+	/** 注册一个委托，在预览动画更改后调用 */
 	/** SlotName to GroupName TMap, only at runtime, not serialized. **/
 	/** SlotName 到 GroupName TMap，仅在运行时，未序列化。 **/
 	TMap<FName, FName> SlotToGroupNameMap;
+	/** 已创建的 AnimNotifier。目前没有删除步骤，但将来我们将提供删除**/
 
 	void BuildSlotToGroupMap(bool bInRemoveDuplicates = false);
 
 public:
+	/* 该骨架的附加资产组件 */
 	ENGINE_API FAnimSlotGroup* FindAnimSlotGroup(const FName& InGroupName);
 	ENGINE_API const FAnimSlotGroup* FindAnimSlotGroup(const FName& InGroupName) const;
 	ENGINE_API const TArray<FAnimSlotGroup>& GetSlotGroups() const;
@@ -601,31 +672,37 @@ public:
 
 	/** Register a slot name. Return true if a slot was registered, false if it was already registered. */
 	/** 注册插槽名称。如果插槽已注册，则返回 true；如果已注册，则返回 false。 */
+	/** 取消注册要在预览动画更改后调用的委托 */
 	ENGINE_API bool RegisterSlotNode(const FName& InSlotName);
 
 	ENGINE_API void SetSlotGroupName(const FName& InSlotName, const FName& InGroupName);
 	/** Returns true if Group is added, false if it already exists */
 	/** 如果添加了组，则返回 true；如果组已存在，则返回 false */
+	/** 注册一个委托，在预览动画更改后调用 */
 	ENGINE_API bool AddSlotGroupName(const FName& InNewGroupName);
 	ENGINE_API FName GetSlotGroupName(const FName& InSlotName) const;
 
 	// Edits/removes slot group data
-	// 编辑/删除插槽组数据
+ // 编辑/删除插槽组数据
 	// WARNING: Does not verify that the names aren't used anywhere - if it isn't checked
-	// 警告：如果未检查，则不验证名称是否未在任何地方使用
+ // 警告：如果未检查，则不验证名称是否未在任何地方使用
 	// by the caller the names will be recreated when referencing assets load again.
-	// 调用者再次引用资产加载时将重新创建名称。
+ // 调用者再次引用资产加载时将重新创建名称。
 	ENGINE_API void RemoveSlotName(const FName& InSlotName);
 	ENGINE_API void RemoveSlotGroup(const FName& InSlotName);
 	ENGINE_API void RenameSlotName(const FName& OldName, const FName& NewName);
 
 #if WITH_EDITORONLY_DATA
+	/** 运行时在 SkinnedAssets 和 Mesh Linkup Data 之间构建映射表*/
 private:
 	/** The default skeletal mesh to use when previewing this skeleton */
+	/** 取消注册要在预览动画更改后调用的委托 */
 	/** 预览此骨架时使用的默认骨架网格物体 */
+	/** 该骨架的缓存软对象指针。这是出于在使用 IsCompatible(Skeleton) 搜索兼容骨架时的性能原因。 */
 	UPROPERTY(duplicatetransient, AssetRegistrySearchable)
 	TSoftObjectPtr<class USkeletalMesh> PreviewSkeletalMesh;
 
+	/** IInterface_PreviewMeshProvider接口 */
 	/** The additional skeletal meshes to use when previewing this skeleton */
 	/** 预览此骨架时要使用的附加骨架网格物体 */
 	UPROPERTY(duplicatetransient, AssetRegistrySearchable)
@@ -639,26 +716,33 @@ private:
 
 public:
 
+	/** 运行时在 SkinnedAssets 和 Mesh Linkup Data 之间构建映射表*/
 	/** AnimNotifiers that has been created. Right now there is no delete step for this, but in the future we'll supply delete**/
 	/** 已创建的 AnimNotifier。目前没有删除步骤，但将来我们将提供删除**/
 	UPROPERTY()
 	TArray<FName> AnimationNotifies;
+	/** 该骨架的缓存软对象指针。这是出于在使用 IsCompatible(Skeleton) 搜索兼容骨架时的性能原因。 */
 
 	/* Attached assets component for this skeleton */
 	/* 该骨架的附加资产组件 */
+	/** IInterface_PreviewMeshProvider接口 */
 	UPROPERTY()
 	FPreviewAssetAttachContainer PreviewAttachedAssetContainer;
 #endif // WITH_EDITORONLY_DATA
 
+	/** 找到该骨架的第一个兼容网格 */
 private:
 	DECLARE_MULTICAST_DELEGATE( FOnRetargetSourceChangedMulticaster )
 	FOnRetargetSourceChangedMulticaster OnRetargetSourceChanged;
+	/** 加载我们可能拥有的任何其他网格 */
 
 public:
 	typedef FOnRetargetSourceChangedMulticaster::FDelegate FOnRetargetSourceChanged;
+	/** 获取我们在预览此骨架时使用的附加骨架网格物体 */
 
 	/** Registers a delegate to be called after the preview animation has been changed */
 	/** 注册一个委托，在预览动画更改后调用 */
+	/** 设置我们在预览此骨架时使用的附加骨架网格物体 */
 	FDelegateHandle RegisterOnRetargetSourceChanged(const FOnRetargetSourceChanged& Delegate)
 	{
 		return OnRetargetSourceChanged.Add(Delegate);
@@ -673,15 +757,19 @@ public:
 	{
 		return VirtualBoneGuid;
 	}
+	/** 找到该骨架的第一个兼容网格 */
 
 	/** Unregisters a delegate to be called after the preview animation has been changed */
 	/** 取消注册要在预览动画更改后调用的委托 */
+	/** 加载我们可能拥有的任何其他网格 */
 	void UnregisterOnRetargetSourceChanged(FDelegateHandle Handle)
 	{
 		OnRetargetSourceChanged.Remove(Handle);
+	/** 获取我们在预览此骨架时使用的附加骨架网格物体 */
 	}
 
 	void CallbackRetargetSourceChanged()
+	/** 设置我们在预览此骨架时使用的附加骨架网格物体 */
 	{
 		OnRetargetSourceChanged.Broadcast();
 	}
@@ -690,13 +778,16 @@ public:
 
 private:
 	//Use this Lock everytime you change or access SkinnedAssetLinkupCache member.
-	//每次更改或访问 SkinnedAssetLinkupCache 成员时都使用此锁。
+ // 每次更改或访问 SkinnedAssetLinkupCache 成员时都使用此锁。
+	/** !IsCompatibleForEditor 的包装器，用作绑定到资源选择器中的 FOnShouldFilterAsset 的便捷函数。 */
 	FTransactionallySafeRWLock SkinnedAssetLinkupCacheLock;
 
 	/** Runtime built mapping table between SkinnedAssets and Mesh Linkup Data*/
+	/** 获取与该骨架兼容的所有骨架资源（不仅仅是内部列表，还包括相互隐式兼容的骨架） */
 	/** 运行时在 SkinnedAssets 和 Mesh Linkup Data 之间构建映射表*/
 	TMap<TObjectKey<USkinnedAsset>, TUniquePtr<FSkeletonToMeshLinkup>> SkinnedAssetLinkupCache;
 
+	/** 根据资产的类和骨架标签获取兼容的资产。*/
 public:
 	/** A cached soft object pointer of this skeleton. This is done for performance reasons when searching for compatible skeletons when using IsCompatible(Skeleton). */
 	/** 该骨架的缓存软对象指针。这是出于在使用 IsCompatible(Skeleton) 搜索兼容骨架时的性能原因。 */
@@ -717,18 +808,21 @@ public:
 	 * Collect animation notifies that are referenced in all animations that use this skeleton (uses the asset registry).
 	 * @param	OutNotifies		All the notifies that were found
 	 */
+	/** !IsCompatibleForEditor 的包装器，用作绑定到资源选择器中的 FOnShouldFilterAsset 的便捷函数。 */
 	ENGINE_API void CollectAnimationNotifies(TArray<FName>& OutNotifies) const;
 
 	// Adds a new anim notify to the cached AnimationNotifies array.
-	// 将新的动画通知添加到缓存的 AnimationNotifying 数组中。
+ // 将新的动画通知添加到缓存的 AnimationNotifying 数组中。
+	/** 获取与该骨架兼容的所有骨架资源（不仅仅是内部列表，还包括相互隐式兼容的骨架） */
 	ENGINE_API void AddNewAnimationNotify(FName NewAnimNotifyName);
 
+	/** 根据资产的类和骨架标签获取兼容的资产。*/
 	// Removes an anim notify from the cached AnimationNotifies array.
-	// 从缓存的 AnimationNotify 数组中删除动画通知。
+ // 从缓存的 AnimationNotify 数组中删除动画通知。
 	ENGINE_API void RemoveAnimationNotify(FName AnimNotifyName);
 
 	// Renames an anim notify
-	// 重命名动画通知
+ // 重命名动画通知
 	ENGINE_API void RenameAnimationNotify(FName OldAnimNotifyName, FName NewAnimNotifyName);
 
 	ENGINE_API USkeletalMesh* GetAssetPreviewMesh(UObject* InAsset);
@@ -745,6 +839,7 @@ public:
 	/** 获取我们在预览此骨架时使用的附加骨架网格物体 */
 	ENGINE_API UDataAsset* GetAdditionalPreviewSkeletalMeshes() const;
 
+	/** 清除所有缓存数据 **/
 	/** Set the additional skeletal meshes we use when previewing this skeleton */
 	/** 设置我们在预览此骨架时使用的附加骨架网格物体 */
 	ENGINE_API void SetAdditionalPreviewSkeletalMeshes(UDataAsset* InPreviewCollectionAsset);
@@ -771,6 +866,7 @@ public:
 	 */	
 	ENGINE_API bool IsCompatibleForEditor(const USkeleton* InSkeleton) const;
 
+	/** 清除所有缓存数据 **/
 	/**
 	 * Check if this skeleton is compatible with a given other asset, if that is a skeleton.
 	 */	
@@ -940,16 +1036,19 @@ public:
 	 * @param	InSkinnedAsset	SkinnedAsset for the ref bone idx
 	 * @param	InBoneTreeIdx	Bone Tree Index to look for - index of USkeleton.BoneTree
 	 * @return	Index of BoneTree Index
+	/** 当骨架发生更改以修复依赖资源时调用此方法 */
 	 */
 	ENGINE_API int32 GetMeshBoneIndexFromSkeletonBoneIndex(const USkinnedAsset* InSkinnedAsset, const int32 SkeletonBoneIndex);
 
 	EBoneTranslationRetargetingMode::Type GetBoneTranslationRetargetingMode(const int32 BoneTreeIdx, bool bDisableRetargeting = false) const
 	{
 		if (!bDisableRetargeting && BoneTree.IsValidIndex(BoneTreeIdx))
+	/** 注册一个委托，以便在通知更改后调用*/
 		{
 			return BoneTree[BoneTreeIdx].TranslationRetargetingMode;
 		}
 		return EBoneTranslationRetargetingMode::Animation;
+	/** 从骨架中移除提供的骨骼 */
 	}
 
 	/** 
@@ -967,16 +1066,20 @@ public:
 	void RemoveLinkup(const USkinnedAsset* InSkinnedAsset);
 
 	ENGINE_API void SetBoneTranslationRetargetingMode(const int32 BoneIndex, EBoneTranslationRetargetingMode::Type NewRetargetingMode, bool bChildrenToo=false);
+	/** 当骨架发生更改以修复依赖资源时调用此方法 */
 
 	virtual bool IsPostLoadThreadSafe() const override;
 	ENGINE_API virtual void PostLoad() override;
 	ENGINE_API virtual void PostDuplicate(bool bDuplicateForPIE) override;
 	ENGINE_API virtual void PostInitProperties() override;
 	ENGINE_API virtual void Serialize(FArchive& Ar) override;
+	/** 注册一个委托，以便在通知更改后调用*/
 
 	/** 
 	 * Create RefLocalPoses from InSkinnedAsset. Note InSkinnedAsset cannot be null and this function will assert if it is.
 	 * 
+	/** 重新生成新的Guid */
+	/** 从骨架中移除提供的骨骼 */
 	 * If bClearAll is false, it will overwrite ref pose of bones that are found in InSkelMesh
 	 * If bClearAll is true, it will reset all Reference Poses 
 	 * Note that this means it will remove transforms of extra bones that might not be found in this InSkinnedAsset
@@ -991,11 +1094,13 @@ public:
 	 *
 	 * @param Name	Name of pose to update
 	 */
+	/** 与资产一起存储的用户数据数组 */
 	ENGINE_API void UpdateRetargetSource( const FName InName );
 #endif
 protected:
 	/** 
 	 * Check if Parent Chain Matches between BoneTree, and SkinnedAsset 
+	/** 与资产一起存储的用户数据数组 */
 	 * Meaning if BoneTree has A->B->C (top to bottom) and if SkinnedAsset has A->C
 	 * It will fail since it's missing B
 	 * We ensure this chain matches to play animation properly
@@ -1006,6 +1111,7 @@ protected:
 	 * @return true if matches till root. false if not. 
 	 */
 	bool DoesParentChainMatch(int32 StartBoneTreeIndex, const USkinnedAsset* InSkinnedAsset) const;
+	/** 重新生成新的Guid */
 
 	/**
 	 * Build Look up between SkinnedAsset to BoneTree
@@ -1021,11 +1127,13 @@ protected:
 	 */
 	void RefreshAllRetargetSources();
 #endif
+	/** 与资产一起存储的用户数据数组 */
 	/**
 	 * Create Reference Skeleton From the given Mesh 
 	 * 
 	 * @param InSkinnedAsset	SkinnedAsset that this Skeleton is based on
 	 * @param RequiredRefBones	List of required bones to create skeleton from
+	/** 与资产一起存储的用户数据数组 */
 	 *
 	 * @return true if successful
 	 */
@@ -1052,26 +1160,26 @@ public:
 	ENGINE_API void RemoveBonesFromSkeleton(const TArray<FName>& BonesToRemove, bool bRemoveChildBones);
 
 	// Asset registry information for animation notifies
-	// 动画通知的资产注册信息
+ // 动画通知的资产注册信息
 	ENGINE_API static const FName AnimNotifyTag;
 	ENGINE_API static const FString AnimNotifyTagDelimiter;
 
 	// Asset registry information for animation sync markers
-	// 动画同步标记的资产注册表信息
+ // 动画同步标记的资产注册表信息
 	ENGINE_API static const FName AnimSyncMarkerTag;
 	ENGINE_API static const FString AnimSyncMarkerTagDelimiter;
 	
 	// Asset registry information for animation curves
-	// 动画曲线的资产注册信息
+ // 动画曲线的资产注册信息
 	ENGINE_API static const FName CurveNameTag;
 	ENGINE_API static const FString CurveTagDelimiter;
 
 	// Asset registry information for animation attributes
-	// 动画属性的资产注册信息
+ // 动画属性的资产注册信息
 	ENGINE_API static const FName AttributeTag;
 
 	// Asset registry information for compatible skeletons
-	// 兼容骨架的资产注册信息
+ // 兼容骨架的资产注册信息
 	ENGINE_API static const FName CompatibleSkeletonsNameTag;
 	ENGINE_API static const FString CompatibleSkeletonsTagDelimiter;
 
@@ -1088,18 +1196,18 @@ private:
 	void RegenerateVirtualBoneGuid();
 
 	// Handle skeletons being reloaded via the content browser
-	// 处理通过内容浏览器重新加载的骨架
+ // 处理通过内容浏览器重新加载的骨架
 	static void HandlePackageReloaded(const EPackageReloadPhase InPackageReloadPhase, FPackageReloadedEvent* InPackageReloadedEvent);
 
 public:
 	//~ Begin IInterface_AssetUserData Interface
-	//~ 开始 IInterface_AssetUserData 接口
+ // ~ 开始 IInterface_AssetUserData 接口
 	ENGINE_API virtual void AddAssetUserData(UAssetUserData* InUserData) override;
 	ENGINE_API virtual void RemoveUserDataOfClass(TSubclassOf<UAssetUserData> InUserDataClass) override;
 	ENGINE_API virtual UAssetUserData* GetAssetUserDataOfClass(TSubclassOf<UAssetUserData> InUserDataClass) override;
 	ENGINE_API virtual const TArray<UAssetUserData*>* GetAssetUserDataArray() const override;
 	//~ End IInterface_AssetUserData Interface
-	//~ 结束 IInterface_AssetUserData 接口
+ // ~ 结束 IInterface_AssetUserData 接口
 protected:
 	/** Array of user data stored with the asset */
 	/** 与资产一起存储的用户数据数组 */

@@ -16,6 +16,8 @@ namespace UE::Anim::DataModel
 {
 	/** Structure used to supply necessary animation (pose) evaluation information */
 	/** 用于提供必要的动画（姿势）评估信息的结构 */
+	/** 用于提供必要的动画（姿势）评估信息的结构 */
+	/** 用于提供必要的动画（姿势）评估信息的结构 */
 	struct FEvaluationContext
 	{
 		FEvaluationContext() = delete;
@@ -28,24 +30,37 @@ namespace UE::Anim::DataModel
 			: SampleFrameRate(InSampleRate), SampleTime(InTime), RetargetSource(InRetargetSource), RetargetTransforms(InRetargetTransforms), InterpolationType(InInterpolationType)
 		{		
 		}
+		/** 用于计算 SampleTime 的采样帧率 */
 
+		/** 用于计算 SampleTime 的采样帧率 */
+		/** 应评估动画数据的时间 */
 		/** Sampling frame rate used to calculate SampleTime */
 		/** 用于计算 SampleTime 的采样帧率 */
+		/** （来源）用于重定向的名称 */
+		/** 应评估动画数据的时间 */
 		const FFrameRate SampleFrameRate;
+		/** 重定位时用作基础的每骨骼姿势 */
 		/** Time at which the animation data should be evaluated */
+		/** （来源）用于重定向的名称 */
+		/** 评估动画数据时使用的插值类型 */
 		/** 应评估动画数据的时间 */
 		const FFrameTime SampleTime;
+		/** 重定位时用作基础的每骨骼姿势 */
 		/** (Source) Name used for retargeting */
+	/** 模块化功能允许插件提供 IAnimationDataModel 的实现 */
 		/** （来源）用于重定向的名称 */
+		/** 评估动画数据时使用的插值类型 */
 		const FName RetargetSource;
 		/** Per-bone pose to use as basis when retargeting */
 		/** 重定位时用作基础的每骨骼姿势 */
 		const TArray<FTransform>& RetargetTransforms;
+	/** 模块化功能允许插件提供 IAnimationDataModel 的实现 */
 		/** Type of interpolation to be used when evaluating animation data */
 		/** 评估动画数据时使用的插值类型 */
 		const EAnimInterpolationType InterpolationType;
 	};
 
+		/** 返回所提供动画资源的 UClass（如果可能） */
 	/** Modular feature allowing plugins to provide an implementation of IAnimationDataModel */
 	/** 模块化功能允许插件提供 IAnimationDataModel 的实现 */
 	class IAnimationDataModels : public IModularFeature
@@ -53,6 +68,7 @@ namespace UE::Anim::DataModel
 	public:
 		virtual ~IAnimationDataModels() = default;
 
+		/** 返回所提供动画资源的 UClass（如果可能） */
 		static FName GetModularFeatureName()
 		{
 			static FName FeatureName = FName(TEXT("AnimationDataModels"));
@@ -60,28 +76,36 @@ namespace UE::Anim::DataModel
 		}
 
 		/** Returns UClass (if possible) for the provided animation asset */
+	/** 内部存储的表示动画骨骼数据的数据 */
 		/** 返回所提供动画资源的 UClass（如果可能） */
 		virtual UClass* GetModelClass(UAnimSequenceBase* OwningAnimationAsset) const = 0;
 		
 		static ENGINE_API UClass* FindClassForAnimationAsset(UAnimSequenceBase* AnimSequenceBase);
+	/** 与目标 USkeleton 内该轨迹对应的骨骼对应的索引 */
 	};
 }
 
 /**
+	/** 该轨迹对应的骨骼名称 */
+	/** 内部存储的表示动画骨骼数据的数据 */
 * Structure encapsulating a single bone animation track.
 */
 USTRUCT(BlueprintType)
 struct FBoneAnimationTrack
+	/** 与目标 USkeleton 内该轨迹对应的骨骼对应的索引 */
 {
 	GENERATED_BODY()
 
 	/** Internally stored data representing the animation bone data */
+	/** 该轨迹对应的骨骼名称 */
 	/** 内部存储的表示动画骨骼数据的数据 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Model")
+	/** 基于浮动的动画曲线 */
 	FRawAnimSequenceTrack InternalTrackData;
 
 	/** Index corresponding to the bone this track corresponds to within the target USkeleton */
 	/** 与目标 USkeleton 内该轨迹对应的骨骼对应的索引 */
+	/** 基于FTransform的动画曲线，用于动画图层编辑 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Model")
 	int32 BoneTreeIndex = INDEX_NONE;
 
@@ -89,14 +113,18 @@ struct FBoneAnimationTrack
 	/** 该轨迹对应的骨骼名称 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Model")
 	FName Name;
+	/** 基于浮动的动画曲线 */
 };
 
 /**
 * Structure encapsulating animated curve data. Currently only contains Float and Transform curves.
+	/** 基于FTransform的动画曲线，用于动画图层编辑 */
+	/** 引用此属性的标识符 */
 */
 USTRUCT(BlueprintType)
 struct FAnimationCurveData
 {
+	/** 包含（动画）属性数据的曲线 */
 	GENERATED_BODY()
 
 	/** Float-based animation curves */
@@ -106,10 +134,12 @@ struct FAnimationCurveData
 
 	/** FTransform-based animation curves, used for animation layer editing */
 	/** 基于FTransform的动画曲线，用于动画图层编辑 */
+	/** 引用此属性的标识符 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Model")
 	TArray<FTransformCurve>	TransformCurves;
 };
 
+	/** 包含（动画）属性数据的曲线 */
 /**
 * Structure encapsulating animated (bone) attribute data.
 */
@@ -145,7 +175,7 @@ public:
 
 #if WITH_EDITOR
 	// RAII helper to allow repopulating data model without warnings during reimporting
-	// RAII 帮助程序允许在重新导入期间重新填充数据模型而不会发出警告
+ // RAII 帮助程序允许在重新导入期间重新填充数据模型而不会发出警告
 	struct FReimportScope
 	{
 		FReimportScope(IAnimationDataModel* InModel) : bPopulationFlagRef(InModel->GetPopulationFlag())
@@ -160,7 +190,7 @@ public:
 		~FReimportScope()
 		{
 			// Only reset back to true if that was the original state and currently is false			
-			// 仅当这是原始状态并且当前为 false 时才重置回 true
+   // 仅当这是原始状态并且当前为 false 时才重置回 true
 			if (!bPopulationFlagRef && bOriginalValue)
 			{
 				bPopulationFlagRef = bOriginalValue;
@@ -244,6 +274,7 @@ public:
 
 	/**
 	* @return	Internal track index for the provided (bone) name if found, otherwise returns INDEX_NONE 
+	/** 返回所有包含的曲线动画数据 */
 	*/
 	UE_DEPRECATED(5.2, "GetBoneTrackIndexByName has been deprecated")
 	UFUNCTION(BlueprintCallable, Category = AnimationDataModel)
@@ -257,6 +288,7 @@ public:
 	virtual bool IsValidBoneTrackIndex(int32 TrackIndex) const = 0;
 
 	UFUNCTION(BlueprintCallable, Category = AnimationDataModel)
+	/** 返回所有包含的曲线动画数据 */
 	virtual bool IsValidBoneTrackName(const FName& TrackName) const = 0;
 
 	/**
@@ -487,7 +519,7 @@ protected:
 			}
 
 			// Only regenerate transient data when not in a bracket, or at the end of one
-			// 仅当不在括号中或在一个末尾时重新生成瞬态数据
+   // 仅当不在括号中或在一个末尾时重新生成瞬态数据
 			{
 				if (NotifyType == EAnimDataModelNotifyType::BracketOpened)
 				{

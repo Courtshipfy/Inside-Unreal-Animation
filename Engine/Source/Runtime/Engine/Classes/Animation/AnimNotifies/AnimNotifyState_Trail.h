@@ -22,6 +22,8 @@ class UAnimNotifyState_Trail : public UAnimNotifyState
 	
 	/** The particle system to use for this trail. */
 	/** 用于此轨迹的粒子系统。 */
+	/** 用于此轨迹的粒子系统。 */
+	/** 用于此轨迹的粒子系统。 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Trail)
 	TObjectPtr<UParticleSystem> PSTemplate;
 
@@ -31,11 +33,15 @@ class UAnimNotifyState_Trail : public UAnimNotifyState
 	ENGINE_API virtual UParticleSystem* GetOverridenPSTemplate(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) const;
 
 	ENGINE_API virtual float GetCurveWidth(USkeletalMeshComponent* MeshComp) const;
+	/** 定义此跟踪的第一个套接字的名称。 */
 
+	/** 定义此跟踪的第一个套接字的名称。 */
 	/** Name of the first socket defining this trail. */
 	/** 定义此跟踪的第一个套接字的名称。 */
+	/** 定义此跟踪的第二个套接字的名称。 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Trail)
 	FName FirstSocketName;
+	/** 定义此跟踪的第二个套接字的名称。 */
 
 	/** Name of the second socket defining this trail. */
 	/** 定义此跟踪的第二个套接字的名称。 */
@@ -46,34 +52,46 @@ class UAnimNotifyState_Trail : public UAnimNotifyState
 	Controls the way width scale is applied. In each method a width scale of 1.0 will mean the width is unchanged from the position of the sockets. A width scale of 0.0 will cause a trail of zero width.
 	From Centre = Trail width is scaled outwards from the centre point between the two sockets.
 	From First = Trail width is scaled outwards from the position of the first socket.
+	/** 驱动宽度比例的曲线名称。 */
 	From Second = Trail width is scaled outwards from the position of the Second socket.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Trail)
+	/** 驱动宽度比例的曲线名称。 */
 	TEnumAsByte<enum ETrailWidthMode> WidthScaleMode;
 
 	/** Name of the curve to drive the width scale. */
 	/** 驱动宽度比例的曲线名称。 */
+	/** 如果为 true，则渲染轨迹几何图形（通常应该打开） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Trail)
 	FName WidthScaleCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Trail)
+	/** 如果为 true，则在沿轨迹的每个生成的粒子点处渲染星星 */
+	/** 如果为 true，则渲染轨迹几何图形（通常应该打开） */
 	uint32 bRecycleSpawnedSystems:1;
 
 #if WITH_EDITORONLY_DATA
+	/** 如果为 true，则渲染一条线，显示沿轨迹的每个生成粒子点处的切线 */
 	/** If true, render the trail geometry (this should typically be on) */
+	/** 如果为 true，则在沿轨迹的每个生成的粒子点处渲染星星 */
 	/** 如果为 true，则渲染轨迹几何图形（通常应该打开） */
 	UPROPERTY(transient, EditAnywhere, Category = Rendering)
+	/** 如果为 true，则渲染生成粒子之间的镶嵌路径 */
 	uint32 bRenderGeometry : 1;
 
+	/** 如果为 true，则渲染一条线，显示沿轨迹的每个生成粒子点处的切线 */
 	/** If true, render stars at each spawned particle point along the trail */
 	/** 如果为 true，则在沿轨迹的每个生成的粒子点处渲染星星 */
+	/** 外部代码的辅助函数来获取我们正在使用的 PSC */
 	UPROPERTY(transient, EditAnywhere, Category = Rendering)
 	uint32 bRenderSpawnPoints : 1;
+	/** 如果为 true，则渲染生成粒子之间的镶嵌路径 */
 
 	/** If true, render a line showing the tangent at each spawned particle point along the trail */
 	/** 如果为 true，则渲染一条线，显示沿轨迹的每个生成粒子点处的切线 */
 	UPROPERTY(transient, EditAnywhere, Category = Rendering)
 	uint32 bRenderTangents : 1;
+	/** 外部代码的辅助函数来获取我们正在使用的 PSC */
 
 	/** If true, render the tessellated path between spawned particles */
 	/** 如果为 true，则渲染生成粒子之间的镶嵌路径 */

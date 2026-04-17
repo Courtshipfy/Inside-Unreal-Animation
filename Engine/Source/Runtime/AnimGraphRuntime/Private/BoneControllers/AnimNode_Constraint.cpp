@@ -13,6 +13,16 @@
 /////////////////////////////////////////////////////
 // FAnimNode_Constraint
 // FAnimNode_Constraint
+// FAnimNode_Constraint
+// FAnimNode_Constraint
+// FAnimNode_Constraint
+// FAnimNode_Constraint
+// FAnimNode_Constraint
+// FAnimNode_Constraint
+// FAnimNode_Constraint
+// FAnimNode_Constraint
+// FAnimNode_Constraint
+// FAnimNode_Constraint
 
 FAnimNode_Constraint::FAnimNode_Constraint()
 {
@@ -69,7 +79,7 @@ void FAnimNode_Constraint::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 	{
 		FTransform SourceTransform = Output.Pose.GetComponentSpaceTransform(BoneToModify.CachedCompactPoseIndex);
 		// for constraint anim node, we always use identity as base		
-		// 对于约束动画节点，我们总是使用身份作为基础
+  // 对于约束动画节点，我们总是使用身份作为基础
 		FTransform ConstrainedTransform = AnimationCore::SolveConstraints(SourceTransform, FTransform::Identity, ConstraintData);
 		OutBoneTransforms.Add(FBoneTransform(BoneToModify.CachedCompactPoseIndex, ConstrainedTransform));
 
@@ -90,14 +100,14 @@ void FAnimNode_Constraint::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 bool FAnimNode_Constraint::IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) 
 {
 	// if any of them are valid
-	// 如果其中任何一个有效
+ // 如果其中任何一个有效
 	bool bHaveValidConstraint = false;
 
 	for (int32 ConstraintIndex = 0; ConstraintIndex<ConstraintSetup.Num() ; ++ConstraintIndex)
 	{
 		FConstraint& Constraint = ConstraintSetup[ConstraintIndex];
 		// make sure it has weight
-		// 确保它有重量
+  // 确保它有重量
 		if (ConstraintWeights[ConstraintIndex] > ZERO_ANIMWEIGHT_THRESH)
 		{
 			bHaveValidConstraint |= Constraint.IsValidToEvaluate(RequiredBones);
@@ -129,13 +139,13 @@ void FAnimNode_Constraint::InitializeBoneReferences(const FBoneContainer& Requir
 			{
 				FConstraintData NewConstraintData(FTransformConstraintDescription(Constraint.TransformType), Constraint.TargetBone.BoneName, 0.f, Constraint.OffsetOption != EConstraintOffsetOption::None);
 				// copy the axes filter options, later figure out cleaner way to do this (constructor)
-				// 复制轴过滤器选项，稍后找出更清晰的方法来执行此操作（构造函数）
+    // 复制轴过滤器选项，稍后找出更清晰的方法来执行此操作（构造函数）
 				NewConstraintData.Constraint.ConstraintDescription->AxesFilterOption = Constraint.PerAxis;
 
 				FTransform TargetTransform = (NewConstraintData.bMaintainOffset) ? FAnimationRuntime::GetComponentSpaceRefPose(Constraint.TargetBone.CachedCompactPoseIndex, RequiredBones) : FTransform::Identity;
 				
 				// for constraint anim node, we always use identity as base	
-				// 对于约束动画节点，我们总是使用身份作为基础
+    // 对于约束动画节点，我们总是使用身份作为基础
 				NewConstraintData.SaveInverseOffset(SourceTransform, TargetTransform, FTransform::Identity);
 
 				Constraint.ConstraintDataIndex = ConstraintData.Add(NewConstraintData);
@@ -160,7 +170,7 @@ void FAnimNode_Constraint::ConditionalDebugDraw(FPrimitiveDrawInterface* PDI, US
 	if (PDI && MeshComp)
 	{
 		// draw my transform
-		// 画出我的变换
+  // 画出我的变换
 		FTransform LocalToWorld = MeshComp->GetComponentTransform();
 		FTransform OriginalTransform = CachedOriginalTransform * LocalToWorld;
 		FTransform ConstrainedTransform = CachedConstrainedTransform * LocalToWorld;
@@ -169,7 +179,7 @@ void FAnimNode_Constraint::ConditionalDebugDraw(FPrimitiveDrawInterface* PDI, US
 		DrawCoordinateSystem(PDI, ConstrainedTransform.GetLocation(), ConstrainedTransform.GetRotation().Rotator(), 20.f, SDPG_Foreground);
 
 		// draw my target's transform for all targets
-		// 绘制所有目标的目标变换
+  // 绘制所有目标的目标变换
 		FVector SourceLocation = ConstrainedTransform.GetLocation();
 		for (int32 Index = 0; Index < CachedTargetTransforms.Num(); ++Index)
 		{

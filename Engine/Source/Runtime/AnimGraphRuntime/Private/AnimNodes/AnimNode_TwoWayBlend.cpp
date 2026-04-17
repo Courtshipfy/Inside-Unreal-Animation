@@ -12,6 +12,16 @@
 /////////////////////////////////////////////////////
 // FAnimNode_TwoWayBlend
 // FAnimNode_TwoWayBlend
+// FAnimNode_TwoWayBlend
+// FAnimNode_TwoWayBlend
+// FAnimNode_TwoWayBlend
+// FAnimNode_TwoWayBlend
+// FAnimNode_TwoWayBlend
+// FAnimNode_TwoWayBlend
+// FAnimNode_TwoWayBlend
+// FAnimNode_TwoWayBlend
+// FAnimNode_TwoWayBlend
+// FAnimNode_TwoWayBlend
 
 void FAnimNode_TwoWayBlend::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -59,14 +69,14 @@ void FAnimNode_TwoWayBlend::Update_AnyThread(const FAnimationUpdateContext& Cont
 	};
 
 	// Make sure Alpha is clamped between 0 and 1.
-	// 确保 Alpha 限制在 0 和 1 之间。
+ // 确保 Alpha 限制在 0 和 1 之间。
 	InternalBlendAlpha = FMath::Clamp<float>(InternalBlendAlpha, 0.f, 1.f);
 
 	const bool bNewAIsRelevant = !FAnimWeight::IsFullWeight(InternalBlendAlpha);
 	const bool bNewBIsRelevant = FAnimWeight::IsRelevant(InternalBlendAlpha);
 
 	// when this flag is true, we'll reinitialize the children
-	// 当这个标志为真时，我们将重新初始化孩子们
+ // 当这个标志为真时，我们将重新初始化孩子们
 	if (bResetChildOnActivation)
 	{
 		if (bNewAIsRelevant && !bAIsRelevant)
@@ -74,7 +84,7 @@ void FAnimNode_TwoWayBlend::Update_AnyThread(const FAnimationUpdateContext& Cont
 			FAnimationInitializeContext ReinitializeContext(Context.AnimInstanceProxy, Context.SharedContext);
 
 			// reinitialize
-			// 重新初始化
+   // 重新初始化
 			A.Initialize(ReinitializeContext);
 		}
 
@@ -83,7 +93,7 @@ void FAnimNode_TwoWayBlend::Update_AnyThread(const FAnimationUpdateContext& Cont
 			FAnimationInitializeContext ReinitializeContext(Context.AnimInstanceProxy, Context.SharedContext);
 
 			// reinitialize
-			// 重新初始化
+   // 重新初始化
 			B.Initialize(ReinitializeContext);
 		}
 	}
@@ -96,7 +106,7 @@ void FAnimNode_TwoWayBlend::Update_AnyThread(const FAnimationUpdateContext& Cont
 		if (bAIsRelevant)
 		{
 			// Blend A and B together
-			// 将A和B混合在一起
+   // 将A和B混合在一起
 			A.Update(Context.FractionalWeight(1.0f - InternalBlendAlpha));
 			B.Update(Context.FractionalWeight(InternalBlendAlpha));
 		}
@@ -108,14 +118,14 @@ void FAnimNode_TwoWayBlend::Update_AnyThread(const FAnimationUpdateContext& Cont
 			}
 
 			// Take all of B
-			// 取B全部
+   // 取B全部
 			B.Update(Context);
 		}
 	}
 	else
 	{
 		// Take all of A
-		// 取A全部
+  // 取A全部
 		A.Update(Context);
 
 		if (bAlwaysUpdateChildren)

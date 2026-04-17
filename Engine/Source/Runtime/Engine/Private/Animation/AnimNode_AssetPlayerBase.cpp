@@ -18,7 +18,7 @@ void FAnimNode_AssetPlayerBase::Initialize_AnyThread(const FAnimationInitializeC
 void FAnimNode_AssetPlayerBase::Update_AnyThread(const FAnimationUpdateContext& Context)
 {
 	// Cache the current weight and update the node
-	// 缓存当前权重并更新节点
+ // 缓存当前权重并更新节点
 	BlendWeight = Context.GetFinalBlendWeight();
 	bHasBeenFullWeight = bHasBeenFullWeight || (BlendWeight >= (1.0f - ZERO_ANIMWEIGHT_THRESH));
 
@@ -28,13 +28,13 @@ void FAnimNode_AssetPlayerBase::Update_AnyThread(const FAnimationUpdateContext& 
 void FAnimNode_AssetPlayerBase::CreateTickRecordForNode(const FAnimationUpdateContext& Context, UAnimSequenceBase* Sequence, bool bLooping, float PlayRate, bool bIsEvaluator)
 {
 	// Create a tick record and push into the closest scope
-	// 创建一个tick记录并推入最近的范围
+ // 创建一个tick记录并推入最近的范围
 	const float FinalBlendWeight = Context.GetFinalBlendWeight();
 
 	UE::Anim::FAnimSyncGroupScope& SyncScope = Context.GetMessageChecked<UE::Anim::FAnimSyncGroupScope>();
 
 	// Active asset player's tick record
-	// 活跃资产玩家的tick记录
+ // 活跃资产玩家的tick记录
 	FAnimTickRecord TickRecord(Sequence, bLooping, PlayRate, bIsEvaluator, FinalBlendWeight, /*inout*/ InternalTimeAccumulator, MarkerTickRecord);
 	TickRecord.GatherContextData(Context);
 	TickRecord.RootMotionWeightModifier = Context.GetRootMotionWeightModifier();
@@ -42,7 +42,7 @@ void FAnimNode_AssetPlayerBase::CreateTickRecordForNode(const FAnimationUpdateCo
 	TickRecord.bRequestedInertialization = Context.GetMessage<UE::Anim::FAnimInertializationSyncScope>() != nullptr;;
 
 	// Add asset player to synchronizer
-	// [翻译失败: Add asset player to synchronizer]
+ // 将资产播放器添加到同步器
 	SyncScope.AddTickRecord(TickRecord, GetSyncParams(TickRecord.bRequestedInertialization), UE::Anim::FAnimSyncDebugInfo(Context));
 
 	TRACE_ANIM_TICK_RECORD(Context, TickRecord);
@@ -88,10 +88,10 @@ UE::Anim::FAnimSyncParams FAnimNode_AssetPlayerBase::GetSyncParams(bool bRequest
 	bool bOverridePositionWhenJoiningSyncGroupAsLeader = GetOverridePositionWhenJoiningSyncGroupAsLeader();
 	
 	// Skip sync based on roles.
-	// [翻译失败: Skip sync based on roles.]
+ // 根据角色跳过同步。
 	{
 		// Only allow transition leader/follower part of a sync group once after inertialization request. (Inertilization)
-		// [翻译失败: Only allow transition leader/follower part of a sync group once after inertialization request. (Inertilization)]
+  // 仅允许在惯性化请求后转换同步组的领导者/跟随者部分一次。 （不育）
 		if (bRequestedInertialization)
 		{
 			if (SyncGroupRole == EAnimGroupRole::TransitionLeader || SyncGroupRole == EAnimGroupRole::TransitionFollower)
@@ -100,14 +100,14 @@ UE::Anim::FAnimSyncParams FAnimNode_AssetPlayerBase::GetSyncParams(bool bRequest
 			}
 		}
 		// Only allow transition leader/follower part of a sync group once it has full weight (Standard blend).
-		// [翻译失败: Only allow transition leader/follower part of a sync group once it has full weight (Standard blend).]
+  // 一旦同步组具有完整权重（标准混合），仅允许转换领导者/跟随者部分。
 		else if ((SyncGroupRole == EAnimGroupRole::TransitionLeader || SyncGroupRole == EAnimGroupRole::TransitionFollower) && !bHasBeenFullWeight)
 		{
 			GroupNameToUse = NAME_None;
 		}
 
 		// Do not use sync groups.
-		// 不要使用同步组。
+  // 不要使用同步组。
 		if (GroupNameToUse == NAME_None && MethodToUse == EAnimSyncMethod::SyncGroup)
 		{
 			MethodToUse = EAnimSyncMethod::DoNotSync;

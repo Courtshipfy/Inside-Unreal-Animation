@@ -55,19 +55,19 @@ public:
 	{}
 
 	// The index of the state machine
-	// 状态机索引
+ // 状态机索引
 	int32 StateMachineIndex;
 
 	// The index of the state
-	// 状态指数
+ // 状态指数
 	int32 StateIndex;
 
 	// The last recorded weight for this state
-	// 该州最后记录的体重
+ // 该州最后记录的体重
 	float Weight;
 
 	// The time that this state has been active (only valid if this is the current state)
-	// 该状态处于活动状态的时间（仅在当前状态时有效）
+ // 该状态处于活动状态的时间（仅在当前状态时有效）
 	float ElapsedTime;
 };
 
@@ -90,24 +90,24 @@ public:
 	};
 
 	// Map from state nodes to their state entry in a state machine
-	// 从状态节点映射到状态机中的状态条目
+ // 从状态节点映射到状态机中的状态条目
 	TMap<TWeakObjectPtr<UEdGraphNode>, int32> NodeToStateIndex;
 	TMap<int32, TWeakObjectPtr<UAnimStateNodeBase>> StateIndexToNode;
 
 	// Transition nodes may be associated w/ multiple transition indicies when the source state is an alias
-	// 当源状态是别名时，转换节点可以与多个转换索引相关联
+ // 当源状态是别名时，转换节点可以与多个转换索引相关联
 	TMultiMap<TWeakObjectPtr<UEdGraphNode>, int32> NodeToTransitionIndex;
 
 	// Mapping between an alias and any transition indices it might be associated to (Both as source and target).
-	// 别名和它可能关联的任何转换索引之间的映射（作为源和目标）。
+ // 别名和它可能关联的任何转换索引之间的映射（作为源和目标）。
 	TMultiMap<TWeakObjectPtr<UAnimStateAliasNode>, FStateAliasTransitionStateIndexPair> StateAliasNodeToTransitionStatePairs;
 
 	// The animation node that leads into this state machine (A3 only)
-	// 进入此状态机的动画节点（仅限 A3）
+ // 进入此状态机的动画节点（仅限 A3）
 	TWeakObjectPtr<UAnimGraphNode_StateMachineBase> MachineInstanceNode;
 
 	// Index of this machine in the StateMachines array
-	// StateMachines 数组中该机器的索引
+ // StateMachines 数组中该机器的索引
 	int32 MachineIndex;
 
 public:
@@ -116,7 +116,7 @@ public:
 };
 
 // This structure represents debugging information for a frame snapshot
-// [翻译失败: This structure represents debugging information for a frame snapshot]
+// 该结构表示帧快照的调试信息
 USTRUCT()
 struct FAnimationFrameSnapshot
 {
@@ -131,11 +131,11 @@ struct FAnimationFrameSnapshot
 #if WITH_EDITORONLY_DATA
 public:
 	// The snapshot of data saved from the animation
-	// [翻译失败: The snapshot of data saved from the animation]
+ // 动画保存的数据快照
 	TArray<uint8> SerializedData;
 
 	// The time stamp for when this snapshot was taken (relative to the life timer of the object being recorded)
-	// 拍摄此快照的时间戳（相对于正在记录的对象的生命周期）
+ // 拍摄此快照的时间戳（相对于正在记录的对象的生命周期）
 	double TimeStamp;
 
 public:
@@ -190,74 +190,74 @@ struct FAnimBlueprintDebugData
 #if WITH_EDITORONLY_DATA
 public:
 	// Map from state machine graphs to their corresponding debug data
-	// 从状态机图映射到相应的调试数据
+ // 从状态机图映射到相应的调试数据
 	TMap<TWeakObjectPtr<const UEdGraph>, FStateMachineDebugData> StateMachineDebugData;
 
 	// Map from state graphs to their node
-	// 从状态图到其节点的映射
+ // 从状态图到其节点的映射
 	TMap<TWeakObjectPtr<const UEdGraph>, TWeakObjectPtr<UAnimStateNode> > StateGraphToNodeMap;
 
 	// Map from transition graphs to their node
-	// 从转移图到其节点的映射
+ // 从转移图到其节点的映射
 	TMap<TWeakObjectPtr<const UEdGraph>, TWeakObjectPtr<UAnimStateTransitionNode> > TransitionGraphToNodeMap;
 
 	// Map from custom transition blend graphs to their node
-	// 从自定义过渡混合图映射到其节点
+ // 从自定义过渡混合图映射到其节点
 	TMap<TWeakObjectPtr<const UEdGraph>, TWeakObjectPtr<UAnimStateTransitionNode> > TransitionBlendGraphToNodeMap;
 
 	// Map from animation node to their property index
-	// 从动画节点映射到其属性索引
+ // 从动画节点映射到其属性索引
 	TMap<TWeakObjectPtr<const UAnimGraphNode_Base>, int32> NodePropertyToIndexMap;
 
 	// Map from node property index to source editor node
-	// 从节点属性索引映射到源编辑器节点
+ // 从节点属性索引映射到源编辑器节点
 	TMap<int32, TWeakObjectPtr<const UEdGraphNode> > NodePropertyIndexToNodeMap;
 
 	// Map from animation node GUID to property index
-	// 从动画节点 GUID 映射到属性索引
+ // 从动画节点 GUID 映射到属性索引
 	TMap<FGuid, int32> NodeGuidToIndexMap;
 
 	// Map from animation node to attributes
-	// 从动画节点映射到属性
+ // 从动画节点映射到属性
 	TMap<TWeakObjectPtr<const UAnimGraphNode_Base>, TArray<FName>> NodeAttributes;
 
 	// The debug data for each state machine state
-	// 每个状态机状态的调试数据
+ // 每个状态机状态的调试数据
 	TArray<FStateMachineStateDebugData> StateData;	
 	
 	// History of snapshots of animation data
-	// 动画数据快照的历史记录
+ // 动画数据快照的历史记录
 	TSimpleRingBuffer<FAnimationFrameSnapshot>* SnapshotBuffer;
 
 	// Mapping from graph pins to their folded properties.
-	// 从图形引脚映射到其折叠属性。
+ // 从图形引脚映射到其折叠属性。
 	// Graph pins are unique per node instance and thus suitable as identifier for the properties.
-	// 图形引脚对于每个节点实例都是唯一的，因此适合作为属性的标识符。
+ // 图形引脚对于每个节点实例都是唯一的，因此适合作为属性的标识符。
 	TMap<FEdGraphPinReference, FProperty*> GraphPinToFoldedPropertyMap;
 
 	// Node visit structure
-	// 节点访问结构
+ // 节点访问结构
 	using FNodeVisit = FAnimBlueprintDebugData_NodeVisit;
 
 	// History of activated nodes
-	// 激活节点的历史记录
+ // 激活节点的历史记录
 	TArray<FNodeVisit> UpdatedNodesThisFrame;
 
 	// Record of attribute transfer between nodes
-	// 节点间属性传递记录
+ // 节点间属性传递记录
 	using FAttributeRecord = FAnimBlueprintDebugData_AttributeRecord;
 
 	// History of node attributes that are output from and input to nodes
-	// 从节点输出和输入到节点的节点属性的历史记录
+ // 从节点输出和输入到节点的节点属性的历史记录
 	TMap<int32, TArray<FAttributeRecord>> NodeInputAttributesThisFrame;
 	TMap<int32, TArray<FAttributeRecord>> NodeOutputAttributesThisFrame;
 
 	// History of node syncs - maps from player node index to graph-determined group name
-	// 节点同步的历史记录 - 从玩家节点索引映射到图形确定的组名称
+ // 节点同步的历史记录 - 从玩家节点索引映射到图形确定的组名称
 	TMap<int32, FName> NodeSyncsThisFrame;
 
 	// Values output by nodes
-	// 节点输出的值
+ // 节点输出的值
 	struct FNodeValue
 	{
 		FString Text;
@@ -270,11 +270,11 @@ public:
 	};
 
 	// Values output by nodes
-	// 节点输出的值
+ // 节点输出的值
 	TArray<FNodeValue> NodeValuesThisFrame;
 
 	// Record of a sequence player's state
-	// 序列播放器状态记录
+ // 序列播放器状态记录
 	struct FSequencePlayerRecord
 	{
 		FSequencePlayerRecord(int32 InNodeID, float InPosition, float InLength, int32 InFrameCount)
@@ -291,11 +291,11 @@ public:
 	};
 
 	// All sequence player records this frame
-	// 所有序列播放器都会记录此帧
+ // 所有序列播放器都会记录此帧
 	TArray<FSequencePlayerRecord> SequencePlayerRecordsThisFrame;
 
 	// Record of a blend space player's state
-	// 混合空间玩家状态记录
+ // 混合空间玩家状态记录
 	struct FBlendSpacePlayerRecord
 	{
 		FBlendSpacePlayerRecord(int32 InNodeID, const UBlendSpace* InBlendSpace, const FVector& InPosition, const FVector& InFilteredPosition)
@@ -312,15 +312,15 @@ public:
 	};
 
 	// All blend space player records this frame
-	// [翻译失败: All blend space player records this frame]
+ // 所有混合空间播放器都会记录此帧
 	TArray<FBlendSpacePlayerRecord> BlendSpacePlayerRecordsThisFrame;
 
 	// Active pose watches to track
-	// [翻译失败: Active pose watches to track]
+ // 手表可追踪的主动姿势
 	TArray<FAnimNodePoseWatch> AnimNodePoseWatch;
 
 	// Index of snapshot
-	// 快照索引
+ // 快照索引
 	int32 SnapshotIndex;
 public:
 
@@ -376,10 +376,12 @@ struct FAnimBlueprintMutableData
 
 // 'Marker' structure for constant data. This is used as a base struct for constant data to be inserted into by the anim
 // 常量数据的“标记”结构。它用作动画插入的常量数据的基本结构
+	/** 此蓝图类的目标骨架 */
 // BP compiler if there is no existing archetype sparse class data.
 // BP编译器如果不存在现有的原型稀疏类数据。
 USTRUCT()
 struct FAnimBlueprintConstantData
+	/** 动画列表通知状态机（或其他任何东西）可能引用 */
 {
 	GENERATED_BODY()
 };
@@ -396,16 +398,16 @@ namespace EPropertySearchMode
 #endif
 
 // Struct type generated by the anim BP compiler. Used for sparse class data and mutable data area.
-// [翻译失败: Struct type generated by the anim BP compiler. Used for sparse class data and mutable data area.]
+// 由anim BP编译器生成的结构类型。用于稀疏类数据和可变数据区域。
 // Only really needed to hide the struct from the content browser (via IsAsset override)
-// [翻译失败: Only really needed to hide the struct from the content browser (via IsAsset override)]
+// 仅真正需要从内容浏览器中隐藏该结构（通过 IsAsset 覆盖）
 UCLASS(MinimalAPI)
 class UAnimBlueprintGeneratedStruct : public UScriptStruct
 {
 	GENERATED_BODY()
 
 	// UObject interface
-	// [翻译失败: UObject interface]
+ // UObject接口
 	virtual bool IsAsset() const override { return false; }
 };
 
@@ -420,13 +422,15 @@ class UAnimBlueprintGeneratedClass : public UBlueprintGeneratedClass, public IAn
 	friend class UAnimBlueprintExtension_Base;
 
 	// List of state machines present in this blueprint class
-	// [翻译失败: List of state machines present in this blueprint class]
+ // 此蓝图类中存在的状态机列表
 	UPROPERTY()
 	TArray<FBakedAnimationStateMachine> BakedStateMachines;
+	/** 此蓝图类的目标骨架 */
 
 	/** Target skeleton for this blueprint class */
 	/** 此蓝图类的目标骨架 */
 	UPROPERTY(AssetRegistrySearchable)
+	/** 动画列表通知状态机（或其他任何东西）可能引用 */
 	TObjectPtr<USkeleton> TargetSkeleton;
 
 	/** A list of anim notifies that state machines (or anything else) may reference */
@@ -435,16 +439,16 @@ class UAnimBlueprintGeneratedClass : public UBlueprintGeneratedClass, public IAn
 	TArray<FAnimNotifyEvent> AnimNotifies;
 
 	// Indices for each of the saved pose nodes that require updating, in the order they need to get updates, per layer
-	// 每层需要更新的每个保存的姿势节点的索引，按照它们需要获取更新的顺序
+ // 每层需要更新的每个保存的姿势节点的索引，按照它们需要获取更新的顺序
 	UPROPERTY()
 	TMap<FName, FCachedPoseIndices> OrderedSavedPoseIndicesMap;
 
 	// The various anim functions that this class holds (created during GenerateAnimationBlueprintFunctions)
-	// 该类拥有的各种动画函数（在GenerateAnimationBlueprintFunctions期间创建）
+ // 该类拥有的各种动画函数（在GenerateAnimationBlueprintFunctions期间创建）
 	TArray<FAnimBlueprintFunction> AnimBlueprintFunctions;
 
 	// The arrays of anim nodes; this is transient generated data (created during Link)
-	// 动画节点数组；这是瞬态生成的数据（在链接期间创建）
+ // 动画节点数组；这是瞬态生成的数据（在链接期间创建）
 	TArray<FStructProperty*> AnimNodeProperties;
 	TArray<FStructProperty*> LinkedAnimGraphNodeProperties;
 	TArray<FStructProperty*> LinkedAnimLayerNodeProperties;
@@ -454,65 +458,65 @@ class UAnimBlueprintGeneratedClass : public UBlueprintGeneratedClass, public IAn
 	TArray<FStructProperty*> InitializationNodeProperties;
 
 	// Array of sync group names in the order that they are requested during compile
-	// 同步组名称数组（按照编译期间请求的顺序排列）
+ // 同步组名称数组（按照编译期间请求的顺序排列）
 	UPROPERTY()
 	TArray<FName> SyncGroupNames;
 
 #if WITH_EDITORONLY_DATA
 	// Deprecated - moved to FAnimSubsystem_Base
-	// 已弃用 - 移至 FAnimSubsystem_Base
+ // 已弃用 - 移至 FAnimSubsystem_Base
 	UPROPERTY()
 	TArray<FExposedValueHandler> EvaluateGraphExposedInputs_DEPRECATED;
 #endif
 
 	// Indices for any Asset Player found within a specific (named) Anim Layer Graph, or implemented Anim Interface Graph
-	// 在特定（命名）动画层图或实现的动画接口图中找到的任何资产播放器的索引
+ // 在特定（命名）动画层图或实现的动画接口图中找到的任何资产播放器的索引
 	UPROPERTY()
 	TMap<FName, FGraphAssetPlayerInformation> GraphAssetPlayerInformation;
 
 	// Per layer graph blending options
-	// 每层图形混合选项
+ // 每层图形混合选项
 	UPROPERTY()
 	TMap<FName, FAnimGraphBlendOptions> GraphBlendOptions;
 
 private:
 	// Constant/folded anim node data
-	// 恒定/折叠动画节点数据
+ // 恒定/折叠动画节点数据
 	UPROPERTY()
 	TArray<FAnimNodeData> AnimNodeData;
 
 	// Map from anim node struct to info about that struct (used to accelerate property name lookups)
-	// 从动画节点结构映射到有关该结构的信息（用于加速属性名称查找）
+ // 从动画节点结构映射到有关该结构的信息（用于加速属性名称查找）
 	UPROPERTY()
 	TMap<TObjectPtr<const UScriptStruct>, FAnimNodeStructData> NodeTypeMap;
 
 	// Cached properties used to access 'folded' anim node properties
-	// 用于访问“折叠”动画节点属性的缓存属性
+ // 用于访问“折叠”动画节点属性的缓存属性
 	TArray<FProperty*> MutableProperties;
 	TArray<FProperty*> ConstantProperties;
 
 	// Cached properties used to access subsystem properties
-	// 用于访问子系统属性的缓存属性
+ // 用于访问子系统属性的缓存属性
 	TArray<FStructProperty*> ConstantSubsystemProperties;
 	TArray<FStructProperty*> MutableSubsystemProperties;
 
 	// Property for the object's mutable data area
-	// 对象的可变数据区域的属性
+ // 对象的可变数据区域的属性
 	FStructProperty* MutableNodeDataProperty = nullptr;
 
 	// Pointers to each subsystem, for easier debugging
-	// 指向每个子系统的指针，以便于调试
+ // 指向每个子系统的指针，以便于调试
 	TArray<const FAnimSubsystem*> Subsystems;
 
 #if WITH_EDITORONLY_DATA
 	// Flag indicating the persistent result of calling VerifyNodeDataLayout() on load/compile
-	// 指示加载/编译时调用VerifyNodeDataLayout()的持久结果的标志
+ // 指示加载/编译时调用VerifyNodeDataLayout()的持久结果的标志
 	bool bDataLayoutValid = true;
 #endif
 	
 public:
 	// IAnimClassInterface interface
-	// [翻译失败: IAnimClassInterface interface]
+ // IAnimClassInterface 接口
 	virtual const TArray<FBakedAnimationStateMachine>& GetBakedStateMachines() const override { return GetRootClass()->GetBakedStateMachines_Direct(); }
 	virtual USkeleton* GetTargetSkeleton() const override { return TargetSkeleton; }
 	virtual const TArray<FAnimNotifyEvent>& GetAnimNotifies() const override { return GetRootClass()->GetAnimNotifies_Direct(); }
@@ -559,20 +563,20 @@ private:
 #endif
 	
 	// Called internally post-load defaults and by the compiler after compilation is completed 
-	// [翻译失败: Called internally post-load defaults and by the compiler after compilation is completed]
+ // 在加载后默认值内部调用，并在编译完成后由编译器调用
 	ENGINE_API void OnPostLoadDefaults(UObject* Object);
 
 	// Called by the compiler to make sure that data tables are initialized. This is needed to patch the sparse class
-	// 由编译器调用以确保数据表已初始化。这是修补稀疏类所必需的
+ // 由编译器调用以确保数据表已初始化。这是修补稀疏类所必需的
 	// data for child anim BP overrides 
-	// 子动画 BP 覆盖的数据
+ // 子动画 BP 覆盖的数据
 	ENGINE_API void InitializeAnimNodeData(UObject* DefaultObject, bool bForce) const;
 
 #if WITH_EDITORONLY_DATA
 	// Verify that the serialized NodeTypeMap can be used with the current set of native node data layouts
-	// 验证序列化的 NodeTypeMap 是否可以与当前的本机节点数据布局集一起使用
+ // 验证序列化的 NodeTypeMap 是否可以与当前的本机节点数据布局集一起使用
 	// Sets internal bDataLayoutValid flag
-	// 设置内部 bDataLayoutValid 标志
+ // 设置内部 bDataLayoutValid 标志
 	ENGINE_API bool VerifyNodeDataLayout();
 #endif
 
@@ -682,30 +686,30 @@ public:
 	}
 
 	// Gets the property index from the original UAnimGraphNode's GUID. Does not remap to property order.
-	// 从原始 UAnimGraphNode 的 GUID 获取属性索引。不重新映射到属性顺序。
+ // 从原始 UAnimGraphNode 的 GUID 获取属性索引。不重新映射到属性顺序。
 	ENGINE_API const int32* GetNodePropertyIndexFromGuid(FGuid Guid, EPropertySearchMode::Type SearchMode = EPropertySearchMode::OnlyThis);
 
 	// Gets the remapped property index from the original UAnimGraphNode's GUID. Can be used to index the AnimNodeProperties array.
-	// 从原始 UAnimGraphNode 的 GUID 获取重新映射的属性索引。可用于索引 AnimNodeProperties 数组。
+ // 从原始 UAnimGraphNode 的 GUID 获取重新映射的属性索引。可用于索引 AnimNodeProperties 数组。
 	ENGINE_API int32 GetNodeIndexFromGuid(FGuid Guid, EPropertySearchMode::Type SearchMode = EPropertySearchMode::OnlyThis);
 
 	ENGINE_API const UEdGraphNode* GetVisualNodeFromNodePropertyIndex(int32 PropertyIndex, EPropertySearchMode::Type SearchMode = EPropertySearchMode::OnlyThis) const;
 #endif
 
 	// Called after Link to patch up references to the nodes in the CDO
-	// 在 Link 之后调用以修补对 CDO 中节点的引用
+ // 在 Link 之后调用以修补对 CDO 中节点的引用
 	ENGINE_API void LinkFunctionsToDefaultObjectNodes(UObject* DefaultObject);
 
 	// Populates AnimBlueprintFunctions according to the UFunction(s) on this class
-	// 根据此类上的 UFunction 填充 AnimBlueprintFunctions
+ // 根据此类上的 UFunction 填充 AnimBlueprintFunctions
 	ENGINE_API void GenerateAnimationBlueprintFunctions();
 
 	// Build the properties that we cache for our constant data
-	// 构建我们为常量数据缓存的属性
+ // 构建我们为常量数据缓存的属性
 	ENGINE_API void BuildConstantProperties();
 
 	// Get the fixed names of our generated structs
-	// 获取我们生成的结构的固定名称
+ // 获取我们生成的结构的固定名称
 	static ENGINE_API FName GetConstantsStructName();
 	static ENGINE_API FName GetMutablesStructName();
 	
@@ -716,25 +720,25 @@ public:
 #endif
 
 	// UObject interface
-	// UObject接口
+ // UObject接口
 	ENGINE_API virtual void Serialize(FArchive& Ar) override;
 	// End of UObject interface
-	// UObject接口结束
+ // UObject接口结束
 
 	// UStruct interface
-	// US结构接口
+ // US结构接口
 	ENGINE_API virtual void Link(FArchive& Ar, bool bRelinkExistingProperties) override;
 	// End of UStruct interface
-	// UStruct 接口结束
+ // UStruct 接口结束
 
 	// UClass interface
-	// U类接口
+ // U类接口
 	ENGINE_API virtual void PurgeClass(bool bRecompilingOnLoad) override;
 	ENGINE_API virtual uint8* GetPersistentUberGraphFrame(UObject* Obj, UFunction* FuncToCheck) const override;
 	ENGINE_API virtual void PostLoadDefaultObject(UObject* Object) override;
 	ENGINE_API virtual void PostLoad() override;
 	// End of UClass interface
-	// UClass接口结束
+ // UClass接口结束
 };
 
 template<typename NodeType>

@@ -16,12 +16,16 @@
 
 /** Preview items that are attached to the skeleton **/
 /** 预览附加到骨架的项目 **/
+/** 预览附加到骨架的项目 **/
+/** 预览附加到骨架的项目 **/
 USTRUCT()
 struct FPreviewAttachedObjectPair
 {
 	GENERATED_USTRUCT_BODY()
 
+	/** 要附加的对象 */
 private:
+	/** 要附加的对象 */
 	/** the object to be attached */
 	/** 要附加的对象 */
 	UPROPERTY()
@@ -37,8 +41,10 @@ public:
 	FPreviewAttachedObjectPair()
 #if WITH_EDITORONLY_DATA
 		: Object_DEPRECATED(NULL)
+	/** 对象的附加点的名称（例如骨骼或插槽名称） */
 #endif
 	{}
+	/** 对象的附加点的名称（例如骨骼或插槽名称） */
 
 	/** The name of the attach point of the Object (for example a bone or socket name) */
 	/** 对象的附加点的名称（例如骨骼或插槽名称） */
@@ -66,9 +72,11 @@ public:
 		AttachedObject = InObject;
 	}
 };
+/** 处理附加资产的组件 */
 
 // Iterators
 // 迭代器
+/** 处理附加资产的组件 */
 typedef TIndexedContainerIterator<      TArray<FPreviewAttachedObjectPair>,       FPreviewAttachedObjectPair, int32> TIterator;
 typedef TIndexedContainerIterator<const TArray<FPreviewAttachedObjectPair>, const FPreviewAttachedObjectPair, int32> TConstIterator;
 

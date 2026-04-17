@@ -22,7 +22,7 @@ void FAnimNode_ModifyCurve::Initialize_AnyThread(const FAnimationInitializeConte
 	SourcePose.Initialize(Context);
 
 	// Init our last values array to be the right size
-	// 将最后一个值数组初始化为正确的大小
+ // 将最后一个值数组初始化为正确的大小
 	if (ApplyMode == EModifyCurveApplyMode::WeightedMovingAverage)
 	{
 		LastCurve.Empty();
@@ -49,9 +49,9 @@ void FAnimNode_ModifyCurve::Evaluate_AnyThread(FPoseContext& Output)
 	if (ApplyMode == EModifyCurveApplyMode::WeightedMovingAverage)
 	{
 		// WMA acts as a filter on incoming curves - it ignores the values that are provided on pins and just uses those
-		// WMA 充当传入曲线的过滤器 - 它忽略引脚上提供的值并仅使用这些值
+  // WMA 充当传入曲线的过滤器 - 它忽略引脚上提供的值并仅使用这些值
 		// curves as a mask to use when applying the filter
-		// 曲线作为应用滤镜时使用的蒙版
+  // 曲线作为应用滤镜时使用的蒙版
 
 		UE::Anim::FCurveFilter Filter;
 		Filter.SetFilterMode(UE::Anim::ECurveFilterMode::AllowOnlyFiltered);
@@ -71,7 +71,7 @@ void FAnimNode_ModifyCurve::Evaluate_AnyThread(FPoseContext& Output)
 			}
 
 			// Combine pin & map curves in case they overlap
-			// 合并图钉和地图曲线，以防它们重叠
+   // 合并图钉和地图曲线，以防它们重叠
 			UE::Anim::FNamedValueArrayUtils::Union(Filter, MapFilter,
 				[](UE::Anim::FCurveFilterElement& InOutElement, const UE::Anim::FCurveFilterElement& InElement, UE::Anim::ENamedValueUnionFlags InFlags)
 				{
@@ -83,16 +83,16 @@ void FAnimNode_ModifyCurve::Evaluate_AnyThread(FPoseContext& Output)
 		}
 
 		// Mask off last curves by pin-exposed curves
-		// 通过引脚暴露的曲线遮盖最后的曲线
+  // 通过引脚暴露的曲线遮盖最后的曲线
 		UE::Anim::FCurveUtils::Filter(LastCurve, Filter);
 
 		// Perform WMA on output
-		// 对输出执行 WMA
+  // 对输出执行 WMA
 		UE::Anim::FNamedValueArrayUtils::Union(Output.Curve, LastCurve,
 			[this](UE::Anim::FCurveElement& InOutResult, const UE::Anim::FCurveElement& InCurveElement, UE::Anim::ENamedValueUnionFlags InFlags)
 			{
 				// Only apply curves that we are overriding
-				// 仅应用我们要覆盖的曲线
+    // 仅应用我们要覆盖的曲线
 				if(EnumHasAnyFlags(InFlags, UE::Anim::ENamedValueUnionFlags::ValidArg1))
 				{
 					InOutResult.Value = ProcessCurveWMAOperation(InOutResult.Value, InCurveElement.Value);
@@ -100,13 +100,13 @@ void FAnimNode_ModifyCurve::Evaluate_AnyThread(FPoseContext& Output)
 			});
 
 		// Copy current to last
-		// 将当前内容复制到最后一个
+  // 将当前内容复制到最后一个
 		LastCurve.CopyFrom(Output.Curve);
 	}
 	else
 	{
 		// Build internal curves from array & map
-		// 从数组和贴图构建内部曲线
+  // 从数组和贴图构建内部曲线
 		FBlendedCurve Curve;
 		Curve.Reserve(CurveNames.Num());
 		for(int32 CurveIndex = 0; CurveIndex < CurveNames.Num(); ++CurveIndex)
@@ -124,7 +124,7 @@ void FAnimNode_ModifyCurve::Evaluate_AnyThread(FPoseContext& Output)
 			}
 
 			// Combine pin & map curves in case they overlap
-			// 合并图钉和地图曲线，以防它们重叠
+   // 合并图钉和地图曲线，以防它们重叠
 			Curve.Combine(MapCurve);
 		}
 		
@@ -132,7 +132,7 @@ void FAnimNode_ModifyCurve::Evaluate_AnyThread(FPoseContext& Output)
 			[this](UE::Anim::FCurveElement& InOutResult, const UE::Anim::FCurveElement& InCurveElement, UE::Anim::ENamedValueUnionFlags InFlags)
 			{
 				// Only apply curves that we are overriding
-				// 仅应用我们要覆盖的曲线
+    // 仅应用我们要覆盖的曲线
 				if(EnumHasAnyFlags(InFlags, UE::Anim::ENamedValueUnionFlags::ValidArg1))
 				{
 					InOutResult.Value = ProcessCurveOperation(InOutResult.Value, InCurveElement.Value);
@@ -146,7 +146,7 @@ float FAnimNode_ModifyCurve::ProcessCurveOperation(float CurrentValue, float New
 	float UseNewValue = CurrentValue;
 
 	// Use ApplyMode enum to decide how to apply
-	// 使用ApplyMode枚举来决定如何申请
+ // 使用ApplyMode枚举来决定如何申请
 	if (ApplyMode == EModifyCurveApplyMode::Add)
 	{
 		UseNewValue = CurrentValue + NewValue;
@@ -179,11 +179,11 @@ void FAnimNode_ModifyCurve::Update_AnyThread(const FAnimationUpdateContext& Cont
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Update_AnyThread)
 
 	// Run update on input pose nodes
-	// 对输入姿势节点运行更新
+ // 对输入姿势节点运行更新
 	SourcePose.Update(Context);
 
 	// Evaluate any BP logic plugged into this node
-	// 评估插入此节点的任何 BP 逻辑
+ // 评估插入此节点的任何 BP 逻辑
 	GetEvaluateGraphExposedInputs().Execute(Context);
 }
 

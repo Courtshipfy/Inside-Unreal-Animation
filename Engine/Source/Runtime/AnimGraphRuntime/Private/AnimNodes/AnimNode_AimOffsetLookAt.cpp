@@ -20,6 +20,16 @@ TAutoConsoleVariable<int32> CVarAimOffsetLookAtDebug(TEXT("a.AnimNode.AimOffsetL
 /////////////////////////////////////////////////////
 // FAnimNode_AimOffsetLookAt
 // FAnimNode_AimOffsetLookAt
+// FAnimNode_AimOffsetLookAt
+// FAnimNode_AimOffsetLookAt
+// FAnimNode_AimOffsetLookAt
+// FAnimNode_AimOffsetLookAt
+// FAnimNode_AimOffsetLookAt
+// FAnimNode_AimOffsetLookAt
+// FAnimNode_AimOffsetLookAt
+// FAnimNode_AimOffsetLookAt
+// FAnimNode_AimOffsetLookAt
+// FAnimNode_AimOffsetLookAt
 
 void FAnimNode_AimOffsetLookAt::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -90,7 +100,7 @@ void FAnimNode_AimOffsetLookAt::Evaluate_AnyThread(FPoseContext& Context)
 	ANIM_MT_SCOPE_CYCLE_COUNTER_VERBOSE(AimOffsetLookAt, !IsInGameThread());
 
 	// Evaluate base pose
-	// 评估基本姿势
+ // 评估基本姿势
 	BasePose.Evaluate(Context);
 
 	if (bIsLODEnabled && FAnimWeight::IsRelevant(Alpha) && (CVarAimOffsetLookAtEnable.GetValueOnAnyThread() == 1))
@@ -98,18 +108,18 @@ void FAnimNode_AimOffsetLookAt::Evaluate_AnyThread(FPoseContext& Context)
 		UpdateFromLookAtTarget(Context);
 
 		// Evaluate MeshSpaceRotation additive blendspace
-		// 评估 MeshSpaceRotation 附加混合空间
+  // 评估 MeshSpaceRotation 附加混合空间
 		FPoseContext MeshSpaceRotationAdditivePoseContext(Context);
 		FAnimNode_BlendSpacePlayer::Evaluate_AnyThread(MeshSpaceRotationAdditivePoseContext);
 
 		// Accumulate poses together
-		// 一起积累姿势
+  // 一起积累姿势
 		FAnimationPoseData BaseAnimationPoseData(Context);
 		const FAnimationPoseData AdditiveAnimationPoseData(MeshSpaceRotationAdditivePoseContext);
 		FAnimationRuntime::AccumulateMeshSpaceRotationAdditiveToLocalPose(BaseAnimationPoseData, AdditiveAnimationPoseData, Alpha);
 
 		// Resulting rotations are not normalized, so normalize here.
-		// 生成的旋转未标准化，因此请在此处标准化。
+  // 生成的旋转未标准化，因此请在此处标准化。
 		Context.Pose.NormalizeRotations();
 	}
 }
@@ -142,7 +152,7 @@ void FAnimNode_AimOffsetLookAt::UpdateFromLookAtTarget(FPoseContext& LocalPoseCo
 		const FTransform ActorTransform = AnimProxy->GetActorTransform();
 
 		// Convert Target to Actor Space
-		// 将目标转换为 Actor 空间
+  // 将目标转换为 Actor 空间
 		const FTransform TargetWorldTransform(LookAtLocation);
 
 		const FVector DirectionToTarget = ActorTransform.InverseTransformVectorNoScale(TargetWorldTransform.GetLocation() - SourceWorldTransform.GetLocation()).GetSafeNormal();
@@ -177,7 +187,7 @@ void FAnimNode_AimOffsetLookAt::UpdateFromLookAtTarget(FPoseContext& LocalPoseCo
 	}
 
 	// Update Blend Space, including the smoothing/filtering, and put the result into BlendSampleDataCache.
-	// 更新混合空间，包括平滑/过滤，并将结果放入 BlendSampleDataCache。
+ // 更新混合空间，包括平滑/过滤，并将结果放入 BlendSampleDataCache。
 	if (CurrentBlendSpace)
 	{
 		const FVector BlendSpacePosition(CurrentBlendInput.X, CurrentBlendInput.Y, 0.f);
@@ -203,7 +213,7 @@ void FAnimNode_AimOffsetLookAt::GatherDebugData(FNodeDebugData& DebugData)
 FVector FAnimNode_AimOffsetLookAt::GetPosition() const
 {
 	// Use our calculated coordinates rather than the folded values
-	// 使用我们计算的坐标而不是折叠值
+ // 使用我们计算的坐标而不是折叠值
 	return CurrentBlendInput;
 }
 

@@ -315,7 +315,7 @@ FUObjectAnnotationSparseBool GSkeletalMeshTraceAnnotations;
 TMap<FName, uint32> GAnimTraceNames;
 
 // Global unique name index
-// [翻译失败: Global unique name index]
+// 全球唯一名称索引
 uint32 GAnimTraceCurrentNameId = 1;
 
 // Critical section used to lock global name map & index
@@ -336,14 +336,14 @@ void FAnimTrace::Reset()
 struct FAnimTraceScratchBuffers : public TThreadSingleton<FAnimTraceScratchBuffers>
 {
 	// Curve values/IDs for skeletal mesh component
-	// 骨架网格物体组件的曲线值/ID
+ // 骨架网格物体组件的曲线值/ID
 	TArray<float> CurveValues;
 	TArray<uint32> CurveIds;
 	TArray<float> ExternalMorphTargetWeights;
 	TArray<int32> ExternalMorphTargetWeightCounts;
 
 	// Parent indices for skeletal meshes
-	// 骨架网格物体的父索引
+ // 骨架网格物体的父索引
 	TArray<int32> ParentIndices;
 };
 
@@ -616,7 +616,7 @@ void FAnimTrace::OutputSkeletalMeshComponent(const USkeletalMeshComponent* InCom
 	}
 
 	// Get the external morph target sets.
-	// 获取外部变形目标集。
+ // 获取外部变形目标集。
 	const int32 LOD = InComponent->GetPredictedLODLevel();
 	
 	FExternalMorphSets* ExternalMorphSet = nullptr;
@@ -657,7 +657,7 @@ void FAnimTrace::OutputSkeletalMeshComponent(const USkeletalMeshComponent* InCom
 		ExternalMorphTraceWeightCounts.Reset();
 
 		// Get the weights for all external morph sets.
-		// 获取所有外部变形集的权重。
+  // 获取所有外部变形集的权重。
 		if (ExternalMorphSet && !ExternalMorphSet->IsEmpty())
 		{
 			const FExternalMorphWeightData& ExternalMorphWeightData = InComponent->GetExternalMorphWeights(LOD);
@@ -666,7 +666,7 @@ void FAnimTrace::OutputSkeletalMeshComponent(const USkeletalMeshComponent* InCom
 			if (!ExternalMorphWeightData.MorphSets.IsEmpty() && NumMorphDataSets == NumMorphWeightSets)
 			{
 				// Allocate enough data in the scratch buffer.
-				// [翻译失败: Allocate enough data in the scratch buffer.]
+    // 在暂存缓冲区中分配足够的数据。
 				ExternalMorphTraceWeightCounts.SetNumZeroed(NumMorphDataSets);
 
 				int32 SetIndex = 0;

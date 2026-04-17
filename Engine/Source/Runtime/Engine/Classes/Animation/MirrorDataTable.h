@@ -9,6 +9,8 @@
 
 /** Type referenced by a row in the mirror data table */
 /** 镜像数据表中的行引用的类型 */
+/** 镜像数据表中的行引用的类型 */
+/** 镜像数据表中的行引用的类型 */
 UENUM()
 namespace EMirrorRowType
 {
@@ -22,23 +24,33 @@ namespace EMirrorRowType
 	};
 }
 
+/** FMirrorFindReplaceExpression 的查找和替换方法。 */
 
+/** FMirrorFindReplaceExpression 的查找和替换方法。 */
 /** Find and Replace Method for FMirrorFindReplaceExpression. */
 /** FMirrorFindReplaceExpression 的查找和替换方法。 */
 UENUM()
 namespace EMirrorFindReplaceMethod
+		/** 只查找并替换名称开头的匹配字符串  */
 {
 	enum Type : int
+        /** 只查找并替换名称末尾的匹配字符串  */
+		/** 只查找并替换名称开头的匹配字符串  */
 	{
+        /** 使用正则表达式进行查找和替换，包括支持捕获 $1 - $10 */
 		/** Only find and replace matching strings at the start of the name  */
+        /** 只查找并替换名称末尾的匹配字符串  */
 		/** 只查找并替换名称开头的匹配字符串  */
 		Prefix,
+        /** 使用正则表达式进行查找和替换，包括支持捕获 $1 - $10 */
         /** Only find and replace matching strings at the end of the name  */
+/**  基本镜像表包含动画镜像系统所需的所有数据。 */
         /** 只查找并替换名称末尾的匹配字符串  */
         Suffix,
         /** Use regular expressions for find and replace, including support for captures $1 - $10 */
         /** 使用正则表达式进行查找和替换，包括支持捕获 $1 - $10 */
         RegularExpression
+/**  基本镜像表包含动画镜像系统所需的所有数据。 */
     };
 }
 
@@ -61,12 +73,14 @@ struct FMirrorTableRow : public FTableRowBase
 
 	FMirrorTableRow()
 		: Name(NAME_None)
+/** 用于生成镜像表的查找和替换表达式*/
 		, MirroredName(NAME_None)
 		, MirrorEntryType(EMirrorRowType::Bone) {}
 
 	ENGINE_API FMirrorTableRow(const FMirrorTableRow& Other);
 	ENGINE_API FMirrorTableRow& operator=(FMirrorTableRow const& Other);
 	ENGINE_API bool operator==(FMirrorTableRow const& Other) const;
+/** 用于生成镜像表的查找和替换表达式*/
 	ENGINE_API bool operator!=(FMirrorTableRow const& Other) const;
 	ENGINE_API bool operator<(FMirrorTableRow const& Other) const;
 };
@@ -221,7 +235,7 @@ public:
 	TObjectPtr<USkeleton> Skeleton; 
 
 	// Index of the mirror bone for a given bone index in the reference skeleton, or INDEX_NONE if the bone is not mirrored
-	// 参考骨骼中给定骨骼索引的镜像骨骼的索引，如果骨骼未镜像，则为 INDEX_NONE
+ // 参考骨骼中给定骨骼索引的镜像骨骼的索引，如果骨骼未镜像，则为 INDEX_NONE
 	TCustomBoneIndexArray<FSkeletonPoseBoneIndex, FSkeletonPoseBoneIndex> BoneToMirrorBoneIndex;
 	
 	UE_DEPRECATED(5.3, "UID-based mirroring has been remove, please use CurveToMirrorCurveMap.")
@@ -231,21 +245,21 @@ public:
 	TArray<SmartName::UID_Type> CurveMirrorTargetUIDArray;
 
 	// Map from animation curve to mirrored animation curve
-	// 从动画曲线映射到镜像动画曲线
+ // 从动画曲线映射到镜像动画曲线
 	TMap<FName, FName> CurveToMirrorCurveMap;
 	
 	// Map from animation notify to mirrored animation notify
-	// 从动画通知到镜像动画通知的映射
+ // 从动画通知到镜像动画通知的映射
 	TMap<FName, FName> AnimNotifyToMirrorAnimNotifyMap;
 	
 	// Map from sync marker to mirrored sync marker 
-	// 从同步标记映射到镜像同步标记
+ // 从同步标记映射到镜像同步标记
 	TMap<FName, FName> SyncToMirrorSyncMap;
 
 protected: 
 
 	// Fill BoneToMirrorBoneIndex, CurveMirrorSourceUIDArray, CurveMirrorTargetUIDArray and NotifyToMirrorNotifyIndex based on the Skeleton and Table Contents
-	// 根据骨架和表内容填充 BoneToMirrorBoneIndex、CurveMirrorSourceUIDArray、CurveMirrorTargetUIDArray 和 NotifyToMirrorNotifyIndex
+ // 根据骨架和表内容填充 BoneToMirrorBoneIndex、CurveMirrorSourceUIDArray、CurveMirrorTargetUIDArray 和 NotifyToMirrorNotifyIndex
 	ENGINE_API void FillMirrorArrays();
 };
 

@@ -15,6 +15,16 @@
 /////////////////////////////////////////////////////
 // FAnimNode_BlendListBase
 // FAnimNode_BlendListBase
+// FAnimNode_BlendListBase
+// FAnimNode_BlendListBase
+// FAnimNode_BlendListBase
+// FAnimNode_BlendListBase
+// FAnimNode_BlendListBase
+// FAnimNode_BlendListBase
+// FAnimNode_BlendListBase
+// FAnimNode_BlendListBase
+// FAnimNode_BlendListBase
+// FAnimNode_BlendListBase
 
 void FAnimNode_BlendListBase::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -28,9 +38,9 @@ void FAnimNode_BlendListBase::Initialize_AnyThread(const FAnimationInitializeCon
 	if (NumPoses > 0)
 	{
 		// If we have at least 1 pose we initialize to full weight on
-		// 如果我们至少有 1 个姿势，我们将初始化为全权重
+  // 如果我们至少有 1 个姿势，我们将初始化为全权重
 		// the first pose
-		// 第一个姿势
+  // 第一个姿势
 		PerBlendData.AddZeroed(NumPoses);
 		PerBlendData[0].Weight = 1.0f;
 
@@ -87,7 +97,7 @@ void FAnimNode_BlendListBase::InitializePerBoneData()
 		const int32 NumPoses = BlendPose.Num();
 
 		// Initialise per-bone data
-		// 初始化每个骨骼的数据
+  // 初始化每个骨骼的数据
 		PerBoneSampleData.Empty(NumPoses);
 		PerBoneSampleData.AddZeroed(NumPoses);
 
@@ -122,7 +132,7 @@ void FAnimNode_BlendListBase::Update_AnyThread(const FAnimationUpdateContext& Co
 	if (NumPoses > 0)
 	{
 		// Handle a change in the active child index; adjusting the target weights
-		// 处理活动子索引的变化；调整目标权重
+  // 处理活动子索引的变化；调整目标权重
 		const int32 ChildIndex = GetActiveChildIndex();
 		
 		if (ChildIndex != LastActiveChildIndex)
@@ -136,11 +146,11 @@ void FAnimNode_BlendListBase::Update_AnyThread(const FAnimationUpdateContext& Co
 			const float WeightDifference = FMath::Clamp<float>(FMath::Abs<float>(DesiredWeight - CurrentWeight), 0.0f, 1.0f);
 
 			// scale by the weight difference since we want always consistency:
-			// 按重量差异进行缩放，因为我们希望始终保持一致性：
+   // 按重量差异进行缩放，因为我们希望始终保持一致性：
 			// - if you're moving from 0 to full weight 1, it will use the normal blend time
-			// - 如果您从 0 移动到全重 1，它将使用正常的混合时间
+   // - 如果您从 0 移动到全重 1，它将使用正常的混合时间
 			// - if you're moving from 0.5 to full weight 1, it will get there in half the time
-			// - 如果你从 0.5 移动到全权重 1，它会在一半的时间内到达那里
+   // - 如果你从 0.5 移动到全权重 1，它会在一半的时间内到达那里
 			float RemainingBlendTime;
 			if (LastChildIndexIsInvalid)
 			{
@@ -184,7 +194,7 @@ void FAnimNode_BlendListBase::Update_AnyThread(const FAnimationUpdateContext& Co
 			}
 
 			// If we have a valid previous child and we're instantly blending - update that pose with zero weight
-			// 如果我们有一个有效的前一个孩子并且我们立即混合 - 以零权重更新该姿势
+   // 如果我们有一个有效的前一个孩子并且我们立即混合 - 以零权重更新该姿势
 			if(RemainingBlendTime == 0.0f && !LastChildIndexIsInvalid)
 			{
 				BlendPose[LastActiveChildIndex].Update(Context.FractionalWeight(0.0f));
@@ -218,13 +228,13 @@ void FAnimNode_BlendListBase::Update_AnyThread(const FAnimationUpdateContext& Co
 			}
 
 			// When bResetChildOnActivation is true and the weight of the new child is zero, we'll reinitialize the child.
-			// 当 bResetChildOnActivation 为 true 并且新子项的权重为零时，我们将重新初始化该子项。
+   // 当 bResetChildOnActivation 为 true 并且新子项的权重为零时，我们将重新初始化该子项。
 			if (GetChildUpdateMode() == EBlendListChildUpdateMode::ResetChildOnActivate && CurrentWeight <= ZERO_ANIMWEIGHT_THRESH)
 			{
 				FAnimationInitializeContext ReinitializeContext(Context.AnimInstanceProxy, Context.SharedContext);
 
 				// reinitialize
-				// 重新初始化
+    // 重新初始化
 				BlendPose[ChildIndex].Initialize(ReinitializeContext);
 			}
 
@@ -232,9 +242,9 @@ void FAnimNode_BlendListBase::Update_AnyThread(const FAnimationUpdateContext& Co
 		}
 
 		// Advance the weights
-		// 推进重量
+  // 推进重量
 		//@TODO: This means we advance even in a frame where the target weights/times just got modified; is that desirable?
-		//@TODO：这意味着即使在目标权重/时间刚刚修改的框架中我们也会前进；这是可取的吗？
+  // @TODO：这意味着即使在目标权重/时间刚刚修改的框架中我们也会前进；这是可取的吗？
 		float SumWeight = 0.0f;
 		for (int32 i = 0; i < PerBlendData.Num(); ++i)
 		{
@@ -248,7 +258,7 @@ void FAnimNode_BlendListBase::Update_AnyThread(const FAnimationUpdateContext& Co
 		}
 
 		// Renormalize the weights
-		// 重新标准化权重
+  // 重新标准化权重
 		if ((SumWeight > ZERO_ANIMWEIGHT_THRESH) && (FMath::Abs<float>(SumWeight - 1.0f) > ZERO_ANIMWEIGHT_THRESH))
 		{
 			float ReciprocalSum = 1.0f / SumWeight;
@@ -259,7 +269,7 @@ void FAnimNode_BlendListBase::Update_AnyThread(const FAnimationUpdateContext& Co
 		}
 
 		// Update our active children
-		// 更新我们活跃的孩子
+  // 更新我们活跃的孩子
 		for (int32 i = 0; i < BlendPose.Num(); ++i)
 		{
 			const float BlendWeight = PerBlendData[i].Weight;
@@ -273,7 +283,7 @@ void FAnimNode_BlendListBase::Update_AnyThread(const FAnimationUpdateContext& Co
 			else if (GetChildUpdateMode() == EBlendListChildUpdateMode::AlwaysTickChildren)
 			{
 				// With always update children on, even if weight is 0 we will update the child
-				// 启用始终更新子项后，即使权重为 0，我们也会更新子项
+    // 启用始终更新子项后，即使权重为 0，我们也会更新子项
 				FAnimationUpdateContext ChildContext = Context.FractionalWeight(FAnimWeight::GetSmallestRelevantWeight());
 				UE::Anim::TOptionalScopedGraphMessage<UE::Anim::FAnimInertializationSyncScope> InertializationSync(bRequestedInertializationOnActiveChildIndexChange, ChildContext);
 				BlendPose[i].Update((i == ChildIndex) ? ChildContext : ChildContext.AsInactive());
@@ -281,7 +291,7 @@ void FAnimNode_BlendListBase::Update_AnyThread(const FAnimationUpdateContext& Co
 		}
 
 		// If we're using a blend profile, extract the scales and build blend sample data
-		// 如果我们使用混合配置文件，请提取比例并构建混合样本数据
+  // 如果我们使用混合配置文件，请提取比例并构建混合样本数据
 		if (CurrentBlendProfile)
 		{
 			for(int32 i = 0; i < BlendPose.Num(); ++i)
@@ -311,7 +321,7 @@ void FAnimNode_BlendListBase::Evaluate_AnyThread(FPoseContext& Output)
 	ANIM_MT_SCOPE_CYCLE_COUNTER(BlendPosesInGraph, !IsInGameThread());
 
 	// Build local arrays to pass to the BlendPosesTogether runtime
-	// 构建本地数组以传递给 BlendPosesTogether 运行时
+ // 构建本地数组以传递给 BlendPosesTogether 运行时
 	TArray<int32, TInlineAllocator<8>> PosesToEvaluate;
 	TArray<float, TInlineAllocator<8>> BlendWeights;
 	const int32 PerBlendDataCount = PerBlendData.Num();
@@ -332,13 +342,13 @@ void FAnimNode_BlendListBase::Evaluate_AnyThread(FPoseContext& Output)
 		if(NumPoses == 1 && FAnimWeight::IsFullWeight(BlendWeights[PosesToEvaluate[0]]) && CurrentBlendProfile == nullptr)
 		{
 			// Single full weight pose - pass-through fast common case
-			// 单一全重量姿势 - 快速通过常见情况
+   // 单一全重量姿势 - 快速通过常见情况
 			BlendPose[PosesToEvaluate[0]].Evaluate(Output);
 		}
 		else
 		{
 			// Scratch arrays for evaluation, stack allocated
-			// 用于评估的临时数组，分配堆栈
+   // 用于评估的临时数组，分配堆栈
 			TArray<FCompactPose, TInlineAllocator<8>> FilteredPoses;
 			TArray<FBlendedCurve, TInlineAllocator<8>> FilteredCurve;
 			TArray<UE::Anim::FStackAttributeContainer, TInlineAllocator<8>> FilteredAttributes;
@@ -365,7 +375,7 @@ void FAnimNode_BlendListBase::Evaluate_AnyThread(FPoseContext& Output)
 			FAnimationPoseData OutAnimationPoseData(Output);
 		
 			// Use the calculated blend sample data if we're blending per-bone
-			// 如果我们要按骨骼混合，请使用计算出的混合样本数据
+   // 如果我们要按骨骼混合，请使用计算出的混合样本数据
 			if (CurrentBlendProfile)
 			{
 				const USkeleton* TargetSkeleton = Output.Pose.GetBoneContainer().GetSkeletonAsset();

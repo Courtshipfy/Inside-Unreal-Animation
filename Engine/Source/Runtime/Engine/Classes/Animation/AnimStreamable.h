@@ -41,11 +41,11 @@ public:
 	int32 NumFrames;
 
 	// Compressed Data for this chunk (if nullptr then data needs to be loaded via BulkData)
-	// 该块的压缩数据（如果为 nullptr，则需要通过 BulkData 加载数据）
+ // 该块的压缩数据（如果为 nullptr，则需要通过 BulkData 加载数据）
 	FCompressedAnimSequence* CompressedAnimSequence;
 
 	// Bulk data if stored in the package.
-	// 批量数据（如果存储在包中）。
+ // 批量数据（如果存储在包中）。
 	FByteBulkData BulkData;
 
 	SIZE_T GetMemorySize() const
@@ -59,7 +59,9 @@ public:
 		}
 		return CurrentSize;
 	}
+	/** 序列化。 */
 
+	/** 序列化。 */
 	/** Serialization. */
 	/** 序列化。 */
 	void Serialize(FArchive& Ar, UAnimStreamable* Owner, int32 ChunkIndex);
@@ -93,14 +95,20 @@ UCLASS(config=Engine, hidecategories=UObject, MinimalAPI, BlueprintType)
 class UAnimStreamable : public UAnimSequenceBase
 {
 	GENERATED_UCLASS_BODY()
+	/** 各个动画轨道中预期的关键点数量。 */
+	/** 各个动画轨道中预期的关键点数量。 */
 
 public:
 	/** The number of keys expected within the individual animation tracks. */
 	/** 各个动画轨道中预期的关键点数量。 */
+	/** 这定义了如何计算键之间的值 **/
+	/** 这定义了如何计算键之间的值 **/
 	UPROPERTY(AssetRegistrySearchable)
 	int32 NumberOfKeys;
 
+	/** 重定位时使用的基本姿势 */
 	/** This defines how values between keys are calculated **/
+	/** 重定位时使用的基本姿势 */
 	/** 这定义了如何计算键之间的值 **/
 	UPROPERTY(EditAnywhere, AssetRegistrySearchable, Category = Animation)
 	EAnimInterpolationType Interpolation;
@@ -115,8 +123,10 @@ public:
 
 #if WITH_EDITORONLY_DATA
 
+	/** 此序列中的原始帧数（引擎不使用 - 仅用于提供信息）。 */
 	// Sequence the streamable was created from (used for reflecting changes to the source in editor)
-	// 创建流的序列（用于反映编辑器中源的更改）
+ // 创建流的序列（用于反映编辑器中源的更改）
+	/** 此序列中的原始帧数（引擎不使用 - 仅用于提供信息）。 */
 	UPROPERTY()
 	TObjectPtr<const UAnimSequence> SourceSequence;
 
@@ -149,14 +159,14 @@ public:
 	TArray<FName> AnimationTrackNames;
 
 	// Editor can have multiple platforms loaded at once
-	// 编辑器可以同时加载多个平台
+ // 编辑器可以同时加载多个平台
 	TMap<const ITargetPlatform*, FStreamableAnimPlatformData*> StreamableAnimPlatformData;
 
 	FStreamableAnimPlatformData* RunningAnimPlatformData;
 #else
 
 	// Non editor only has one set of platform data
-	// 非编辑者只有一套平台数据
+ // 非编辑者只有一套平台数据
 	FStreamableAnimPlatformData RunningAnimPlatformData;
 #endif
 
@@ -180,30 +190,44 @@ public:
 	}
 
 	const FStreamableAnimPlatformData& GetRunningPlatformData() const
+	/** 用于按此顺序压缩骨骼的骨骼压缩设置。 */
+	/** 用于按此顺序压缩骨骼的骨骼压缩设置。 */
 	{
 #if WITH_EDITOR
 		check(RunningAnimPlatformData);
+	/** 用于压缩此序列中的曲线的曲线压缩设置。 */
 		return *RunningAnimPlatformData;
+	/** 用于压缩此序列中的曲线的曲线压缩设置。 */
 #else
 		return RunningAnimPlatformData;
+	/** 用于控制是否使用可变帧剥离及其数量的设置*/
 #endif
 	}
+	/** 用于控制是否使用可变帧剥离及其数量的设置*/
 
+	/** 如果打开，它将允许提取根运动 **/
 	/** The bone compression settings used to compress bones in this sequence. */
 	/** 用于按此顺序压缩骨骼的骨骼压缩设置。 */
 	UPROPERTY(Category = Compression, EditAnywhere)
+	/** 如果打开，它将允许提取根运动 **/
+	/** 提取根运动时，根骨骼将被锁定到该位置。**/
 	TObjectPtr<class UAnimBoneCompressionSettings> BoneCompressionSettings;
 
 	/** The curve compression settings used to compress curves in this sequence. */
 	/** 用于压缩此序列中的曲线的曲线压缩设置。 */
+	/** 即使未启用根运动，也强制根骨锁定 */
+	/** 提取根运动时，根骨骼将被锁定到该位置。**/
 	UPROPERTY(Category = Compression, EditAnywhere)
 	TObjectPtr<class UAnimCurveCompressionSettings> CurveCompressionSettings;
 
+	/** 如果启用此选项，它将使用标准化比例值来提取提取的根运动：FVector(1.0, 1.0, 1.0) **/
 	/** The settings used to control whether or not to use variable frame stripping and its amount*/
+	/** 即使未启用根运动，也强制根骨锁定 */
 	/** 用于控制是否使用可变帧剥离及其数量的设置*/
 	UPROPERTY(Category = Compression, EditAnywhere)
 	TObjectPtr<class UVariableFrameStrippingSettings> VariableFrameStrippingSettings;
 
+	/** 如果启用此选项，它将使用标准化比例值来提取提取的根运动：FVector(1.0, 1.0, 1.0) **/
 	/** If this is on, it will allow extracting of root motion **/
 	/** 如果打开，它将允许提取根运动 **/
 	UPROPERTY(EditAnywhere, AssetRegistrySearchable, Category = RootMotion, meta = (DisplayName = "EnableRootMotion"))
@@ -225,22 +249,22 @@ public:
 	bool bUseNormalizedRootMotionScale;
 
 	//~ Begin UObject Interface
-	//~ 开始 UObject 接口
+ // ~ 开始 UObject 接口
 	virtual void PreSave(FObjectPreSaveContext ObjectSaveContext) override;
 	virtual void Serialize(FArchive& Ar) override;
 	virtual void PostLoad() override;
 	virtual void FinishDestroy() override;
 	virtual void GetResourceSizeEx(FResourceSizeEx& CumulativeResourceSize) override;
 	//~ End UObject Interface
-	//~ 结束 UObject 接口
+ // ~ 结束 UObject 接口
 
 	//~ Begin UAnimSequenceBase Interface
-	//~ 开始 UAnimSequenceBase 接口
+ // ~ 开始 UAnimSequenceBase 接口
 	ENGINE_API virtual void HandleAssetPlayerTickedInternal(FAnimAssetTickContext &Context, const float PreviousTime, const float MoveDelta, const FAnimTickRecord &Instance, struct FAnimNotifyQueue& NotifyQueue) const override;
 	virtual void GetAnimationPose(FAnimationPoseData& OutAnimationPoseData, const FAnimExtractContext& ExtractionContext) const override;
 	virtual int32 GetNumberOfSampledKeys() const override { return NumberOfKeys; }
 	//~ End UAnimSequenceBase Interface
-	//~ 结束 UAnimSequenceBase 接口
+ // ~ 结束 UAnimSequenceBase 接口
 
 #if WITH_EDITOR
 	ENGINE_API void InitFrom(const UAnimSequence* InSourceSequence);

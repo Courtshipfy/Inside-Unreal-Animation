@@ -76,14 +76,14 @@ bool UAnimCurveCompressionCodec_CompressedRichCurve::Compress(const FCompressibl
 		KeyData.Append(CompressedCurve.CompressedKeys);
 
 		// Compressed curve validation
-		// 压缩曲线验证
+  // 压缩曲线验证
 		if(!!ValidateCompressedRichCurveEvaluation)
 		{
 			const int32 SamplesToTake = AnimSeq.NumberOfKeys;
 			for (int32 KeyIndex = 0; KeyIndex < SamplesToTake; ++KeyIndex)
 			{
 				// Evaluated RawCurve and Compressed Curve
-				// 评估原始曲线和压缩曲线
+    // 评估原始曲线和压缩曲线
 				const double EvalTime = SamplingFrameRate.AsSeconds(KeyIndex);
 				const float RawValue = Curve.FloatCurve.Eval(EvalTime);
 				const float CompressedValue = CompressedCurve.Eval(EvalTime);
@@ -92,7 +92,7 @@ bool UAnimCurveCompressionCodec_CompressedRichCurve::Compress(const FCompressibl
 				if (!FMath::IsNearlyZero(AbsDelta, MaxCurveError + UE_KINDA_SMALL_NUMBER))
 				{
 					// Delta larger than tolerated error value
-					// Delta 大于容许误差值
+     // Delta 大于容许误差值
 					UE_LOG(LogAnimationCompression, Warning, TEXT("Curve %s: delta too large %f, between %f and %f, at %f"), *Curve.GetName().ToString(), AbsDelta, RawValue, CompressedValue, EvalTime);
 				}
 			}
@@ -103,11 +103,11 @@ bool UAnimCurveCompressionCodec_CompressedRichCurve::Compress(const FCompressibl
 	TempBytes.Reserve(KeyDataOffset);
 
 	// Serialize the compression settings into a temporary array. The archive
-	// 将压缩设置序列化到临时数组中。档案馆
+ // 将压缩设置序列化到临时数组中。档案馆
 	// is flagged as persistent so that machines of different endianness produce
-	// 被标记为持久的，以便不同字节序的机器产生
+ // 被标记为持久的，以便不同字节序的机器产生
 	// identical binary results.
-	// 相同的二进制结果。
+ // 相同的二进制结果。
 	FMemoryWriter Ar(TempBytes, /*bIsPersistent=*/ true);
 
 	Ar.Serialize(Curves.GetData(), sizeof(FCurveDesc) * NumCurves);
@@ -150,7 +150,7 @@ void UAnimCurveCompressionCodec_CompressedRichCurve::DecompressCurves(const FCom
 	};
 
 	// Setup our constant arguments, we'll re-use the structure for every curve
-	// 设置我们的常量参数，我们将为每条曲线重复使用该结构
+ // 设置我们的常量参数，我们将为每条曲线重复使用该结构
 	FCompressedRichCurve::FStaticEvalArgs Args;
 	Args.Time = CurrentTime;
 	Args.DefaultValue = 0.0f;

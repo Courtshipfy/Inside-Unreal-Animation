@@ -61,11 +61,11 @@ UAnimBank::FOnDependenciesChanged UAnimBank::OnDependenciesChanged;
 static inline void DecomposeTransform(const FTransform& Transform, FVector3f& OutTranslation, FQuat4f& OutRotation)
 {
 	// Get Translation
-	// 获取翻译
+ // 获取翻译
 	OutTranslation = (FVector3f)Transform.GetTranslation();
 
 	// Get Rotation 
-	// 获取旋转
+ // 获取旋转
 	OutRotation = (FQuat4f)Transform.GetRotation();
 }
 
@@ -192,7 +192,7 @@ public:
 	inline void Cancel()
 	{
 		// Cancel the waiting on the build
-		// 取消等待构建
+  // 取消等待构建
 		bIsWaitingOnCompilation = false;
 
 		if (BuildTask)
@@ -239,9 +239,9 @@ void FAnimBankAsyncBuildWorker::DoWork()
 	if (UAnimBank* Bank = Owner->WeakAnimBank.Get())
 	{
 		// Grab any execution resources currently assigned to this worker so that we maintain
-		// 获取当前分配给该工作人员的所有执行资源，以便我们维护
+  // 获取当前分配给该工作人员的所有执行资源，以便我们维护
 		// concurrency limit and memory pressure until the whole multi-step task is done.
-		// 并发限制和内存压力，直到整个多步骤任务完成。
+  // 并发限制和内存压力，直到整个多步骤任务完成。
 		Owner->ExecutionResource = FExecutionResourceContext::Get();
 
 		static const FCacheBucket Bucket("AnimBank");
@@ -298,7 +298,7 @@ bool FAnimBankBuildAsyncCacheTask::ShouldWaitForCompilation() const
 			}
 
 			// If the sequence is still waiting for a post load call, let it build its stuff first to avoid blocking the Game Thread
-			// 如果序列仍在等待加载后调用，请让它首先构建其内容以避免阻塞游戏线程
+   // 如果序列仍在等待加载后调用，请让它首先构建其内容以避免阻塞游戏线程
 			if (BankSequence.Sequence->HasAnyFlags(RF_NeedPostLoad) || BankSequence.Sequence->IsCompiling() || !BankSequence.Sequence->CanBeCompressed())
 			{
 				return true;
@@ -372,7 +372,7 @@ bool FAnimBankBuildAsyncCacheTask::WaitForDependenciesAndBeginCacheWithTimeout(f
 	}
 
 	// Performs any necessary cleanup now that the async task (if any) is complete
-	// 现在异步任务（如果有）已完成，执行任何必要的清理
+ // 现在异步任务（如果有）已完成，执行任何必要的清理
 	WaitForDependenciesAndBeginCache();
 
 	return true;
@@ -396,7 +396,7 @@ void FAnimBankBuildAsyncCacheTask::BeginCache(const FIoHash& InKeyHash)
 		}
 
 		// Queue this launch through the thread pool so that we benefit from fair scheduling and memory throttling
-		// [翻译失败: Queue this launch through the thread pool so that we benefit from fair scheduling and memory throttling]
+  // 通过线程池对此启动进行排队，以便我们受益于公平调度和内存限制
 		FQueuedThreadPool* ThreadPool = FAnimBankCompilingManager::Get().GetThreadPool();
 		EQueuedWorkPriority BasePriority = FAnimBankCompilingManager::Get().GetBasePriority(Bank);
 
@@ -417,7 +417,7 @@ void FAnimBankBuildAsyncCacheTask::EndCache(UE::DerivedData::FCacheGetValueRespo
 		Owner.LaunchTask(TEXT("AnimBankSerialize"), [this, Value = MoveTemp(Response.Value)]
 		{
 			// Release execution resource as soon as the task is done
-			// [翻译失败: Release execution resource as soon as the task is done]
+   // 任务完成后立即释放执行资源
 			ON_SCOPE_EXIT { ExecutionResource = nullptr; };
 
 			if (UAnimBank* Bank = WeakAnimBank.Get())
@@ -427,7 +427,7 @@ void FAnimBankBuildAsyncCacheTask::EndCache(UE::DerivedData::FCacheGetValueRespo
 				Ar << *Data;
 
 				// The initialization of the resources is done by FAnimBankCompilingManager to avoid race conditions
-				// [翻译失败: The initialization of the resources is done by FAnimBankCompilingManager to avoid race conditions]
+    // 资源的初始化由 FAnimBankCompilingManager 完成，以避免竞争条件
 			}
 		});
 	}
@@ -436,7 +436,7 @@ void FAnimBankBuildAsyncCacheTask::EndCache(UE::DerivedData::FCacheGetValueRespo
 		Owner.LaunchTask(TEXT("AnimBankBuild"), [this, Name = Response.Name, Key = Response.Key]
 		{
 			// Release execution resource as soon as the task is done
-			// 任务完成后立即释放执行资源
+   // 任务完成后立即释放执行资源
 			ON_SCOPE_EXIT { ExecutionResource = nullptr; };
 
 			if (!BuildData(Name, Key))
@@ -453,14 +453,14 @@ void FAnimBankBuildAsyncCacheTask::EndCache(UE::DerivedData::FCacheGetValueRespo
 				GetCache().PutValue({ {Name, Key, FValue::Compress(MakeSharedBufferFromArray(MoveTemp(RecordData)))} }, Owner);
 
 				// The initialization of the resources is done by FAnimBankCompilingManager to avoid race conditions
-				// [翻译失败: The initialization of the resources is done by FAnimBankCompilingManager to avoid race conditions]
+    // 资源的初始化由 FAnimBankCompilingManager 完成，以避免竞争条件
 			}
 		});
 	}
 	else
 	{
 		// Release execution resource as soon as the task is done
-		// [翻译失败: Release execution resource as soon as the task is done]
+  // 任务完成后立即释放执行资源
 		ExecutionResource = nullptr;
 	}
 }
@@ -477,7 +477,7 @@ static void GetRefBoneGlobalSpace(const FReferenceSkeleton& RefSkeleton, TArray<
 	for (int32 BoneIndex = 0; BoneIndex < NumTransforms; ++BoneIndex)
 	{
 		// Initialize to identity since some of them don't have tracks
-		// 初始化身份，因为其中一些没有曲目
+  // 初始化身份，因为其中一些没有曲目
 		int32 IterBoneIndex = BoneIndex;
 		FTransform ComponentSpaceTransform = BoneSpaceTransforms[BoneIndex];
 
@@ -525,13 +525,13 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 	const FReferenceSkeleton& AnimRefSkeleton = AnimBank->Asset->GetSkeleton()->GetReferenceSkeleton();
 
 	// Get the skeleton reference pose in local space
-	// 获取局部空间中的骨骼参考位姿
+ // 获取局部空间中的骨骼参考位姿
 	const TArray<FTransform>& MeshLocalRefPose = MeshRefSkeleton.GetRawRefBonePose();
 	const TArray<FTransform>& AnimLocalRefPose = AnimRefSkeleton.GetRawRefBonePose();
 
 #if 0
 	// Get the skeleton reference pose in global space (needed for delta bounds)
-	// 获取全局空间中的骨架参考姿势（增量边界所需）
+ // 获取全局空间中的骨架参考姿势（增量边界所需）
 	TArray<FTransform> RefBoneGlobalSpace;
 	GetRefBoneGlobalSpace(AnimRefSkeleton, RefBoneGlobalSpace);
 #endif
@@ -540,7 +540,7 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 	const int32 NumAnimBones = AnimRefSkeleton.GetRawBoneNum();
 
 	// Scratch memory
-	// 暂存记忆
+ // 暂存记忆
 	BoneTrackArray TrackToBoneIndexMap;
 
 	Data->Entries.SetNum(AnimBank->Sequences.Num());
@@ -565,7 +565,7 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 		UAnimSequence::FScopedCompressedAnimSequence CompressedAnimSequence = Sequence->GetCompressedData(TargetPlatform);
 		const FCompressedAnimSequence& PlatformCompressedData = CompressedAnimSequence.Get();
 		// We should always have compressed data at this point
-		// 此时我们应该始终拥有压缩数据
+  // 此时我们应该始终拥有压缩数据
 		if (!PlatformCompressedData.IsValid(Sequence) || PlatformCompressedData.BoneCompressionCodec == nullptr)
 		{
 			UE_LOG(LogAnimBank, Error, TEXT("Animation bank referenced sequence is missing compressed data!"));
@@ -573,7 +573,7 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 		}
 
 		// Set up mapping tables for the decompressor to map internal tracks to the pose array (which is in bone order).
-		// 为解压缩器设置映射表，以将内部轨迹映射到姿势数组（按骨骼顺序）。
+  // 为解压缩器设置映射表，以将内部轨迹映射到姿势数组（按骨骼顺序）。
 		const int32 NumTracks = PlatformCompressedData.CompressedTrackToSkeletonMapTable.Num();
 
 		TrackToBoneIndexMap.Reset(NumTracks);
@@ -582,7 +582,7 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 			const int32 BoneIndex = PlatformCompressedData.GetSkeletonIndexFromTrackIndex(TrackIndex);
 
 			// We only care about raw bones.
-			// 我们只关心生骨头。
+   // 我们只关心生骨头。
 			if (BoneIndex < NumAnimBones)
 			{
 				TrackToBoneIndexMap.Add(BoneTrackPair(BoneIndex, TrackIndex));
@@ -590,7 +590,7 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 		}
 
 		// Prep to uncompress a non-additive animation.
-		// [翻译失败: Prep to uncompress a non-additive animation.]
+  // 准备解压缩非附加动画。
 		FAnimSequenceDecompressionContext DecompressionContext(
 			Sequence->GetSamplingFrameRate(),
 			Sequence->GetSamplingFrameRate().AsFrameTime(Sequence->GetPlayLength()).RoundToFrame().Value,
@@ -615,9 +615,9 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 		BankEntry.PlayRate = BankSequence.PlayRate;
 
 		// The sampled pose transforms from the sequence are in bone (parent) space. We need to convert them
-		// [翻译失败: The sampled pose transforms from the sequence are in bone (parent) space. We need to convert them]
+  // 序列中采样的姿势变换位于骨骼（父）空间中。我们需要将它们转换
 		// to local space (component space) to retarget to the mesh and create ref -> anim pose transform.  
-		// [翻译失败: to local space (component space) to retarget to the mesh and create ref -> anim pose transform.]
+  // 到局部空间（组件空间）以重新定位到网格并创建 ref -> 动画姿势变换。
 		TArray<FTransform> SampledLocalAnimPose = AnimRefSkeleton.GetRawRefBonePose();
 		TArray<FTransform> SampledLocalMeshPose;
 		TArray<FTransform> SampledGlobalMeshPose;
@@ -629,7 +629,7 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 		BankEntry.RotationKeys.SetNumUninitialized(BankEntry.KeyCount);
 
 		// Initialize bounds to the mesh vertex positions in reference pose.
-		// [翻译失败: Initialize bounds to the mesh vertex positions in reference pose.]
+  // 初始化参考姿势中网格顶点位置的边界。
 		FVector3f AnimatedBoundsMin(AssetBounds.Origin - AssetBounds.BoxExtent);
 		FVector3f AnimatedBoundsMax(AssetBounds.Origin + AssetBounds.BoxExtent);
 
@@ -641,7 +641,7 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 		for (uint32 Frame = 0; Frame < BankEntry.FrameCount; ++Frame)
 		{
 			// Some paths in the decompression code use mem stack, so make sure we put a mark here.
-			// [翻译失败: Some paths in the decompression code use mem stack, so make sure we put a mark here.]
+   // 解压代码中的某些路径使用了内存堆栈，因此请确保我们在此处进行标记。
 			FMemMark Mark(FMemStack::Get());
 
 			const double SeekTime = Sequence->GetSamplingFrameRate().AsSeconds(FFrameTime(int32(Frame)));
@@ -651,7 +651,7 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 			PlatformCompressedData.BoneCompressionCodec->DecompressPose(DecompressionContext, TrackToBoneIndexMap, TrackToBoneIndexMap, TrackToBoneIndexMap, SampledLocalPoseView);
 
 			// Retarget from the anim skeleton to the mesh skeleton.
-			// [翻译失败: Retarget from the anim skeleton to the mesh skeleton.]
+   // 从动画骨架重新定位到网格骨架。
 			for (int32 MeshBoneIndex = 0; MeshBoneIndex < NumMeshBones; ++MeshBoneIndex)
 			{
 				const int32 AnimBoneIndex = Data->Mapping.MeshToAnimIndexMap[MeshBoneIndex];
@@ -675,7 +675,7 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 			}
 		
 			// Convert local pose from the sequence to global pose (in the animation skeleton's space -- we retarget below to the mesh skeleton's space, as needed).
-			// [翻译失败: Convert local pose from the sequence to global pose (in the animation skeleton's space -- we retarget below to the mesh skeleton's space, as needed).]
+   // 将局部姿势从序列转换为全局姿势（在动画骨架的空间中 - 我们根据需要在下面重新定位到网格骨架的空间）。
 			UE::AnimBank::ConvertLocalToGlobalSpaceTransforms(MeshRefSkeleton, SampledLocalMeshPose, SampledGlobalMeshPose);
 
 			for (int32 MeshBoneIndex = 0; MeshBoneIndex < NumMeshBones; ++MeshBoneIndex)
@@ -684,7 +684,7 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 				BankEntry.RotationKeys[KeyIndex] = FQuat4f(SampledGlobalMeshPose[MeshBoneIndex].GetRotation());
 
 				// Expand animated bounds
-				// [翻译失败: Expand animated bounds]
+    // 扩大动画范围
 				{
 					const VectorRegister4Float VecBonePosition = VectorLoadFloat3(&BankEntry.PositionKeys[KeyIndex].X);
 					VecAnimatedBoundsMin = VectorMin(VecAnimatedBoundsMin, VecBonePosition);
@@ -699,9 +699,9 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 		VectorStoreFloat3(VecAnimatedBoundsMax, &AnimatedBoundsMax);
 
 		// Calculate (nearly) conservative bounds across all key frames
-		// [翻译失败: Calculate (nearly) conservative bounds across all key frames]
+  // 计算所有关键帧的（接近）保守边界
 		// Also accounts for translated root motion
-		// [翻译失败: Also accounts for translated root motion]
+  // 还考虑了平移的根运动
 		BankEntry.SampledBounds = FBoxSphereBounds(
 			FBox(
 				FVector(AnimatedBoundsMin),
@@ -710,7 +710,7 @@ bool FAnimBankBuildAsyncCacheTask::BuildData(const UE::FSharedString& Name, cons
 		);
 
 		// Apply per-sequence bounds scale (if specified)
-		// [翻译失败: Apply per-sequence bounds scale (if specified)]
+  // 应用每个序列的边界比例（如果指定）
 		BankEntry.SampledBounds.BoxExtent *= BankSequence.BoundsScale;
 		BankEntry.SampledBounds.SphereRadius *= BankSequence.BoundsScale;
 
@@ -780,7 +780,7 @@ void UAnimBank::PostLoad()
 	if (FApp::CanEverRender())
 	{
 		// Only valid for cooked builds
-		// 仅对熟构建有效
+  // 仅对熟构建有效
 		if (Data.Entries.Num() > 0)
 		{
 			InitResources();
@@ -832,6 +832,8 @@ bool UAnimBank::IsReadyForFinishDestroy()
 }
 
 bool UAnimBank::NeedsLoadForTargetPlatform(const ITargetPlatform* TargetPlatform) const
+		//Data.ResourcesPtr->InitResources(this);
+  // Data.ResourcesPtr->InitResources(this);
 {
 	return DoesTargetPlatformSupportNanite(TargetPlatform);
 }
@@ -846,6 +848,8 @@ void UAnimBank::GetResourceSizeEx(FResourceSizeEx& CumulativeResourceSize)
 	CumulativeResourceSize.AddDedicatedSystemMemoryBytes(Data.Mapping.RetargetingTable.GetAllocatedSize());
 	CumulativeResourceSize.AddDedicatedSystemMemoryBytes(Data.Mapping.PositionKeys.GetAllocatedSize());
 	CumulativeResourceSize.AddDedicatedSystemMemoryBytes(Data.Mapping.RotationKeys.GetAllocatedSize());
+	//if (Data.ResourcesPtr->ReleaseResources())
+ // if (Data.ResourcesPtr->ReleaseResources())
 
 	for (const FAnimBankEntry& Entry : Data.Entries)
 	{
@@ -864,11 +868,17 @@ void UAnimBank::InitResources()
 	}
 
 	if (!bIsInitialized)
+ // Data.ResourcesPtr->InitResources(this);
+ // Data.ResourcesPtr->InitResources(this);
+ // Data.ResourcesPtr->InitResources(this);
+ // Data.ResourcesPtr->InitResources(this);
 	{
-		// TODO:
-		// [翻译失败: TODO:]
 		//Data.ResourcesPtr->InitResources(this);
-		//[翻译失败: Data.ResourcesPtr->InitResources(this);]
+  // Data.ResourcesPtr->InitResources(this);
+		// TODO:
+  // 待办事项：
+		//Data.ResourcesPtr->InitResources(this);
+  // Data.ResourcesPtr->InitResources(this);
 	}
 
 	bIsInitialized = true;
@@ -878,18 +888,24 @@ void UAnimBank::ReleaseResources()
 {
 	if (!bIsInitialized)
 	{
+ // if (Data.ResourcesPtr->ReleaseResources())
+ // if (Data.ResourcesPtr->ReleaseResources())
 		return;
+  // if (Data.ResourcesPtr->ReleaseResources())
+  // if (Data.ResourcesPtr->ReleaseResources())
 	}
 
-	// TODO:
-	// [翻译失败: TODO:]
 	//if (Data.ResourcesPtr->ReleaseResources())
-	//[翻译失败: if (Data.ResourcesPtr->ReleaseResources())]
+ // if (Data.ResourcesPtr->ReleaseResources())
+	// TODO:
+ // 待办事项：
+	//if (Data.ResourcesPtr->ReleaseResources())
+ // if (Data.ResourcesPtr->ReleaseResources())
 	{
 		// Make sure the renderer is done processing the command,
-		// [翻译失败: Make sure the renderer is done processing the command,]
+  // 确保渲染器已完成处理命令，
 		// and done using the GPU resources before we overwrite the data.
-		// [翻译失败: and done using the GPU resources before we overwrite the data.]
+  // 并在覆盖数据之前使用 GPU 资源完成。
 		ReleaseResourcesFence.BeginFence();
 	}
 
@@ -918,7 +934,7 @@ void UAnimBank::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 	OnDependenciesChanged.Broadcast(this);
 
 	// Synchronously build the new data. This calls InitResources.
-	// [翻译失败: Synchronously build the new data. This calls InitResources.]
+ // 同步构建新数据。这会调用 InitResources。
 	ITargetPlatform* RunningPlatform = GetTargetPlatformManagerRef().GetRunningTargetPlatform();
 	BeginCacheDerivedData(RunningPlatform);
 }
@@ -1029,7 +1045,7 @@ bool UAnimBank::TryCancelAsyncTasks()
 			It->Value->Cancel();
 
 			// Try to see if we can remove the task now that it might have been canceled
-			// 尝试看看我们是否可以删除该任务，因为它可能已被取消
+   // 尝试看看我们是否可以删除该任务，因为它可能已被取消
 			if (It->Value->Poll())
 			{
 				It.RemoveCurrent();
@@ -1040,7 +1056,7 @@ bool UAnimBank::TryCancelAsyncTasks()
 	if (bHadCachedTaskForRunningPlatform && !CacheTasksByKeyHash.Contains(DataKeyHash))
 	{
 		// Reset the cached Key for the running platform since we won't have any GPU data
-		// 重置运行平台的缓存密钥，因为我们没有任何 GPU 数据
+  // 重置运行平台的缓存密钥，因为我们没有任何 GPU 数据
 		DataKeyHash = FIoHash();
 	}
 
@@ -1066,7 +1082,7 @@ bool UAnimBank::WaitForAsyncTasks(float TimeLimitSeconds)
 	for (auto& Pair : CacheTasksByKeyHash)
 	{
 		// Clamp to 0 as it implies polling
-		// 钳制为 0，因为这意味着轮询
+  // 钳制为 0，因为这意味着轮询
 		const float TimeLimit = FMath::Min(0.0f, TimeLimitSeconds - (FPlatformTime::Seconds() - StartTimeSeconds));
 		if (!Pair.Value->WaitWithTimeout(TimeLimit))
 		{
@@ -1119,7 +1135,7 @@ FIoHash UAnimBank::CreateDerivedDataKeyHash(const ITargetPlatform* TargetPlatfor
 		if (IsValid(BankSequence.Sequence))
 		{
 			// Make sure all our required dependencies are loaded, we need them to compute the KeyHash
-			// 确保加载了所有必需的依赖项，我们需要它们来计算 KeyHash
+   // 确保加载了所有必需的依赖项，我们需要它们来计算 KeyHash
 			FAnimationUtils::EnsureAnimSequenceLoaded(*BankSequence.Sequence);
 
 			FIoHash SequenceHash = BankSequence.Sequence->GetDerivedDataKeyHash(TargetPlatform);
@@ -1136,11 +1152,11 @@ FIoHash UAnimBank::CreateDerivedDataKeyHash(const ITargetPlatform* TargetPlatfor
 
 #if PLATFORM_CPU_ARM_FAMILY
 	// Separate out arm keys as x64 and arm64 clang do not generate the same data for a given
-	// 分离出arm密钥，因为x64和arm64 clang不会为给定的情况生成相同的数据
+ // 分离出arm密钥，因为x64和arm64 clang不会为给定的情况生成相同的数据
 	// input. Add the arm specifically so that a) we avoid rebuilding the current DDC and
-	// 输入。专门添加手臂，以便 a) 我们避免重建当前的 DDC 和
+ // 输入。专门添加手臂，以便 a) 我们避免重建当前的 DDC 和
 	// b) we can remove it once we get arm64 to be consistent.
-	// b) 一旦我们让arm64 保持一致，我们就可以删除它。
+ // b) 一旦我们让arm64 保持一致，我们就可以删除它。
 	FString ArmSuffix(TEXT("_arm64"));
 	Writer << ArmSuffix;
 #endif
@@ -1158,18 +1174,18 @@ FIoHash UAnimBank::BeginCacheDerivedData(const ITargetPlatform* TargetPlatform)
 	}
 
 	// If nothing has changed and we already started the compilation we should be all good.
-	// 如果没有任何变化并且我们已经开始编译，那么一切都会好起来的。
+ // 如果没有任何变化并且我们已经开始编译，那么一切都会好起来的。
 	if (CacheTasksByKeyHash.Contains(KeyHash))
 	{
 		return KeyHash;
 	}
 
 	// Make sure we finish the previous build before starting another one
-	// 确保我们在开始下一个构建之前完成了上一个构建
+ // 确保我们在开始下一个构建之前完成了上一个构建
 	FAnimBankCompilingManager::Get().FinishCompilation({ this });
 
 	// Make sure the GPU is no longer referencing the current GPU resource data.
-	// 确保 GPU 不再引用当前 GPU 资源数据。
+ // 确保 GPU 不再引用当前 GPU 资源数据。
 	ReleaseResources();
 	ReleaseResourcesFence.Wait();
 	Data = {};
@@ -1190,7 +1206,7 @@ FIoHash UAnimBank::BeginCacheDerivedData(const ITargetPlatform* TargetPlatform)
 	CacheTasksByKeyHash.Emplace(KeyHash, MakePimpl<FAnimBankBuildAsyncCacheTask>(KeyHash, TargetData, *this, TargetPlatform));
 
 	// The compiling manager provides throttling, notification manager, etc... for the asset being built.
-	// 编译管理器为正在构建的资产提供限制、通知管理器等。
+ // 编译管理器为正在构建的资产提供限制、通知管理器等。
 	FAnimBankCompilingManager::Get().AddAnimBanks({this});
 
 	return KeyHash;
@@ -1483,9 +1499,9 @@ uint32 FAnimBankDesc::GetHash() const
 		{
 		#if PLATFORM_64BITS
 			// Ignoring the lower 4 bits since they are likely zero anyway.
-			// 忽略低 4 位，因为它们无论如何都可能为零。
+   // 忽略低 4 位，因为它们无论如何都可能为零。
 			// Higher bits are more significant in 64 bit builds.
-			// 高位在 64 位构建中更重要。
+   // 高位在 64 位构建中更重要。
 			return reinterpret_cast<UPTRINT>(Key) >> 4;
 		#else
 			return reinterpret_cast<UPTRINT>(Key);
@@ -1534,7 +1550,7 @@ void ConvertLocalToGlobalSpaceTransforms(
 	for (int32 BoneIndex = 0; BoneIndex < NumTransforms; ++BoneIndex)
 	{
 		// Initialize to identity since some of them don't have tracks
-		// 初始化身份，因为其中一些没有曲目
+  // 初始化身份，因为其中一些没有曲目
 		int32 IterBoneIndex = BoneIndex;
 		FTransform ComponentSpaceTransform = InLocalSpaceTransforms[BoneIndex];
 
@@ -1563,21 +1579,21 @@ void BuildSkinnedAssetMapping(const USkinnedAsset& Asset, FSkinnedAssetMapping& 
 	const int32 NumAnimBones = AnimRefSkeleton.GetRawBoneNum();
 
 	// Get Number of RawBones (no virtual)
-	// 获取 RawBone 数量（非虚拟）
+ // 获取 RawBone 数量（非虚拟）
 	Mapping.BoneCount = NumMeshBones;
 
 	// Get the skeleton reference pose in local space;
-	// 获取局部空间的骨骼参考位姿；
+ // 获取局部空间的骨骼参考位姿；
 	const TArray<FTransform>& MeshLocalRefPose = MeshRefSkeleton.GetRawRefBonePose();
 	const TArray<FTransform>& AnimLocalRefPose = AnimRefSkeleton.GetRawRefBonePose();
 
 	// Get the bone transforms in global pose.
-	// 获取全局姿势中的骨骼变换。
+ // 获取全局姿势中的骨骼变换。
 	ConvertLocalToGlobalSpaceTransforms(MeshRefSkeleton, MeshRefSkeleton.GetRawRefBonePose(), Mapping.MeshGlobalRefPose);
 	ConvertLocalToGlobalSpaceTransforms(AnimRefSkeleton, AnimRefSkeleton.GetRawRefBonePose(), Mapping.AnimGlobalRefPose);
 
 	// A map to go from the mesh skeleton bone index to anim skeleton bone index.
-	// 从网格骨架骨骼索引到动画骨架骨骼索引的映射。
+ // 从网格骨架骨骼索引到动画骨架骨骼索引的映射。
 	Mapping.MeshToAnimIndexMap.SetNumUninitialized(NumMeshBones);
 	for (int32 MeshBoneIndex = 0; MeshBoneIndex < NumMeshBones; ++MeshBoneIndex)
 	{
@@ -1585,7 +1601,7 @@ void BuildSkinnedAssetMapping(const USkinnedAsset& Asset, FSkinnedAssetMapping& 
 	}
 
 	// Construct a retargeting table to go from the anim skeleton to the mesh skeleton.
-	// 构建一个重定向表以从动画骨架转到网格骨架。
+ // 构建一个重定向表以从动画骨架转到网格骨架。
 	Mapping.RetargetingTable.SetNumUninitialized(NumMeshBones);
 	Mapping.RetargetingTable[0] = MakeTuple(FQuat::Identity, AnimRefSkeleton.GetRawRefBonePose()[0].GetRotation().Inverse() * MeshRefSkeleton.GetRawRefBonePose()[0].GetRotation());
 	for (int32 MeshBoneIndex = 1; MeshBoneIndex < NumMeshBones; ++MeshBoneIndex)
@@ -1678,7 +1694,7 @@ bool FSoftAnimBankItem::operator==(const FSoftAnimBankItem& Other) const
 FSkinnedMeshComponentDescriptorBase::FSkinnedMeshComponentDescriptorBase()
 {
 	// Note: should not really be used - prefer using FSkinnedMeshComponentDescriptor or FSoftSkinnedMeshComponentDescriptor
-	// 注意：不应该真正使用 - 更喜欢使用 FSkinnedMeshComponentDescriptor 或 FSoftSkinnedMeshComponentDescriptor
+ // 注意：不应该真正使用 - 更喜欢使用 FSkinnedMeshComponentDescriptor 或 FSoftSkinnedMeshComponentDescriptor
 	InitFrom(UInstancedSkinnedMeshComponent::StaticClass()->GetDefaultObject<UInstancedSkinnedMeshComponent>());
 }
 
@@ -1744,8 +1760,14 @@ void FSkinnedMeshComponentDescriptorBase::InitComponent(UInstancedSkinnedMeshCom
 	Component->HLODBatchingPolicy = HLODBatchingPolicy;
 	Component->bEnableAutoLODGeneration = bIncludeInHLOD;
 #endif
+	// AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
 
+	// AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
+ // AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
 	Component->SetInstanceDataGPUOnly(bIsInstanceDataGPUOnly);
+	// AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
 	if (bIsInstanceDataGPUOnly)
 	{
 		Component->SetNumGPUInstances(NumInstancesGPUOnly);
@@ -1793,25 +1815,49 @@ FSkinnedMeshComponentDescriptor::FSkinnedMeshComponentDescriptor()
 	: FSkinnedMeshComponentDescriptorBase(NoInit)
 {
 	// Make sure we have proper defaults
-	// 确保我们有正确的默认值
+ // 确保我们有正确的默认值
 	InitFrom(UInstancedSkinnedMeshComponent::StaticClass()->GetDefaultObject<UInstancedSkinnedMeshComponent>());
 }
 
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
 FSkinnedMeshComponentDescriptor::FSkinnedMeshComponentDescriptor(ENoInit) {}
+// AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
+// AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
 FSkinnedMeshComponentDescriptor::FSkinnedMeshComponentDescriptor(const FSkinnedMeshComponentDescriptor& InDescriptor) = default;
+// AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
+// AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
+// AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
+// AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
 FSkinnedMeshComponentDescriptor::~FSkinnedMeshComponentDescriptor() = default;
+// AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
+// AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
 
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
 FSkinnedMeshComponentDescriptor::FSkinnedMeshComponentDescriptor(const FSoftSkinnedMeshComponentDescriptor& InDescriptor)
+	// AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
 	: FSkinnedMeshComponentDescriptorBase(InDescriptor)
+	// AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
+ // AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
 {
+	// AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
 	SkinnedAsset = InDescriptor.SkinnedAsset.LoadSynchronous();
 	TransformProvider = InDescriptor.TransformProvider.LoadSynchronous();
 	// AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
 	// AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TSoftObjectPtr<UMaterialInterface> Material) { return Material.LoadSynchronous(); });
 	// AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
+ // AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
 	// AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
+ // AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial.LoadSynchronous();
 	// AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
 	// AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TSoftObjectPtr<URuntimeVirtualTexture> RVT) { return RVT.LoadSynchronous(); });
 	Hash = InDescriptor.Hash;
 }
 
@@ -1819,8 +1865,13 @@ UInstancedSkinnedMeshComponent* FSkinnedMeshComponentDescriptor::CreateComponent
 {
 	UInstancedSkinnedMeshComponent* Component = NewObject<UInstancedSkinnedMeshComponent>(Outer, ComponentClass, Name, ObjectFlags);
 	InitComponent(Component);
+	// AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
 	return Component;
+	// AB-TODO：OverlayMaterial = InDescriptor.OverlayMaterial；
 }
+	// AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
 
 void FSkinnedMeshComponentDescriptor::InitFrom(const UInstancedSkinnedMeshComponent* Template, bool bInitBodyInstance)
 {
@@ -1863,20 +1914,35 @@ bool FSkinnedMeshComponentDescriptor::operator==(const FSkinnedMeshComponentDesc
 {
 	return
 		(Hash == 0 || Other.Hash == 0 || Hash == Other.Hash) && // Check hash first, other checks are in case of Hash collision
+  // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
+  // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
 		SkinnedAsset == Other.SkinnedAsset &&
+  // AB-TODO：OverlayMaterial = InDescriptor.OverlayMaterial；
 		TransformProvider == Other.TransformProvider &&
+  // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
+  // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
 		Super::operator==(Other);
 }
 
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
 FSoftSkinnedMeshComponentDescriptor::FSoftSkinnedMeshComponentDescriptor()
+// AB-TODO：OverlayMaterial = InDescriptor.OverlayMaterial；
 	: FSkinnedMeshComponentDescriptorBase(NoInit)
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
 {
 	// Make sure we have proper defaults
-	// 确保我们有正确的默认值
+ // 确保我们有正确的默认值
 	InitFrom(UInstancedSkinnedMeshComponent::StaticClass()->GetDefaultObject<UInstancedSkinnedMeshComponent>());
 }
+	// AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
 
+	// AB-TODO：OverlayMaterial = InDescriptor.OverlayMaterial；
 FSoftSkinnedMeshComponentDescriptor::FSoftSkinnedMeshComponentDescriptor(ENoInit) {}
+	// AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
 FSoftSkinnedMeshComponentDescriptor::FSoftSkinnedMeshComponentDescriptor(const FSoftSkinnedMeshComponentDescriptor& InDescriptor) = default;
 FSoftSkinnedMeshComponentDescriptor::~FSoftSkinnedMeshComponentDescriptor() = default;
 
@@ -1886,11 +1952,16 @@ FSoftSkinnedMeshComponentDescriptor::FSoftSkinnedMeshComponentDescriptor(const F
 	SkinnedAsset = InDescriptor.SkinnedAsset;
 	TransformProvider = InDescriptor.TransformProvider;
 	// AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
 	// AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
+ // AB-TODO: Algo::Transform(InDescriptor.OverrideMaterials, OverrideMaterials, [](TObjectPtr<UMaterialInterface> Material) { return Material; });
 	// AB-TODO: OverlayMaterial = InDescriptor.OverlayMaterial;
+ // AB-TODO：OverlayMaterial = InDescriptor.OverlayMaterial；
 	// AB-TODO：OverlayMaterial = InDescriptor.OverlayMaterial；
 	// AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
 	// AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
+ // AB-TODO: Algo::Transform(InDescriptor.RuntimeVirtualTextures, RuntimeVirtualTextures, [](TObjectPtr<URuntimeVirtualTexture> RVT) { return RVT; });
 	Hash = InDescriptor.Hash;
 }
 

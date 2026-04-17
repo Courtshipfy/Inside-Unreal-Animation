@@ -19,7 +19,7 @@ struct FInertializationRequest
 	ENGINE_API FInertializationRequest(float InDuration, const UBlendProfile* InBlendProfile);
 
 	// Note: We need to explicitly disable warnings on these constructors/operators for clang to be happy with deprecated variables
-	// 注意：我们需要显式禁用这些构造函数/运算符的警告，以便 clang 对已弃用的变量感到满意
+ // 注意：我们需要显式禁用这些构造函数/运算符的警告，以便 clang 对已弃用的变量感到满意
 	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	~FInertializationRequest() = default;
 	FInertializationRequest(const FInertializationRequest&) = default;
@@ -31,11 +31,11 @@ struct FInertializationRequest
 	ENGINE_API void Clear();
 
 	// Comparison operator used to test for equality in the array of animation requests to that
-	// 比较运算符用于测试动画请求数组中的相等性
+ // 比较运算符用于测试动画请求数组中的相等性
 	// only unique requests are added. This does not take into account the properties that are 
-	// 仅添加独特的请求。这没有考虑到以下属性
+ // 仅添加独特的请求。这没有考虑到以下属性
 	// used only for debugging and only used when ANIM_TRACE_ENABLED
-	// 仅用于调试并且仅在 ANIM_TRACE_ENABLED 时使用
+ // 仅用于调试并且仅在 ANIM_TRACE_ENABLED 时使用
 	friend bool operator==(const FInertializationRequest& A, const FInertializationRequest& B)
 	{
 		return
@@ -53,32 +53,32 @@ struct FInertializationRequest
 	}
 
 	// Blend duration of the inertialization request.
-	// 惯性化请求的混合持续时间。
+ // 惯性化请求的混合持续时间。
 	UPROPERTY(Transient)
 	float Duration = -1.0f;
 
 	// Blend profile to control per-joint blend times.
-	// 混合配置文件以控制每个关节的混合时间。
+ // 混合配置文件以控制每个关节的混合时间。
 	UPROPERTY(Transient)
 	TObjectPtr<const UBlendProfile> BlendProfile = nullptr;
 
 	// If to use the provided blend mode.
-	// 如果要使用提供的混合模式。
+ // 如果要使用提供的混合模式。
 	UPROPERTY(Transient)
 	bool bUseBlendMode = false;
 
 	// Blend mode to use.
-	// 要使用的混合模式。
+ // 要使用的混合模式。
 	UPROPERTY(Transient)
 	EAlphaBlendOption BlendMode = EAlphaBlendOption::Linear;
 
 	// Custom blend curve to use when use of the blend mode is active.
-	// 当使用混合模式时要使用的自定义混合曲线。
+ // 当使用混合模式时要使用的自定义混合曲线。
 	UPROPERTY(Transient)
 	TObjectPtr<UCurveFloat> CustomBlendCurve = nullptr;
 
 	// Inertialization / Dead blend node tag to force a particular node to handle the request.
-	// 惯性化/死混合节点标记强制特定节点处理请求。
+ // 惯性化/死混合节点标记强制特定节点处理请求。
 	UPROPERTY(Transient)
 	FName Tag = NAME_None;
 
@@ -90,20 +90,30 @@ struct FInertializationRequest
 	FText Description_DEPRECATED;
 
 	// Description of the request
-	// 请求描述
+ // 请求描述
+// endif ANIM_TRACE_ENABLED
+// endif ANIM_TRACE_ENABLED
 	UPROPERTY(Transient)
 	FString DescriptionString;
 
 	// Node id from which this request was made.
-	// 发出此请求的节点 ID。
+ // 发出此请求的节点 ID。
 	UPROPERTY(Transient)
 	int32 NodeId = INDEX_NONE;
 
 	// Anim instance from which this request was made.
-	// 发出此请求的动画实例。
+ // 发出此请求的动画实例。
 	UPROPERTY(Transient)
 	TObjectPtr<UObject> AnimInstance = nullptr;
+ // endif ANIM_TRACE_ENABLED
+ // endif ANIM_TRACE_ENABLED
+ // endif ANIM_TRACE_ENABLED
+ // endif ANIM_TRACE_ENABLED
 
+// endif ANIM_TRACE_ENABLED
+// endif ANIM_TRACE_ENABLED
+// endif ANIM_TRACE_ENABLED
+// endif ANIM_TRACE_ENABLED
 // endif ANIM_TRACE_ENABLED
 // endif ANIM_TRACE_ENABLED
 };

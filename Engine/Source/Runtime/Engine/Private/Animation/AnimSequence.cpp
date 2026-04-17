@@ -207,7 +207,7 @@ void OnCVarsChanged()
 		TArray< TPair<int32, UAnimSequence*> > Sizes;
 		
 		// Rebake/compress the animations
-		// 重新烘焙/压缩动画
+  // 重新烘焙/压缩动画
 		for (UAnimSequence* Seq : SequenceCache)
 		{
 			Seq->CacheDerivedDataForCurrentPlatform();
@@ -249,25 +249,25 @@ FAutoConsoleVariableSink AnimationCVarSink(FConsoleCommandDelegate::CreateStatic
 FString GetAnimSequenceSpecificCacheKeySuffix(const UAnimSequence& Seq, bool bPerformStripping, float CompressionErrorThresholdScale, const ITargetPlatform* TargetPlatform)
 {
 	//Make up our content key consisting of:
-	//组成我们的内容密钥，包括：
+ // 组成我们的内容密钥，包括：
 	//	* Global animation compression version
-	//	* 全球动画压缩版
+ // * 全球动画压缩版
 	//  * Whether to strip frames
-	//  * 是否剥框
+ // * 是否剥框
 	//	* Our raw data GUID
-	//	* 我们的原始数据 GUID
+ // * 我们的原始数据 GUID
 	//	* Our skeleton GUID: If our skeleton changes our compressed data may now be stale
-	//	* 我们的骨架 GUID：如果我们的骨架发生变化，我们的压缩数据现在可能会过时
+ // * 我们的骨架 GUID：如果我们的骨架发生变化，我们的压缩数据现在可能会过时
 	//	* Baked Additive Flag
-	//	* 烘焙添加剂标志
+ // * 烘焙添加剂标志
 	//	* Additive ref pose GUID or hardcoded string if not available
-	//	* 附加参考姿势 GUID 或硬编码字符串（如果不可用）
+ // * 附加参考姿势 GUID 或硬编码字符串（如果不可用）
 	//	* Compression Settings
-	//	* 压缩设置
+ // * 压缩设置
 	//	* Curve compression settings
-	//	* 曲线压缩设置
+ // * 曲线压缩设置
 	//  * Target frames per second
-	//  * 每秒目标帧数
+ // * 每秒目标帧数
 
 	bool bIsValidAdditive = Seq.IsValidAdditive();
 	char AdditiveType = bIsValidAdditive ? NibbleToTChar(Seq.AdditiveAnimType) : '0';
@@ -307,8 +307,9 @@ FString GetAnimSequenceSpecificCacheKeySuffix(const UAnimSequence& Seq, bool bPe
 // FRawAnimSequenceTrackNative已弃用
 
 //@deprecated with VER_REPLACED_LAZY_ARRAY_WITH_UNTYPED_BULK_DATA
-//@已弃用 VER_REPLACED_LAZY_ARRAY_WITH_UNTYPED_BULK_DATA
+// @已弃用 VER_REPLACED_LAZY_ARRAY_WITH_UNTYPED_BULK_DATA
 struct FRawAnimSequenceTrackNativeDeprecated
+/** 如果数组中存在有效的曲线权重，则返回 true*/
 {
 	TArray<FVector> PosKeys;
 	TArray<FQuat> RotKeys;
@@ -322,6 +323,7 @@ struct FRawAnimSequenceTrackNativeDeprecated
 // FCurveTrack
 // F曲线轨迹
 
+/** 如果数组中存在有效的曲线权重，则返回 true*/
 /** Returns true if valid curve weight exists in the array*/
 /** 如果数组中存在有效的曲线权重，则返回 true*/
 bool FCurveTrack::IsValidCurveTrack()
@@ -333,7 +335,7 @@ bool FCurveTrack::IsValidCurveTrack()
 		for (int32 I=0; I<CurveWeights.Num(); ++I)
 		{
 			// it has valid weight
-			// 它有有效的重量
+   // 它有有效的重量
 			if (CurveWeights[I]>UE_KINDA_SMALL_NUMBER)
 			{
 				bValid = true;
@@ -352,22 +354,22 @@ bool FCurveTrack::IsValidCurveTrack()
 bool FCurveTrack::CompressCurveWeights()
 {
 	// if always 1, no reason to do this
-	// 如果始终为 1，则没有理由这样做
+ // 如果始终为 1，则没有理由这样做
 	if (CurveWeights.Num() > 1)
 	{
 		bool bCompress = true;
 		// first weight
-		// 第一个重量
+  // 第一个重量
 		float FirstWeight = CurveWeights[0];
 
 		for (int32 I=1; I<CurveWeights.Num(); ++I)
 		{
 			// see if my key is same as previous
-			// [翻译失败: see if my key is same as previous]
+   // 看看我的密钥是否与以前的相同
 			if (fabs(FirstWeight - CurveWeights[I]) > UE_SMALL_NUMBER)
 			{
 				// if not same, just get out, you don't like to compress this to 1 key
-				// [翻译失败: if not same, just get out, you don't like to compress this to 1 key]
+    // 如果不一样，就退出，你不喜欢将其压缩为 1 个密钥
 				bCompress = false;
 				break;
 			}
@@ -384,13 +386,13 @@ bool FCurveTrack::CompressCurveWeights()
 	}
 
 	// nothing changed
-	// [翻译失败: nothing changed]
+ // 没有任何改变
 	return false;
 }
 
 /////////////////////////////////////////////////////
 // UAnimSequence
-// [翻译失败: UAnimSequence]
+// U动画序列
 
 UAnimSequence::UAnimSequence(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -460,7 +462,7 @@ void UAnimSequence::GetAssetRegistryTags(FAssetRegistryTagsContext Context) cons
 	}
 
 	// Output unique sync marker names we use
-	// [翻译失败: Output unique sync marker names we use]
+ // 输出我们使用的唯一同步标记名称
 	TStringBuilder<256> SyncMarkersBuilder;
 	SyncMarkersBuilder.Append(USkeleton::AnimSyncMarkerTagDelimiter);
 
@@ -613,7 +615,7 @@ UAnimSequence::FScopedCompressedAnimSequence UAnimSequence::GetCompressedData() 
 static void LoadOldCompressedTrack(FArchive& Ar, FCompressedTrack& Dst, int32 ByteStreamStride)
 {
 	// Serialize from the archive to a buffer.
-	// [翻译失败: Serialize from the archive to a buffer.]
+ // 从存档序列化到缓冲区。
 	int32 NumBytes = 0;
 	Ar << NumBytes;
 
@@ -623,11 +625,11 @@ static void LoadOldCompressedTrack(FArchive& Ar, FCompressedTrack& Dst, int32 By
 	Ar.Serialize( SerializedData.GetData(), NumBytes );
 
 	// Serialize the key times.
-	// 将关键时刻串联起来。
+ // 将关键时刻串联起来。
 	Ar << Dst.Times;
 
 	// Serialize mins and ranges.
-	// 序列化分钟和范围。
+ // 序列化分钟和范围。
 	Ar << Dst.Mins[0] << Dst.Mins[1] << Dst.Mins[2];
 	Ar << Dst.Ranges[0] << Dst.Ranges[1] << Dst.Ranges[2];
 }
@@ -661,7 +663,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 		if (UE::Anim::Private::ShouldStripAdditiveRefPose() && GetAdditiveAnimType() != EAdditiveAnimationType::AAT_None)
 		{
 			// Strip the additive base before UPROPERTY serialization in Super::Serialize
-			// 在 Super::Serialize 中进行 UPROPERTY 序列化之前去除附加基数
+   // 在 Super::Serialize 中进行 UPROPERTY 序列化之前去除附加基数
 			StrippedRefPoseSeq = RefPoseSeq;
 			RefPoseSeq = nullptr;
 		}
@@ -672,7 +674,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 	if (StrippedRefPoseSeq)
 	{
 		// Restore after UPROPERTY serialization to avoid compression requests missing an additive base pose. 
-		// UPROPERTY 序列化后恢复，以避免压缩请求丢失附加基本姿势。
+  // UPROPERTY 序列化后恢复，以避免压缩请求丢失附加基本姿势。
 		RefPoseSeq = StrippedRefPoseSeq;
 	}
 
@@ -705,7 +707,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 					if (SourceRawAnimationData_DEPRECATED.Num())
 					{
 						// Set RawAnimationData to Source
-						// 将 RawAnimationData 设置为源
+      // 将 RawAnimationData 设置为源
 						RawAnimationData = SourceRawAnimationData_DEPRECATED;
 						SourceRawAnimationData_DEPRECATED.Empty();
 					}
@@ -736,7 +738,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 	if (Ar.CustomVer(FFrameworkObjectVersion::GUID) < FFrameworkObjectVersion::MoveCompressedAnimDataToTheDDC)
 	{
 		// Serialize the compressed byte stream from the archive to the buffer.
-		// 将压缩字节流从存档序列化到缓冲区。
+  // 将压缩字节流从存档序列化到缓冲区。
 		int32 NumBytes;
 		Ar << NumBytes;
 
@@ -765,7 +767,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 			if(GetSkeleton())
 			{
 				// Validate that we are cooking valid compressed data.
-				// 验证我们正在烹饪有效的压缩数据。
+    // 验证我们正在烹饪有效的压缩数据。
 				checkf(Ar.IsObjectReferenceCollector() || (GetSkeletonVirtualBoneGuid() == GetSkeleton()->GetVirtualBoneGuid()), TEXT("Attempting to cook animation '%s' containing invalid virtual bone guid! Animation:%s Skeleton:%s"), *GetFullName(), *GetSkeletonVirtualBoneGuid().ToString(EGuidFormats::HexValuesInBraces), *GetSkeleton()->GetVirtualBoneGuid().ToString(EGuidFormats::HexValuesInBraces));
 			}
 		}
@@ -773,7 +775,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 		if (bSerializeCompressedData)
 		{
 			// Backwards compatibility, just serialize out compressed data
-			// 向后兼容，只需序列化出压缩数据
+   // 向后兼容，只需序列化出压缩数据
 			if (Ar.IsLoading() && Ar.CustomVer(FFortniteMainBranchObjectVersion::GUID) < FFortniteMainBranchObjectVersion::AnimSequenceRawDataOnlyFlagRemoval)
 			{
 			    SerializeCompressedData(Ar,false);
@@ -809,7 +811,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 							const ITargetPlatform* Platform = Ar.CookingTarget();
 							checkf(Platform, TEXT("Invalid cooking target platform"));
 							// During cook, serialize out singular (target platform) compressed data 
-							// 在烹饪期间，序列化出单一（目标平台）压缩数据
+       // 在烹饪期间，序列化出单一（目标平台）压缩数据
 							FCompressedAnimSequence& PlatformCompressedData = GetPlatformCompressedData(Platform);
 							check(PlatformCompressedData.IsValid(this, true));
 							SerializeCompressedData(Ar, PlatformCompressedData);
@@ -817,7 +819,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 						else if (bIsDuplicating || bIsCountingMemory)
 						{					
 							// During duplication/transacting etc. serialize all contained compressed data
-							// [翻译失败: During duplication/transacting etc. serialize all contained compressed data]
+       // 在复制/处理等过程中，序列化所有包含的压缩数据
 							if (bIsSaving)
 							{
 								uint32 NumPlatforms = DataByPlatformKeyHash.Num();
@@ -836,7 +838,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 								}
 							
 								// Store off the expected hash for CurrentPlatformData
-								// [翻译失败: Store off the expected hash for CurrentPlatformData]
+        // 存储 CurrentPlatformData 的预期哈希值
 								Ar << CurrentPlatformHash;
 							}
 							else
@@ -854,7 +856,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 								CurrentPlatformData = nullptr;
 							
 								// Try and restore short-circuit ptr for CurrentPlatformData according to its previously serialized hash
-								// [翻译失败: Try and restore short-circuit ptr for CurrentPlatformData according to its previously serialized hash]
+        // 尝试根据 CurrentPlatformData 之前序列化的哈希值恢复短路 ptr
 								FIoHash CurrentPlatformHash = FIoHash::Zero;
 								Ar << CurrentPlatformHash;
 								if (CurrentPlatformHash != FIoHash::Zero)
@@ -886,7 +888,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 #endif
 				{
 					// During cooked runtime serialize in singular compressed data
-					// [翻译失败: During cooked runtime serialize in singular compressed data]
+     // 在煮熟的运行时序列化为单一压缩数据
 					SerializeCompressedData(Ar, GetCompressedData_Internal());
 				}
 			}			
@@ -900,7 +902,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 		NumberOfKeys = NumFrames;
 
 		// Validate the actual number of keys that is stored, by looking at the maximum number of keys for any given animation track 
-		// [翻译失败: Validate the actual number of keys that is stored, by looking at the maximum number of keys for any given animation track]
+  // 通过查看任何给定动画轨道的最大关键点数量来验证存储的实际关键点数量
 		int32 MaxNumberOfTrackKeys = 0;
 		for (const FRawAnimSequenceTrack& Track : RawAnimationData)
 		{
@@ -911,7 +913,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 
 		const bool bUniformOrIdentityKeys = MaxNumberOfTrackKeys == 0 || MaxNumberOfTrackKeys == 1;
 		// Test whether or not there are more track keys than the value stored, check for greater than or less than if the # of keys does not indicate single key or identity tracks
-		// 测试轨道密钥的数量是否多于存储的值，如果密钥数量不指示单个密钥或身份轨道，则检查是否大于或小于
+  // 测试轨道密钥的数量是否多于存储的值，如果密钥数量不指示单个密钥或身份轨道，则检查是否大于或小于
 		if (MaxNumberOfTrackKeys > NumberOfKeys	|| (!bUniformOrIdentityKeys && MaxNumberOfTrackKeys < NumberOfKeys))
 		{
 			UE_LOG(LogAnimation, Warning, TEXT("Animation %s needs resaving - Invalid number of keys %i stored according to maximum number animation data track keys. Setting new number of keys %i."), *GetName(), NumberOfKeys, MaxNumberOfTrackKeys);
@@ -919,18 +921,18 @@ void UAnimSequence::Serialize(FArchive& Ar)
 		}
 
 		// Update stored frame rate according to number of keys and play length
-		// 根据按键数量和播放长度更新存储的帧速率
+  // 根据按键数量和播放长度更新存储的帧速率
 		UpdateFrameRate();
 
 		// In case there is any animation data available (not valid for curve only animations), verify that the new frame-rate matches up with the expected number of frames/keys and vice versa
-		// [翻译失败: In case there is any animation data available (not valid for curve only animations), verify that the new frame-rate matches up with the expected number of frames/keys and vice versa]
+  // 如果有任何可用的动画数据（对于仅曲线动画无效），请验证新的帧速率是否与预期的帧/关键点数量匹配，反之亦然
 		if (RawAnimationData.Num())
 		{
 			const int32 NumberOfFrames = FMath::Max(NumberOfKeys - 1, 1);
 			const float SampledTime = SamplingFrameRate.AsSeconds(NumberOfFrames);
 
 			// Validate that provided the number of keys and frame-rate the sequence length is accurate
-			// [翻译失败: Validate that provided the number of keys and frame-rate the sequence length is accurate]
+   // 验证提供的密钥数量和帧速率以及序列长度是否准确
 			if (!FMath::IsNearlyEqual(SampledTime, SequenceLength, UE_KINDA_SMALL_NUMBER))
 			{
 				UE_LOG(LogAnimation, Warning, TEXT("Animation %s needs resaving - Inaccurate sequence length %5.5f according to number of frames and frame rate (delta of %f). Setting new length %5.5f."), *GetName(), SequenceLength, SampledTime - SequenceLength, SampledTime);
@@ -943,16 +945,16 @@ void UAnimSequence::Serialize(FArchive& Ar)
 	if ( Ar.IsLoading() && Ar.UEVer() < VER_UE4_ASSET_IMPORT_DATA_AS_JSON && !AssetImportData)
 	{
 		// AssetImportData should always be valid
-		// AssetImportData 应始终有效
+  // AssetImportData 应始终有效
 		AssetImportData = NewObject<UAssetImportData>(this, TEXT("AssetImportData"));
 	}
 
 	// SourceFilePath and SourceFileTimestamp were moved into a subobject
-	// SourceFilePath 和 SourceFileTimestamp 已移至子对象中
+ // SourceFilePath 和 SourceFileTimestamp 已移至子对象中
 	if ( Ar.IsLoading() && Ar.UEVer() < VER_UE4_ADDED_FBX_ASSET_IMPORT_DATA && AssetImportData)
 	{
 		// AssetImportData should always have been set up in the constructor where this is relevant
-		// AssetImportData 应始终在相关的构造函数中设置
+  // AssetImportData 应始终在相关的构造函数中设置
 		FAssetImportInfo Info;
 		Info.Insert(FAssetImportInfo::FSourceFile(SourceFilePath_DEPRECATED));
 		AssetImportData->SourceData = MoveTemp(Info);
@@ -967,7 +969,7 @@ void UAnimSequence::Serialize(FArchive& Ar)
 bool UAnimSequence::IsValidToPlay() const
 {
 	// make sure sequence length is valid and raw animation data exists, and compressed
-	// 确保序列长度有效且原始动画数据存在且已压缩
+ // 确保序列长度有效且原始动画数据存在且已压缩
 	return (GetPlayLength() > 0.f);
 }
 
@@ -977,16 +979,16 @@ void UAnimSequence::UpdateFrameRate()
 	const int32 NumberOfFrames = FMath::Max(NumberOfKeys - 1, 1);
 
 	// Generate the frame-rate according to the number of frames and sequence length
-	// 根据帧数和序列长度生成帧率
+ // 根据帧数和序列长度生成帧率
 	const double DecimalFrameRate = (double)NumberOfFrames / ((double)SequenceLength > 0.0 ? (double)SequenceLength : 1.0);
 
 	// Account for non-whole number frame rates using large denominator
-	// 使用大分母考虑非整数帧速率
+ // 使用大分母考虑非整数帧速率
 	const double Denominator = 1000000.0;
 	SamplingFrameRate = FFrameRate(DecimalFrameRate * Denominator, Denominator);	 
 
 	// Try to simplifiy the frame rate, in case it is a multiple of the commonly used frame rates e.g. 10000/300000 -> 1/30
-	// 尝试简化帧速率，以防它是常用帧速率的倍数，例如10000/300000 -> 1/30
+ // 尝试简化帧速率，以防它是常用帧速率的倍数，例如10000/300000 -> 1/30
 	TArrayView<const FCommonFrameRateInfo> CommonFrameRates = FModuleManager::LoadModulePtr<ITimeManagementModule>("TimeManagement")->GetAllCommonFrameRates();
 	for (const FCommonFrameRateInfo& Info : CommonFrameRates)
 	{
@@ -1005,18 +1007,18 @@ void UAnimSequence::UpdateFrameRate()
 void UAnimSequence::SortSyncMarkers()
 {
 	// First make sure all SyncMarkers are within a valid range
-	// 首先确保所有SyncMarkers都在有效范围内
+ // 首先确保所有SyncMarkers都在有效范围内
 	for (auto& SyncMarker : AuthoredSyncMarkers)
 	{
 		SyncMarker.Time = FMath::Clamp(SyncMarker.Time, 0.f, GetPlayLength());
 	}
 
 	// Then sort
-	// 然后排序
+ // 然后排序
 	AuthoredSyncMarkers.Sort();
 
 	// Then refresh data
-	// 然后刷新数据
+ // 然后刷新数据
 	RefreshSyncMarkerDataFromAuthored();
 }
 
@@ -1079,9 +1081,9 @@ void UAnimSequence::GetPreloadDependencies(TArray<UObject*>& OutDeps)
 	Super::GetPreloadDependencies(OutDeps);
 
 	// We preload the compression settings because we need them loaded during Serialize to lookup the proper codec
-	// 我们预加载压缩设置，因为我们需要在序列化期间加载它们以查找正确的编解码器
+ // 我们预加载压缩设置，因为我们需要在序列化期间加载它们以查找正确的编解码器
 	// which is stored as a path/string.
-	// 它存储为路径/字符串。
+ // 它存储为路径/字符串。
 	if (CurveCompressionSettings != nullptr)
 	{
 		OutDeps.Add(CurveCompressionSettings);
@@ -1131,7 +1133,7 @@ public:
 			Writer << "DDCKey" << DDCKey;
 		}
 		//Limiting the diagnostic size to the first 1000 chars
-		//将诊断大小限制为前 1000 个字符
+  // 将诊断大小限制为前 1000 个字符
 		Writer << "Model" << FStringView(ModelStateString).Left(1000);
 		Writer << "RawDataGuidEqual" << bRawDataGuidEqual;
 		Writer.EndObject();
@@ -1152,7 +1154,7 @@ void UAnimSequence::PreSave(FObjectPreSaveContext ObjectSaveContext)
 		check(IsCachedCookedPlatformDataLoaded(ObjectSaveContext.GetTargetPlatform()));
 
 		// In case compressed data was cleared between ::IsCachedCookedPlatformDataLoaded and ::PreSave being called, synchronously run compression
-		// 如果在调用 ::IsCachedCookedPlatformDataLoaded 和 ::PreSave 之间清除了压缩数据，则同步运行压缩
+  // 如果在调用 ::IsCachedCookedPlatformDataLoaded 和 ::PreSave 之间清除了压缩数据，则同步运行压缩
 		if(!IsCachedCookedPlatformDataLoaded(ObjectSaveContext.GetTargetPlatform()))
 		{
 			CacheDerivedDataForPlatform(ObjectSaveContext.GetTargetPlatform());
@@ -1171,11 +1173,11 @@ void UAnimSequence::PreSave(FObjectPreSaveContext ObjectSaveContext)
 	}
 
 	// Updated current platform cache data ptr during non-cook editor runtime
-	// 在非cook编辑器运行时更​​新了当前平台缓存数据ptr
+ // 在非cook编辑器运行时更​​新了当前平台缓存数据ptr
 	if (!ObjectSaveContext.IsCooking())
 	{
 		// Find compressed data for current platform and cache its ptr
-		// 查找当前平台的压缩数据并缓存其 ptr
+  // 查找当前平台的压缩数据并缓存其 ptr
 		const ITargetPlatform* RunningPlatform = GetTargetPlatformManagerRef().GetRunningTargetPlatform();
 		if(HasCompressedDataForPlatform(RunningPlatform))
 		{
@@ -1195,9 +1197,9 @@ void UAnimSequence::PostLoad()
 #endif // WITH_EDITOR
 	
 	//Parent PostLoad will ensure that skeleton is fully loaded
-	//Parent PostLoad 将确保骨架完全加载
+ // Parent PostLoad 将确保骨架完全加载
 	//before we do anything further in PostLoad
-	//在我们在 PostLoad 中做进一步的事情之前
+ // 在我们在 PostLoad 中做进一步的事情之前
 	Super::PostLoad();
 
 #if WITH_EDITOR
@@ -1208,36 +1210,36 @@ void UAnimSequence::PostLoad()
 #endif // WITH_EDITOR
 
 	// if valid additive, but if base additive isn't 
-	// [翻译失败: if valid additive, but if base additive isn't]
+ // 如果添加剂有效，但如果基础添加剂无效
 	// this seems to happen from retargeting sometimes, which we still have to investigate why, 
-	// [翻译失败: this seems to happen from retargeting sometimes, which we still have to investigate why,]
+ // 有时这似乎是由于重新定位而发生的，我们仍然需要调查原因，
 	// but this causes issue since once this happens this is unrecoverable until you delete from outside of editor
-	// 但这会导致问题，因为一旦发生这种情况，除非您从编辑器外部删除，否则将无法恢复
+ // 但这会导致问题，因为一旦发生这种情况，除非您从编辑器外部删除，否则将无法恢复
 	if (IsValidAdditive())
 	{
 		if (RefPoseSeq && RefPoseSeq->GetSkeleton() == nullptr)
 		{
 			// if this happens, there was a issue with retargeting
-			// 如果发生这种情况，则说明重定向存在问题
+   // 如果发生这种情况，则说明重定向存在问题
 			UE_LOG(LogAnimation, Warning, TEXT("Animation %s - Invalid additive animation base animation (%s)"), *GetName(), *RefPoseSeq->GetName());
 			RefPoseSeq = nullptr;
 		}
 	}
 
 	// Ensure notifies are sorted.
-	// 确保通知已排序。
+ // 确保通知已排序。
 	SortNotifies();
 
 	// No animation data is found. Warn - this should check before we check CompressedTrackOffsets size
-	// 没有找到动画数据。警告 - 这应该在我们检查 CompressedTrackOffsets 大小之前进行检查
+ // 没有找到动画数据。警告 - 这应该在我们检查 CompressedTrackOffsets 大小之前进行检查
 	// Otherwise, we'll see empty data set crashing game due to no CompressedTrackOffsets
-	// 否则，我们会看到由于没有 CompressedTrackOffsets 而导致游戏崩溃的空数据集
+ // 否则，我们会看到由于没有 CompressedTrackOffsets 而导致游戏崩溃的空数据集
 	// You can't check RawAnimationData size since it gets removed during cooking
-	// 您无法检查 RawAnimationData 大小，因为它在烹饪过程中被删除
+ // 您无法检查 RawAnimationData 大小，因为它在烹饪过程中被删除
 	if (GetOutermost()->HasAnyPackageFlags(PKG_Cooked | PKG_FilterEditorOnly))
 	{
 		// Update the virtual bone GUID according to the skeleton
-		// 根据骨骼更新虚拟骨骼GUID
+  // 根据骨骼更新虚拟骨骼GUID
 		if (const USkeleton* CurrentSkeleton = GetSkeleton())
 		{
 			SetSkeletonVirtualBoneGuid(CurrentSkeleton->GetVirtualBoneGuid());
@@ -1302,7 +1304,7 @@ EDataValidationResult UAnimSequence::IsDataValid(FDataValidationContext& Context
 {
 	EDataValidationResult ValidationResult = Super::IsDataValid(Context);
 	// Do not validate cooked anim sequence
-	// 不验证熟的动画序列
+ // 不验证熟的动画序列
 	if (GetPackage()->HasAnyPackageFlags(PKG_Cooked) == false)
 	{
 		if (!GetSkeleton())
@@ -1319,7 +1321,7 @@ void UAnimSequence::BeginDestroy()
 {
 #if WITH_EDITOR
 	// Could already be compressing
-	// 可能已经在压缩
+ // 可能已经在压缩
 	WaitOnExistingCompression(false);
 #endif // WITH_EDITOR
 
@@ -1352,7 +1354,7 @@ void UAnimSequence::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 	if(!IsTemplate() && !FUObjectThreadContext::Get().IsRoutingPostLoad)
 	{
 		// Make sure package is marked dirty when doing stuff like adding/removing notifies
-		// 在执行添加/删除通知等操作时，确保包被标记为脏
+  // 在执行添加/删除通知等操作时，确保包被标记为脏
 		MarkPackageDirty();
 	}
 
@@ -1361,7 +1363,7 @@ void UAnimSequence::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 		if (RefPoseType == ABPT_None)
 		{
 			// slate will take care of change
-			// slate 会处理变化
+   // slate 会处理变化
 			RefPoseType = ABPT_RefPose;
 		}
 	}
@@ -1399,7 +1401,7 @@ void UAnimSequence::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 			if (RefPoseType == ABPT_RefPose || RefPoseType == ABPT_LocalAnimFrame || AdditiveAnimType == AAT_None)
 			{
 				// clear RefPoseSeq when selecting settings which will hide the field
-				// 选择将隐藏字段的设置时清除 RefPoseSeq
+    // 选择将隐藏字段的设置时清除 RefPoseSeq
 				RefPoseSeq = nullptr;
 			}
 		}
@@ -1421,7 +1423,7 @@ void UAnimSequence::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 	const bool bNeedPostProcess = !IsCompressedDataValid() || bAdditiveSettingsChanged || bCompressionAffectingSettingsChanged || bShouldResample;
 
 	// @Todo fix me: This is temporary fix to make sure they always have compressed data
-	// @Todo 修复我：这是临时修复，以确保它们始终具有压缩数据
+ // @Todo 修复我：这是临时修复，以确保它们始终具有压缩数据
 	ValidateModel();
 	if (IsDataModelValid() && bNeedPostProcess)
 	{		
@@ -1511,7 +1513,7 @@ bool UAnimSequence::IsCachedCookedPlatformDataLoaded(const ITargetPlatform* Targ
 #endif // WITH_EDITOR
 
 // @todo DB: Optimize!
-// [翻译失败: @todo DB: Optimize!]
+// @todo DB：优化！
 template<typename TimeArray>
 static int32 FindKeyIndex(float Time, const TimeArray& Times)
 {
@@ -1631,18 +1633,18 @@ FTransform UAnimSequence::ExtractRootMotion(const FAnimExtractContext& Extractio
 		do
 		{
 			// Disable looping here. Advance to desired position, or beginning / end of animation 
-			// [翻译失败: Disable looping here. Advance to desired position, or beginning / end of animation]
+   // 此处禁用循环。前进到所需位置，或动画的开始/结束
 			const ETypeAdvanceAnim AdvanceType = FAnimationRuntime::AdvanceTime(false, DesiredDeltaMove, CurrentPosition, GetPlayLength());
 
 			// Verify position assumptions
-			// [翻译失败: Verify position assumptions]
+   // 验证位置假设
 			ensureMsgf(bPlayingBackwards ? (CurrentPosition <= PreviousPosition) : (CurrentPosition >= PreviousPosition), TEXT("in Animation %s(Skeleton %s) : bPlayingBackwards(%d), PreviousPosition(%0.2f), Current Position(%0.2f)"),
 				*GetName(), *GetNameSafe(GetSkeleton()), bPlayingBackwards, PreviousPosition, CurrentPosition);
 
 			RootMotionParams.Accumulate(ExtractRootMotionFromRange(PreviousPosition, CurrentPosition, ExtractionContext));
 
 			// If we've hit the end of the animation, and we're allowed to loop, keep going.
-			// 如果我们已经到达动画的结尾，并且允许循环，请继续。
+   // 如果我们已经到达动画的结尾，并且允许循环，请继续。
 			if ((AdvanceType == ETAA_Finished) && ExtractionContext.bLooping)
 			{
 				const double ActualDeltaMove = (CurrentPosition - PreviousPosition);
@@ -1688,11 +1690,11 @@ FTransform UAnimSequence::ExtractRootMotionFromRange(double StartTime, double En
 	FTransform EndTransform = ExtractRootTrackTransform_Lockless(Context, nullptr);
 
 	// Use old calculation if needed.
-	// [翻译失败: Use old calculation if needed.]
+ // 如果需要，请使用旧的计算。
 	if (bUseNormalizedRootMotionScale)
 	{
 		//Clear scale as it will muck up GetRelativeTransform
-		//[翻译失败: Clear scale as it will muck up GetRelativeTransform]
+  // 清除比例，因为它会弄乱 GetRelativeTransform
 		StartTransform.SetScale3D(FVector(1.f));
 		EndTransform.SetScale3D(FVector(1.f));
 	}
@@ -1706,7 +1708,7 @@ FTransform UAnimSequence::ExtractRootMotionFromRange(double StartTime, double En
 	}
 
 	// Transform to Component Space
-	// 变换到组件空间
+ // 变换到组件空间
 	const FTransform RootToComponent = RootTransformRefPose.Inverse();
 	StartTransform = RootToComponent * StartTransform;
 	EndTransform = RootToComponent * EndTransform;
@@ -1744,7 +1746,7 @@ void UAnimSequence::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData, c
 	const FCompactPose& OutPose = OutAnimationPoseData.GetPose();
 
 	// @todo anim: if compressed and baked in the future, we don't have to do this 
-	// @todo anim：如果将来压缩和烘焙，我们就不必这样做
+ // @todo anim：如果将来压缩和烘焙，我们就不必这样做
 	if (IsValidAdditive() && ShouldUseRawDataForPoseExtraction(OutPose.GetBoneContainer(), ExtractionContext))
 	{
 		if (AdditiveAnimType == AAT_LocalSpaceBase)
@@ -1762,7 +1764,7 @@ void UAnimSequence::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData, c
 	}
 
 	// If the sequence has root motion enabled, allow sampling of a root motion delta into the custom attribute container of the outgoing pose
-	// 如果序列启用了根运动，则允许将根运动增量采样到传出姿势的自定义属性容器中
+ // 如果序列启用了根运动，则允许将根运动增量采样到传出姿势的自定义属性容器中
 	if (HasRootMotion()
 #if WITH_EDITOR
 		&& ExtractionContext.bExtractWithRootMotionProvider
@@ -1776,7 +1778,7 @@ void UAnimSequence::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData, c
 	}
 
 	// Check that all bone atoms coming from animation are normalized
-	// 检查来自动画的所有骨骼原子是否已标准化
+ // 检查来自动画的所有骨骼原子是否已标准化
 #if DO_CHECK && WITH_EDITORONLY_DATA
 	check(OutPose.IsNormalized());
 #endif
@@ -1850,24 +1852,24 @@ void UAnimSequence::GetBonePose(FAnimationPoseData& OutAnimationPoseData, const 
 	const bool bDisableRetargeting = RequiredBones.GetDisableRetargeting();
 
 	// initialize with ref-pose
-	// 使用 ref-pose 进行初始化
+ // 使用 ref-pose 进行初始化
 	if (bIsBakedAdditive)
 	{
 		//When using baked additive ref pose is identity
-		//当使用烘焙添加剂时，参考姿势是同一性的
+  // 当使用烘焙添加剂时，参考姿势是同一性的
 		OutPose.ResetToAdditiveIdentity();
 	}
 	else
 	{
 		// if retargeting is disabled, we initialize pose with 'Retargeting Source' ref pose.
-		// 如果禁用重定向，我们将使用“重定向源”参考姿势初始化姿势。
+  // 如果禁用重定向，我们将使用“重定向源”参考姿势初始化姿势。
 		if (bDisableRetargeting)
 		{
 			TArray<FTransform> const& AuthoredOnRefSkeleton = GetRetargetTransforms();
 			const TArray<FTransform>& SkeletonRefPose = RequiredBones.GetSkeletonAsset()->GetRefLocalPoses();
 
 			// Map from this sequence its Skeleton to target
-			// 从此序列将其骨架映射到目标
+   // 从此序列将其骨架映射到目标
 			const FSkeletonRemapping& SkeletonRemapping = UE::Anim::FSkeletonRemappingRegistry::Get().GetRemapping(MySkeleton, RequiredBones.GetSkeletonAsset());
 			for (FCompactPoseBoneIndex PoseBoneIndex : OutPose.ForEachBoneIndex())
 			{
@@ -1875,7 +1877,7 @@ void UAnimSequence::GetBonePose(FAnimationPoseData& OutAnimationPoseData, const 
 				const int32 RemappedSkeletonBoneIndex = SkeletonRemapping.IsValid() ? SkeletonRemapping.GetSourceSkeletonBoneIndex(SkeletonBoneIndex) : SkeletonBoneIndex;
 
 				// Virtual bones are part of the retarget transform pose, so if the pose has not been updated (recently) there might be a mismatch
-				// 虚拟骨骼是重定向变换姿势的一部分，因此如果姿势尚未更新（最近），则可能会不匹配
+    // 虚拟骨骼是重定向变换姿势的一部分，因此如果姿势尚未更新（最近），则可能会不匹配
 				if (RemappedSkeletonBoneIndex != INDEX_NONE && AuthoredOnRefSkeleton.IsValidIndex(RemappedSkeletonBoneIndex))
 				{
 					OutPose[PoseBoneIndex] = AuthoredOnRefSkeleton[RemappedSkeletonBoneIndex];
@@ -1883,11 +1885,11 @@ void UAnimSequence::GetBonePose(FAnimationPoseData& OutAnimationPoseData, const 
 				else
 				{
 					// Only do this if we have a mesh. otherwise we're not retargeting animations.
-					// 仅当我们有网格时才执行此操作。否则我们不会重新定位动画。
+     // 仅当我们有网格时才执行此操作。否则我们不会重新定位动画。
 					if (RequiredBones.GetSkeletalMeshAsset())
 					{
 						// Pose bone index should always exist in Skeleton
-						// 姿势骨骼索引应该始终存在于骨骼中
+      // 姿势骨骼索引应该始终存在于骨骼中
 						checkSlow(SkeletonBoneIndex != INDEX_NONE);
 						OutPose[PoseBoneIndex] = SkeletonRefPose[SkeletonBoneIndex];
 					}
@@ -1922,7 +1924,7 @@ void UAnimSequence::GetBonePose(FAnimationPoseData& OutAnimationPoseData, const 
 
 #if WITH_EDITOR
 	// Evaluate raw (source) curve and bone data
-	// 评估原始（源）曲线和骨骼数据
+ // 评估原始（源）曲线和骨骼数据
 	if (bUseRawDataForPoseExtraction)
 	{
 		{
@@ -1941,22 +1943,22 @@ void UAnimSequence::GetBonePose(FAnimationPoseData& OutAnimationPoseData, const 
 	else
 #endif // WITH_EDITOR
 	// Only try and evaluate compressed bone data if the animation contains any bone tracks
-	// [翻译失败: Only try and evaluate compressed bone data if the animation contains any bone tracks]
+ // 仅当动画包含任何骨骼轨迹时才尝试评估压缩骨骼数据
 	if (NumTracks != 0)
 	{
 		// Evaluate compressed bone data
-		// [翻译失败: Evaluate compressed bone data]
+  // 评估压缩骨骼数据
 		const EAnimInterpolationType InterpolationType = ExtractionContext.InterpolationOverride.Get(Interpolation);
 		FAnimSequenceDecompressionContext DecompContext(PlatformTargetFrameRate.Default, PlatformTargetFrameRate.Default.AsFrameTime(GetPlayLength()).RoundToFrame().Value, InterpolationType, GetRetargetTransformsSourceName(), *PlatformCompressedData.CompressedDataStructure, GetSkeleton()->GetRefLocalPoses(), PlatformCompressedData.CompressedTrackToSkeletonMapTable, GetSkeleton(), IsValidAdditive(), AdditiveAnimType);
 		UE::Anim::Decompression::DecompressPose(OutPose, PlatformCompressedData, ExtractionContext, DecompContext, GetRetargetTransforms(), RootMotionReset);
 	}
 
 	// (Always) evaluate compressed curve data
-	// （始终）评估压缩曲线数据
+ // （始终）评估压缩曲线数据
 	{
 #if WITH_EDITOR
 		// When evaluating from raw animation data, UE::Anim::BuildPoseFromModel will populate the curve data
-		// 从原始动画数据进行评估时，UE::Anim::BuildPoseFromModel 将填充曲线数据
+  // 从原始动画数据进行评估时，UE::Anim::BuildPoseFromModel 将填充曲线数据
 		if (!bUseRawDataForPoseExtraction)
 #endif // WITH_EDITOR
 		{
@@ -1965,7 +1967,7 @@ void UAnimSequence::GetBonePose(FAnimationPoseData& OutAnimationPoseData, const 
 	}
 
 	// Evaluate animation attributes (no compressed format yet)
-	// 评估动画属性（尚无压缩格式）
+ // 评估动画属性（尚无压缩格式）
 	EvaluateAttributes(OutAnimationPoseData, ExtractionContext, false);
 }
 
@@ -1982,11 +1984,11 @@ void UAnimSequence::GetBonePose_Additive(FAnimationPoseData& OutAnimationPoseDat
 	}
 
 	// Extract target pose
-	// 提取目标姿态
+ // 提取目标姿态
 	GetBonePose(OutAnimationPoseData, ExtractionContext);
 
 	// Extract base pose
-	// 提取基本姿势
+ // 提取基本姿势
 	FCompactPose BasePose;
 	FBlendedCurve BaseCurve;
 	UE::Anim::FStackAttributeContainer BaseAttributes;
@@ -1999,7 +2001,7 @@ void UAnimSequence::GetBonePose_Additive(FAnimationPoseData& OutAnimationPoseDat
 	GetAdditiveBasePose(BasePoseData, ExtractionContext);
 
 	// Create Additive animation
-	// 创建添加动画
+ // 创建添加动画
 	FAnimationRuntime::ConvertPoseToAdditive(OutPose, BasePose);
 	OutCurve.ConvertToAdditive(BaseCurve);
 
@@ -2020,11 +2022,11 @@ void UAnimSequence::GetAdditiveBasePose(FAnimationPoseData& OutAnimationPoseData
 	switch (RefPoseType)
 	{
 		// use whole animation as a base pose. Need BasePoseSeq.
-		// 使用整个动画作为基本姿势。需要 BasePoseSeq。
+  // 使用整个动画作为基本姿势。需要 BasePoseSeq。
 		case ABPT_AnimScaled:
 		{
 			// normalize time to fit base seq
-			// 标准化时间以适应基本序列
+   // 标准化时间以适应基本序列
 			PRAGMA_DISABLE_DEPRECATION_WARNINGS
 			const double Fraction = (GetPlayLength() > 0.0)? FMath::Clamp<double>(ExtractionContext.CurrentTime / (double)GetPlayLength(), 0.0, 1.0) : 0.0;
 			const double BasePoseTime = (double)RefPoseSeq->GetPlayLength() * Fraction;
@@ -2036,21 +2038,21 @@ void UAnimSequence::GetAdditiveBasePose(FAnimationPoseData& OutAnimationPoseData
 			break;
 		}
 		// use animation as a base pose. Need BasePoseSeq and RefFrameIndex (will clamp if outside).
-		// 使用动画作为基本姿势。需要 BasePoseSeq 和 RefFrameIndex（如果在外部则会夹紧）。
+  // 使用动画作为基本姿势。需要 BasePoseSeq 和 RefFrameIndex（如果在外部则会夹紧）。
 		case ABPT_AnimFrame:
 		{
 			GetSequencePose(OutAnimationPoseData, ExtractionContext, *RefPoseSeq, RefFrameIndex, CanEvaluateRawAnimationData());
 			break;
 		}
 		// use this animation as a base pose. Need RefFrameIndex (will clamp if outside).
-		// [翻译失败: use this animation as a base pose. Need RefFrameIndex (will clamp if outside).]
+  // 使用此动画作为基本姿势。需要 RefFrameIndex（如果在外部则会夹紧）。
 		case ABPT_LocalAnimFrame:
 		{
 			GetSequencePose(OutAnimationPoseData, ExtractionContext, *this, RefFrameIndex, CanEvaluateRawAnimationData());
 			break;
 		}
 		// use ref pose of Skeleton as base
-		// [翻译失败: use ref pose of Skeleton as base]
+  // 使用骨骼的参考姿势作为基础
 		case ABPT_RefPose:
 		default:
 			OutAnimationPoseData.GetPose().ResetToRefPose();
@@ -2067,17 +2069,17 @@ void UAnimSequence::GetBonePose_AdditiveMeshRotationOnly(FAnimationPoseData& Out
 	if (!IsValidAdditive())
 	{
 		// since this is additive, need to initialize to identity
-		// 由于这是附加的，需要初始化为身份
+  // 由于这是附加的，需要初始化为身份
 		OutPose.ResetToAdditiveIdentity();
 		return;
 	}
 
 	// Get target pose
-	// 获取目标姿态
+ // 获取目标姿态
 	GetBonePose(OutAnimationPoseData, ExtractionContext, CanEvaluateRawAnimationData());
 
 	// get base pose
-	// 获取基本姿势
+ // 获取基本姿势
 	FCompactPose BasePose;
 	FBlendedCurve BaseCurve;
 	UE::Anim::FStackAttributeContainer BaseAttributes;
@@ -2090,12 +2092,12 @@ void UAnimSequence::GetBonePose_AdditiveMeshRotationOnly(FAnimationPoseData& Out
 	GetAdditiveBasePose(BasePoseData, ExtractionContext);
 
 	// Convert them to mesh rotation.
-	// 将它们转换为网格旋转。
+ // 将它们转换为网格旋转。
 	FAnimationRuntime::ConvertPoseToMeshRotation(OutPose);
 	FAnimationRuntime::ConvertPoseToMeshRotation(BasePose);
 
 	// Turn into Additive
-	// 变成添加剂
+ // 变成添加剂
 	FAnimationRuntime::ConvertPoseToAdditive(OutPose, BasePose);
 	OutCurve.ConvertToAdditive(BaseCurve);
 
@@ -2156,7 +2158,7 @@ const FCompressedAnimSequence& UAnimSequence::GetPlatformCompressedData(const FA
 			if(AnimExtractContext.TargetPlatformHash.IsZero())
 			{
 				// Not set, check platform instead
-				// 未设置，请检查平台
+    // 未设置，请检查平台
 				if (AnimExtractContext.TargetPlatform)
 				{
 					Hash = GetDerivedDataKeyHash(AnimExtractContext.TargetPlatform);
@@ -2209,7 +2211,7 @@ FCompressedAnimSequence& UAnimSequence::GetPlatformCompressedData(const FAnimExt
 			if(AnimExtractContext.TargetPlatformHash.IsZero())
 			{
 				// Not set, check platform instead
-				// 未设置，请检查平台
+    // 未设置，请检查平台
 				if (AnimExtractContext.TargetPlatform)
 				{
 					Hash = GetDerivedDataKeyHash(AnimExtractContext.TargetPlatform);
@@ -2341,7 +2343,7 @@ FTransform UAnimSequence::ExtractRootTrackTransform_Lockless(const FAnimExtractC
 		else
 		{
 			// Allow reading raw data in editor, as long as we don't explcitly request compressed data
-			// 允许在编辑器中读取原始数据，只要我们不明确请求压缩数据
+   // 允许在编辑器中读取原始数据，只要我们不明确请求压缩数据
 			bUseRawDataForPoseExtraction = !bValidCompressedData && !ExtractionContext.bEnforceCompressedDataSampling; 
 		}
 
@@ -2367,7 +2369,7 @@ FTransform UAnimSequence::ExtractRootTrackTransform_Lockless(const FAnimExtractC
 		{
 			const TArray<FTrackToSkeletonMap>& TrackToSkeletonMap = PlatformCompressedData.CompressedTrackToSkeletonMapTable;
 			// we assume root is in first data if available = SkeletonIndex == 0 && BoneTreeIndex == 0)
-			// 我们假设根位于第一个数据中（如果可用） = SkeletonIndex == 0 && BoneTreeIndex == 0)
+   // 我们假设根位于第一个数据中（如果可用） = SkeletonIndex == 0 && BoneTreeIndex == 0)
 			if ((TrackToSkeletonMap.Num() > 0) && (TrackToSkeletonMap[0].BoneTreeIndex == RootBoneIndex))
 			{
 				return true;
@@ -2380,14 +2382,14 @@ FTransform UAnimSequence::ExtractRootTrackTransform_Lockless(const FAnimExtractC
 	if(bContainsRootBoneTrack)
 	{
 		// if we do have root data, then return root data
-		// 如果我们确实有根数据，则返回根数据
+  // 如果我们确实有根数据，则返回根数据
 		FTransform RootTransform;
 		GetBoneTransform_Lockless(RootTransform, FSkeletonPoseBoneIndex(RootBoneIndex), ExtractionContext, !bValidCompressedData);
 		return RootTransform;
 	}
 
 	// Fallback to root bone from reference skeleton.
-	// [翻译失败: Fallback to root bone from reference skeleton.]
+ // 从参考骨骼回退到根骨骼。
 	if( RequiredBones )
 	{
 		const FReferenceSkeleton& RefSkeleton = RequiredBones->GetReferenceSkeleton();
@@ -2399,7 +2401,7 @@ FTransform UAnimSequence::ExtractRootTrackTransform_Lockless(const FAnimExtractC
 
 	USkeleton * MySkeleton = GetSkeleton();
 	// If we don't have a RequiredBones array, get root bone from default skeleton.
-	// [翻译失败: If we don't have a RequiredBones array, get root bone from default skeleton.]
+ // 如果我们没有RequiredBones数组，则从默认骨架中获取根骨骼。
 	if( !RequiredBones &&  MySkeleton )
 	{
 		const FReferenceSkeleton& RefSkeleton = MySkeleton->GetReferenceSkeleton();
@@ -2410,7 +2412,7 @@ FTransform UAnimSequence::ExtractRootTrackTransform_Lockless(const FAnimExtractC
 	}
 
 	// Otherwise, use identity.
-	// 否则，请使用身份。
+ // 否则，请使用身份。
 	return FTransform::Identity;
 }
 
@@ -2514,7 +2516,7 @@ bool UAnimSequence::ShouldPerformStripping(const bool bPerformFrameStripping, co
 	const bool bShouldPerformFrameStripping = bPerformFrameStripping && bAllowFrameStripping;
 
 	// Can only do stripping on animations that have an even number of frames once the end frame is removed)
-	// 一旦结束帧被删除，只能对具有偶数帧的动画进行剥离）
+ // 一旦结束帧被删除，只能对具有偶数帧的动画进行剥离）
 	const bool bIsEvenFramed = ((NumberOfSampledKeys - 1) % 2) == 0;
 	const bool bIsValidForStripping = bIsEvenFramed || bPerformStrippingOnOddFramedAnims;
 
@@ -2613,7 +2615,7 @@ void UAnimSequence::OnAnimModelLoaded()
 		}
 
 		// Do not try to cache compressed animation data when cooking, as cook target platform might not match current platform
-		// 烹饪时不要尝试缓存压缩的动画数据，因为烹饪目标平台可能与当前平台不匹配
+  // 烹饪时不要尝试缓存压缩的动画数据，因为烹饪目标平台可能与当前平台不匹配
 		if (!IsRunningCookCommandlet())
 		{
 			BeginCacheDerivedDataForCurrentPlatform();			
@@ -2682,7 +2684,7 @@ void UAnimSequence::UpdateDependentStreamingAnimations() const
 void UAnimSequence::ResetAnimation()
 {
 	// clear everything. Making new animation, so need to reset all the things that belong here
-	// 清除一切。制作新的动画，所以需要重置所有属于这里的东西
+ // 清除一切。制作新的动画，所以需要重置所有属于这里的东西
 	ValidateModel();
 
 	PlatformTargetFrameRate = UAnimationSettings::Get()->GetDefaultFrameRate();
@@ -2789,7 +2791,7 @@ int32 FindMeshBoneIndexFromBoneName(USkeleton * Skeleton, const FName &BoneName)
 void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConvertSpaces )
 {
 	// this is not cheap, so make sure it only happens in editor
-	// 这并不便宜，所以请确保它只发生在编辑器中
+ // 这并不便宜，所以请确保它只发生在编辑器中
 
 	ValidateModel();
 
@@ -2797,32 +2799,32 @@ void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConv
 	Controller->UpdateAttributesFromSkeleton(NewSkeleton);
 
 	// @Todo : currently additive will work fine since we don't bake anything except when we extract
-	// @Todo：目前添加剂可以正常工作，因为我们不烘烤任何东西，除非我们提取
+ // @Todo：目前添加剂可以正常工作，因为我们不烘烤任何东西，除非我们提取
 	// but in the future if we bake this can be problem
-	// 但将来如果我们烘烤这可能会成为问题
+ // 但将来如果我们烘烤这可能会成为问题
 	if (bConvertSpaces)
 	{
 		USkeleton* OldSkeleton = GetSkeleton();
 		
 		// this will try to do bone to bone mapping
-		// 这将尝试进行骨骼到骨骼映射
+  // 这将尝试进行骨骼到骨骼映射
 		if(OldSkeleton && OldSkeleton != NewSkeleton)
 		{
 			// Validate animation tracks against the new skeleton, any tracks linked to bones that do not exist in the new hierarchy are removed
-			// 根据新骨架验证动画轨迹，链接到新层次结构中不存在的骨骼的任何轨迹都将被删除
+   // 根据新骨架验证动画轨迹，链接到新层次结构中不存在的骨骼的任何轨迹都将被删除
 			Controller->RemoveBoneTracksMissingFromSkeleton(NewSkeleton);
 			ensure(DataModelInterface->GetNumBoneTracks() != 0);
 
 			// make sure you do update reference pose before coming here
-			// 确保在来这里之前更新参考姿势
+   // 确保在来这里之前更新参考姿势
 			
 			// first calculate component space ref pose to get the relative transform between
-			// 首先计算分量空间参考位姿以获得之间的相对变换
+   // 首先计算分量空间参考位姿以获得之间的相对变换
 			// two ref poses. It is very important update ref pose before getting here. 
-			// 两个裁判姿势。在到达这里之前更新参考姿势非常重要。
+   // 两个裁判姿势。在到达这里之前更新参考姿势非常重要。
 			TArray<FTransform> NewSpaceBaseRefPose, OldSpaceBaseRefPose, RelativeToNewTransform;
 			// get the spacebases transform
-			// [翻译失败: get the spacebases transform]
+   // 获得空间基地变换
 			FAnimationRuntime::FillUpComponentSpaceTransformsRefPose(NewSkeleton, NewSpaceBaseRefPose);
 			FAnimationRuntime::FillUpComponentSpaceTransformsRefPose(OldSkeleton, OldSpaceBaseRefPose);
 
@@ -2830,51 +2832,53 @@ void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConv
 			const TArray<FTransform>& NewRefPose = NewSkeleton->GetReferenceSkeleton().GetRefBonePose();
 
 			// now we'd like to get the relative transform from old to new ref pose in component space
-			// [翻译失败: now we'd like to get the relative transform from old to new ref pose in component space]
+   // 现在我们想要获得组件空间中从旧参考姿势到新参考姿势的相对变换
 			// PK2*K2 = PK1*K1*theta where theta => P1*R1*theta = P2*R2 
-			// PK2*K2 = PK1*K1*theta 其中 theta => P1*R1*theta = P2*R2
+   // PK2*K2 = PK1*K1*theta 其中 theta => P1*R1*theta = P2*R2
 			// where	P1 - parent transform in component space for original skeleton
-			// 其中 P1 - 原始骨架在组件空间中的父变换
+   // 其中 P1 - 原始骨架在组件空间中的父变换
 			//			R1 - local space of the current bone for original skeleton
-			//			R1 - 当前骨骼对于原始骨骼的局部空间
+   // R1 - 当前骨骼对于原始骨骼的局部空间
 			//			P2 - parent transform in component space for new skeleton
-			//			P2 - 新骨架组件空间中的父变换
+   // P2 - 新骨架组件空间中的父变换
 			//			R2 - local space of the current bone for new skeleton
-			//			R2 - 新骨骼的当前骨骼的局部空间
+   // R2 - 新骨骼的当前骨骼的局部空间
+						// K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
+      // K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
 			// what we're looking for is theta, so that we can apply that to animated transform
-			// 我们正在寻找的是 theta，这样我们就可以将其应用于动画变换
+   // 我们正在寻找的是 theta，这样我们就可以将其应用于动画变换
 			int32 NumBones = NewSpaceBaseRefPose.Num();
 			// saves the theta data per bone
-			// 保存每个骨骼的 theta 数据
+   // 保存每个骨骼的 theta 数据
 			RelativeToNewTransform.AddUninitialized(NumBones);
 			TArray<float> OldToNewTranslationRatio;
 			// saves the translation conversion data
-			// 保存翻译转换数据
+   // 保存翻译转换数据
 			OldToNewTranslationRatio.AddUninitialized(NumBones);
 
 			// calculate the relative transform to new skeleton
-			// 计算新骨架的相对变换
+   // 计算新骨架的相对变换
 			// so that we can apply the delta in component space
-			// 这样我们就可以在组件空间中应用增量
+   // 这样我们就可以在组件空间中应用增量
 			for(int32 BoneIndex=0; BoneIndex<NumBones; ++BoneIndex)
 			{
 				// first find bone name of the idnex
-				// 首先找到idnex的骨骼名称
+    // 首先找到idnex的骨骼名称
 				FName BoneName = NewSkeleton->GetReferenceSkeleton().GetRefBoneInfo()[BoneIndex].Name;
 				// find it in old index
-				// 在旧索引中找到它
+    // 在旧索引中找到它
 				int32 OldBoneIndex = OldSkeleton->GetReferenceSkeleton().FindBoneIndex(BoneName);
 
 				// get old bone index
-				// 获取旧骨指数
+    // 获取旧骨指数
 				if(OldBoneIndex != INDEX_NONE)
 				{
 					// theta (RelativeToNewTransform) = (P1*R1)^(-1) * P2*R2 where theta => P1*R1*theta = P2*R2
-					// theta (RelativeToNewTransform) = (P1*R1)^(-1) * P2*R2 其中 theta => P1*R1*theta = P2*R2
+     // theta (RelativeToNewTransform) = (P1*R1)^(-1) * P2*R2 其中 theta => P1*R1*theta = P2*R2
 					RelativeToNewTransform[BoneIndex] = NewSpaceBaseRefPose[BoneIndex].GetRelativeTransform(OldSpaceBaseRefPose[OldBoneIndex]);
 
 					// also savees the translation difference between old to new
-					// 还节省了旧到新之间的翻译差异
+     // 还节省了旧到新之间的翻译差异
 					FVector OldTranslation = OldRefPose[OldBoneIndex].GetTranslation();
 					FVector NewTranslation = NewRefPose[BoneIndex].GetTranslation();
 
@@ -2889,7 +2893,7 @@ void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConv
 			}
 
 			// 2d array of animated time [boneindex][time key]
-			// 动画时间的二维数组 [boneindex][time key]
+   // 动画时间的二维数组 [boneindex][time key]
 			TArray< TArray<FTransform> > AnimatedSpaceBases, ConvertedLocalSpaces, ConvertedSpaceBases;
 			AnimatedSpaceBases.AddZeroed(NumBones);
 			ConvertedLocalSpaces.AddZeroed(NumBones);
@@ -2899,7 +2903,7 @@ void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConv
 			const float Interval = DataModelInterface->GetFrameRate().AsInterval();
 
 			// allocate arrays
-			// 分配数组
+   // 分配数组
 			for(int32 BoneIndex=0; BoneIndex<NumBones; ++BoneIndex)
 			{
 				AnimatedSpaceBases[BoneIndex].AddUninitialized(NumKeys);
@@ -2908,9 +2912,9 @@ void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConv
 			}
 
 			// now calculating old animated space bases
-			// [翻译失败: now calculating old animated space bases]
+   // 现在计算旧的动画空间基地
 			// this one calculates aniamted space per bones and per key
-			// [翻译失败: this one calculates aniamted space per bones and per key]
+   // 这个计算每个骨骼和每个键的动画空间
 			TArray<FTransform> BoneTransforms;
 			for(int32 BoneIndex=0; BoneIndex<NumBones; ++BoneIndex)
 			{
@@ -2922,16 +2926,16 @@ void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConv
 				if(bContainsTrack)
 				{
 					// fill up keys - calculate PK1 * K1
-					// [翻译失败: fill up keys - calculate PK1 * K1]
+     // 填写密钥 - 计算 PK1 * K1
 					BoneTransforms.Reset();
 					DataModelInterface->GetBoneTrackTransforms(BoneName, BoneTransforms);
 					for(int32 Key=0; Key<NumKeys; ++Key)
 					{
 						FTransform AnimatedLocalKey = BoneTransforms[Key];
 						// note that we apply scale in the animated space
-						// 请注意，我们在动画空间中应用了比例
+      // 请注意，我们在动画空间中应用了比例
 						// at this point, you should have scaled version of animated skeleton
-						// 此时，您应该已经有了动画骨架的缩放版本
+      // 此时，您应该已经有了动画骨架的缩放版本
 						AnimatedLocalKey.ScaleTranslation(OldToNewTranslationRatio[BoneIndex]);
 
 						if(ParentBoneIndex != INDEX_NONE)
@@ -2947,7 +2951,7 @@ void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConv
 				else
 				{
 					// get local spaces from refpose and use that to fill it up
-					// 从 refpose 获取本地空间并用它来填充它
+     // 从 refpose 获取本地空间并用它来填充它
 					FTransform LocalTransform = (OldBoneIndex != INDEX_NONE)? OldSkeleton->GetReferenceSkeleton().GetRefBonePose()[OldBoneIndex] : FTransform::Identity;
 
 					for(int32 Key=0; Key<NumKeys; ++Key)
@@ -2969,7 +2973,7 @@ void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConv
 			TArray<FVector3f> ScaleKeys;
 
 			// now apply the theta back to the animated space bases
-			// 现在将 theta 应用回动画空间基地
+   // 现在将 theta 应用回动画空间基地
 			for(int32 BoneIndex=0; BoneIndex<NumBones; ++BoneIndex)
 			{
 				const FName BoneName = NewSkeleton->GetReferenceSkeleton().GetBoneName(BoneIndex);
@@ -2978,36 +2982,44 @@ void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConv
 				for(int32 Key=0; Key<NumKeys; ++Key)
 				{
 					// thus PK2 & K2 =  PK1 * K1 * theta where theta = (P1*R1)^(-1) * P2*R2
-					// 因此 PK2 & K2 = PK1 * K1 * theta 其中 theta = (P1*R1)^(-1) * P2*R2
+     // 因此 PK2 & K2 = PK1 * K1 * theta 其中 theta = (P1*R1)^(-1) * P2*R2
 					// where PK2	: parent transform in component space of animated key for new skeleton
-					// 其中 PK2 ：新骨架的动画关键点组件空间中的父变换
+     // 其中 PK2 ：新骨架的动画关键点组件空间中的父变换
 					//		 K2		: local transform of animated key for new skeleton
-					//		 K2：新骨架的动画关键点的局部变换
+     // K2：新骨架的动画关键点的局部变换
 					//		 PK1	: parent transform in component space of animated key for old skeleton
-					//		 PK1：旧骨架动画关键帧组件空间中的父变换
+     // PK1：旧骨架动画关键帧组件空间中的父变换
 					//		 K1		: local transform of animated key for old skeleton
-					//		 K1：旧骨架动画关键点的局部变换
+     // K1：旧骨架动画关键点的局部变换
 					FTransform SpaceBase;
 					// we don't just apply it because translation is sensitive
-					// [翻译失败: we don't just apply it because translation is sensitive]
+     // 我们不只是因为翻译很敏感而应用它
 					// we don't like to apply relative transform to tranlsation directly
-					// 我们不喜欢直接将相对变换应用于翻译
+     // 我们不喜欢直接将相对变换应用于翻译
 					// rotation and scale we can, but translation we'd like to use scaled translation instead of transformed location
-					// 旋转和缩放我们可以，但是平移我们想使用缩放平移而不是变换后的位置
+     // 旋转和缩放我们可以，但是平移我们想使用缩放平移而不是变换后的位置
 					// as their relative translation can be different
-					// 因为它们的相对翻译可能不同
+     // 因为它们的相对翻译可能不同
 					SpaceBase.SetRotation(AnimatedSpaceBases[BoneIndex][Key].GetRotation() * RelativeToNewTransform[BoneIndex].GetRotation());
 					SpaceBase.SetScale3D(AnimatedSpaceBases[BoneIndex][Key].GetScale3D() * RelativeToNewTransform[BoneIndex].GetScale3D());
 					// use animated scaled translation directly
-					// 直接使用动画缩放翻译
+     // 直接使用动画缩放翻译
 					SpaceBase.SetTranslation(AnimatedSpaceBases[BoneIndex][Key].GetTranslation());
+     // K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
+     // K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
+     // K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
+     // K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
 					ConvertedSpaceBases[BoneIndex][Key] = SpaceBase;
 					// now calculate local space for animation
-					// 现在计算动画的本地空间
+     // 现在计算动画的本地空间
+						// K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
+      // K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
 					if(ParentBoneIndex != INDEX_NONE)
 					{
 						// K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
+      // K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
 						// K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
+      // K2 = PK2^(-1) * PK1 * K1 * (P1*R1)^(-1) * P2*R2
 						ConvertedLocalSpaces[BoneIndex][Key] = SpaceBase.GetRelativeTransform(ConvertedSpaceBases[ParentBoneIndex][Key]);
 					}
 					else
@@ -3017,7 +3029,7 @@ void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConv
 				}
 
 				// now save back to animation data
-				// [翻译失败: now save back to animation data]
+    // 现在保存回动画数据
 				if(DataModelInterface->IsValidBoneTrackName(BoneName))
 				{
 					PosKeys.SetNumUninitialized(NumKeys);
@@ -3041,9 +3053,9 @@ void UAnimSequence::RemapTracksToNewSkeleton( USkeleton* NewSkeleton, bool bConv
 		}
 
 		// I have to set this here in order for compression
-		// 我必须在这里设置它以便进行压缩
+  // 我必须在这里设置它以便进行压缩
 		// that has to happen outside of this after Skeleton changes
-		// 在骨架改变之后，这必须发生在这之外
+  // 在骨架改变之后，这必须发生在这之外
 		SetSkeleton(NewSkeleton);
 	}
 	else
@@ -3064,17 +3076,17 @@ int32 FindFirstChildTrack(const USkeleton* MySkeleton, const FReferenceSkeleton&
 	if(BoneIndex == INDEX_NONE)
 	{
 		// get out, nothing to do
-		// 出去，无事可做
+  // 出去，无事可做
 		return INDEX_NONE;
 	}
 
 	// find children
-	// 寻找孩子
+ // 寻找孩子
 	TArray<int32> Childs;
 	if(MySkeleton->GetChildBones(BoneIndex, Childs) > 0)
 	{
 		// first look for direct children
-		// 首先寻找直系子女
+  // 首先寻找直系子女
 		for(auto ChildIndex : Childs)
 		{
 			FName ChildBoneName = RefSkeleton.GetBoneName(ChildIndex);
@@ -3082,19 +3094,19 @@ int32 FindFirstChildTrack(const USkeleton* MySkeleton, const FReferenceSkeleton&
 			if(ChildTrackIndex != INDEX_NONE)
 			{
 				// found the new track
-				// 找到了新曲目
+    // 找到了新曲目
 				return ChildTrackIndex;
 			}
 		}
 
 		int32 BestGrandChildIndex = INDEX_NONE;
 		// if you didn't find yet, now you have to go through all children
-		// 如果你还没有找到，现在你必须遍历所有的孩子
+  // 如果你还没有找到，现在你必须遍历所有的孩子
 		for(auto ChildIndex : Childs)
 		{
 			FName ChildBoneName = RefSkeleton.GetBoneName(ChildIndex);
 			// now I have to go through all childrewn and find who is earliest since I don't know which one might be the closest one
-			// 现在我必须遍历所有的孩子并找出谁是最早的，因为我不知道哪一个可能是最接近的
+   // 现在我必须遍历所有的孩子并找出谁是最早的，因为我不知道哪一个可能是最接近的
 			int32 GrandChildIndex = FindFirstChildTrack(MySkeleton, RefSkeleton, AnimationTrackNames, ChildBoneName);
 			if (GrandChildIndex != INDEX_NONE)
 			{
@@ -3105,7 +3117,7 @@ int32 FindFirstChildTrack(const USkeleton* MySkeleton, const FReferenceSkeleton&
 				else if (BestGrandChildIndex > GrandChildIndex)
 				{
 					// best should be earlier track index
-					// 最好应该是更早的轨道索引
+     // 最好应该是更早的轨道索引
 					BestGrandChildIndex = GrandChildIndex;
 				}
 			}
@@ -3116,7 +3128,7 @@ int32 FindFirstChildTrack(const USkeleton* MySkeleton, const FReferenceSkeleton&
 	else
 	{
 		// there is no child, just add at the end
-		// 没有孩子，就在最后添加
+  // 没有孩子，就在最后添加
 		return AnimationTrackNames.Num();
 	}
 }
@@ -3167,21 +3179,21 @@ int32 UAnimSequence::GetSpaceBasedAnimationData(TArray< TArray<FTransform> >& An
 	ValidateModel();
 
 	// 2d array of animated time [boneindex][time key]
-	// 动画时间的二维数组 [boneindex][time key]
+ // 动画时间的二维数组 [boneindex][time key]
 	const int32 NumKeys = DataModelInterface->GetNumberOfKeys();
 	const float Interval = DataModelInterface->GetFrameRate().AsInterval();
 
 	// allocate arrays
-	// [翻译失败: allocate arrays]
+ // 分配数组
 	for (int32 BoneIndex = 0; BoneIndex < NumBones; ++BoneIndex)
 	{
 		AnimationDataInComponentSpace[BoneIndex].AddUninitialized(NumKeys);
 	}
 	
 	// now calculating old animated space bases
-	// [翻译失败: now calculating old animated space bases]
+ // 现在计算旧的动画空间基地
 	// this one calculates animated space per bones and per key
-	// 这个计算每个骨骼和每个键的动画空间
+ // 这个计算每个骨骼和每个键的动画空间
 	TArray<FTransform> BoneTransforms;
 	for (int32 BoneIndex = 0; BoneIndex < NumBones; ++BoneIndex)
 	{
@@ -3193,7 +3205,7 @@ int32 UAnimSequence::GetSpaceBasedAnimationData(TArray< TArray<FTransform> >& An
 			BoneTransforms.Reset();
 			DataModelInterface->GetBoneTrackTransforms(BoneName, BoneTransforms);
 			// fill up keys - calculate PK1 * K1
-			// 填写密钥 - 计算 PK1 * K1
+   // 填写密钥 - 计算 PK1 * K1
 			for (int32 Key = 0; Key < NumKeys; ++Key)
 			{
 				FTransform AnimatedLocalKey = BoneTransforms[Key];
@@ -3210,7 +3222,7 @@ int32 UAnimSequence::GetSpaceBasedAnimationData(TArray< TArray<FTransform> >& An
 		else
 		{
 			// get local spaces from refpose and use that to fill it up
-			// 从 refpose 获取本地空间并用它来填充它
+   // 从 refpose 获取本地空间并用它来填充它
 			FTransform LocalTransform = MySkeleton->GetReferenceSkeleton().GetRefBonePose()[BoneIndex];
 
 			for (int32 Key = 0; Key < NumKeys; ++Key)
@@ -3233,7 +3245,7 @@ int32 UAnimSequence::GetSpaceBasedAnimationData(TArray< TArray<FTransform> >& An
 void UAnimSequence::AddKeyToSequence(float Time, const FName& BoneName, const FTransform& AdditiveTransform)
 {
 	// find if this already exists, then just add curve data only
-	// [翻译失败: find if this already exists, then just add curve data only]
+ // 查找是否已经存在，然后仅添加曲线数据
 	FName CurveName = BoneName;
 	USkeleton * CurrentSkeleton = GetSkeleton();
 	check (CurrentSkeleton);
@@ -3273,7 +3285,7 @@ bool UAnimSequence::IsCompressedDataOutOfDate() const
 bool UAnimSequence::CreateAnimation(USkeletalMesh* Mesh)
 {
 	// create animation from Mesh's ref pose
-	// [翻译失败: create animation from Mesh's ref pose]
+ // 从网格体的参考姿势创建动画
 	if (Mesh)
 	{
 		ValidateModel();
@@ -3380,7 +3392,7 @@ void UAnimSequence::RefreshCacheData()
 		else
 		{
 			// This should not happen, but if it does we must find somewhere else to add it
-			// 这不应该发生，但如果发生了，我们必须找到其他地方来添加它
+   // 这不应该发生，但如果发生了，我们必须找到其他地方来添加它
 			ensureMsgf(0, TEXT("AnimNotifyTrack: Wrong indices found"));
 			AnimNotifyTracks[0].SyncMarkers.Add(&SyncMarker);
 			SyncMarker.TrackIndex = 0;
@@ -3514,7 +3526,7 @@ void UAnimSequence::RefreshSyncMarkerDataFromAuthored()
 	check(IsInGameThread());
 
 	// Update blend spaces that may be referencing us
-	// 更新可能引用我们的混合空间
+ // 更新可能引用我们的混合空间
 	TArray<UAnimationAsset*> ReferredAssets;
 	for(TObjectIterator<UBlendSpace> It; It; ++It)
 	{
@@ -3543,63 +3555,63 @@ void UAnimSequence::AdvanceMarkerPhaseAsLeader(bool bLooping, float MoveDelta, c
 	float CurrentMoveDelta = MoveDelta;
 
 	// Hard to reproduce issue triggering this, ensure & clamp for now
-	// [翻译失败: Hard to reproduce issue triggering this, ensure & clamp for now]
+ // 很难重现触发此问题的问题，暂时确保并限制
 	ensureMsgf(CurrentTime >= 0.f && CurrentTime <= GetPlayLength(), TEXT("Current time inside of AdvanceMarkerPhaseAsLeader is out of range %.3f of 0.0 to %.3f\n    Sequence: %s"), CurrentTime, GetPlayLength(), *GetFullName());
 
 	// Ensure our time is within the boundaries of the anim sequence.
-	// [翻译失败: Ensure our time is within the boundaries of the anim sequence.]
+ // 确保我们的时间在动画序列的范围内。
 	CurrentTime = FMath::Clamp(CurrentTime, 0.f, GetPlayLength());
 
 	if (bPlayingForwards)
 	{
 		// Repeat until there is no more move delta to handle.
-		// [翻译失败: Repeat until there is no more move delta to handle.]
+  // 重复此操作，直到不再需要处理移动增量。
 		while (true)
 		{
 			// Our next marker is the end boundary. (Only possible if sequence is not looping)
-			// [翻译失败: Our next marker is the end boundary. (Only possible if sequence is not looping)]
+   // 我们的下一个标记是结束边界。 （仅当序列不循环时才可能）
 			if (NextMarker.MarkerIndex == MarkerIndexSpecialValues::AnimationBoundary)
 			{
 				const float PrevCurrentTime = CurrentTime;
 
 				// Ensure we dont overshoot when advancing our time.
-				// 确保我们在推进时间时不会过度。
+    // 确保我们在推进时间时不会过度。
 				CurrentTime = FMath::Min(CurrentTime + CurrentMoveDelta, GetPlayLength());
 
 				// Compute the distances left to reach the next and previous marker from the current time position.
-				// 计算从当前时间位置到达下一个和上一个标记的剩余距离。
+    // 计算从当前时间位置到达下一个和上一个标记的剩余距离。
 				NextMarker.TimeToMarker = GetPlayLength() - CurrentTime;
 				PrevMarker.TimeToMarker -= CurrentTime - PrevCurrentTime;
 				break;
 			}
 
 			// Good, we have a valid next marker.
-			// 很好，我们有一个有效的下一个标记。
+   // 很好，我们有一个有效的下一个标记。
 			const FAnimSyncMarker& NextSyncMarker = AuthoredSyncMarkers[NextMarker.MarkerIndex];
 			checkSlow(ValidMarkerNames.Contains(NextSyncMarker.MarkerName));
 
 			// We are going to end up past our next marker.
-			// 我们最终将超过下一个标记。
+   // 我们最终将超过下一个标记。
 			if (CurrentMoveDelta > NextMarker.TimeToMarker)
 			{
 				// Move time to match that of the next marker, and update the move delta to reflect the change.
-				// 移动时间以匹配下一个标记的时间，并更新移动增量以反映更改。
+    // 移动时间以匹配下一个标记的时间，并更新移动增量以反映更改。
 				CurrentTime = NextSyncMarker.Time;
 				CurrentMoveDelta -= NextMarker.TimeToMarker;
 
 				// Make our new previous marker be the marker we just passed.
-				// 让我们新的前一个标记成为我们刚刚经过的标记。
+    // 让我们新的前一个标记成为我们刚刚经过的标记。
 				PrevMarker.MarkerIndex = NextMarker.MarkerIndex; 
 				PrevMarker.TimeToMarker = 0.0f;
 
 				// Record that we just passed a marker.
-				// [翻译失败: Record that we just passed a marker.]
+    // 记录我们刚刚通过一个标记。
 				const int32 PassedMarker = MarkersPassed.Add(FPassedMarker());
 				MarkersPassed[PassedMarker].PassedMarkerName = NextSyncMarker.MarkerName;
 				MarkersPassed[PassedMarker].DeltaTimeWhenPassed = CurrentMoveDelta;
 				
 				// Compute our new next marker.
-				// [翻译失败: Compute our new next marker.]
+    // 计算我们新的下一个标记。
 				{
 					float MarkerTimeOffset = 0.f;
 					
@@ -3608,11 +3620,11 @@ void UAnimSequence::AdvanceMarkerPhaseAsLeader(bool bLooping, float MoveDelta, c
 						++NextMarker.MarkerIndex;
 
 						// No more markers up ahead.
-						// [翻译失败: No more markers up ahead.]
+      // 前方不再有标记。
 						if (NextMarker.MarkerIndex >= AuthoredSyncMarkers.Num())
 						{
 							// Stop at anim end boundary.
-							// 在动画结束边界处停止。
+       // 在动画结束边界处停止。
 							if (!bLooping)
 							{
 								NextMarker.MarkerIndex = MarkerIndexSpecialValues::AnimationBoundary;
@@ -3620,14 +3632,14 @@ void UAnimSequence::AdvanceMarkerPhaseAsLeader(bool bLooping, float MoveDelta, c
 							}
 
 							// Make our next marker be the first marker found in the sequence. 
-							// 使我们的下一个标记成为序列中找到的第一个标记。
+       // 使我们的下一个标记成为序列中找到的第一个标记。
 							NextMarker.MarkerIndex = 0;
 							MarkerTimeOffset = GetPlayLength();
 						}
 					} while (!ValidMarkerNames.Contains(AuthoredSyncMarkers[NextMarker.MarkerIndex].MarkerName));
 
 					// Update time left to reach the new next marker
-					// 更新到达新的下一个标记的剩余时间
+     // 更新到达新的下一个标记的剩余时间
 					if (NextMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary)
 					{
 						NextMarker.TimeToMarker = MarkerTimeOffset + AuthoredSyncMarkers[NextMarker.MarkerIndex].Time - CurrentTime;
@@ -3635,7 +3647,7 @@ void UAnimSequence::AdvanceMarkerPhaseAsLeader(bool bLooping, float MoveDelta, c
 				}
 			}
 			// We will not go past our next marker, we can advance comfortably.
-			// 我们不会越过下一个标记，我们可以轻松前进。
+   // 我们不会越过下一个标记，我们可以轻松前进。
 			else
 			{
 				CurrentTime = FMath::Fmod(CurrentTime + CurrentMoveDelta, GetPlayLength());
@@ -3653,56 +3665,56 @@ void UAnimSequence::AdvanceMarkerPhaseAsLeader(bool bLooping, float MoveDelta, c
 	else
 	{
 		// Playing backwards.
-		// 向后播放。
+  // 向后播放。
 		
 		// Repeat until there is no more move delta to handle.
-		// 重复此操作，直到不再需要处理移动增量。
+  // 重复此操作，直到不再需要处理移动增量。
 		while (true)
 		{
 			// Our previous marker is the start boundary.
-			// 我们之前的标记是开始边界。
+   // 我们之前的标记是开始边界。
 			if (PrevMarker.MarkerIndex == MarkerIndexSpecialValues::AnimationBoundary)
 			{
 				const float PrevCurrentTime = CurrentTime;
 
 				// Ensure we dont undershoot when advancing our time.
-				// 确保我们在推进时间时不会落后。
+    // 确保我们在推进时间时不会落后。
 				CurrentTime = FMath::Max(CurrentTime + CurrentMoveDelta, 0.f);
 
 				// Compute the distances left to reach the next and previous marker from the current time position.
-				// 计算从当前时间位置到达下一个和上一个标记的剩余距离。
+    // 计算从当前时间位置到达下一个和上一个标记的剩余距离。
 				PrevMarker.TimeToMarker = CurrentTime;
 				NextMarker.TimeToMarker -= CurrentTime - PrevCurrentTime;
 				break;
 			}
 
 			// Good, we have a valid previous marker.
-			// 很好，我们有一个有效的先前标记。
+   // 很好，我们有一个有效的先前标记。
 			const FAnimSyncMarker& PrevSyncMarker = AuthoredSyncMarkers[PrevMarker.MarkerIndex];
 			checkSlow(ValidMarkerNames.Contains(PrevSyncMarker.MarkerName));
 
 			// We are going to end up past our previous marker.
-			// 我们最终将超越之前的标记。
+   // 我们最终将超越之前的标记。
 			if (CurrentMoveDelta < PrevMarker.TimeToMarker)
 			{
 				// Move time to match that of the previous marker, and update the move delta to reflect the change.
-				// 移动时间以匹配前一个标记的时间，并更新移动增量以反映更改。
+    // 移动时间以匹配前一个标记的时间，并更新移动增量以反映更改。
 				CurrentTime = PrevSyncMarker.Time;
 				CurrentMoveDelta -= PrevMarker.TimeToMarker;
 
 				// Make our new next marker be the marker we just passed.
-				// 让我们新的下一个标记成为我们刚刚经过的标记。
+    // 让我们新的下一个标记成为我们刚刚经过的标记。
 				NextMarker.MarkerIndex = PrevMarker.MarkerIndex;
 				NextMarker.TimeToMarker = 0.0f;
 
 				// Record that we just passed a marker.
-				// 记录我们刚刚通过一个标记。
+    // 记录我们刚刚通过一个标记。
 				const int32 PassedMarker = MarkersPassed.Add(FPassedMarker());
 				MarkersPassed[PassedMarker].PassedMarkerName = PrevSyncMarker.MarkerName;
 				MarkersPassed[PassedMarker].DeltaTimeWhenPassed = CurrentMoveDelta;
 
 				// Compute our new previous marker.
-				// 计算我们新的前一个标记。
+    // 计算我们新的前一个标记。
 				{
 					float MarkerTimeOffset = 0.f;
 					
@@ -3711,11 +3723,11 @@ void UAnimSequence::AdvanceMarkerPhaseAsLeader(bool bLooping, float MoveDelta, c
 						--PrevMarker.MarkerIndex;
 
 						// No more markers behind.
-						// 后面不再有标记。
+      // 后面不再有标记。
 						if (PrevMarker.MarkerIndex < 0)
 						{
 							// Stop at the anim start boundary.
-							// 在动画开始边界处停止。
+       // 在动画开始边界处停止。
 							if (!bLooping)
 							{
 								PrevMarker.MarkerIndex = MarkerIndexSpecialValues::AnimationBoundary;
@@ -3723,14 +3735,14 @@ void UAnimSequence::AdvanceMarkerPhaseAsLeader(bool bLooping, float MoveDelta, c
 							}
 							
 							// Make our previous marker be the last marker found in the sequence.
-							// 使我们的前一个标记成为序列中找到的最后一个标记。
+       // 使我们的前一个标记成为序列中找到的最后一个标记。
 							PrevMarker.MarkerIndex = AuthoredSyncMarkers.Num() - 1;
 							MarkerTimeOffset -= GetPlayLength();
 						}
 					} while (!ValidMarkerNames.Contains(AuthoredSyncMarkers[PrevMarker.MarkerIndex].MarkerName));
 
 					// Update time left to reach marker.
-					// 更新到达标记的剩余时间。
+     // 更新到达标记的剩余时间。
 					if (PrevMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary)
 					{
 						PrevMarker.TimeToMarker = MarkerTimeOffset + AuthoredSyncMarkers[PrevMarker.MarkerIndex].Time - CurrentTime;
@@ -3738,7 +3750,7 @@ void UAnimSequence::AdvanceMarkerPhaseAsLeader(bool bLooping, float MoveDelta, c
 				}
 			}
 			// We will not go past our previous marker, we can advance comfortably.
-			// 我们不会超越之前的标记，我们可以轻松前进。
+   // 我们不会超越之前的标记，我们可以轻松前进。
 			else
 			{
 				CurrentTime = FMath::Fmod(CurrentTime + CurrentMoveDelta, GetPlayLength());
@@ -3775,7 +3787,7 @@ void AdvanceMarkerForwards(int32& Marker, FName MarkerToFind, bool bLooping, con
 	int32 MaxIterations = AuthoredSyncMarkers.Num();
 
 	// Get next available marker.
-	// 获取下一个可用标记。
+ // 获取下一个可用标记。
 	while ((MarkerOrMirroredName(AuthoredSyncMarkers[Marker].MarkerName, MirrorTable) != MarkerToFind) && (--MaxIterations >= 0))
 	{
 		++Marker;
@@ -3787,7 +3799,7 @@ void AdvanceMarkerForwards(int32& Marker, FName MarkerToFind, bool bLooping, con
 	}
 
 	// In any invalid case, default to -1 aka an animation boundary.
-	// [翻译失败: In any invalid case, default to -1 aka an animation boundary.]
+ // 在任何无效的情况下，默认为 -1 也称为动画边界。
 	if (!AuthoredSyncMarkers.IsValidIndex(Marker) || (MarkerOrMirroredName(AuthoredSyncMarkers[Marker].MarkerName, MirrorTable) != MarkerToFind))
 	{
 		Marker = MarkerIndexSpecialValues::AnimationBoundary;
@@ -3831,18 +3843,18 @@ void UAnimSequence::ValidateCurrentPosition(const FMarkerSyncAnimPosition& Posit
 	if (bPlayingForwards)
 	{
 		// Ensure previous marker matches the desired previous marker given a name.
-		// [翻译失败: Ensure previous marker matches the desired previous marker given a name.]
+  // 确保前一个标记与给定名称的所需前一个标记相匹配。
 		if (!MarkerMatchesPosition(this, PreviousMarker.MarkerIndex, Position.PreviousMarkerName, MirrorTable))
 		{
 			AdvanceMarkerForwards(PreviousMarker.MarkerIndex, Position.PreviousMarkerName, bLooping, AuthoredSyncMarkers, MirrorTable);
 
 			// Ensure next marker comes after the recently updated previous marker.
-			// 确保下一个标记位于最近更新的上一个标记之后。
+   // 确保下一个标记位于最近更新的上一个标记之后。
 			{
 				NextMarker.MarkerIndex = (PreviousMarker.MarkerIndex + 1);
 
 				// If needed, loop back or stop at end boundary.
-				// 如果需要，可返回或在结束边界处停止。
+    // 如果需要，可返回或在结束边界处停止。
 				if (NextMarker.MarkerIndex >= AuthoredSyncMarkers.Num())
 				{
 					NextMarker.MarkerIndex = bLooping ? NextMarker.MarkerIndex % AuthoredSyncMarkers.Num() : MarkerIndexSpecialValues::AnimationBoundary;
@@ -3851,7 +3863,7 @@ void UAnimSequence::ValidateCurrentPosition(const FMarkerSyncAnimPosition& Posit
 		}
 
 		// Ensure next marker matches the desired next marker given a name.
-		// 确保下一个标记与给定名称的所需下一个标记匹配。
+  // 确保下一个标记与给定名称的所需下一个标记匹配。
 		if (!MarkerMatchesPosition(this, NextMarker.MarkerIndex, Position.NextMarkerName, MirrorTable))
 		{
 			AdvanceMarkerForwards(NextMarker.MarkerIndex, Position.NextMarkerName, bLooping, AuthoredSyncMarkers, MirrorTable);
@@ -3860,13 +3872,13 @@ void UAnimSequence::ValidateCurrentPosition(const FMarkerSyncAnimPosition& Posit
 	else
 	{
 		// Ensure next marker matches the desired next marker given a name.
-		// 确保下一个标记与给定名称的所需下一个标记匹配。
+  // 确保下一个标记与给定名称的所需下一个标记匹配。
 		if (!MarkerMatchesPosition(this, NextMarker.MarkerIndex, Position.NextMarkerName, MirrorTable))
 		{
 			AdvanceMarkerBackwards(NextMarker.MarkerIndex, Position.NextMarkerName, bLooping, AuthoredSyncMarkers, MirrorTable);
 
 			// Ensure previous marker comes before the recently updated next marker.
-			// 确保上一个标记出现在最近更新的下一个标记之前。
+   // 确保上一个标记出现在最近更新的下一个标记之前。
 			if (NextMarker.MarkerIndex == MarkerIndexSpecialValues::AnimationBoundary || (NextMarker.MarkerIndex == 0 && bLooping))
 			{
 				PreviousMarker.MarkerIndex = AuthoredSyncMarkers.Num() - 1;
@@ -3878,7 +3890,7 @@ void UAnimSequence::ValidateCurrentPosition(const FMarkerSyncAnimPosition& Posit
 		}
 		
 		// Ensure previous marker matches the desired previous marker given a name.
-		// 确保前一个标记与给定名称的所需前一个标记相匹配。
+  // 确保前一个标记与给定名称的所需前一个标记相匹配。
 		if (!MarkerMatchesPosition(this, PreviousMarker.MarkerIndex, Position.PreviousMarkerName, MirrorTable))
 		{
 			AdvanceMarkerBackwards(PreviousMarker.MarkerIndex, Position.PreviousMarkerName, bLooping, AuthoredSyncMarkers, MirrorTable);
@@ -3889,7 +3901,7 @@ void UAnimSequence::ValidateCurrentPosition(const FMarkerSyncAnimPosition& Posit
 	checkSlow(MarkerMatchesPosition(this, NextMarker.MarkerIndex, Position.NextMarkerName, MirrorTable));
 
 	// Only reset position if we found valid markers. Otherwise stay where we are to not pop.
-	// 仅当我们找到有效标记时才重置位置。否则就待在原地，以免流行。
+ // 仅当我们找到有效标记时才重置位置。否则就待在原地，以免流行。
 	if ((PreviousMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary) && (NextMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary))
 	{
 		CurrentTime = GetCurrentTimeFromMarkers(PreviousMarker, NextMarker, Position.PositionBetweenMarkers);
@@ -3958,7 +3970,7 @@ void UAnimSequence::EvaluateAttributes(FAnimationPoseData& OutAnimationPoseData,
 			const int32 RemappedSkeletonBoneIndex = SkeletonRemapping.IsValid() ? SkeletonRemapping.GetTargetSkeletonBoneIndex(AttributeBoneIndex) : AttributeBoneIndex;
 			const FCompactPoseBoneIndex PoseBoneIndex = RequiredBones.GetCompactPoseIndexFromSkeletonIndex(RemappedSkeletonBoneIndex);
 			// Only add attribute if the, optionally remapped, bone it is targeting exists in the currently evaluated set of bones
-			// 仅当当前评估的骨骼集中存在其目标骨骼（可选地重新映射）时才添加属性
+   // 仅当当前评估的骨骼集中存在其目标骨骼（可选地重新映射）时才添加属性
 			if(PoseBoneIndex.IsValid())
 			{
 				UE::Anim::Attributes::GetAttributeValue(OutAttributes, PoseBoneIndex, Attribute, ExtractionContext.CurrentTime);
@@ -3974,7 +3986,7 @@ void UAnimSequence::EvaluateAttributes(FAnimationPoseData& OutAnimationPoseData,
 			const int32 RemappedSkeletonBoneIndex = SkeletonRemapping.IsValid() ? SkeletonRemapping.GetTargetSkeletonBoneIndex(AttributeBoneIndex) : AttributeBoneIndex;
 			const FCompactPoseBoneIndex PoseBoneIndex = RequiredBones.GetCompactPoseIndexFromSkeletonIndex(RemappedSkeletonBoneIndex);
 			// Only add attribute if , optionally remapped, bone it is targeting exists in the currently evaluated set of bones
-			// 仅当当前评估的骨骼集中存在其目标骨骼（可选重新映射）时才添加属性
+   // 仅当当前评估的骨骼集中存在其目标骨骼（可选重新映射）时才添加属性
 			if(PoseBoneIndex.IsValid())
 			{
 				UE::Anim::FAttributeId Info(BakedAttribute.Key.GetName(), PoseBoneIndex);
@@ -4007,7 +4019,7 @@ void UAnimSequence::SynchronousAnimatedBoneAttributesCompression()
 		FByFramePoseEvalContext(USkeleton* InSkeleton)
 		{
 			// Initialize RequiredBones for pose evaluation
-			// 初始化RequiredBones进行姿势评估
+   // 初始化RequiredBones进行姿势评估
 			RequiredBones.SetUseRAWData(true);
 
 			check(InSkeleton);
@@ -4027,16 +4039,16 @@ void UAnimSequence::SynchronousAnimatedBoneAttributesCompression()
 	AttributeCurves.Empty();
 
 	// If we are additive, we'll need to sample the base pose (against we're additive) and subtract the attributes from the base ones
-	// 如果我们是可加的，我们需要对基本姿势进行采样（反对我们是可加的）并从基本姿势中减去属性
+ // 如果我们是可加的，我们需要对基本姿势进行采样（反对我们是可加的）并从基本姿势中减去属性
 	const bool bShouldSampleBasePose = IsValidAdditive() && RefPoseType != ABPT_RefPose;
 	if (bShouldSampleBasePose)
 	{
 		// Select which AnimSequence to sample according to additive type
-		// 根据附加类型选择要采样的 AnimSequence
+  // 根据附加类型选择要采样的 AnimSequence
 		const UAnimSequence* BasePoseSequence = (RefPoseType == ABPT_LocalAnimFrame) ? this : RefPoseSeq.Get();
 		
 		// Behaviour for determining the time to sample the base pose attributes
-		// [翻译失败: Behaviour for determining the time to sample the base pose attributes]
+  // 用于确定采样基本姿势属性的时间的行为
 		auto GetBasePoseTimeToSample = [this, BasePoseSequence](float InTime) -> float
 		{
 			float BasePoseTime = 0.f;
@@ -4061,7 +4073,7 @@ void UAnimSequence::SynchronousAnimatedBoneAttributesCompression()
 		FMemMark Mark(FMemStack::Get());
 
 		// Helper struct to match sample timings with regular additive baking
-		// [翻译失败: Helper struct to match sample timings with regular additive baking]
+  // 帮助结构将采样时间与常规添加剂烘焙相匹配
 		FByFramePoseEvalContext EvalContext(this);
 
 		for (const FAnimatedBoneAttribute& AdditiveAttribute : DataModelInterface->GetAttributes())
@@ -4100,7 +4112,7 @@ void UAnimSequence::SynchronousAnimatedBoneAttributesCompression()
 		for (const FAnimatedBoneAttribute& Attribute : DataModelInterface->GetAttributes())
 		{
 			// Do something with the attributes
-			// [翻译失败: Do something with the attributes]
+   // 用属性做一些事情
 			ensure(!AttributeCurves.Contains(Attribute.Identifier));
 
 			FAttributeCurve& BakedCurve = AttributeCurves.Add(Attribute.Identifier);
@@ -4241,7 +4253,7 @@ void UAnimSequence::AdvanceMarkerPhaseAsFollower(const FMarkerTickContext& Conte
 	const bool bPlayingForwards = DeltaRemaining >= 0.f;
 
 	// Ensures the sequence's markers match the sync start position.
-	// 确保序列的标记与同步开始位置匹配。
+ // 确保序列的标记与同步开始位置匹配。
 	ValidateCurrentPosition(Context.GetMarkerSyncStartPosition(), bPlayingForwards, bLooping, CurrentTime, PreviousMarker, NextMarker, MirrorTable);
 
 	if (bPlayingForwards)
@@ -4249,11 +4261,11 @@ void UAnimSequence::AdvanceMarkerPhaseAsFollower(const FMarkerTickContext& Conte
 		int32 PassedMarkersIndex = 0;
 
 		// Advance all next markers to follow markers passed by leader and update previous markers accordingly.
-		// 推进所有下一个标记以跟随领导者传递的标记，并相应地更新先前的标记。
+  // 推进所有下一个标记以跟随领导者传递的标记，并相应地更新先前的标记。
 		do
 		{
 			// They are no more markers ahead.
-			// 他们不再是前方的标记。
+   // 他们不再是前方的标记。
 			if (NextMarker.MarkerIndex == MarkerIndexSpecialValues::AnimationBoundary)
 			{
 				check(!bLooping || Context.GetMarkerSyncEndPosition().NextMarkerName == NAME_None); // You shouldn't have an end of anim marker if looping
@@ -4261,7 +4273,7 @@ void UAnimSequence::AdvanceMarkerPhaseAsFollower(const FMarkerTickContext& Conte
 				break;
 			}
 			// Find markers passed by group leader.
-			// 找到组长通过的标记。
+   // 找到组长通过的标记。
 			else if (PassedMarkersIndex < Context.MarkersPassedThisTick.Num())
 			{
 				PreviousMarker.MarkerIndex = NextMarker.MarkerIndex; 
@@ -4269,14 +4281,14 @@ void UAnimSequence::AdvanceMarkerPhaseAsFollower(const FMarkerTickContext& Conte
 				checkSlow(NextMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary);
 				
 				// Advance our next marker to match marker passed by leader.
-				// 推进我们的下一个标记以匹配领导者通过的标记。
+    // 推进我们的下一个标记以匹配领导者通过的标记。
 				{
 					const FPassedMarker& MarkerPassedByLeader = Context.MarkersPassedThisTick[PassedMarkersIndex];
 					
 					AdvanceMarkerForwards(NextMarker.MarkerIndex, MarkerPassedByLeader.PassedMarkerName, bLooping, AuthoredSyncMarkers, MirrorTable);
 
 					// Ensure that any left over delta is handled in last iteration.
-					// 确保在最后一次迭代中处理任何剩余的增量。
+     // 确保在最后一次迭代中处理任何剩余的增量。
 					if (NextMarker.MarkerIndex == MarkerIndexSpecialValues::AnimationBoundary)
 					{
 						DeltaRemaining = MarkerPassedByLeader.DeltaTimeWhenPassed;
@@ -4288,18 +4300,18 @@ void UAnimSequence::AdvanceMarkerPhaseAsFollower(const FMarkerTickContext& Conte
 		} while (PassedMarkersIndex < Context.MarkersPassedThisTick.Num());
 
 		// Get sync position after group leader was ticked.
-		// 勾选组长后获取同步位置。
+  // 勾选组长后获取同步位置。
 		const FMarkerSyncAnimPosition& LeaderEndPosition = Context.GetMarkerSyncEndPosition();
 
 		// Ensure next marker is a boundary, if the group leader's next marker was one.
-		// 如果组长的下一个标记是边界，请确保下一个标记是边界。
+  // 如果组长的下一个标记是边界，请确保下一个标记是边界。
 		if (LeaderEndPosition.NextMarkerName == NAME_None)
 		{
 			NextMarker.MarkerIndex = MarkerIndexSpecialValues::AnimationBoundary;
 		}
 		
 		// Ensure next marker matches leader's next marker after tick.
-		// 确保勾选后下一个标记与领导者的下一个标记匹配。
+  // 确保勾选后下一个标记与领导者的下一个标记匹配。
 		if (NextMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary && Context.MarkersPassedThisTick.Num() > 0)
 		{
 			PreviousMarker.MarkerIndex = NextMarker.MarkerIndex;
@@ -4308,16 +4320,16 @@ void UAnimSequence::AdvanceMarkerPhaseAsFollower(const FMarkerTickContext& Conte
 		}
 
 		// Validation
-		// 验证
+  // 验证
 		if (NextMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary)
 		{
 			check(MarkerOrMirroredName(AuthoredSyncMarkers[NextMarker.MarkerIndex].MarkerName, MirrorTable) == LeaderEndPosition.NextMarkerName);
 		}
 
 		// End Validation
-		// 结束验证
+  // 结束验证
 		// Only reset position if we found valid markers. Otherwise stay where we are to not pop.
-		// 仅当我们找到有效标记时才重置位置。否则就待在原地，以免流行。
+  // 仅当我们找到有效标记时才重置位置。否则就待在原地，以免流行。
 		if ((PreviousMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary) && (NextMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary))
 		{
 			CurrentTime = GetCurrentTimeFromMarkers(PreviousMarker, NextMarker, LeaderEndPosition.PositionBetweenMarkers);
@@ -4328,11 +4340,11 @@ void UAnimSequence::AdvanceMarkerPhaseAsFollower(const FMarkerTickContext& Conte
 		int32 PassedMarkersIndex = 0;
 
 		// Advance all previous markers to follow markers passed by leader and update next markers accordingly.
-		// 推进所有先前的标记以跟随领导者传递的标记并相应地更新下一个标记。
+  // 推进所有先前的标记以跟随领导者传递的标记并相应地更新下一个标记。
 		do
 		{
 			// They are no more markers ahead.
-			// 他们不再是前方的标记。
+   // 他们不再是前方的标记。
 			if (PreviousMarker.MarkerIndex == MarkerIndexSpecialValues::AnimationBoundary)
 			{
 				check(!bLooping || Context.GetMarkerSyncEndPosition().PreviousMarkerName == NAME_None); // You shouldn't have an end of anim marker if looping.
@@ -4340,7 +4352,7 @@ void UAnimSequence::AdvanceMarkerPhaseAsFollower(const FMarkerTickContext& Conte
 				break;
 			}
 			// Find markers passed by group leader.
-			// 找到组长通过的标记。
+   // 找到组长通过的标记。
 			else if (PassedMarkersIndex < Context.MarkersPassedThisTick.Num())
 			{
 				NextMarker.MarkerIndex = PreviousMarker.MarkerIndex;
@@ -4348,14 +4360,14 @@ void UAnimSequence::AdvanceMarkerPhaseAsFollower(const FMarkerTickContext& Conte
 				checkSlow(PreviousMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary);
 
 				// Advance previous marker matches marker passed by leader
-				// 前进前一个标记匹配领导者通过的标记
+    // 前进前一个标记匹配领导者通过的标记
 				{
 					const FPassedMarker& MarkerPassedByLeader = Context.MarkersPassedThisTick[PassedMarkersIndex];
 
 					AdvanceMarkerBackwards(PreviousMarker.MarkerIndex, MarkerPassedByLeader.PassedMarkerName, bLooping, AuthoredSyncMarkers, MirrorTable);
 
 					// Ensure that any left over delta is handled in last iteration.
-					// 确保在最后一次迭代中处理任何剩余的增量。
+     // 确保在最后一次迭代中处理任何剩余的增量。
 					if (PreviousMarker.MarkerIndex == MarkerIndexSpecialValues::AnimationBoundary)
 					{
 						DeltaRemaining = MarkerPassedByLeader.DeltaTimeWhenPassed;
@@ -4367,18 +4379,18 @@ void UAnimSequence::AdvanceMarkerPhaseAsFollower(const FMarkerTickContext& Conte
 		} while (PassedMarkersIndex < Context.MarkersPassedThisTick.Num());
 
 		// Get sync position after group leader was ticked.
-		// 勾选组长后获取同步位置。
+  // 勾选组长后获取同步位置。
 		const FMarkerSyncAnimPosition& LeaderEndPosition = Context.GetMarkerSyncEndPosition();
 
 		// Ensure previous marker is a boundary, if the group leader's was one.
-		// 确保前一个标记是边界（如果组长的标记是边界）。
+  // 确保前一个标记是边界（如果组长的标记是边界）。
 		if (LeaderEndPosition.PreviousMarkerName == NAME_None)
 		{
 			PreviousMarker.MarkerIndex = MarkerIndexSpecialValues::AnimationBoundary;
 		}
 		
 		// Ensure previous marker match leader's previous marker after tick
-		// 确保前一个标记在勾选后与领导者的前一个标记匹配
+  // 确保前一个标记在勾选后与领导者的前一个标记匹配
 		if (PreviousMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary && Context.MarkersPassedThisTick.Num() > 0)
 		{
 			NextMarker.MarkerIndex = PreviousMarker.MarkerIndex;
@@ -4387,16 +4399,16 @@ void UAnimSequence::AdvanceMarkerPhaseAsFollower(const FMarkerTickContext& Conte
 		}
 
 		// Validation
-		// 验证
+  // 验证
 		if (PreviousMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary)
 		{
 			check(AuthoredSyncMarkers[PreviousMarker.MarkerIndex].MarkerName == LeaderEndPosition.PreviousMarkerName);
 		}
 
 		// End Validation
-		// 结束验证
+  // 结束验证
 		// Only reset position if we found valid markers. Otherwise stay where we are to not pop.
-		// 仅当我们找到有效标记时才重置位置。否则就待在原地，以免流行。
+  // 仅当我们找到有效标记时才重置位置。否则就待在原地，以免流行。
 		if ((PreviousMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary) && (NextMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary))
 		{
 			CurrentTime = GetCurrentTimeFromMarkers(PreviousMarker, NextMarker, LeaderEndPosition.PositionBetweenMarkers);
@@ -4449,7 +4461,7 @@ FMarkerSyncAnimPosition UAnimSequence::GetMarkerSyncPositionFromMarkerIndicies(i
 	float PrevTime, NextTime;
 
 	// Get previous marker's time and name.
-	// 获取前一个标记的时间和名称。
+ // 获取前一个标记的时间和名称。
 	if (PrevMarker != MarkerIndexSpecialValues::AnimationBoundary && ensureAlwaysMsgf(AuthoredSyncMarkers.IsValidIndex(PrevMarker),
 		TEXT("%s - MarkerCount: %d, PrevMarker : %d, NextMarker: %d, CurrentTime : %0.2f"), *GetFullName(), AuthoredSyncMarkers.Num(), PrevMarker, NextMarker, CurrentTime))
 	{
@@ -4462,7 +4474,7 @@ FMarkerSyncAnimPosition UAnimSequence::GetMarkerSyncPositionFromMarkerIndicies(i
 	}
 
 	// Get next marker's time and name.
-	// 获取下一个标记的时间和名称。
+ // 获取下一个标记的时间和名称。
 	if (NextMarker != MarkerIndexSpecialValues::AnimationBoundary && ensureAlwaysMsgf(AuthoredSyncMarkers.IsValidIndex(NextMarker),
 		TEXT("%s - MarkerCount: %d, PrevMarker : %d, NextMarker: %d, CurrentTime : %0.2f"), *GetFullName(), AuthoredSyncMarkers.Num(), PrevMarker, NextMarker, CurrentTime))
 	{
@@ -4475,7 +4487,7 @@ FMarkerSyncAnimPosition UAnimSequence::GetMarkerSyncPositionFromMarkerIndicies(i
 	}
 
 	// Account for looping
-	// 考虑循环
+ // 考虑循环
 	if(PrevTime > NextTime)
 	{
 		PrevTime = (PrevTime > CurrentTime) ? PrevTime - GetPlayLength() : PrevTime;
@@ -4494,7 +4506,7 @@ FMarkerSyncAnimPosition UAnimSequence::GetMarkerSyncPositionFromMarkerIndicies(i
 	check(NextTime > PrevTime);
 
 	// Store the encoded current time position as a ratio between markers
-	// 将编码的当前时间位置存储为标记之间的比率
+ // 将编码的当前时间位置存储为标记之间的比率
 	SyncPosition.PositionBetweenMarkers = (CurrentTime - PrevTime) / (NextTime - PrevTime);
 	return SyncPosition;
 }
@@ -4502,28 +4514,28 @@ FMarkerSyncAnimPosition UAnimSequence::GetMarkerSyncPositionFromMarkerIndicies(i
 float UAnimSequence::GetCurrentTimeFromMarkers(FMarkerPair& PrevMarker, FMarkerPair& NextMarker, float PositionBetweenMarkers) const
 {
 	// Query marker times, or start and end boundary times, respectively.
-	// 分别查询标记时间或开始和结束边界时间。
+ // 分别查询标记时间或开始和结束边界时间。
 	float PrevTime = (PrevMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary) ? AuthoredSyncMarkers[PrevMarker.MarkerIndex].Time : 0.f;
 	float NextTime = (NextMarker.MarkerIndex != MarkerIndexSpecialValues::AnimationBoundary) ? AuthoredSyncMarkers[NextMarker.MarkerIndex].Time : GetPlayLength();
 
 	// Account for looping
-	// 考虑循环
+ // 考虑循环
 	if (PrevTime >= NextTime)
 	{
 		PrevTime -= GetPlayLength(); 
 	}
 
 	// Compute current time given start and end marker times.
-	// 计算给定开始和结束标记时间的当前时间。
+ // 计算给定开始和结束标记时间的当前时间。
 	float CurrentTime = PrevTime + PositionBetweenMarkers * (NextTime - PrevTime);
 
 	// Compute time to reach each marker.
-	// 计算到达每个标记的时间。
+ // 计算到达每个标记的时间。
 	PrevMarker.TimeToMarker = PrevTime - CurrentTime;
 	NextMarker.TimeToMarker = NextTime - CurrentTime;
 
 	// Account for looping while playing backwards.
-	// 考虑向后播放时的循环。
+ // 考虑向后播放时的循环。
 	if (CurrentTime < 0.f)
 	{
 		CurrentTime += GetPlayLength();
@@ -4544,9 +4556,9 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 	};
 	
 	// If we're not looping, assume we're playing a transition and we need to stay where we are.
-	// 如果我们不循环，则假设我们正在播放过渡并且需要保持原样。
+ // 如果我们不循环，则假设我们正在播放过渡并且需要保持原样。
 	// Also do this if we have no usable SyncPosition.
-	// 如果我们没有可用的 SyncPosition，也可以这样做。
+ // 如果我们没有可用的 SyncPosition，也可以这样做。
 	if (!bLooping || (SyncPosition.PreviousMarkerName == NAME_None && SyncPosition.NextMarkerName == NAME_None))
 	{
 		OutPrevMarker.MarkerIndex = INDEX_NONE;
@@ -4558,14 +4570,14 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 			const float MarkerTime = SyncMarker.Time;
 
 			// Match the position's previous marker name, and store its index.
-			// 匹配该位置的前一个标记名称，并存储其索引。
+   // 匹配该位置的前一个标记名称，并存储其索引。
 			if (OutCurrentTime > MarkerTime && GetMarkerName(SyncMarker) == SyncPosition.PreviousMarkerName)
 			{
 				OutPrevMarker.MarkerIndex = Idx;
 				OutPrevMarker.TimeToMarker = MarkerTime - OutCurrentTime;
 			}
 			// Match the position's next marker name, and store its index. By this point we should have found the previous marker index so we can stop searching.
-			// 匹配该位置的下一个标记名称，并存储其索引。此时我们应该已经找到了前一个标记索引，这样我们就可以停止搜索了。
+   // 匹配该位置的下一个标记名称，并存储其索引。此时我们应该已经找到了前一个标记索引，这样我们就可以停止搜索了。
 			else if (OutCurrentTime < MarkerTime && GetMarkerName(SyncMarker) == SyncPosition.NextMarkerName)
 			{
 				OutNextMarker.MarkerIndex = Idx;
@@ -4579,19 +4591,19 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 	}
 
 	// Handle case where the position's previous marker is the start boundary.
-	// 处理位置的前一个标记是开始边界的情况。
+ // 处理位置的前一个标记是开始边界的情况。
 	if (SyncPosition.PreviousMarkerName == NAME_None)
 	{
 		// Make output prev marker index be the start boundary.
-		// 使输出上一个标记索引成为开始边界。
+  // 使输出上一个标记索引成为开始边界。
 		OutPrevMarker.MarkerIndex = MarkerIndexSpecialValues::AnimationBoundary;
 
 		// Our position's next marker should never be the end boundary, otherwise we dont have any sync markers at all.
-		// 我们位置的下一个标记永远不应该是结束边界，否则我们根本没有任何同步标记。
+  // 我们位置的下一个标记永远不应该是结束边界，否则我们根本没有任何同步标记。
 		check(SyncPosition.NextMarkerName != NAME_None);
 
 		// Find next marker index.
-		// 查找下一个标记索引。
+  // 查找下一个标记索引。
 		for (int32 Idx = 0; Idx < AuthoredSyncMarkers.Num(); ++Idx)
 		{
 			const FAnimSyncMarker& Marker = AuthoredSyncMarkers[Idx];
@@ -4604,24 +4616,24 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 		}
 		
 		// Should have found a marker above!
-		// 应该在上面找到一个标记！
+  // 应该在上面找到一个标记！
 		checkf(false, TEXT("Next Marker not found in GetMarkerIndicesForPosition. Anim: %s Expecting marker %s (Added to help debug Jira OR-9675)"), *GetName(), *SyncPosition.NextMarkerName.ToString());
 	}
 
 	// Handle case where the position's next marker is the end boundary.
-	// 处理位置的下一个标记是结束边界的情况。
+ // 处理位置的下一个标记是结束边界的情况。
 	if (SyncPosition.NextMarkerName == NAME_None)
 	{
 		// Make output next marker index be the end boundary.
-		// 使输出下一个标记索引成为结束边界。
+  // 使输出下一个标记索引成为结束边界。
 		OutNextMarker.MarkerIndex = MarkerIndexSpecialValues::AnimationBoundary;
 
 		// Our position's previous marker should never be the start boundary, otherwise we dont have any sync markers at all.
-		// 我们位置的前一个标记永远不应该是开始边界，否则我们根本没有任何同步标记。
+  // 我们位置的前一个标记永远不应该是开始边界，否则我们根本没有任何同步标记。
 		check(SyncPosition.PreviousMarkerName != NAME_None);
 
 		// Find previous marker index.
-		// 查找上一个标记索引。
+  // 查找上一个标记索引。
 		for (int32 Idx = AuthoredSyncMarkers.Num() - 1; Idx >= 0; --Idx)
 		{
 			const FAnimSyncMarker& Marker = AuthoredSyncMarkers[Idx];
@@ -4634,7 +4646,7 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 		}
 		
 		// Should have found a marker above!
-		// 应该在上面找到一个标记！
+  // 应该在上面找到一个标记！
 		checkf(false, TEXT("Previous Marker not found in GetMarkerIndicesForPosition. Anim: %s Expecting marker %s (Added to help debug Jira OR-9675)"), *GetName(), *SyncPosition.PreviousMarkerName.ToString());
 	}
 
@@ -4642,13 +4654,13 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 	const float CurrentInputTime  = OutCurrentTime;
 
 	// Handle case for looping and sync position not being on either boundary.
-	// [翻译失败: Handle case for looping and sync position not being on either boundary.]
+ // 处理循环和同步位置不在任一边界上的情况。
 	for (int32 PrevMarkerIdx = 0; PrevMarkerIdx < AuthoredSyncMarkers.Num(); ++PrevMarkerIdx)
 	{
 		const FAnimSyncMarker& PrevMarker = AuthoredSyncMarkers[PrevMarkerIdx];
 
 		// We have matched the position's previous marker name.
-		// [翻译失败: We have matched the position's previous marker name.]
+  // 我们已经匹配了该位置之前的标记名称。
 		if (GetMarkerName(PrevMarker) == SyncPosition.PreviousMarkerName)
 		{
 			const int32 EndMarkerSearchStart = PrevMarkerIdx + 1;
@@ -4659,13 +4671,13 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 				const int32 NextMarkerIdx = NextMarkerCount % AuthoredSyncMarkers.Num();
 
 				// We have matched the position's next marker name.
-				// 我们已经匹配了该位置的下一个标记名称。
+    // 我们已经匹配了该位置的下一个标记名称。
 				if (GetMarkerName(AuthoredSyncMarkers[NextMarkerIdx]) == SyncPosition.NextMarkerName)
 				{
 					float NextMarkerTime = AuthoredSyncMarkers[NextMarkerIdx].Time;
 
 					// Handle case where we need to loop to get to be able to get to the next marker.
-					// 处理我们需要循环才能到达下一个标记的情况。
+     // 处理我们需要循环才能到达下一个标记的情况。
 					bool bLooped = false;
 					if (NextMarkerTime < PrevMarker.Time)
 					{
@@ -4674,11 +4686,11 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 					}
 
 					// Get current time based of sync position.
-					// 根据同步位置获取当前时间。
+     // 根据同步位置获取当前时间。
 					float ThisCurrentTime = PrevMarker.Time + SyncPosition.PositionBetweenMarkers * (NextMarkerTime - PrevMarker.Time);
 
 					// Find marker indices closest to input time position.
-					// 查找最接近输入时间位置的标记索引。
+     // 查找最接近输入时间位置的标记索引。
 					float ThisDiff = FMath::Abs(ThisCurrentTime - CurrentInputTime);
 					if (ThisDiff < DiffToCurrentTime)
 					{
@@ -4690,16 +4702,16 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 					else if (bLooped)
 					{
 						// If we looped, we extended our next marker past the end of the sequence
-						// 如果我们循环，我们会将下一个标记延伸到序列末尾之后
+      // 如果我们循环，我们会将下一个标记延伸到序列末尾之后
 						// This means that there are two points we need to test:
-						// 这意味着我们需要测试两点：
+      // 这意味着我们需要测试两点：
 						//   - The one that lands near the end of the sequence (possibly overshooting/looping around)
-						//   - 落在序列末尾附近的那个（可能超出/循环）
+      // - 落在序列末尾附近的那个（可能超出/循环）
 						//   - The one that lands near the start of the sequence (possibly undershooting/looping around)
-						//   - 落在序列开头附近的那个（可能下冲/循环）
+      // - 落在序列开头附近的那个（可能下冲/循环）
 						// 
 						// We tested the first one above, now test the second
-						// 我们测试了上面的第一个，现在测试第二个
+      // 我们测试了上面的第一个，现在测试第二个
 						ThisCurrentTime -= GetPlayLength();
 
 						ThisDiff = FMath::Abs(ThisCurrentTime - CurrentInputTime);
@@ -4713,19 +4725,19 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 					}
 
 					// This marker test is done, move onto next one.
-					// 此标记测试已完成，进入下一个。
+     // 此标记测试已完成，进入下一个。
 					break;
 				}
 			}
 
 			// If we get here and we haven't found a match and we are not looping then there 
-			// 如果我们到达这里并且还没有找到匹配项并且我们没有循环，那么就在那里
+   // 如果我们到达这里并且还没有找到匹配项并且我们没有循环，那么就在那里
 			// is no point running the rest of the loop set up something as relevant as we can and carry on
-			// 运行循环的其余部分没有必要设置尽可能相关的内容并继续
+   // 运行循环的其余部分没有必要设置尽可能相关的内容并继续
 			if (OutPrevMarker.MarkerIndex == MarkerIndexSpecialValues::Uninitialized)
 			{
 				//Find nearest previous marker that is earlier than our current time
-				//查找早于当前时间的最近的先前标记
+    // 查找早于当前时间的最近的先前标记
 				DiffToCurrentTime = OutCurrentTime - PrevMarker.Time;
 				int32 PrevMarkerToUse = PrevMarkerIdx + 1;
 				while (DiffToCurrentTime > 0.f && PrevMarkerToUse < AuthoredSyncMarkers.Num())
@@ -4737,7 +4749,7 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 				
 				OutNextMarker.MarkerIndex = -1;						// This goes to minus one as the very fact we are here means
 																	// that there is no next marker to use
-																	// [翻译失败: that there is no next marker to use]
+                 // 没有下一个标记可以使用
 				OutCurrentTime = GetCurrentTimeFromMarkers(OutPrevMarker, OutNextMarker, SyncPosition.PositionBetweenMarkers);
 				break; // no need to keep searching, we are done
 			}
@@ -4745,7 +4757,7 @@ void UAnimSequence::GetMarkerIndicesForPosition(
 	}
 	
 	// Should have found a markers above!
-	// [翻译失败: Should have found a markers above!]
+ // 上面应该已经找到标记了！
 	checkf(OutPrevMarker.MarkerIndex != MarkerIndexSpecialValues::Uninitialized, TEXT("Prev Marker not found in GetMarkerIndicesForPosition. Anim: %s Expecting marker %s (Added to help debug Jira OR-9675)"), *GetName(), *SyncPosition.PreviousMarkerName.ToString());
 	checkf(OutNextMarker.MarkerIndex != MarkerIndexSpecialValues::Uninitialized, TEXT("Next Marker not found in GetMarkerIndicesForPosition. Anim: %s Expecting marker %s (Added to help debug Jira OR-9675)"), *GetName(), *SyncPosition.NextMarkerName.ToString());
 }
@@ -4884,7 +4896,7 @@ void UAnimSequence::PopulateModel()
 	const int32 NumKeys = FMath::Max(NumberOfKeys, 2);
 	const float PlayLength = SequenceLength;
 	// Reset target framerate to current sampling frame rate
-	// 将目标帧率重置为当前采样帧率
+ // 将目标帧率重置为当前采样帧率
 	TargetFrameRate = SamplingFrameRate;
 	PlatformTargetFrameRate = SamplingFrameRate;
 	const FFrameRate FrameRate = SamplingFrameRate;
@@ -4939,11 +4951,11 @@ void UAnimSequence::PopulateModel()
 			auto GenerateUniformKeys = [NumKeys](auto& Keys, auto IdentityKey)
 			{
 				// Convert track keys to be uniform
-				// 将轨道键转换为统一的
+    // 将轨道键转换为统一的
 				if (Keys.Num() == 0)
 				{
 					// set all to identity
-					// 将所有设置为身份
+     // 将所有设置为身份
 					for (int32 Index = 0; Index < NumKeys; ++Index)
 					{
 						Keys.Add(IdentityKey);
@@ -4952,7 +4964,7 @@ void UAnimSequence::PopulateModel()
 				else if (Keys.Num() == 1)
 				{
 					// set all to single key
-					// 全部设置为单键
+     // 全部设置为单键
 					const auto KeyZero = Keys[0];
 					for (int32 Index = 0; Index < (NumKeys - 1); ++Index)
 					{
@@ -5017,7 +5029,7 @@ void UAnimSequence::OnModelModified(const EAnimDataModelNotifyType& NotifyType, 
 	auto HandleNumberOfFramesChanged = [this](FFrameNumber NewNumberOfFrames, FFrameNumber OldNumberOfFrames, FFrameNumber Frame0, FFrameNumber Frame1)
 	{
 		// Do not handle changes during model population, or undo-redo (notifies are transacted so will be restored/set, so only handle in case of, initial, user interaction)
-		// 不要在模型填充或撤消重做期间处理更改（通知已处理，因此将被恢复/设置，因此仅在初始用户交互的情况下处理）
+  // 不要在模型填充或撤消重做期间处理更改（通知已处理，因此将被恢复/设置，因此仅在初始用户交互的情况下处理）
 		if (bPopulatingDataModel || GIsTransacting)
 		{
 			return;
@@ -5038,9 +5050,9 @@ void UAnimSequence::OnModelModified(const EAnimDataModelNotifyType& NotifyType, 
 				float CurrentTime = Marker.Time;
 
 				// when insert, we only care about start time
-				// 插入时，我们只关心开始时间
+    // 插入时，我们只关心开始时间
 				// if it's later than start time
-				// 如果晚于开始时间
+    // 如果晚于开始时间
 				if (CurrentTime >= InsertTime)
 				{
 					CurrentTime += Duration;
@@ -5055,7 +5067,7 @@ void UAnimSequence::OnModelModified(const EAnimDataModelNotifyType& NotifyType, 
 			const float EndRemoveTime = T1;
 
 			// Total time value for frames that were removed
-			// 已删除帧的总时间值
+   // 已删除帧的总时间值
 			const float Duration = T1 - T0;
 
 			for (FAnimSyncMarker& Marker : AuthoredSyncMarkers)
@@ -5299,7 +5311,7 @@ FIoHash UAnimSequence::CreateDerivedDataKeyHash(const ITargetPlatform* TargetPla
 	}
 
 	// New animation DDC key format; use just the hash of the complete dependencies string.
-	// 新的动画DDC密钥格式；仅使用完整依赖项字符串的哈希值。
+ // 新的动画DDC密钥格式；仅使用完整依赖项字符串的哈希值。
 	FMemoryHasherBlake3 Writer;
 	Writer << Ret;
 	const FIoHash Hash = Writer.Finalize();
@@ -5307,7 +5319,7 @@ FIoHash UAnimSequence::CreateDerivedDataKeyHash(const ITargetPlatform* TargetPla
 	{
 		FWriteScopeLock ScopeLock(HashCacheLock);
 		// Verifying key (changing)
-		// 验证密钥（更改）
+  // 验证密钥（更改）
 		if (FIoHash* StoredHash = PlatformHashToKeyHash.Find(PlatformHash))
 		{
 			if (*StoredHash != Hash)
@@ -5317,7 +5329,7 @@ FIoHash UAnimSequence::CreateDerivedDataKeyHash(const ITargetPlatform* TargetPla
 		}
 		
 		// Store platform-to-hash pair 
-		// 存储平台到哈希对
+  // 存储平台到哈希对
 		PlatformHashToKeyHash.Add(PlatformHash, Hash);
 	}
 
@@ -5376,7 +5388,7 @@ FString UAnimSequence::CreateDerivedDataKeyString(const ITargetPlatform* TargetP
 	if (bIsValidAdditive)
 	{
 		// Additive sequences are compressed in re-targeted space, as such we need to include the re-targeting transforms in our key
-		// [翻译失败: Additive sequences are compressed in re-targeted space, as such we need to include the re-targeting transforms in our key]
+  // 加法序列在重新定位空间中被压缩，因此我们需要在密钥中包含重新定位变换
 		const TArray<FTransform>& RetargetTransforms = GetRetargetTransforms();
 		for (FTransform RetargetTransform : RetargetTransforms)	// Copy the transform to allow us to use the non-const << operator below
 		{
@@ -5385,7 +5397,7 @@ FString UAnimSequence::CreateDerivedDataKeyString(const ITargetPlatform* TargetP
 	}
 
 	// Include sockets since they can impact precision requirements
-	// [翻译失败: Include sockets since they can impact precision requirements]
+ // 包括插座，因为它们会影响精度要求
 	for (const USkeletalMeshSocket* Socket : CurrentSkeleton->Sockets)
 	{
 		FName BoneName = Socket->BoneName;
@@ -5419,7 +5431,7 @@ FString UAnimSequence::CreateDerivedDataKeyString(const ITargetPlatform* TargetP
 void UAnimSequence::ValidateCompressionSettings()
 {
 	// Ensure that there are valid compression settings
-	// [翻译失败: Ensure that there are valid compression settings]
+ // 确保有有效的压缩设置
 	if (BoneCompressionSettings == nullptr || !BoneCompressionSettings->AreSettingsValid())
 	{
 		BoneCompressionSettings = FAnimationUtils::GetDefaultAnimationBoneCompressionSettings();
@@ -5457,9 +5469,9 @@ FIoHash UAnimSequence::BeginCacheDerivedData(const ITargetPlatform* TargetPlatfo
 	}
 
 	// Wait for any in-flight requests to finish
-	// 等待任何正在进行的请求完成
+ // 等待任何正在进行的请求完成
 	// Once a compression request finishes, it might modify the compression settings below and the key hash as well
-	// 压缩请求完成后，它可能会修改下面的压缩设置以及密钥哈希
+ // 压缩请求完成后，它可能会修改下面的压缩设置以及密钥哈希
 	UE::Anim::FAnimSequenceCompilingManager::Get().FinishCompilation({ this, RefPoseSeq });
 
 	if (!CanBeCompressed())
@@ -5470,7 +5482,7 @@ FIoHash UAnimSequence::BeginCacheDerivedData(const ITargetPlatform* TargetPlatfo
 	ValidateCompressionSettings();
 
 	// Make sure all our required dependencies are loaded, we need them to compute the KeyHash
-	// 确保加载了所有必需的依赖项，我们需要它们来计算 KeyHash
+ // 确保加载了所有必需的依赖项，我们需要它们来计算 KeyHash
 	FAnimationUtils::EnsureAnimSequenceLoaded(*this);
 		
 	const FIoHash KeyHash = CreateDerivedDataKeyHash(TargetPlatform);
@@ -5480,7 +5492,7 @@ FIoHash UAnimSequence::BeginCacheDerivedData(const ITargetPlatform* TargetPlatfo
 	{
 		checkf(!CacheTasksByKeyHash.Contains(KeyHash), TEXT("[%s] Hash %s still/already has task in-flight"), *GetPathName(), *LexToString(KeyHash));
 		// Early out if not valid, has already been cached, or has an inflight task running 
-		// 如果无效、已缓存或正在运行任务，则提前退出
+  // 如果无效、已缓存或正在运行任务，则提前退出
 		if (KeyHash.IsZero() || CacheTasksByKeyHash.Contains(KeyHash) || DataByPlatformKeyHash.Contains(KeyHash))
 		{
 			return KeyHash;
@@ -5502,7 +5514,7 @@ FIoHash UAnimSequence::BeginCacheDerivedData(const ITargetPlatform* TargetPlatfo
 	}
 
 	// Reset the target compressed data, to mark it invalid
-	// 重置目标压缩数据，将其标记为无效
+ // 重置目标压缩数据，将其标记为无效
 	check(TargetData);
 	TargetData->Reset();
 
@@ -5528,7 +5540,7 @@ FIoHash UAnimSequence::BeginCacheDerivedData(const ITargetPlatform* TargetPlatfo
 	}
 
 	// Always keep AnimatedBoneAttributes in lock-step when requesting compression
-	// [翻译失败: Always keep AnimatedBoneAttributes in lock-step when requesting compression]
+ // 请求压缩时始终保持 AnimatedBoneAttributes 同步
 	{
 		SynchronousAnimatedBoneAttributesCompression();
 	}
@@ -5536,7 +5548,7 @@ FIoHash UAnimSequence::BeginCacheDerivedData(const ITargetPlatform* TargetPlatfo
 	if (!CacheTasksByKeyHash.Contains(KeyHash))
 	{
 		// Data does not exist, need to build it.
-		// [翻译失败: Data does not exist, need to build it.]
+  // 数据不存在，需要构建它。
 		const FCompressibleAnimRef CompressibleData = MakeShared<FCompressibleAnimData, ESPMode::ThreadSafe>(this, bPerformFrameStripping, TargetPlatform);
 		
 		COOK_STAT(auto Timer = UE::Anim::AnimSequenceCookStats::UsageStats.TimeSyncWork());
@@ -5550,7 +5562,7 @@ FIoHash UAnimSequence::BeginCacheDerivedData(const ITargetPlatform* TargetPlatfo
     }
 
 	// The compiling manager provides throttling, notification manager, etc... for the asset being built.
-	// 编译管理器为正在构建的资产提供限制、通知管理器等。
+ // 编译管理器为正在构建的资产提供限制、通知管理器等。
 	UE::Anim::FAnimSequenceCompilingManager::Get().AddAnimSequences({this});
 	
 	return KeyHash;
@@ -5629,9 +5641,9 @@ void UAnimSequence::ClearAllCompressionData()
 {
 	{
 		// Delete any cache tasks first because the destructor will cancel the cache and build tasks,
-		// 首先删除所有缓存任务，因为析构函数将取消缓存和构建任务，
+  // 首先删除所有缓存任务，因为析构函数将取消缓存和构建任务，
 		// and drop their pointers to the data.
-		// 并放下指向数据的指针。
+  // 并放下指向数据的指针。
 
 		for (auto It = CacheTasksByKeyHash.CreateIterator(); It; ++It)
 		{
@@ -5659,7 +5671,7 @@ void UAnimSequence::ClearCompressionData(const FIoHash& InKeyHash)
 	check(!InKeyHash.IsZero());
 	
 	// Check if there are any references left, otherwise clear out
-	// 检查是否还有引用，否则清除
+ // 检查是否还有引用，否则清除
 	if(!RequiresResidency(InKeyHash))
 	{
 		UE_COMPRESSED_DATA_WRITE_SCOPE(this);
@@ -5705,7 +5717,7 @@ void UAnimSequence::RequestResidency(const ITargetPlatform* InPlatform, uint32 I
 	}
 	
 	// First request for residency
-	// 首次申请居留权
+ // 首次申请居留权
 	if (ReferencerHashes.Num() == 0)
 	{
 		UE_CLOG(false, LogAnimationCompression, Display, TEXT("RequestResidency platform data [KeyHash]: %s %s %x %s"), *InPlatform->DisplayName().ToString(), *LexToString(KeyHash), InReferencerHash, *GetPathName());
@@ -5716,7 +5728,7 @@ void UAnimSequence::RequestResidency(const ITargetPlatform* InPlatform, uint32 I
 	{
 		FWriteScopeLock ScopeLock(ResidencyLock);
 		// Store referencer hash alongside platform has at point of request (as data changes during compression can impact platform hash)
-		// 将引用哈希与平台在请求点的哈希一起存储（因为压缩期间的数据更改可能会影响平台哈希）
+  // 将引用哈希与平台在请求点的哈希一起存储（因为压缩期间的数据更改可能会影响平台哈希）
 		ResidencyReferencerHashes.Add(InReferencerHash, KeyHash);
 		PlatformHashToReferencers.Add(KeyHash, InReferencerHash);
 	}
@@ -5731,12 +5743,12 @@ void UAnimSequence::ReleaseResidency(const ITargetPlatform* InPlatform, uint32 I
 		KeyHash = ResidencyReferencerHashes.FindChecked(InReferencerHash);
 
 		// Remove entry from both maps
-		// 从两个地图中删除条目
+  // 从两个地图中删除条目
 		check(ResidencyReferencerHashes.Remove(InReferencerHash) == 1);
 		check(PlatformHashToReferencers.Remove(KeyHash, InReferencerHash) == 1);
 		
 		// Check if there are any references left
-		// 检查是否还有剩余的参考文献
+  // 检查是否还有剩余的参考文献
 		PlatformHashToReferencers.MultiFind(KeyHash, ReferencerHashes);
 
 	
@@ -5746,7 +5758,7 @@ void UAnimSequence::ReleaseResidency(const ITargetPlatform* InPlatform, uint32 I
 	if (ReferencerHashes.Num() == 0 && !KeyHash.IsZero())
 	{
 		// If previously this anim sequence was marked as never to be cooked again clear out compressed data without residency references
-		// 如果之前此动画序列被标记为永远不会再次烹饪，则清除没有驻留引用的压缩数据
+  // 如果之前此动画序列被标记为永远不会再次烹饪，则清除没有驻留引用的压缩数据
 		if(bShouldClearCompressedData)
 		{
 			ClearCompressionData(KeyHash);
@@ -5777,7 +5789,7 @@ bool UAnimSequence::WaitForAsyncTasks(float TimeLimitSeconds)
 	for (auto& Pair : CacheTasksByKeyHash)
 	{
 		// Clamp to 0 as it implies polling
-		// [翻译失败: Clamp to 0 as it implies polling]
+  // 钳制为 0，因为这意味着轮询
 		const float TimeLimit = FMath::Min(0.0f, TimeLimitSeconds - (FPlatformTime::Seconds() - StartTimeSeconds));
 		if (!Pair.Value->WaitWithTimeout(TimeLimit))
 		{
@@ -5813,7 +5825,7 @@ void UAnimSequence::FinishAsyncTasks()
 		for (auto It = CacheTasksByKeyHash.CreateIterator(); It; ++It)
 		{
 			// Wait has potential to hit FAnimationSequenceAsyncCacheTask::BuildData or FAnimationSequenceAsyncCacheTask::EndCache which requires a write-lock
-			// [翻译失败: Wait has potential to hit FAnimationSequenceAsyncCacheTask::BuildData or FAnimationSequenceAsyncCacheTask::EndCache which requires a write-lock]
+   // 等待有可能命中需要写锁的 FAnimationSequenceAsyncCacheTask::BuildData 或 FAnimationSequenceAsyncCacheTask::EndCache
 			It->Value->Wait();
 
 			UE_COMPRESSED_DATA_WRITE_SCOPE(this);
@@ -5837,7 +5849,7 @@ void UAnimSequence::FinishAsyncTasks()
 				if (TaskData && TaskData->IsValid(this, true))
 				{
 					//This is only safe during sync anim compression
-					//[翻译失败: This is only safe during sync anim compression]
+     // 这仅在同步动画压缩期间是安全的
 					if (GetSkeleton())
 					{
 						SetSkeletonVirtualBoneGuid(GetSkeleton()->GetVirtualBoneGuid());
@@ -5848,7 +5860,7 @@ void UAnimSequence::FinishAsyncTasks()
 						AssetRegistryModule.Get().AssetTagsFinalized(*this);
 
 						// Cache compressed data ptr for current platform to by-pass TMap lookup requiring data-hash retrieval/generation and locking
-						// 为当前平台缓存压缩数据 ptr，以绕过需要数据哈希检索/生成和锁定的 TMap 查找
+      // 为当前平台缓存压缩数据 ptr，以绕过需要数据哈希检索/生成和锁定的 TMap 查找
 						ensure(CurrentPlatformData == nullptr);
 						CurrentPlatformData = TaskData;
 					}
@@ -5858,7 +5870,7 @@ void UAnimSequence::FinishAsyncTasks()
 				else
 				{
 					// Failed to compress
-					// 压缩失败
+     // 压缩失败
 					UE_LOG(LogAnimationCompression, Display, TEXT("Failed to finish async Animation Compression task for %s, as the generated data is not valid."), *GetName());
 					ResetData();
 				}

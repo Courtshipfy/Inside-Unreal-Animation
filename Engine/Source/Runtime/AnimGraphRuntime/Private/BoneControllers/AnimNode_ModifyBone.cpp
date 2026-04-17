@@ -9,6 +9,16 @@
 /////////////////////////////////////////////////////
 // FAnimNode_ModifyBone
 // FAnimNode_ModifyBone
+// FAnimNode_ModifyBone
+// FAnimNode_ModifyBone
+// FAnimNode_ModifyBone
+// FAnimNode_ModifyBone
+// FAnimNode_ModifyBone
+// FAnimNode_ModifyBone
+// FAnimNode_ModifyBone
+// FAnimNode_ModifyBone
+// FAnimNode_ModifyBone
+// FAnimNode_ModifyBone
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AnimNode_ModifyBone)
 
@@ -46,11 +56,11 @@ void FAnimNode_ModifyBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 	check(OutBoneTransforms.Num() == 0);
 
 	// the way we apply transform is same as FMatrix or FTransform
-	// 我们应用变换的方式与 FMatrix 或 FTransform 相同
+ // 我们应用变换的方式与 FMatrix 或 FTransform 相同
 	// we apply scale first, and rotation, and translation
-	// 我们首先应用缩放、旋转和平移
+ // 我们首先应用缩放、旋转和平移
 	// if you'd like to translate first, you'll need two nodes that first node does translate and second nodes to rotate.
-	// 如果您想先平移，则需要两个节点，第一个节点平移，第二个节点旋转。
+ // 如果您想先平移，则需要两个节点，第一个节点平移，第二个节点旋转。
 	const FBoneContainer& BoneContainer = Output.Pose.GetPose().GetBoneContainer();
 
 	FCompactPoseBoneIndex CompactPoseBoneToModify = BoneToModify.GetCompactPoseIndex(BoneContainer);
@@ -60,7 +70,7 @@ void FAnimNode_ModifyBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 	if (ScaleMode != BMM_Ignore)
 	{
 		// Convert to Bone Space.
-		// 转换为骨骼空间。
+  // 转换为骨骼空间。
 		FAnimationRuntime::ConvertCSTransformToBoneSpace(ComponentTransform, Output.Pose, NewBoneTM, CompactPoseBoneToModify, ScaleSpace);
 
 		if (ScaleMode == BMM_Additive)
@@ -73,14 +83,14 @@ void FAnimNode_ModifyBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 		}
 
 		// Convert back to Component Space.
-		// 转换回组件空间。
+  // 转换回组件空间。
 		FAnimationRuntime::ConvertBoneSpaceTransformToCS(ComponentTransform, Output.Pose, NewBoneTM, CompactPoseBoneToModify, ScaleSpace);
 	}
 
 	if (RotationMode != BMM_Ignore)
 	{
 		// Convert to Bone Space.
-		// 转换为骨骼空间。
+  // 转换为骨骼空间。
 		FAnimationRuntime::ConvertCSTransformToBoneSpace(ComponentTransform, Output.Pose, NewBoneTM, CompactPoseBoneToModify, RotationSpace);
 
 		const FQuat BoneQuat(Rotation);
@@ -94,14 +104,14 @@ void FAnimNode_ModifyBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 		}
 
 		// Convert back to Component Space.
-		// 转换回组件空间。
+  // 转换回组件空间。
 		FAnimationRuntime::ConvertBoneSpaceTransformToCS(ComponentTransform, Output.Pose, NewBoneTM, CompactPoseBoneToModify, RotationSpace);
 	}
 	
 	if (TranslationMode != BMM_Ignore)
 	{
 		// Convert to Bone Space.
-		// 转换为骨骼空间。
+  // 转换为骨骼空间。
 		FAnimationRuntime::ConvertCSTransformToBoneSpace(ComponentTransform, Output.Pose, NewBoneTM, CompactPoseBoneToModify, TranslationSpace);
 
 		if (TranslationMode == BMM_Additive)
@@ -114,7 +124,7 @@ void FAnimNode_ModifyBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 		}
 
 		// Convert back to Component Space.
-		// 转换回组件空间。
+  // 转换回组件空间。
 		FAnimationRuntime::ConvertBoneSpaceTransformToCS(ComponentTransform, Output.Pose, NewBoneTM, CompactPoseBoneToModify, TranslationSpace);
 	}
 	
@@ -126,7 +136,7 @@ void FAnimNode_ModifyBone::EvaluateSkeletalControl_AnyThread(FComponentSpacePose
 bool FAnimNode_ModifyBone::IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) 
 {
 	// if both bones are valid
-	// 如果两个骨头都有效
+ // 如果两个骨头都有效
 	return (BoneToModify.IsValidToEvaluate(RequiredBones));
 }
 

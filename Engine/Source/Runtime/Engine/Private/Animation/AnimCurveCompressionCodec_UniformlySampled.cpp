@@ -32,11 +32,11 @@ bool UAnimCurveCompressionCodec_UniformlySampled::Compress(const FCompressibleAn
 	else
 	{
 		// If our duration isn't an exact multiple of the sample rate, we'll round
-		// 如果我们的持续时间不是采样率的精确倍数，我们将四舍五入
+  // 如果我们的持续时间不是采样率的精确倍数，我们将四舍五入
 		// and end up with a sample rate slightly corrected to make sure we spread
-		// 最终对采样率进行了稍微修正，以确保我们能够传播
+  // 最终对采样率进行了稍微修正，以确保我们能够传播
 		// the resulting error over the whole duration
-		// 整个持续时间内产生的错误
+  // 整个持续时间内产生的错误
 		NumSamples = FMath::RoundToInt(Duration * SampleRate) + 1;
 		SampleRate_ = (NumSamples - 1) / Duration;
 	}
@@ -53,7 +53,7 @@ bool UAnimCurveCompressionCodec_UniformlySampled::Compress(const FCompressibleAn
 	const int32 NumAnimatedCurves = NumCurves - NumConstantCurves;
 
 	// 1 bit per curve, round up
-	// 每条曲线 1 位，向上舍入
+ // 每条曲线 1 位，向上舍入
 	const int32 ConstantBitsetSize = sizeof(uint32) * ((NumCurves + 31) / 32);
 
 	int32 BufferSize = 0;
@@ -111,7 +111,7 @@ bool UAnimCurveCompressionCodec_UniformlySampled::Compress(const FCompressibleAn
 					}
 
 					// Bitset uses little-endian bit ordering
-					// Bitset 使用小端位排序
+     // Bitset 使用小端位排序
 					ConstantCurvesBitsetPtr[CurveIndex / 32] |= 1 << (CurveIndex % 32);
 					ConstantCurveIndex++;
 				}
@@ -121,11 +121,11 @@ bool UAnimCurveCompressionCodec_UniformlySampled::Compress(const FCompressibleAn
 		if(AnimatedSamplesPtr)
 		{
 			// Write out samples sorted by time first in order to have everything contiguous in memory
-			// [翻译失败: Write out samples sorted by time first in order to have everything contiguous in memory]
+   // 首先写出按时间排序的样本，以使所有内容在内存中连续
 			// for improved cache locality
-			// [翻译失败: for improved cache locality]
+   // 改进缓存局部性
 			// Curve 0 Key 0, Curve 0 Key 1, Curve 0 Key N, Curve 1 Key 0, Curve 1 Key 1, Curve 1 Key N, Curve M Key 0, ...
-			// [翻译失败: Curve 0 Key 0, Curve 0 Key 1, Curve 0 Key N, Curve 1 Key 0, Curve 1 Key 1, Curve 1 Key N, Curve M Key 0, ...]
+   // 曲线 0 关键点 0、曲线 0 关键点 1、曲线 0 关键点 N、曲线 1 关键点 0、曲线 1 关键点 1、曲线 1 关键点 N、曲线 M 关键点 0、...
 			const float InvSampleRate = 1.0f / SampleRate_;
 			for (int32 SampleIndex = 0; SampleIndex < NumSamples; ++SampleIndex)
 			{
@@ -138,7 +138,7 @@ bool UAnimCurveCompressionCodec_UniformlySampled::Compress(const FCompressibleAn
 					if (Curve.FloatCurve.IsConstant())
 					{
 						// Skip constant curves, their data has already been written
-						// 跳过恒定曲线，它们的数据已经被写入
+      // 跳过恒定曲线，它们的数据已经被写入
 						continue;
 					}
 
@@ -162,7 +162,7 @@ bool UAnimCurveCompressionCodec_UniformlySampled::Compress(const FCompressibleAn
 int64 UAnimCurveCompressionCodec_UniformlySampled::EstimateCompressionMemoryUsage(const UAnimSequence& AnimSequence) const
 {
 	// Same calculation as above
-	// 与上面相同的计算
+ // 与上面相同的计算
 	int64 NumSamples;
 	if (UseAnimSequenceSampleRate)
 	{
@@ -178,7 +178,7 @@ int64 UAnimCurveCompressionCodec_UniformlySampled::EstimateCompressionMemoryUsag
 	const int64 ConstantBitsetSize = sizeof(uint32) * ((NumCurves + 31) / 32);
 
 	// Assume every curve is animated since they use more memory
-	// 假设每条曲线都是动画的，因为它们使用更多内存
+ // 假设每条曲线都是动画的，因为它们使用更多内存
 	const int64 NumConstantCurves = 0;
 	const int64 NumAnimatedCurves = NumCurves;
 

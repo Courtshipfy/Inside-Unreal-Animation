@@ -109,7 +109,7 @@ void FAnimSequencerInstanceProxy::UpdateAnimationNode(const FAnimationUpdateCont
 void FAnimSequencerInstanceProxy::ConstructNodes()
 {
 	// construct node link node for full body and additive to apply additive node
-	// 为全身和附加构造节点链接节点以应用附加节点
+ // 为全身和附加构造节点链接节点以应用附加节点
 	SequencerRootNode.Base.SetLinkNode(&FullBodyBlendNode);
 	SequencerRootNode.Additive.SetLinkNode(&AdditiveBlendNode);
 
@@ -155,7 +155,7 @@ void FAnimSequencerInstanceProxy::ResetPose()
 {
 	SequencerRootNode.Base.SetLinkNode(&SnapshotNode);
 	//force evaluation?
-	//力评价？
+ // 力评价？
 }	
 void FAnimSequencerInstanceProxy::ResetNodes()
 {
@@ -179,20 +179,20 @@ void FAnimSequencerInstanceProxy::InitAnimTrack(UAnimSequenceBase* InAnimSequenc
 			FAnimNode_MultiWayBlend& BlendNode = (bIsAdditive) ? AdditiveBlendNode : FullBodyBlendNode;
 			
 			// you shouldn't allow additive animation to be added here, but if it changes type after
-			// 您不应该允许在此处添加附加动画，但如果它在之后更改了类型
+   // 您不应该允许在此处添加附加动画，但如果它在之后更改了类型
 			// you'll see this warning coming up
-			// 你会看到这个警告出现
+   // 你会看到这个警告出现
 			if (bIsAdditive && InAnimSequence->GetAdditiveAnimType() == AAT_RotationOffsetMeshSpace)
 			{
 				// this doesn't work
-				// 这不起作用
+    // 这不起作用
 				UE_LOG(LogAnimation, Warning, TEXT("ERROR: Animation [%s] in Sequencer has Mesh Space additive animation.  No support on mesh space additive animation. "), *GetNameSafe(InAnimSequence));
 			}
 
 			const int32 PoseIndex = BlendNode.AddPose() - 1;
 
 			// add the new entry to map
-			// 将新条目添加到地图
+   // 将新条目添加到地图
 			FSequencerPlayerAnimSequence* NewPlayerState = new FSequencerPlayerAnimSequence();
 			NewPlayerState->PoseIndex = PoseIndex;
 			NewPlayerState->bAdditive = bIsAdditive;
@@ -200,29 +200,29 @@ void FAnimSequencerInstanceProxy::InitAnimTrack(UAnimSequenceBase* InAnimSequenc
 			SequencerToPlayerMap.Add(SequenceId, NewPlayerState);
 
 			// link player to mirror node,
-			// 将玩家链接到镜像节点，
+   // 将玩家链接到镜像节点，
 			FAnimNode_Mirror_Standalone* NewMirrorNode = new FAnimNode_Mirror_Standalone();
 			NewMirrorNode->SetMirror(false);
 			NewMirrorNode->SetSourceLinkNode(&NewPlayerState->PlayerNode);
 			SequencerToMirrorMap.Add(SequenceId, NewMirrorNode); 
 
 			// link mirror to blendnode, this will let you trigger notifies and so on
-			// 将镜像链接到混合节点，这将让您触发通知等
+   // 将镜像链接到混合节点，这将让您触发通知等
 			NewPlayerState->PlayerNode.SetTeleportToExplicitTime(false);
 			BlendNode.Poses[PoseIndex].SetLinkNode(NewMirrorNode);
 
 			// set player state
-			// 设置玩家状态
+   // 设置玩家状态
 			PlayerState = NewPlayerState;
 		}
 
 		// now set animation data to player
-		// 现在将动画数据设置为播放器
+  // 现在将动画数据设置为播放器
 		PlayerState->PlayerNode.SetSequence(InAnimSequence);
 		PlayerState->PlayerNode.SetExplicitTime(0.f);
 
 		// initialize player
-		// 初始化播放器
+  // 初始化播放器
 		PlayerState->PlayerNode.Initialize_AnyThread(FAnimationInitializeContext(this));
 
 		FAnimNode_Mirror_Standalone* Mirror = SequencerToMirrorMap.FindRef(SequenceId);
@@ -254,12 +254,12 @@ void FAnimSequencerInstanceProxy::TermAnimTrack(int32 SequenceId)
 		FAnimNode_MultiWayBlend& BlendNode = (PlayerState->bAdditive) ? AdditiveBlendNode : FullBodyBlendNode;
 
 		// remove the pose from blend node
-		// 从混合节点中删除姿势
+  // 从混合节点中删除姿势
 		BlendNode.Poses.RemoveAt(PlayerState->PoseIndex);
 		BlendNode.DesiredAlphas.RemoveAt(PlayerState->PoseIndex);
 
 		// remove from Sequence Map
-		// 从序列图中删除
+  // 从序列图中删除
 		SequencerToPlayerMap.Remove(SequenceId);
 	}
 }*/
@@ -301,11 +301,11 @@ void FAnimSequencerInstanceProxy::UpdateAnimTrack(UAnimSequenceBase* InAnimSeque
 	if (InFromPosition.IsSet())
 	{
 		// Set the internal time accumulator at the "from" time so that the player node will correctly evaluate the
-		// 将内部时间累加器设置为“起始”时间，以便玩家节点正确评估
+  // 将内部时间累加器设置为“起始”时间，以便玩家节点正确评估
 		// desired "from/to" range. We also disable the reinitialization code so it doesn't mess up that time we
-		// 所需的“从/到”范围。我们还禁用重新初始化代码，这样我们就不会搞砸了
+  // 所需的“从/到”范围。我们还禁用重新初始化代码，这样我们就不会搞砸了
 		// just set.
-		// 刚刚设置。
+  // 刚刚设置。
 		PlayerState->PlayerNode.SetExplicitPreviousTime(InFromPosition.GetValue());
 		PlayerState->PlayerNode.SetReinitializationBehavior(ESequenceEvalReinit::NoReset);
 	}
@@ -324,17 +324,17 @@ void FAnimSequencerInstanceProxy::UpdateAnimTrack(UAnimSequenceBase* InAnimSeque
 	}
 
 	// if no fire notifies, we can teleport to explicit time
-	// 如果没有火灾通知，我们可以传送到明确的时间
+ // 如果没有火灾通知，我们可以传送到明确的时间
 	PlayerState->PlayerNode.SetTeleportToExplicitTime(!bFireNotifies);
 	// if moving to 0.f, we mark this to teleport. Otherwise, do not use explicit time
-	// 如果移动到 0.f，我们将其标记为传送。否则，不要使用明确的时间
+ // 如果移动到 0.f，我们将其标记为传送。否则，不要使用明确的时间
 	FAnimNode_MultiWayBlend& BlendNode = (PlayerState->bAdditive) ? AdditiveBlendNode : FullBodyBlendNode;
 	BlendNode.DesiredAlphas[PlayerState->PoseIndex] = Weight;
 
 	// if additive, apply alpha value correctlyeTick
-	// 如果相加，则正确应用 alpha 值eTick
+ // 如果相加，则正确应用 alpha 值eTick
 	// this will be used when apply additive is blending correct total alpha to additive
-	// 当应用添加剂将正确的总 alpha 值与添加剂混合时，将使用此选项
+ // 当应用添加剂将正确的总 alpha 值与添加剂混合时，将使用此选项
 	if (PlayerState->bAdditive)
 	{
 		SequencerRootNode.Alpha = BlendNode.GetTotalAlpha();

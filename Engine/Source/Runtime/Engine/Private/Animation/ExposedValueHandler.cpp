@@ -40,7 +40,7 @@ void FExposedValueHandler::Initialize(UClass* InClass, const FPropertyAccessLibr
 }
 
 // Don't inline this function to keep the stack usage down
-// [翻译失败: Don't inline this function to keep the stack usage down]
+// 不要内联此函数以降低堆栈使用率
 FORCENOINLINE void FExposedValueHandler::Execute(const FAnimationBaseContext& Context) const
 {
 	if (Handler)
@@ -54,11 +54,11 @@ void FAnimNodeExposedValueHandler_Base::Initialize(const UClass* InClass)
 	if (BoundFunction != NAME_None)
 	{
 		// This cached function is nullptr when the CDO is initially serialized, or (in editor) when the class has been
-		// [翻译失败: This cached function is nullptr when the CDO is initially serialized, or (in editor) when the class has been]
+  // 当 CDO 最初被序列化时，或者（在编辑器中）当类已被序列化时，此缓存函数为 nullptr
 		// recompiled and any instances have been re-instanced. When new instances are spawned, this function is
-		// [翻译失败: recompiled and any instances have been re-instanced. When new instances are spawned, this function is]
+  // 重新编译并且所有实例都已重新实例化。当产生新实例时，该函数是
 		// duplicated (it is a FProperty) onto those instances so we dont pay the cost of the FindFunction() call
-		// [翻译失败: duplicated (it is a FProperty) onto those instances so we dont pay the cost of the FindFunction() call]
+  // 复制（它是 FProperty）到这些实例上，因此我们无需支付 FindFunction() 调用的成本
 #if !WITH_EDITOR
 		if (Function == nullptr)
 #endif

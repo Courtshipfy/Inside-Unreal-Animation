@@ -33,7 +33,7 @@ bool UAnimationStateMachineLibrary::IsStateBlendingIn(const FAnimUpdateContext& 
 				IAnimClassInterface* AnimBlueprintClass = AnimationUpdateContext->GetAnimClass();
 
 				// Previous node to an FAnimNode_StateResult is always its owning FAnimNode_StateMachine
-				// FAnimNode_StateResult 的前一个节点始终是其所属的 FAnimNode_StateMachine
+    // FAnimNode_StateResult 的前一个节点始终是其所属的 FAnimNode_StateMachine
 				const int32 MachineIndex =  AnimBlueprintClass->GetAnimNodeProperties().Num() - 1 - AnimationUpdateContext->GetPreviousNodeId();
 				const int32 StateIndex = StateResultNode.GetStateIndex();
 
@@ -67,7 +67,7 @@ bool UAnimationStateMachineLibrary::IsStateBlendingOut(const FAnimUpdateContext&
 				IAnimClassInterface* AnimBlueprintClass = AnimationUpdateContext->GetAnimClass();
 
 				// Previous node to an FAnimNode_StateResult is always its owning FAnimNode_StateMachine
-				// FAnimNode_StateResult 的前一个节点始终是其所属的 FAnimNode_StateMachine
+    // FAnimNode_StateResult 的前一个节点始终是其所属的 FAnimNode_StateMachine
 				const int32 MachineIndex = AnimBlueprintClass->GetAnimNodeProperties().Num() - 1 - AnimationUpdateContext->GetPreviousNodeId();
 				const int32 StateIndex = StateResultNode.GetStateIndex();
 
@@ -147,7 +147,7 @@ float UAnimationStateMachineLibrary::GetRelevantAnimTimeRemaining(const FAnimUpd
 			IAnimClassInterface* AnimBlueprintClass = AnimationUpdateContext->GetAnimClass();
 
 			// Previous node to an FAnimNode_StateResult is always its owning FAnimNode_StateMachine
-			// FAnimNode_StateResult 的前一个节点始终是其所属的 FAnimNode_StateMachine
+   // FAnimNode_StateResult 的前一个节点始终是其所属的 FAnimNode_StateMachine
 			const int32 MachineIndex = AnimBlueprintClass->GetAnimNodeProperties().Num() - 1 - AnimationUpdateContext->GetPreviousNodeId();
 			const int32 StateIndex = StateResultNode.GetStateIndex();
 
@@ -175,7 +175,7 @@ float UAnimationStateMachineLibrary::GetRelevantAnimTimeRemainingFraction(const 
 			IAnimClassInterface* AnimBlueprintClass = AnimationUpdateContext->GetAnimClass();
 
 			// Previous node to an FAnimNode_StateResult is always its owning FAnimNode_StateMachine
-			// FAnimNode_StateResult 的前一个节点始终是其所属的 FAnimNode_StateMachine
+   // FAnimNode_StateResult 的前一个节点始终是其所属的 FAnimNode_StateMachine
 			const int32 MachineIndex = AnimBlueprintClass->GetAnimNodeProperties().Num() - 1 - AnimationUpdateContext->GetPreviousNodeId();
 			const int32 StateIndex = StateResultNode.GetStateIndex();
 

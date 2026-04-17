@@ -13,15 +13,23 @@ struct FBlendedCurve;
 
 #if WITH_EDITORONLY_DATA
 /** Holds the result from animation curve compression */
+/** 保存动画曲线压缩的结果 */
+/** 保存动画曲线压缩的结果 */
 /** [翻译失败: Holds the result from animation curve compression] */
 struct FAnimCurveCompressionResult
+	/** 动画曲线作为原始压缩字节 */
 {
+	/** 动画曲线作为原始压缩字节 */
 	/** The animation curves as raw compressed bytes */
+	/** 压缩字节使用的编解码器 */
 	/** 动画曲线作为原始压缩字节 */
 	TArray<uint8> CompressedBytes;
+	/** 压缩字节使用的编解码器 */
+	/** 默认构造函数 */
 
 	/** The codec used by the compressed bytes */
 	/** 压缩字节使用的编解码器 */
+	/** 默认构造函数 */
 	UAnimCurveCompressionCodec* Codec;
 
 	/** Default constructor */
@@ -31,10 +39,12 @@ struct FAnimCurveCompressionResult
 #endif
 
 /*
+	/** 允许我们将 DDC 序列化路径转换回编解码器对象 */
  * Base class for all curve compression codecs.
  */
 UCLASS(abstract, hidecategories = Object, EditInlineNew, MinimalAPI)
 class UAnimCurveCompressionCodec : public UObject
+	/** 允许我们将 DDC 序列化路径转换回编解码器对象 */
 {
 	GENERATED_UCLASS_BODY()
 
@@ -47,14 +57,18 @@ class UAnimCurveCompressionCodec : public UObject
 	ENGINE_API virtual void Serialize(FArchive& Ar) override;
 
 	/*
+	/** 返回我们是否可以使用此编解码器进行压缩。 */
 	 * Called on load and when cooking to validate that the compressed data is good.
 	 * Codecs should perform necessary validation and emit an error when appropriate.
 	 * e.g: UE_LOG(LogAnimationCompression, Error, TEXT("Bad data!"));
+	/** 压缩动画序列中的曲线数据。 */
 	 * 
 	 * Returns true when the data is valid, false otherwise.
+	/** 返回我们是否可以使用此编解码器进行压缩。 */
 	 */
 	virtual bool ValidateCompressedData(UObject* DataOwner, const FCompressedAnimSequence& AnimSeq) const { return true; }
 
+	/** 压缩动画序列中的曲线数据。 */
 #if WITH_EDITORONLY_DATA
 	/** Returns whether or not we can use this codec to compress. */
 	/** 返回我们是否可以使用此编解码器进行压缩。 */

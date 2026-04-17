@@ -73,7 +73,7 @@ void UAnimComposite::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData, 
 	EvaluateCurveData(CompositeCurve, ExtractionContext);
 
 	// combine both curve
-	// 合并两条曲线
+ // 合并两条曲线
 	OutCurve.Combine(CompositeCurve);
 }
 
@@ -125,7 +125,7 @@ FTransform UAnimComposite::ExtractRootTrackTransform(const FAnimExtractContext& 
 	}
 
 	// Return the last valid value in case we're requesting for a time after the anim composite end time.
-	// 返回最后一个有效值，以防我们请求动画复合结束时间之后的时间。
+ // 返回最后一个有效值，以防我们请求动画复合结束时间之后的时间。
 	if (!AnimationTrack.AnimSegments.IsEmpty())
 	{
 		const int32 LastSegmentIndex = AnimationTrack.AnimSegments.Num() - 1;
@@ -146,7 +146,7 @@ FTransform UAnimComposite::ExtractRootTrackTransform(const FAnimExtractContext& 
 class UAnimSequence* UAnimComposite::GetAdditiveBasePose() const
 {
 	// @todo : for now it just picks up the first sequence
-	// @todo：现在它只选取第一个序列
+ // @todo：现在它只选取第一个序列
 	return AnimationTrack.GetAdditiveBasePose();
 }
 #endif 
@@ -154,27 +154,27 @@ class UAnimSequence* UAnimComposite::GetAdditiveBasePose() const
 void UAnimComposite::InvalidateRecursiveAsset()
 {
 	// unfortunately we'll have to do this all the time
-	// 不幸的是我们必须一直这样做
+ // 不幸的是我们必须一直这样做
 	// we don't know whether or not the nested assets are modified or not
-	// 我们不知道嵌套资产是否被修改
+ // 我们不知道嵌套资产是否被修改
 	AnimationTrack.InvalidateRecursiveAsset(this);
 }
 
 bool UAnimComposite::ContainRecursive(TArray<UAnimCompositeBase*>& CurrentAccumulatedList)
 {
 	// am I included already?
-	// 我已经包括在内了吗？
+ // 我已经包括在内了吗？
 	if (CurrentAccumulatedList.Contains(this))
 	{
 		return true;
 	}
 
 	// otherwise, add myself to it
-	// 否则，将我自己添加到其中
+ // 否则，将我自己添加到其中
 	CurrentAccumulatedList.Add(this);
 
 	// otherwise send to animation track
-	// 否则发送到动画轨道
+ // 否则发送到动画轨道
 	if (AnimationTrack.ContainRecursive(CurrentAccumulatedList))
 	{
 		return true;

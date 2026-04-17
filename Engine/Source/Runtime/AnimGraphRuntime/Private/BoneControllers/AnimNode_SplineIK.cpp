@@ -107,7 +107,7 @@ void FAnimNode_SplineIK::EvaluateSkeletalControl_AnyThread(FComponentSpacePoseCo
 bool FAnimNode_SplineIK::IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) 
 {
 	// If any bone references are valid, evaluate.
-	// 如果任何骨骼参考有效，请进行评估。
+ // 如果任何骨骼参考有效，请进行评估。
 	if (CachedBoneReferences.Num() > 0)
 	{
 		for (FSplineIKCachedBoneData& CachedBoneData : CachedBoneReferences)
@@ -258,12 +258,12 @@ void FAnimNode_SplineIK::GatherBoneReferences(const FReferenceSkeleton& RefSkele
 	if (StartIndex != INDEX_NONE && EndIndex != INDEX_NONE)
 	{
 		// walk up hierarchy towards root from end to start
-		// 从结束到开始沿着层次结构向根走去
+  // 从结束到开始沿着层次结构向根走去
 		int32 BoneIndex = EndIndex;
 		while (BoneIndex != StartIndex)
 		{
 			// we hit the root, so clear the cached bones - we have an invalid chain
-			// 我们击中了根，所以清除缓存的骨骼 - 我们有一个无效的链
+   // 我们击中了根，所以清除缓存的骨骼 - 我们有一个无效的链
 			if (BoneIndex == INDEX_NONE)
 			{
 				CachedBoneReferences.Reset();
@@ -282,7 +282,7 @@ void FAnimNode_SplineIK::GatherBoneReferences(const FReferenceSkeleton& RefSkele
 			CachedBoneReferences.EmplaceAt(0, BoneName, StartIndex);
 
 			// reallocate transform array to match bones
-			// 重新分配变换数组以匹配骨骼
+   // 重新分配变换数组以匹配骨骼
 			if (bAutoCalculateSpline)
 			{
 				ControlPoints.SetNum(CachedBoneReferences.Num());
@@ -305,7 +305,7 @@ void FAnimNode_SplineIK::BuildBoneSpline(const FReferenceSkeleton& RefSkeleton)
 		FAnimationRuntime::FillUpComponentSpaceTransforms(RefSkeleton, RefSkeleton.GetRefBonePose(), ComponentSpaceTransforms);
 
 		// Build cached bone info
-		// 构建缓存的骨骼信息
+  // 构建缓存的骨骼信息
 		CachedBoneLengths.Reset();
 		CachedOffsetRotations.Reset();
 		for (int32 BoneIndex = 0; BoneIndex < CachedBoneReferences.Num(); BoneIndex++)
@@ -324,7 +324,7 @@ void FAnimNode_SplineIK::BuildBoneSpline(const FReferenceSkeleton& RefSkeleton)
 				BoneLength = BoneDir.Size();
 
 				// Calculate a quaternion that gets us from our current rotation to the desired one.
-				// 计算一个四元数，使我们从当前的旋转到所需的旋转。
+    // 计算一个四元数，使我们从当前的旋转到所需的旋转。
 				FVector TransformedAxis = Transform.GetRotation().RotateVector(FMatrix::Identity.GetUnitAxis((EAxis::Type)BoneAxis)).GetSafeNormal();
 				BoneOffsetRotation = FQuat::FindBetweenNormals(BoneDir.GetSafeNormal(), TransformedAxis);
 			}
@@ -334,7 +334,7 @@ void FAnimNode_SplineIK::BuildBoneSpline(const FReferenceSkeleton& RefSkeleton)
 		}
 
 		// Setup curve params in component space
-		// 在组件空间中设置曲线参数
+  // 在组件空间中设置曲线参数
 		BoneSpline.Position.Reset();
 		BoneSpline.Rotation.Reset();
 		BoneSpline.Scale.Reset();
@@ -343,7 +343,7 @@ void FAnimNode_SplineIK::BuildBoneSpline(const FReferenceSkeleton& RefSkeleton)
 		if (bAutoCalculateSpline || ClampedPointCount == CachedBoneReferences.Num())
 		{
 			// We are auto-calculating, so use each bone as a control point
-			// 我们正在自动计算，因此使用每个骨骼作为控制点
+   // 我们正在自动计算，因此使用每个骨骼作为控制点
 			for (int32 BoneIndex = 0; BoneIndex < CachedBoneReferences.Num(); BoneIndex++)
 			{
 				FSplineIKCachedBoneData& BoneData = CachedBoneReferences[BoneIndex];
@@ -358,15 +358,15 @@ void FAnimNode_SplineIK::BuildBoneSpline(const FReferenceSkeleton& RefSkeleton)
 		else
 		{
 			// We are not auto-calculating, so we need to build an approximation to the curve. First we build a curve using our transformed curve
-			// 我们不会自动计算，因此我们需要建立曲线的近似值。首先，我们使用变换后的曲线构建一条曲线
+   // 我们不会自动计算，因此我们需要建立曲线的近似值。首先，我们使用变换后的曲线构建一条曲线
 			// as a temp storage area, then we evaluate the curve at appropriate points to approximate the bone chain with a new cubic.
-			// 作为临时存储区域，然后我们在适当的点评估曲线，以用新的立方体近似骨链。
+   // 作为临时存储区域，然后我们在适当的点评估曲线，以用新的立方体近似骨链。
 			TransformedSpline.Position.Reset();
 			TransformedSpline.Rotation.Reset();
 			TransformedSpline.Scale.Reset();
 
 			// Build the linear spline
-			// 构建线性样条
+   // 构建线性样条
 			float TotalBoneCount = (float)(CachedBoneReferences.Num() - 1);
 			for (int32 BoneIndex = 0; BoneIndex < CachedBoneReferences.Num(); BoneIndex++)
 			{
@@ -382,7 +382,7 @@ void FAnimNode_SplineIK::BuildBoneSpline(const FReferenceSkeleton& RefSkeleton)
 			TransformedSpline.UpdateSpline();
 
 			// now build the approximation
-			// 现在建立近似值
+   // 现在建立近似值
 
 			float TotalPointCount = (float)(ClampedPointCount - 1);
 			for (int32 PointIndex = 0; PointIndex < ClampedPointCount; ++PointIndex)
@@ -396,7 +396,7 @@ void FAnimNode_SplineIK::BuildBoneSpline(const FReferenceSkeleton& RefSkeleton)
 			}
 
 			// clear the transformed spline so we dont end up using it
-			// 清除转换后的样条线，这样我们就不会使用它
+   // 清除转换后的样条线，这样我们就不会使用它
 			TransformedSpline.Position.Reset();
 			TransformedSpline.Rotation.Reset();
 			TransformedSpline.Scale.Reset();

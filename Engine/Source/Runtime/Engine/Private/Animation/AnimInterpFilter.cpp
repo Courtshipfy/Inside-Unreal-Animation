@@ -21,7 +21,7 @@ float FFIRFilter::GetInterpolationCoefficient (EFilterInterpolationType Interpol
 			return Step*Step*Step*CoefficientIndex;
 		default:
 			// Note that BSIT_EaseInOut is not supported
-			// 请注意，不支持 BSIT_EaseInOut
+   // 请注意，不支持 BSIT_EaseInOut
 			return 0.f;
 	}
 }
@@ -38,7 +38,7 @@ void FFIRFilter::CalculateCoefficient(EFilterInterpolationType InterpolationType
 		}
 
 		// now normalize it, if not 1
-		// 现在将其标准化，如果不是 1
+  // 现在将其标准化，如果不是 1
 		if ( fabs(Sum-1.f) > ZERO_ANIMWEIGHT_THRESH )
 		{
 			for (int32 I=0; I != Coefficients.Num(); ++I)
@@ -92,26 +92,26 @@ float FFIRFilter::CalculateFilteredOutput() const
 int32 FFIRFilterTimeBased::GetSafeCurrentStackIndex()
 {
 	// if valid range
-	// 如果有效范围
+ // 如果有效范围
 	check ( CurrentStackIndex < FilterData.Num() );
 
 	// see if it's expired yet
-	// 看看是否已经过期
+ // 看看是否已经过期
 	if ( !FilterData[CurrentStackIndex].IsValid() )
 	{
 		return CurrentStackIndex;
 	}
 
 	// else see any other index is available
-	// 否则看看是否有其他可用的索引
+ // 否则看看是否有其他可用的索引
 	// when you do this, go to forward, (oldest)
-	// 当你这样做时，前进，（最老的）
+ // 当你这样做时，前进，（最老的）
 	// this should not be the case because most of times
-	// 情况不应该是这样，因为大多数时候
+ // 情况不应该是这样，因为大多数时候
 	// current one should be the oldest one, but since 
-	// 当前的应该是最古老的，但是由于
+ // 当前的应该是最古老的，但是由于
 	// we jumps when reallocation happens, we still do this
-	// 当重新分配发生时我们会跳跃，我们仍然这样做
+ // 当重新分配发生时我们会跳跃，我们仍然这样做
 	for (int32 I=0; I != FilterData.Num(); ++I)
 	{
 		int32 NewIndex = CurrentStackIndex + I;
@@ -127,9 +127,9 @@ int32 FFIRFilterTimeBased::GetSafeCurrentStackIndex()
 	}
 
 	// if current one isn't available anymore 
-	// 如果当前的不再可用
+ // 如果当前的不再可用
 	// that means we need more stack
-	// 这意味着我们需要更多堆栈
+ // 这意味着我们需要更多堆栈
 	const int32 NewIndex = FilterData.Num();
 	FilterData.AddZeroed(5);
 	return NewIndex;
@@ -146,7 +146,7 @@ void FFIRFilterTimeBased::RefreshValidFilters()
 	else
 	{
 		// Ensure the current time is valid
-		// 确保当前时间有效
+  // 确保当前时间有效
 		for (int32 I=0; I != FilterData.Num(); ++I)
 		{
 			FilterData[I].EnsureTimeIsValid(CurrentTime, WindowDuration);
@@ -206,11 +206,11 @@ void FFIRFilterTimeBased::SetToValue(float Value)
 float FFIRFilterTimeBased::UpdateAndGetFilteredData(float Input, float DeltaTime)
 {
 	// Early return if there is no smoothing - applies to all smoothing types. Note that if
-	// 如果没有平滑则提前返回 - 适用于所有平滑类型。请注意，如果
+ // 如果没有平滑则提前返回 - 适用于所有平滑类型。请注意，如果
 	// WindowDuration changes we will have been re-initialized, so we don't need to worry about
-	// WindowDuration的改变我们都会被重新初始化，所以我们不需要担心
+ // WindowDuration的改变我们都会被重新初始化，所以我们不需要担心
 	// updating the filter in this case.
-	// 在这种情况下更新过滤器。
+ // 在这种情况下更新过滤器。
 	if (WindowDuration <= 0.0f)
 	{
 		LastOutput = Input;
@@ -236,7 +236,7 @@ float FFIRFilterTimeBased::UpdateAndGetFilteredData(float Input, float DeltaTime
 				if (MaxSpeed > 0.0f)
 				{
 					// Clamp the speed
-					// 钳位速度
+     // 钳位速度
 					FilterData[0].Input = FMath::Clamp(FilterData[0].Input, OrigValue - MaxSpeed * DeltaTime,
                                                          OrigValue + MaxSpeed * DeltaTime); 
 				}
@@ -249,7 +249,7 @@ float FFIRFilterTimeBased::UpdateAndGetFilteredData(float Input, float DeltaTime
 				{
 					FilterData.Empty(2);
 					// [0] element is the value, [1] element is the rate
-					// [0]元素为数值，[1]元素为比率
+     // [0]元素为数值，[1]元素为比率
 					FilterData.Push(FFilterData(Input, 0.0f));
 					FilterData.Push(FFilterData(0.0f, 0.0f));
 				}
@@ -259,7 +259,7 @@ float FFIRFilterTimeBased::UpdateAndGetFilteredData(float Input, float DeltaTime
 				if (MaxSpeed > 0.0f)
 				{
 					// Clamp the speed
-					// 钳位速度
+     // 钳位速度
 					FilterData[0].Input = FMath::Clamp(FilterData[0].Input, OrigValue - MaxSpeed * DeltaTime,
                                                          OrigValue + MaxSpeed * DeltaTime); 
 					FilterData[1].Input = FMath::Clamp(FilterData[1].Input, -MaxSpeed, MaxSpeed);
@@ -267,7 +267,7 @@ float FFIRFilterTimeBased::UpdateAndGetFilteredData(float Input, float DeltaTime
 				if (bClamp)
 				{
 					// Clamp the value
-					// 钳位值
+     // 钳位值
 					if (FilterData[0].Input > MaxValue)
 					{
 						FilterData[0].Input = MaxValue;
@@ -291,7 +291,7 @@ float FFIRFilterTimeBased::UpdateAndGetFilteredData(float Input, float DeltaTime
 			default:
 			{
 				// This handles the array based filters
-				// 这处理基于数组的过滤器
+    // 这处理基于数组的过滤器
 				if (IsValid())
 				{
 					RefreshValidFilters();
@@ -335,7 +335,7 @@ float FFIRFilterTimeBased::GetInterpolationCoefficient(const FFilterData& Data) 
 				return 1.f - FMath::Cube(Diff/WindowDuration);
 			case BSIT_EaseInOut:
 				// Quadratic that starts and ends at 0, and reaches 1 half way through the window
-				// [翻译失败: Quadratic that starts and ends at 0, and reaches 1 half way through the window]
+    // 开始和结束于 0 并在窗口中途达到 1 的二次曲线
 				return 1.0f - 4.0f * FMath::Square(Diff/WindowDuration - 0.5f);
 			default:
 				break;

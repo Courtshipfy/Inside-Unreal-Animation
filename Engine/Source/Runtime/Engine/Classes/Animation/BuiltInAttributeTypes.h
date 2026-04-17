@@ -13,6 +13,8 @@
 
 /** Attribute type supporting the legacy TVariant<float> atttributes */
 /** 支持旧版 TVariant<float> 属性的属性类型 */
+/** 支持旧版 TVariant<float> 属性的属性类型 */
+/** 支持旧版 TVariant<float> 属性的属性类型 */
 USTRUCT(BlueprintType)
 struct FFloatAnimationAttribute 
 {
@@ -44,7 +46,9 @@ struct FFloatAnimationAttribute
 		Value += (Attribute.Value * Alpha);
 	}
 };
+/** 支持旧版 TVariant<int32> 属性的属性类型 */
 
+/** 支持旧版 TVariant<int32> 属性的属性类型 */
 /** Attribute type supporting the legacy TVariant<int32> atttributes */
 /** 支持旧版 TVariant<int32> 属性的属性类型 */
 USTRUCT(BlueprintType)
@@ -76,8 +80,10 @@ struct FIntegerAnimationAttribute
 	{
 		Value = FMath::TruncToInt32(Value * (1.f - Alpha));
 		Value += FMath::TruncToInt32(Attribute.Value * Alpha);
+/** 支持旧版 TVariant<FString> 属性的属性类型 */
 	}
 };
+/** 支持旧版 TVariant<FString> 属性的属性类型 */
 
 /** Attribute type supporting the legacy TVariant<FString> attributes */
 /** 支持旧版 TVariant<FString> 属性的属性类型 */
@@ -90,25 +96,37 @@ struct FStringAnimationAttribute
 	FString Value;
 };
 
+/** 支持旧版 TVariant<FTransform> 属性的属性类型 */
 inline uint32 GetTypeHash(const FStringAnimationAttribute& Key)
 {
 	return GetTypeHash(Key.Value);
+/** 支持旧版 TVariant<FTransform> 属性的属性类型 */
 }
 
+ // if (FAnimWeight::IsRelevant(Weight))
+ // if (FAnimWeight::IsRelevant(Weight))
+ // if (FAnimWeight::IsRelevant(Weight))
+ // if (FAnimWeight::IsRelevant(Weight))
 /** Attribute type supporting the legacy TVariant<FTransform> attributes */
 /** 支持旧版 TVariant<FTransform> 属性的属性类型 */
 USTRUCT(BlueprintType)
 struct FTransformAnimationAttribute
 {
+		//if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=TransformAnimationAttribute)
 	FTransform Value;
+		//if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 
 	void Accumulate(const FTransformAnimationAttribute& Attribute, float Weight, EAdditiveAnimationType AdditiveType)
 	{
 		//if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 		//if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 		{
 			const ScalarRegister VBlendWeight(Weight);
 
@@ -151,24 +169,34 @@ struct FTransformAnimationAttribute
 	}
 
 	void Interpolate(const FTransformAnimationAttribute& Attribute, float Alpha)
+ // if (FAnimWeight::IsRelevant(Weight))
+ // if (FAnimWeight::IsRelevant(Weight))
 	{
+ // if (FAnimWeight::IsRelevant(Weight))
+ // if (FAnimWeight::IsRelevant(Weight))
 		Value.BlendWith(Attribute.Value, Alpha);
 	}
 };
 
 
 USTRUCT(BlueprintType)
+		// if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 struct FVectorAnimationAttribute
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=VectorAnimationAttribute)
+		// if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 	FVector Value = FVector::ZeroVector;
 
 	void Accumulate(const FVectorAnimationAttribute& Attribute, float Weight, EAdditiveAnimationType AdditiveType)
 	{
 		// if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 		// if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 		{
 			Value += Attribute.Value * Weight;
 		}
@@ -188,8 +216,12 @@ struct FVectorAnimationAttribute
 	{
 		FVectorAnimationAttribute Out;
 		Out.Value = Value * Weight;
+  // if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 
 		return Out;
+  // if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 	}
 
 	void Interpolate(const FVectorAnimationAttribute& Attribute, float Alpha)
@@ -197,34 +229,40 @@ struct FVectorAnimationAttribute
 		Value = FMath::Lerp<FVector>(Value, Attribute.Value, Alpha);
 	}
 };
+		// if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 
 USTRUCT(BlueprintType)
 struct FQuaternionAnimationAttribute
 {
 	GENERATED_BODY()
 
+		// if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=QuaternionAnimationAttribute)
 	FQuat Value = FQuat::Identity;
 
 	void Accumulate(const FQuaternionAnimationAttribute& Attribute, float Weight, EAdditiveAnimationType AdditiveType)
 	{
 		// if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 		// if (FAnimWeight::IsRelevant(Weight))
+  // if (FAnimWeight::IsRelevant(Weight))
 		{
 			if (AdditiveType == AAT_None)
 			{
 				const FQuat WeightedRotation = Attribute.Value * Weight;
 				
 				// From VectorAccumulateQuaternionShortestPath
-				// 来自 VectorAccumulateQuaternionShortestPath
+    // 来自 VectorAccumulateQuaternionShortestPath
 				// Blend rotation
-				// 混合旋转
+    // 混合旋转
 				//     To ensure the 'shortest route', we make sure the dot product between the both rotations is positive.
-				//     为了确保“最短路径”，我们确保两次旋转之间的点积为正。
+    // 为了确保“最短路径”，我们确保两次旋转之间的点积为正。
 				//     const float Bias = (|A.B| >= 0 ? 1 : -1)
-				//     const float 偏差 = (|A.B| >= 0 ? 1 : -1)
+    // const float 偏差 = (|A.B| >= 0 ? 1 : -1)
 				//     return A + B * Bias;
-				//     返回 A + B * 偏差；
+    // 返回 A + B * 偏差；
 				const FQuat::FReal DotResult = (Value | WeightedRotation);
 				const FQuat::FReal Bias = FMath::FloatSelect(DotResult, FQuat::FReal(1.0f), FQuat::FReal(-1.0f));
 				
@@ -233,7 +271,7 @@ struct FQuaternionAnimationAttribute
 			else
 			{
 				// Quaternion equivalent of FTransform::BlendFromIdentityAndAccumulate
-				// FTransform::BlendFromIdentityAndAccumulate 的四元数等效项
+    // FTransform::BlendFromIdentityAndAccumulate 的四元数等效项
 				const FQuat WeightedRotation = FQuat::FastLerp(FQuat::Identity, Attribute.Value, Weight).GetNormalized();
 				Value = WeightedRotation * Value;
 			}
@@ -287,7 +325,9 @@ struct FNonBlendableTransformAnimationAttribute : public FTransformAnimationAttr
 USTRUCT()
 struct FNonBlendableFloatAnimationAttribute : public FFloatAnimationAttribute
 {
+		/** 默认情况下，整数属性是逐步插值的 */
 	GENERATED_BODY()
+		/** 默认情况下，整数属性是逐步插值的 */
 };
 
 USTRUCT()
@@ -296,8 +336,10 @@ struct FNonBlendableIntegerAnimationAttribute : public FIntegerAnimationAttribut
 	GENERATED_BODY()
 };
 
+		/** 默认情况下，字符串属性不可混合 */
 namespace UE
 {
+		/** 默认情况下，字符串属性不可混合 */
 	namespace Anim
 	{
 		/** Integer attribute is step-interpolated by default */
@@ -305,42 +347,51 @@ namespace UE
 		template<>
 		struct TAttributeTypeTraits<FIntegerAnimationAttribute> : public TAttributeTypeTraitsBase<FIntegerAnimationAttribute>
 		{
+		/** 变换属性需要标准化 */
 			enum
 			{
 				StepInterpolate = true,
+		/** 变换属性需要标准化 */
 			};
 		};
 
 		/** String attribute is not blend-able by default */
 		/** 默认情况下，字符串属性不可混合 */
 		template<>
+		/** 四元数属性需要标准化 */
 		struct TAttributeTypeTraits<FStringAnimationAttribute> : public TAttributeTypeTraitsBase<FStringAnimationAttribute>
 		{
 			enum
 			{
+		/** 四元数属性需要标准化 */
 				IsBlendable = false,
 			};
 		};
 
 		/** Transform attribute requires normalization */
+		/** 不可混合类型*/
 		/** 变换属性需要标准化 */
 		template<>
 		struct TAttributeTypeTraits<FTransformAnimationAttribute> : public TAttributeTypeTraitsBase<FTransformAnimationAttribute>
 		{
 			enum
+		/** 不可混合类型*/
 			{
 				RequiresNormalization = true,
 			};
 		};
+		/** 不可混合类型*/
 
 		/** Quaternion attribute requires normalization */
 		/** 四元数属性需要标准化 */
 		template<>
 		struct TAttributeTypeTraits<FQuaternionAnimationAttribute> : public TAttributeTypeTraitsBase<FQuaternionAnimationAttribute>
 		{
+		/** 不可混合类型*/
 			enum
 			{
 				RequiresNormalization = true,
+		/** 不可混合类型*/
 			};
 		};
 
@@ -348,6 +399,7 @@ namespace UE
 		/** 不可混合类型*/
 		template<>
 		struct TAttributeTypeTraits<FNonBlendableQuaternionAnimationAttribute> : public TAttributeTypeTraitsBase<FNonBlendableQuaternionAnimationAttribute>
+		/** 不可混合类型*/
 		{
 			enum
 			{
@@ -369,6 +421,7 @@ namespace UE
 		/** Non blendable types*/
 		/** 不可混合类型*/
 		template<>
+		/** 帮助程序功能允许用户添加带有类型化值数组的属性 */
 		struct TAttributeTypeTraits<FNonBlendableTransformAnimationAttribute> : public TAttributeTypeTraitsBase<FNonBlendableTransformAnimationAttribute>
 		{
 			enum
@@ -377,6 +430,7 @@ namespace UE
 			};
 		};
 		
+		/** 帮助程序功能允许用户添加带有类型化值数组的属性 */
 		template<>
 		struct TAttributeTypeTraits<FNonBlendableFloatAnimationAttribute> : public TAttributeTypeTraitsBase<FNonBlendableFloatAnimationAttribute>
 		{

@@ -49,11 +49,11 @@ const void* FAnimNodeData::GetData(UE::Anim::FNodeDataId InId, const FAnimNode_B
 	if((Entry & ANIM_NODE_DATA_INSTANCE_DATA_FLAG) != 0)
 	{
 		// Use the supplied object or find the object ptr by walking the property chain from this node
-		// [翻译失败: Use the supplied object or find the object ptr by walking the property chain from this node]
+  // 使用提供的对象或通过从此节点遍历属性链来查找对象 ptr
 		const UObject* CurrentObject = InCurrentObject ? InCurrentObject : IAnimClassInterface::GetObjectPtrFromAnimNode(&(*AnimClassInterface), InNode);
 
 		// Check the current context is expected
-		// 检查当前上下文是否符合预期
+  // 检查当前上下文是否符合预期
 		check(CurrentObject && CurrentObject->GetClass()->IsChildOf(IAnimClassInterface::GetActualAnimClass(&(*AnimClassInterface))));
 
 		return AnimClassInterface->GetMutableNodeValueRaw(EntryIndex, CurrentObject);
@@ -82,11 +82,11 @@ void* FAnimNodeData::GetInstanceData(UE::Anim::FNodeDataId InId, FAnimNode_Base*
 	if((Entry & ANIM_NODE_DATA_INSTANCE_DATA_FLAG) != 0)
 	{
 		// Use the supplied object or find the object ptr by walking the property chain from this node
-		// 使用提供的对象或通过从此节点遍历属性链来查找对象 ptr
+  // 使用提供的对象或通过从此节点遍历属性链来查找对象 ptr
 		const UObject* CurrentObject = InCurrentObject ? InCurrentObject : IAnimClassInterface::GetObjectPtrFromAnimNode(&(*AnimClassInterface), InNode);
 
 		// Check the current context is expected
-		// 检查当前上下文是否符合预期
+  // 检查当前上下文是否符合预期
 		check(CurrentObject && CurrentObject->GetClass()->IsChildOf(IAnimClassInterface::GetActualAnimClass(&(*AnimClassInterface))));
 
 		return const_cast<void*>(AnimClassInterface->GetMutableNodeValueRaw(EntryIndex, CurrentObject));
@@ -98,7 +98,7 @@ void* FAnimNodeData::GetInstanceData(UE::Anim::FNodeDataId InId, FAnimNode_Base*
 FAnimNodeStructData::FAnimNodeStructData(const UScriptStruct* InNodeType)
 {
 	// Iterated properties are not in the same order they are laid out in memory, so we extract and sort them here.
-	// [翻译失败: Iterated properties are not in the same order they are laid out in memory, so we extract and sort them here.]
+ // 迭代属性的顺序与它们在内存中的排列顺序不同，因此我们在这里提取它们并对其进行排序。
 	TArray<FProperty*> Properties;
 	for(TFieldIterator<FProperty> It(InNodeType); It; ++It)
 	{

@@ -25,14 +25,20 @@ class UAnimNodeRigidBodyLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	/** 从动画节点上下文获取刚体动画节点上下文 */
+	/** 从动画节点上下文获取刚体动画节点上下文 */
 	/** Get a rigid body anim node context from an anim node context */
 	/** 从动画节点上下文获取刚体动画节点上下文 */
 	UFUNCTION(BlueprintCallable, Category = "Animation|Dynamics", meta = (BlueprintThreadSafe, ExpandEnumAsExecs = "Result"))
 	static ANIMGRAPHRUNTIME_API FRigidBodyAnimNodeReference ConvertToRigidBodyAnimNode(const FAnimNodeReference& Node, EAnimNodeReferenceConversionResult& Result);
+	/** 从动画节点上下文获取刚体动画节点上下文（纯） */
+	/** 从动画节点上下文获取刚体动画节点上下文（纯） */
 
 	/** Get a rigid body anim node context from an anim node context (pure) */
 	/** 从动画节点上下文获取刚体动画节点上下文（纯） */
+	/** 在刚体动画图形节点 (RBAN) 上设置物理资源。 */
 	UFUNCTION(BlueprintPure, Category = "Animation|Dynamics", meta = (BlueprintThreadSafe, DisplayName = "Convert to rigid body"))
+	/** 在刚体动画图形节点 (RBAN) 上设置物理资源。 */
 	static void ConvertToRigidBodyAnimNodePure(const FAnimNodeReference& Node, FRigidBodyAnimNodeReference& RigidBodyAnimNode, bool& Result);
 
 	/** Set the physics asset on the rigid body anim graph node (RBAN). */

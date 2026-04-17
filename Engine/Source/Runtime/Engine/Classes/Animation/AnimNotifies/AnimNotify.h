@@ -64,9 +64,13 @@ class UAnimNotify : public UObject
 #if WITH_EDITORONLY_DATA
 	/** Color of Notify in editor */
 	/** 编辑器中通知的颜色 */
+	/** 编辑器中通知的颜色 */
+	/** 编辑器中通知的颜色 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AnimNotify)
 	FColor NotifyColor;
+	/** 此通知实例是否应在动画编辑器中触发 */
 
+	/** 此通知实例是否应在动画编辑器中触发 */
 	/** Whether this notify instance should fire in animation editors */
 	/** 此通知实例是否应在动画编辑器中触发 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category=AnimNotify)
@@ -77,8 +81,10 @@ class UAnimNotify : public UObject
 	virtual void OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent) {};
 	virtual bool CanBePlaced(UAnimSequenceBase* Animation) const { return true; }
 	virtual void ValidateAssociatedAssets() {}
+	/** 覆盖此设置以防止在动画编辑器中触发此通知类型 */
 	virtual void DrawInEditor(FPrimitiveDrawInterface* PDI, USkeletalMeshComponent* MeshComp, const UAnimSequenceBase* Animation, const FAnimNotifyEvent& NotifyEvent) const {}
 	virtual void DrawCanvasInEditor(FCanvas& Canvas, FSceneView& View, USkeletalMeshComponent* MeshComp, const UAnimSequenceBase* Animation, const FAnimNotifyEvent& NotifyEvent) const {}
+	/** 覆盖此设置以防止在动画编辑器中触发此通知类型 */
 
 	/** Override this to prevent firing this notify type in animation editors */
 	/** 覆盖此设置以防止在动画编辑器中触发此通知类型 */
@@ -91,9 +97,11 @@ class UAnimNotify : public UObject
 	ENGINE_API virtual void BranchingPointNotify(FBranchingPointNotifyPayload& BranchingPointPayload);
 
 	// @todo document 
-	// @todo文档
+ // @todo文档
+	/** 创建此类通知时使用的 TriggerWeightThreshold */
 	virtual FString GetEditorComment() 
 	{ 
+	/** 创建此类通知时使用的 TriggerWeightThreshold */
 		return TEXT(""); 
 	}
 
@@ -103,7 +111,7 @@ class UAnimNotify : public UObject
 	ENGINE_API float GetDefaultTriggerWeightThreshold() const;
 
 	// @todo document 
-	// @todo文档
+ // @todo文档
 	virtual FLinearColor GetEditorColor() 
 	{ 
 #if WITH_EDITORONLY_DATA
@@ -115,20 +123,28 @@ class UAnimNotify : public UObject
 
 	/**
 	 * We don't instance UAnimNotify objects along with the animations they belong to, but
+	/** U对象接口 */
 	 * we still need a way to see which world this UAnimNotify is currently operating on.
 	 * So this retrieves a contextual world pointer, from the triggering animation/mesh.  
+	/** U对象接口 */
+	/** 结束UObject接口 */
 	 * 
 	 * @return NULL if this isn't in the middle of a Received_Notify(), otherwise it's the world belonging to the Mesh passed to Received_Notify()
+	/** 当在 Montage 上使用时，此通知始终是一个分支点。 */
 	 */
+	/** 结束UObject接口 */
 	ENGINE_API virtual class UWorld* GetWorld() const override;
 
+	/** 当在 Montage 上使用时，此通知始终是一个分支点。 */
 	/** UObject Interface */
 	/** U对象接口 */
+	/* 我们当前正在触发 UAnimNotify 的网格物体（因此我们可以检索每个实例的信息） */
 	ENGINE_API virtual void PostLoad() override;
 	ENGINE_API virtual void PreSave(FObjectPreSaveContext ObjectSaveContext) override;
 	/** End UObject Interface */
 	/** 结束UObject接口 */
 
+	/* 我们当前正在触发 UAnimNotify 的网格物体（因此我们可以检索每个实例的信息） */
 	/** This notify is always a branching point when used on Montages. */
 	/** 当在 Montage 上使用时，此通知始终是一个分支点。 */
 	bool bIsNativeBranchingPoint;

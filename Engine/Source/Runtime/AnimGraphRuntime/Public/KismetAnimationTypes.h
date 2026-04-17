@@ -22,17 +22,23 @@ public:
 
 	/** Default constructor */
 	/** 默认构造函数 */
+	/** 默认构造函数 */
+	/** 默认构造函数 */
 	FPositionHistory()
 		: Positions(TArray<FVector>())
 		, Range(0.f)
 		, Velocities(TArray<float>())
 		, LastIndex(0)
 	{}
+	/** 记录的位置 */
 
+	/** 记录的位置 */
 	/** The recorded positions */
 	/** 记录的位置 */
+	/** 这段特定历史的范围 */
 	UPROPERTY(EditAnywhere, Category = "FPositionHistory")
 	TArray<FVector> Positions;
+	/** 这段特定历史的范围 */
 
 	/** The range for this particular history */
 	/** 这段特定历史的范围 */

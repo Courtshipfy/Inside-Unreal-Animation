@@ -232,9 +232,13 @@ private:
 
 	/** Optimized list of markers. */
 	/** 优化的标记列表。 */
+	/** 优化的标记列表。 */
+	/** 优化的标记列表。 */
 	UPROPERTY(VisibleAnywhere, Category = TimeStretchCurve)
 	TArray<FTimeStretchCurveMarker> Markers;
+	/** 缓存总和(dT_i * C_i) */
 
+	/** 缓存总和(dT_i * C_i) */
 	/** Cached Sum(dT_i * C_i) */
 	/** 缓存总和(dT_i * C_i) */
 	UPROPERTY(VisibleAnywhere, Category = TimeStretchCurve)
@@ -257,11 +261,15 @@ public:
 	/**
 		Updates InOutMarkerIndex as needed based on 'InPosition' in 'InMarkerPositions'
 		So that InOutMarkerIndex satisfies 'IsValidMarkerForPosition'
+	/** 验证提供的标记索引是否正确书挡提供的位置。 */
 	*/
 	ENGINE_API void UpdateMarkerIndexForPosition(int32& InOutMarkerIndex, float InPosition, const TArray<float>& InMarkerPositions) const;
+	/** 验证提供的标记索引是否正确书挡提供的位置。 */
+	/** 验证提供的标记是否位于书挡提供的位置。 */
 
 	/** Validates that the supplied marker index correctly bookends supplied position. */
 	/** 验证提供的标记索引是否正确书挡提供的位置。 */
+	/** 验证提供的标记是否位于书挡提供的位置。 */
 	ENGINE_API bool IsValidMarkerForPosition(int32 InMarkerIndex, float InPosition, const TArray<float>& InMarkerPositions) const;
 
 	/** Validates that the supplied marker positions bookend supplied position. */
@@ -281,22 +289,32 @@ public:
 	*/
 	ENGINE_API float Convert_P_Original_To_Target(int32 InMarkerIndex, float In_P_Original) const;
 
+	/** 确保 In_P_Target 保持在有效标记范围内。 */
 	/**
 		Converts a Position from Target Space to Original Space.
 		This requires a Marker Index that satisfies 'IsValidMarkerForPosition'
+	/** 读取对原始空间中标记的访问权限。 */
 		for the supplied position.
+	/** 确保 In_P_Target 保持在有效标记范围内。 */
 	*/
+	/** 对目标空间中标记的读取访问权限。 */
 	ENGINE_API float Convert_P_Target_To_Original(int32 InMarkerIndex, float In_P_Target) const;
 
+	/** 读取对原始空间中标记的访问权限。 */
+	/** 获取原始播放时长 */
 	/** Make sure In_P_Target stays in valid marker range. */
 	/** 确保 In_P_Target 保持在有效标记范围内。 */
 	ENGINE_API float Clamp_P_Target(float In_P_Target) const;
+	/** 获取目标播放时长 */
+	/** 对目标空间中标记的读取访问权限。 */
 
 	/** Read access to markers in original space. */
 	/** 读取对原始空间中标记的访问权限。 */
+	/** 获取原始播放时长 */
 	const TArray<float>& GetMarkers_Original() const { return P_Marker_Original; }
 	
 	/** Read access to markers in target space. */
+	/** 获取目标播放时长 */
 	/** 对目标空间中标记的读取访问权限。 */
 	const TArray<float>& GetMarkers_Target() const { return P_Marker_Target; }
 

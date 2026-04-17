@@ -291,7 +291,7 @@ namespace UE::Anim
 			for (UAnimSequence* AnimSequence : InAnimSequences)
 			{
 				// Do not broadcast an event for unreachable objects
-				// 不要广播无法访问的对象的事件
+    // 不要广播无法访问的对象的事件
 				if (!AnimSequence->IsUnreachable())
 				{
 					AssetsData.Emplace(AnimSequence);
@@ -308,7 +308,7 @@ namespace UE::Anim
 	void FAnimSequenceCompilingManager::ApplyCompilation(UAnimSequence* InAnimSequence)
 	{
 		// If AsyncTask is null here, the task got canceled so we don't need to do anything
-		// [翻译失败: If AsyncTask is null here, the task got canceled so we don't need to do anything]
+  // 如果此处 AsyncTask 为 null，则任务已取消，因此我们不需要执行任何操作
 		if (!IsEngineExitRequested())
 		{
 			check(IsInGameThread());

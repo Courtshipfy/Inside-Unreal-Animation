@@ -21,14 +21,20 @@ class UAnimCompress_RemoveLinearKeys : public UAnimCompress
 	GENERATED_UCLASS_BODY()
 
 	/** Maximum position difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression. */
+	/** 测试是否可以删除动画关键点时要使用的最大位置差异。较低的值保留更多的键，但产生的压缩较少。 */
+	/** 测试是否可以删除动画关键点时要使用的最大位置差异。较低的值保留更多的键，但产生的压缩较少。 */
 	/** [翻译失败: Maximum position difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression.] */
 	UPROPERTY(EditAnywhere, Category=LinearKeyRemoval)
 	float MaxPosDiff;
+	/** 测试是否可以删除动画关键点时要使用的最大角度差。较低的值保留更多的键，但产生的压缩较少。 */
 
+	/** 测试是否可以删除动画关键点时要使用的最大角度差。较低的值保留更多的键，但产生的压缩较少。 */
 	/** Maximum angle difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression. */
 	/** [翻译失败: Maximum angle difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression.] */
+	/** 测试是否可以删除动画关键点时使用的最大比例差异。较低的值保留更多的键，但产生的压缩较少。 */
 	UPROPERTY(EditAnywhere, Category=LinearKeyRemoval)
 	float MaxAngleDiff;
+	/** 测试是否可以删除动画关键点时使用的最大比例差异。较低的值保留更多的键，但产生的压缩较少。 */
 
 	/** Maximum Scale difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression. */
 	/** [翻译失败: Maximum Scale difference to use when testing if an animation key may be removed. Lower values retain more keys, but yield less compression.] */
@@ -80,22 +86,22 @@ class UAnimCompress_RemoveLinearKeys : public UAnimCompress
 	uint32 bActuallyFilterLinearKeys:1;
 
 	//~ Begin UAnimBoneCompressionCodec Interface
-	//~ 开始 UAnimBoneCompressionCodec 接口
+ // ~ 开始 UAnimBoneCompressionCodec 接口
 #if WITH_EDITORONLY_DATA
 	virtual int64 EstimateCompressionMemoryUsage(const UAnimSequence& AnimSequence) const override;
 #endif // WITH_EDITORONLY_DATA
 	//~ End UAnimBoneCompressionCodec Interface
-	//~ 结束 UAnimBoneCompressionCodec 接口
+ // ~ 结束 UAnimBoneCompressionCodec 接口
 
 protected:
 	//~ Begin UAnimCompress Interface
-	//[翻译失败: ~ Begin UAnimCompress Interface]
+ // ~ 开始 UAnimCompress 界面
 #if WITH_EDITOR
 	virtual bool DoReduction(const FCompressibleAnimData& CompressibleAnimData, FCompressibleAnimDataResult& OutResult) override;
 	virtual void PopulateDDCKey(const UE::Anim::Compression::FAnimDDCKeyArgs& KeyArgs, FArchive& Ar) override;
 #endif // WITH_EDITOR
 	//~ Begin UAnimCompress Interface
-	//[翻译失败: ~ Begin UAnimCompress Interface]
+ // ~ 开始 UAnimCompress 界面
 
 #if WITH_EDITOR
 	/**

@@ -99,18 +99,28 @@ struct FSmartNameMapping
 	ENGINE_API void Iterate(TFunction<void(const struct FSmartNameMappingIterator& Iterator)> Callback) const;
 
 private:
+	/*内部无锁功能可防止重入锁定，请参阅 API 函数 GetName 文档。*/
+	/*内部无锁功能可防止重入锁定，请参阅 API 函数 GetName 文档。*/
 	/*Internal no lock function to prevent re-entrant locking, see API function GetName for documentation.*/
 	/*内部无锁功能可防止重入锁定，请参阅 API 函数 GetName 文档。*/
 	ENGINE_API bool GetName_NoLock(const SmartName::UID_Type& Uid, FName& OutName) const;
+	/*内部无锁功能可防止重入锁定，请参阅 API 函数 Exists 文档。*/
+	/*内部无锁功能可防止重入锁定，请参阅 API 函数 Exists 文档。*/
 
 	/*Internal no lock function to prevent re-entrant locking, see API function Exists for documentation.*/
 	/*内部无锁功能可防止重入锁定，请参阅 API 函数 Exists 文档。*/
+	/*内部无锁功能可防止重入锁定，请参阅 API 函数 Exists 文档。*/
+	/*内部无锁功能可防止重入锁定，请参阅 API 函数 Exists 文档。*/
 	ENGINE_API bool Exists_NoLock(const SmartName::UID_Type& Uid) const;
+	/*内部无锁功能可防止重入锁定，请参阅 API 函数 FindUID 文档。*/
 	
 	/*Internal no lock function to prevent re-entrant locking, see API function Exists for documentation.*/
+	/*内部无锁功能可防止重入锁定，请参阅 API 函数 FindUID 文档。*/
+	/*内部无锁功能可防止重入锁定，请参阅 API 函数 GetCurveMetaData 文档。*/
 	/*内部无锁功能可防止重入锁定，请参阅 API 函数 Exists 文档。*/
 	ENGINE_API bool Exists_NoLock(const FName& Name) const;
 
+	/*内部无锁功能可防止重入锁定，请参阅 API 函数 GetCurveMetaData 文档。*/
 	/*Internal no lock function to prevent re-entrant locking, see API function FindUID for documentation.*/
 	/*内部无锁功能可防止重入锁定，请参阅 API 函数 FindUID 文档。*/
 	ENGINE_API SmartName::UID_Type FindUID_NoLock(const FName& Name) const;
@@ -120,12 +130,12 @@ private:
 	ENGINE_API const FCurveMetaData* GetCurveMetaData_NoLock(FName CurveName) const;
 
 	// List of curve names, indexed by UID
-	// 曲线名称列表，按 UID 索引
+ // 曲线名称列表，按 UID 索引
 	TArray<FName> CurveNameList;
 
 #if !WITH_EDITOR
 	// List of curve metadata, indexed by UID
-	// 曲线元数据列表，按 UID 索引
+ // 曲线元数据列表，按 UID 索引
 	TArray<FCurveMetaData> CurveMetaDataList;
 #endif
 
@@ -164,7 +174,7 @@ struct FSmartNameMappingIterator
 	
 	private:
 		// This class struct should only be crated by FSmartNameMapping::Iterate
-		// 此类结构只能由 FSmartNameMapping::Iterate 创建
+  // 此类结构只能由 FSmartNameMapping::Iterate 创建
 		FSmartNameMappingIterator(const FSmartNameMapping* InMapping, SmartName::UID_Type InIndex):
 			Mapping(InMapping), Index(InIndex)
 		{}
@@ -183,6 +193,8 @@ struct FSmartNameContainer
 
 	UE_DEPRECATED(5.3, "FSmartNameContainer functions are no longer used.")
 	ENGINE_API const FSmartNameMapping* GetContainer(FName ContainerName) const;
+	/** 只有受限制的类可以访问受保护的接口 */
+	/** 只有受限制的类可以访问受保护的接口 */
 
 	UE_DEPRECATED(5.3, "FSmartNameContainer functions are no longer used.")
 	ENGINE_API void Serialize(FArchive& Ar, bool bIsTemplate);
@@ -204,7 +216,7 @@ private:
 
 #if WITH_EDITORONLY_DATA
 	// Editor copy of the data we loaded, used to preserve determinism during cooking
-	// 我们加载的数据的编辑器副本，用于在烹饪过程中保留确定性
+ // 我们加载的数据的编辑器副本，用于在烹饪过程中保留确定性
 	TMap<FName, FSmartNameMapping> LoadedNameMappings;
 #endif
 };
@@ -228,7 +240,7 @@ struct FSmartName
 	FName DisplayName;
 
 	// SmartName::UID_Type - for faster access
-	// SmartName::UID_Type - 更快地访问
+ // SmartName::UID_Type - 更快地访问
 	SmartName::UID_Type	UID;
 
 	FSmartName()

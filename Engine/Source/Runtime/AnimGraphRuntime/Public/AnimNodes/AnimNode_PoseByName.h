@@ -23,8 +23,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta = (PinHiddenByDefault))
 	float PoseWeight;
+	/** 缓存的当前姿势名称用于失效 */
 
 private:
+	/** 缓存的当前姿势名称用于失效 */
 	/** Cached current pose name used for invalidation */
 	/** 缓存的当前姿势名称用于失效 */
 	FName CurrentPoseName;
@@ -37,13 +39,13 @@ public:
 	}
 
 	// FAnimNode_Base interface
-	// FAnimNode_Base接口
+ // FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void UpdateAssetPlayer(const FAnimationUpdateContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
-	// FAnimNode_Base接口结束
+ // FAnimNode_Base接口结束
 private:
 	ANIMGRAPHRUNTIME_API virtual void RebuildPoseList(const FBoneContainer& InBoneContainer, const UPoseAsset* InPoseAsset) override;
 };

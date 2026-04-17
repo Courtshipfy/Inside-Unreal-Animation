@@ -6,6 +6,16 @@
 // 在此处的 Sandbox 项目中提供：
 // https://github.com/melax/sandbox
 // https://github.com/melax/sandbox
+// https://github.com/melax/sandbox
+// https://github.com/melax/sandbox
+// https://github.com/melax/sandbox
+// https://github.com/melax/sandbox
+// https://github.com/melax/sandbox
+// https://github.com/melax/sandbox
+// https://github.com/melax/sandbox
+// https://github.com/melax/sandbox
+// https://github.com/melax/sandbox
+// https://github.com/melax/sandbox
 
 // The license for Sandbox is reproduced below:
 // Sandbox 的许可证复制如下：
@@ -83,13 +93,13 @@ FAnimPhysShape FAnimPhysShape::MakeBox(const FVector& Extents)
 	FVector HalfExtents = Extents / 2.0f;
 
 	// A box of zero size will introduce NaNs into the simulation so we stomp it here and log
-	// 大小为零的盒子会将 NaN 引入模拟中，因此我们在这里将其踩踏并记录
+ // 大小为零的盒子会将 NaN 引入模拟中，因此我们在这里将其踩踏并记录
 	// if we encounter it.
-	// 如果我们遇到它。
+ // 如果我们遇到它。
 	if (Extents.SizeSquared() <= UE_SMALL_NUMBER)
 	{
 // 		UE_LOG(LogAnimation, Warning, TEXT("AnimDynamics: Attempted to create a simulation box with 0 volume, this introduces NaNs into the simulation. Adjusting box extents to (1.0f,1.0f,1.0f)"));
-// 		UE_LOG(LogAnimation, warning, TEXT("AnimDynamics：尝试创建体积为 0 的模拟框，这将 NaN 引入模拟中。将框范围调整为 (1.0f,1.0f,1.0f)"));
+// UE_LOG(LogAnimation, warning, TEXT("AnimDynamics：尝试创建体积为 0 的模拟框，这将 NaN 引入模拟中。将框范围调整为 (1.0f,1.0f,1.0f)"));
 		HalfExtents = FVector(0.5f);
 	}
 
@@ -99,21 +109,21 @@ FAnimPhysShape FAnimPhysShape::MakeBox(const FVector& Extents)
 	Tris.Reserve(12);	
 
 	// Front Verts
-	// 前垂直
+ // 前垂直
 	Verts.Add(FVector(-HalfExtents.X, -HalfExtents.Y, HalfExtents.Z));
 	Verts.Add(FVector(HalfExtents.X, -HalfExtents.Y, HalfExtents.Z));
 	Verts.Add(FVector(HalfExtents.X, -HalfExtents.Y, -HalfExtents.Z));
 	Verts.Add(FVector(-HalfExtents.X, -HalfExtents.Y, -HalfExtents.Z));
 
 	// Back Verts
-	// 背部垂直
+ // 背部垂直
 	Verts.Add(FVector(HalfExtents.X, HalfExtents.Y, HalfExtents.Z));
 	Verts.Add(FVector(-HalfExtents.X, HalfExtents.Y, HalfExtents.Z));
 	Verts.Add(FVector(-HalfExtents.X, HalfExtents.Y, -HalfExtents.Z));
 	Verts.Add(FVector(HalfExtents.X, HalfExtents.Y, -HalfExtents.Z));
 
 	// Front
-	// 正面
+ // 正面
 	Tris.Add(FIntVector(0, 1, 3));
 	Tris.Add(FIntVector(1, 2, 3));
 
@@ -126,7 +136,7 @@ FAnimPhysShape FAnimPhysShape::MakeBox(const FVector& Extents)
 	Tris.Add(FIntVector(5, 4, 1));
 
 	// Right
-	// 正确的
+ // 正确的
 	Tris.Add(FIntVector(1, 4, 2));
 	Tris.Add(FIntVector(2, 4, 7));
 
@@ -135,7 +145,7 @@ FAnimPhysShape FAnimPhysShape::MakeBox(const FVector& Extents)
 	Tris.Add(FIntVector(5, 3, 6));
 
 	// Bottom
-	// 底部
+ // 底部
 	Tris.Add(FIntVector(3, 2, 6));
 	Tris.Add(FIntVector(2, 7, 6));
 
@@ -246,7 +256,7 @@ FAnimPhysAngularLimit::FAnimPhysAngularLimit(FAnimPhysRigidBody* InFirstBody, FA
 void FAnimPhysAngularLimit::RemoveBias()
 {
 	// not zero since its ok to let one-sided constraints fall to their bound;
-	// 不为零，因为可以让单方面的约束落入其界限；
+ // 不为零，因为可以让单方面的约束落入其界限；
 	TargetSpin = (MinimumTorque < 0) ? 0 : FMath::Min(TargetSpin, 0.0f);
 }
 
@@ -258,26 +268,26 @@ void FAnimPhysAngularLimit::Iter(float DeltaTime)
 	}
 
 	// how we are rotating about the axis 'normal' we are dealing with
-	// 我们如何围绕我们正在处理的“正常”轴旋转
+ // 我们如何围绕我们正在处理的“正常”轴旋转
 	float CurrentSpin = ((Bodies[1]) ? FVector::DotProduct(Bodies[1]->Spin(), WorldSpaceAxis) : 0.0f) - ((Bodies[0]) ? FVector::DotProduct(Bodies[0]->Spin(), WorldSpaceAxis) : 0.0f);
 
 	// the amount of spin we have to add to satisfy the limit.
-	// 我们必须添加以满足限制的旋转量。
+ // 我们必须添加以满足限制的旋转量。
 	float DeltaSpin = TargetSpin - CurrentSpin;
 
 	// how we have to change the angular impulse
-	// 我们如何改变角冲量
+ // 我们如何改变角冲量
 	float DeltaTorque = DeltaSpin * CachedSpinToTorque;
 
 	// total torque cannot exceed maxtorque
-	// 总扭矩不能超过 maxtorque
+ // 总扭矩不能超过 maxtorque
 	DeltaTorque = FMath::Min(DeltaTorque, MaximumTorque * DeltaTime - Torque);
 	// total torque cannot fall below mintorque
-	// 总扭矩不能低于 mintorque
+ // 总扭矩不能低于 mintorque
 	DeltaTorque = FMath::Max(DeltaTorque, MinimumTorque * DeltaTime - Torque);
 
 	// Apply impulses
-	// 施加脉冲
+ // 施加脉冲
 	if (Bodies[0])
 	{
 		Bodies[0]->AngularMomentum -= WorldSpaceAxis * DeltaTorque;
@@ -325,12 +335,12 @@ void FAnimPhysLinearLimit::RemoveBias()
 void FAnimPhysLinearLimit::Iter(float DeltaTime)
 {
 	// Instantaneous linear velocity at point of constraint
-	// 约束点瞬时线速度
+ // 约束点瞬时线速度
 	FVector Velocity0 = Bodies[0] ? FVector::CrossProduct(Bodies[0]->Spin(), WorldSpacePosition0) + Bodies[0]->LinearMomentum * Bodies[0]->InverseMass : FVector(0.0f, 0.0f, 0.0f);
 	FVector Velocity1 = Bodies[1] ? FVector::CrossProduct(Bodies[1]->Spin(), WorldSpacePosition1) + Bodies[1]->LinearMomentum * Bodies[1]->InverseMass : FVector(0.0f, 0.0f, 0.0f);
 
 	// velocity of rb1 wrt rb0
-	// rb1相对于rb0的速度
+ // rb1相对于rb0的速度
 	float  DeltaVelocity = FVector::DotProduct(Velocity1 - Velocity0, LimitNormal);
 
 	float VelocityImpulse = -TargetSpeed - DeltaVelocity;
@@ -371,7 +381,7 @@ float FAnimPhys::CalculateVolume(const TArray<FVector>& InVertices, const TArray
 		FMatrix VolMatrix(InVertices[Tri[0]], InVertices[Tri[1]], InVertices[Tri[2]], FVector(1.0f));
 
 		// This gives us six times the volume of the tetrahedron, we'll divide through later
-		// 这给了我们四面体体积的六倍，我们稍后将进行划分
+  // 这给了我们四面体体积的六倍，我们稍后将进行划分
 		CalculatedVolume += VolMatrix.RotDeterminant();
 	}
 
@@ -403,11 +413,11 @@ FVector FAnimPhys::CalculateCenterOfMass(const TArray<FVector>& InVertices, cons
 		FMatrix VolMatrix(Vertices[0], Vertices[1], Vertices[2], FVector(1.0f));
 
 		// Six times volume, doesn't need to be divided for CoM (Balanced)
-		// 六倍体积，无需分割CoM（平衡）
+  // 六倍体积，无需分割CoM（平衡）
 		float TetraVolume = VolMatrix.RotDeterminant();
 
 		// Avg, divide by 4 at the end
-		// 求平均值，最后除以4
+  // 求平均值，最后除以4
 		CoM += TetraVolume * (Vertices[0] + Vertices[1] + Vertices[2]);
 
 		CalculatedVolume += TetraVolume;
@@ -438,18 +448,18 @@ FVector FAnimPhys::CalculateCenterOfMass(const TArray<FAnimPhysShape>& InShapes)
 FMatrix FAnimPhys::CalculateInertia(const TArray<FVector>& InVertices, const TArray<FIntVector>& InTriangles, const FVector& InCenterOfMass)
 {
 	// Calculate moments around CoM (FVector::ZeroVector if unsupplied)
-	// 计算 CoM 周围的力矩（如果未提供，则为 FVector::ZeroVector）
+ // 计算 CoM 周围的力矩（如果未提供，则为 FVector::ZeroVector）
 	// Mass is assumed to be 1.0f, tensor can be scaled later
-	// 质量假设为1.0f，张量可以稍后缩放
+ // 质量假设为1.0f，张量可以稍后缩放
 
 	// Accumulates volume time six
-	// 累积音量时间六
+ // 累积音量时间六
 	float CalculatedVolume = 0.0f;
 	// Main diagonal integrals
-	// 主对角积分
+ // 主对角积分
 	FVector TensorDiagonals(0.0f);
 	// Off-Diagonal integrals
-	// 非对角积分
+ // 非对角积分
 	FVector TensorOffDiagonals(0.0f);
 
 	FVector Vertices[3];
@@ -461,7 +471,7 @@ FMatrix FAnimPhys::CalculateInertia(const TArray<FVector>& InVertices, const TAr
 		Vertices[2] = InVertices[Tri[2]];
 
 		// Calculate tetrahedron volume (times 6)
-		// 计算四面体体积（乘以 6）
+  // 计算四面体体积（乘以 6）
 		FMatrix VolMatrix(Vertices[0], Vertices[1], Vertices[2], FVector(1.0f));
 		float TetraVolume = VolMatrix.RotDeterminant();
 		CalculatedVolume += TetraVolume;
@@ -472,12 +482,12 @@ FMatrix FAnimPhys::CalculateInertia(const TArray<FVector>& InVertices, const TAr
 			int32 V2 = (V0 + 2) % 3;
 
 			// Calculate diagonals times 60 (needs divide later)
-			// 计算对角线乘以 60（稍后需要除）
+   // 计算对角线乘以 60（稍后需要除）
 			TensorDiagonals[V0] += (Vertices[0][V0] * Vertices[1][V0] + Vertices[1][V0] * Vertices[2][V0] + Vertices[2][V0] * Vertices[0][V0] +
 				Vertices[0][V0] * Vertices[0][V0] + Vertices[1][V0] * Vertices[1][V0] + Vertices[2][V0] * Vertices[2][V0]) * TetraVolume;
 
 			// Calculate off-diagonals times 120 (needs divide later)
-			// 计算非对角线乘以 120（稍后需要除）
+   // 计算非对角线乘以 120（稍后需要除）
 			TensorOffDiagonals[V0] += (Vertices[0][V1] * Vertices[1][V2] + Vertices[1][V1] * Vertices[2][V2] + Vertices[2][V1] * Vertices[0][V2] +
 				Vertices[0][V1] * Vertices[2][V2] + Vertices[1][V1] * Vertices[0][V2] + Vertices[2][V1] * Vertices[1][V2] +
 				Vertices[0][V1] * Vertices[0][V2] * 2 + Vertices[1][V1] * Vertices[1][V2] * 2 + Vertices[2][V1] * Vertices[2][V2] * 2) * TetraVolume;
@@ -485,7 +495,7 @@ FMatrix FAnimPhys::CalculateInertia(const TArray<FVector>& InVertices, const TAr
 	}
 
 	// Divide through by required amounts (and the six for the volume calculation)
-	// 除以所需的数量（以及用于体积计算的六）
+ // 除以所需的数量（以及用于体积计算的六）
 	TensorDiagonals /= CalculatedVolume * (60.0f / 6.0f);
 	TensorOffDiagonals /= CalculatedVolume * (120.0f / 6.0f);
 
@@ -510,7 +520,7 @@ FMatrix FAnimPhys::CalculateInertia(const TArray<FAnimPhysShape>& InShapes, cons
 	TotalInertia *= 1.0f / TotalVolume;
 
 	// We use 4x4 matrices right now, make sure it's homogeneous for calculations
-	// 我们现在使用 4x4 矩阵，确保计算时它是齐次的
+ // 我们现在使用 4x4 矩阵，确保计算时它是齐次的
 	TotalInertia.M[3][3] = 1.0f;
 
 	return TotalInertia;
@@ -540,7 +550,7 @@ FQuat FAnimPhys::DiffQ(const FQuat& InOrientation, const FMatrix &InInverseTenso
 FQuat FAnimPhys::UpdateOrientRK(const FQuat& InOrient, const FMatrix& InInverseTensor, const FVector& InAngularMomentum, float InDeltaTime)
 {
 	// RK update for orientation, preserves realistic spin
-	// RK 方向更新，保留真实旋转
+ // RK 方向更新，保留真实旋转
 	FQuat d1 = DiffQ(InOrient, InInverseTensor, InAngularMomentum);
 	FQuat d2 = DiffQ(InOrient + d1*(InDeltaTime / 2), InInverseTensor, InAngularMomentum);
 	FQuat d3 = DiffQ(InOrient + d2*(InDeltaTime / 2), InInverseTensor, InAngularMomentum);
@@ -552,7 +562,7 @@ FQuat FAnimPhys::UpdateOrientRK(const FQuat& InOrient, const FMatrix& InInverseT
 void FAnimPhys::ApplyImpulse(FAnimPhysRigidBody* InOutRigidBody, const FVector& InWorldOrientedImpactPoint, const FVector& InImpulse)
 {
 	// InWorldOrientedImpactPoint is impact point positionally relative to InOutRigidBody's origin but in 'world' orientation
-	// InWorldOrientedImpactPoint 是相对于 InOutRigidBody 的原点位置但处于“世界”方向的冲击点
+ // InWorldOrientedImpactPoint 是相对于 InOutRigidBody 的原点位置但处于“世界”方向的冲击点
 	InOutRigidBody->LinearMomentum += InImpulse;
 	InOutRigidBody->AngularMomentum += FVector::CrossProduct(InWorldOrientedImpactPoint, InImpulse);
 }
@@ -567,7 +577,7 @@ void FAnimPhys::ConstrainAlongDirection(float DeltaTime, TArray<FAnimPhysLinearL
 	if (FMath::Abs(Limits.X - Limits.Y) < UE_SMALL_NUMBER)
 	{
 		// Fully locked axis, just generate one limit
-		// 完全锁定轴，仅生成一个限制
+  // 完全锁定轴，仅生成一个限制
 		LimitContainer.Add(FAnimPhysLinearLimit(FirstBody, SecondBody, FirstPosition, SecondPosition, AxisToConstrain, Distance / DeltaTime, Distance / DeltaTime, FVector2D(MinimumForce, MaximumForce)));
 	}
 	else
@@ -605,11 +615,11 @@ void FAnimPhys::ConstrainPositionPrismatic(float DeltaTime, TArray<FAnimPhysLine
 	FVector AxisDistances(FVector::DotProduct(ToPoint, XAxis), FVector::DotProduct(ToPoint, YAxis), FVector::DotProduct(ToPoint, ZAxis));
 
 	// Target in prism space
-	// 棱镜空间中的目标
+ // 棱镜空间中的目标
 	FVector Target(PrismRotation.Inverse().RotateVector(ToPoint));
 
 	// Get closest valid point within the limit
-	// 获取限制内最接近的有效点
+ // 获取限制内最接近的有效点
 	if (AxisDistances.X < LimitsMin.X)
 	{
 		Target.X = LimitsMin.X;
@@ -638,7 +648,7 @@ void FAnimPhys::ConstrainPositionPrismatic(float DeltaTime, TArray<FAnimPhysLine
 	}
 
 	// Target in world space
-	// 世界空间目标
+ // 世界空间目标
 	Target = Position0 + PrismRotation.RotateVector(Target);
 
 	if (!Target.Equals(Position1))
@@ -673,7 +683,7 @@ void FAnimPhys::ConstrainAngularRangeInternal(float DeltaTime, TArray<FAnimPhysA
 	FVector RotationTwistAxis;
 
 	// Get twist dependent info for calculating spin and twist
-	// 获取与扭转相关的信息以计算旋转和扭转
+ // 获取与扭转相关的信息以计算旋转和扭转
 	switch (TwistAxis)
 	{
 	case AnimPhysTwistAxis::AxisX:
@@ -694,12 +704,12 @@ void FAnimPhys::ConstrainAngularRangeInternal(float DeltaTime, TArray<FAnimPhysA
 	}
 
 	// Calculate Spin and Twist
-	// 计算旋转和扭转
+ // 计算旋转和扭转
 	FQuat Swing = FQuat::FindBetween(WorldTwistAxis, RotationTwistAxis);
 	FQuat Twist = Swing.Inverse() * Rotation0to1;
 
 	// Invert if necessary
-	// 必要时反转
+ // 必要时反转
 	if (Swing.W < 0.0f)
 	{
 		Swing *= -1.0f;
@@ -722,7 +732,7 @@ void FAnimPhys::ConstrainAngularRangeInternal(float DeltaTime, TArray<FAnimPhysA
 	float TwistAmount = 0.0f;
 
 	// Get twist dependent info to create the limits
-	// 获取扭转相关信息以创建限制
+ // 获取扭转相关信息以创建限制
 	switch (TwistAxis)
 	{
 	case AnimPhysTwistAxis::AxisX:
@@ -799,7 +809,7 @@ void FAnimPhys::ConstrainAngularRangeInternal(float DeltaTime, TArray<FAnimPhysA
 void FAnimPhys::ConstrainAngularRange(float DeltaTime, TArray<FAnimPhysAngularLimit>& LimitContainer, FAnimPhysRigidBody *FirstBody, FAnimPhysRigidBody *SecondBody, const FQuat& JointFrame, AnimPhysTwistAxis TwistAxis, const FVector& JointLimitMin, const FVector& JointLimitMax, float InJointBias)
 {
 	// a generic configurable 6dof style way to specify angular limits.  used for hard limits such as joint ranges.
-	// 指定角度限制的通用可配置 6dof 样式方式。  用于硬限制，例如关节范围。
+ // 指定角度限制的通用可配置 6dof 样式方式。  用于硬限制，例如关节范围。
 	FQuat FirstBodyLocalFrame = (FirstBody) ? FirstBody->Pose.Orientation * JointFrame : JointFrame;
 	FQuat SecondBodyOrientation = (SecondBody) ? SecondBody->Pose.Orientation : FQuat::Identity;
 
@@ -813,10 +823,10 @@ void FAnimPhys::ConstrainConeAngle(float DeltaTime, TArray<FAnimPhysAngularLimit
 	bool ZeroLimit = LimitAngle == 0.0f;
 
 	// First anchor in first body local space
-	// 第一个身体局部空间中的第一个锚点
+ // 第一个身体局部空间中的第一个锚点
 	FVector WorldSpaceNormal0 = (FirstBody) ? FirstBody->Pose.Orientation.RotateVector(Normal0) : Normal0;
 	// Second anchor in rb1 space, no check here as we asserted above
-	// rb1 空间中的第二个锚点，如我们上面所说，这里没有检查
+ // rb1 空间中的第二个锚点，如我们上面所说，这里没有检查
 	FVector WorldSpaceNormal1 = SecondBody->Pose.Orientation.RotateVector(Normal1);
 	FVector Axis = FVector::CrossProduct(WorldSpaceNormal1, WorldSpaceNormal0).GetSafeNormal();
 
@@ -833,7 +843,7 @@ void FAnimPhys::ConstrainPlanar(float DeltaTime, TArray<FAnimPhysLinearLimit>& L
 	float DistanceFromPlane = LimitPlane.PlaneDot(Body->Pose.Position);
 
 	// Reduce distance by radius if using a spherical collision method
-	// 如果使用球形碰撞​​方法，则按半径减少距离
+ // 如果使用球形碰撞​​方法，则按半径减少距离
 	if(Body->CollisionType != AnimPhysCollisionType::CoM)
 	{
 		DistanceFromPlane -= Body->SphereCollisionRadius;
@@ -900,9 +910,9 @@ void FAnimPhys::CreateSpring(TArray<FAnimPhysSpring>& SpringContainer, FAnimPhys
 void FAnimPhys::InitializeBodyVelocity(float DeltaTime, FAnimPhysRigidBody *InBody, const FVector& GravityDirection)
 {
 	// Gather weak forces being applied to body at beginning of timestep
-	// 在时间步长开始时收集施加到身体的弱力
+ // 在时间步长开始时收集施加到身体的弱力
 	// Forward euler update of the velocity and rotation/spin 
-	// 速度和旋转/自旋的前向欧拉更新
+ // 速度和旋转/自旋的前向欧拉更新
 	InBody->PreviousState.Pose.Position = InBody->Pose.Position;
 	InBody->PreviousState.Pose.Orientation = InBody->Pose.Orientation;
 
@@ -918,19 +928,19 @@ void FAnimPhys::InitializeBodyVelocity(float DeltaTime, FAnimPhysRigidBody *InBo
 	FVector Torque(0.0f, 0.0f, 0.0f);
 
 	// Add wind forces
-	// 添加风力
+ // 添加风力
 	if(InBody->bWindEnabled)
 	{
 		// Multiplier for wind forces, we have a similar arbitrary scale in cloth wind, doing similar here
-		// 风力乘数，我们在布风中有类似的任意尺度，在这里做类似的事情
+  // 风力乘数，我们在布风中有类似的任意尺度，在这里做类似的事情
 		// so we get somewhat similar appearance between cloth and anim dynamics.
-		// 所以我们在布料和动画动力学之间得到了一些相似的外观。
+  // 所以我们在布料和动画动力学之间得到了一些相似的外观。
 		// #TODO Maybe put this and the cloth scale into physics settings?
-		// #TODO 也许可以将其和布料比例放入物理设置中？
+  // #TODO 也许可以将其和布料比例放入物理设置中？
 		static const float WindUnitScale = 250.0f;
 
 		// Wind velocity in body space
-		// 身体空间的风速
+  // 身体空间的风速
 		FVector WindVelocity = InBody->WindData.WindDirection * InBody->WindData.WindSpeed * WindUnitScale * InBody->WindData.BodyWindScale;
 
 		if(WindVelocity.SizeSquared() > UE_SMALL_NUMBER)
@@ -952,7 +962,7 @@ void FAnimPhys::CalculateNextPose(float DeltaTime, FAnimPhysRigidBody* InBody)
 	const bool bUseRKOrientIntegration = true;
 
 	// After an acceptable velocity and spin are computed, a forward euler update is applied to the position and orientation.
-	// 计算出可接受的速度和自旋后，将对位置和方向应用前向欧拉更新。
+ // 计算出可接受的速度和自旋后，将对位置和方向应用前向欧拉更新。
 	InBody->NextPosition = InBody->Pose.Position + InBody->LinearMomentum * InBody->InverseMass * DeltaTime;
 
 	if (bUseRKOrientIntegration)
@@ -970,7 +980,7 @@ void FAnimPhys::UpdatePose(FAnimPhysRigidBody* InBody)
 	CONDITIONAL_SCOPE_CYCLE_COUNTER(STAT_AnimDynamicsPoseUpdate, bEnableDetailedStats);
 
 	// after an acceptable velocity and spin are computed, a forward euler update is applied to the position and orientation.
-	// 在计算出可接受的速度和自旋后，将对位置和方向应用前向欧拉更新。
+ // 在计算出可接受的速度和自旋后，将对位置和方向应用前向欧拉更新。
 	InBody->PreviousPosition = InBody->Pose.Position;  // should do this at beginning of physics loop in case someone teleports the body.
 	InBody->PreviousOrientation = InBody->Pose.Orientation;
 	InBody->Pose.Position = InBody->NextPosition;
@@ -990,7 +1000,7 @@ void FAnimPhys::PhysicsUpdate(float DeltaTime, TArray<FAnimPhysRigidBody*>& Bodi
 	}
 
 	// Apply any external forces.
-	// 施加任何外力。
+ // 施加任何外力。
 	if(!ExternalForce.IsNearlyZero())
 	{
 		for(FAnimPhysRigidBody* Body : Bodies)
@@ -1000,7 +1010,7 @@ void FAnimPhys::PhysicsUpdate(float DeltaTime, TArray<FAnimPhysRigidBody*>& Bodi
 	}
 
 	// Apply external acceleration
-	// 应用外部加速度
+ // 应用外部加速度
 	if (!ExternalLinearAcc.IsNearlyZero())
 	{
 		for (FAnimPhysRigidBody* Body : Bodies)
@@ -1013,7 +1023,7 @@ void FAnimPhys::PhysicsUpdate(float DeltaTime, TArray<FAnimPhysRigidBody*>& Bodi
 	}
 
 	// Apply fictitious Forces
-	// 应用虚拟力量
+ // 应用虚拟力量
 	if(!(ExternalAngularVelocity.IsNearlyZero() && ExternalAngularAcc.IsNearlyZero()))
 	{
 		for (FAnimPhysRigidBody* Body : Bodies)
@@ -1027,14 +1037,14 @@ void FAnimPhys::PhysicsUpdate(float DeltaTime, TArray<FAnimPhysRigidBody*>& Bodi
 			const FVector AxR = FVector::CrossProduct(ExternalAngularAcc, Body->Pose.Position);
 
 			// Calculate the phantom forces
-			// 计算幻象力
+   // 计算幻象力
 			const FVector CoriolisAcc = CoriolisAlpha * 2.0f * WxV;
 			const FVector CentrifugalAcc = CentrifugalAlpha * WxWxR;
 			const FVector EulerAcc = EulerAlpha * AxR;
 			const FVector AngularAcc = AngularAccelerationAlpha * ExternalAngularAcc;
 
 			// Apply the phantom forces
-			// 施加幻影力量
+   // 施加幻影力量
 			Body->LinearMomentum -= (CoriolisAcc + CentrifugalAcc + EulerAcc) / Body->InverseMass * DeltaTime;
 			Body->AngularMomentum -= Body->InertiaTensor.TransformPosition(AngularAcc) * DeltaTime;
 		}
@@ -1069,11 +1079,11 @@ void FAnimPhys::PhysicsUpdate(float DeltaTime, TArray<FAnimPhysRigidBody*>& Bodi
 	}
 
 	// The objective of this step is to take away any velocity that was added strictly for purposes of reaching the constraint or contact.
-	// 此步骤的目的是消除为达到约束或接触而严格添加的任何速度。
+ // 此步骤的目的是消除为达到约束或接触而严格添加的任何速度。
 	// i.e. we added some velocity to a point to pull it away from something that was inter-penetrating but that velocity shouldn't stick around for the next frame,
-	// 也就是说，我们向一个点添加了一些速度，以将其拉离相互渗透的物体，但该速度不应在下一帧中保留，
+ // 也就是说，我们向一个点添加了一些速度，以将其拉离相互渗透的物体，但该速度不应在下一帧中保留，
 	// otherwise we will have lots of jitter from our contacts and oscillations from constraints. Do this by clearing the targetvelocities and reinvoking the solver.
-	// 否则，我们会因接触而产生大量抖动，并因约束而产生振荡。通过清除目标速度并重新调用求解器来完成此操作。
+ // 否则，我们会因接触而产生大量抖动，并因约束而产生振荡。通过清除目标速度并重新调用求解器来完成此操作。
 	for (FAnimPhysLinearLimit& CurrentLimit : LinearLimits)
 	{
 		CurrentLimit.RemoveBias();
@@ -1114,12 +1124,12 @@ void FAnimPhysSpring::ApplyForces(float DeltaTime)
 	if (bApplyLinear)
 	{
 		// World space spring ends
-		// 世界太空春天结束
+  // 世界太空春天结束
 		FVector Position0 = (Body0) ? Body0->GetPose() * Anchor0 : Anchor0;
 		FVector Position1 = (Body1) ? Body1->GetPose() * Anchor1 : Anchor1;
 
 		// World oriented impact points to apply impulses
-		// 面向世界的冲击点来施加脉冲
+  // 面向世界的冲击点来施加脉冲
 		FVector OrientedPos0 = (Body0) ? Body0->Pose.Orientation * Anchor0 : Anchor0;
 		FVector OrientedPos1 = (Body1) ? Body1->Pose.Orientation * Anchor1 : Anchor1;
 
@@ -1129,7 +1139,7 @@ void FAnimPhysSpring::ApplyForces(float DeltaTime)
 		FVector Impulse = P0ToP1.GetSafeNormal() * ScalarForce;
 
 		// Apply linear spring forces
-		// 施加线性弹簧力
+  // 施加线性弹簧力
 		if (Body0)
 		{
 			FAnimPhys::ApplyImpulse(Body0, OrientedPos0, -Impulse);

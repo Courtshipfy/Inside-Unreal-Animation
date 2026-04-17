@@ -106,7 +106,7 @@ void CheckRetargetSourceAssetData(bool bFixAssets, bool bWantsFullScan, const TA
 	UE_LOG(LogAnimation, Log, TEXT("Check Retarget Source Assets found [%d] assets."), Assets.Num());
 
 	// Run through paths and classes that should be excluded
-	// 运行应排除的路径和类
+ // 运行应排除的路径和类
 	if (Assets.Num() > 0 && ExcludedPaths.Num() > 0)
 	{
 		FARFilter Filter;
@@ -146,9 +146,9 @@ void CheckRetargetSourceAssetData(bool bFixAssets, bool bWantsFullScan, const TA
 				FText::FromString((AssetData.PackagePath.ToString() + FString(TEXT("/")) + AssetData.AssetName.ToString()))));
 
 		// Fast scan will skip assets that does not have a retarget source asset set in the metadata
-		// 快速扫描将跳过元数据中没有设置重定向源资产的资产
+  // 快速扫描将跳过元数据中没有设置重定向源资产的资产
 		// With full scan we can check if an anim sequence has retarget transforms but no asset set for some reason (but it is slower)
-		// 通过完整扫描，我们可以检查动画序列是否具有重定向变换，但由于某种原因没有设置资产（但速度较慢）
+  // 通过完整扫描，我们可以检查动画序列是否具有重定向变换，但由于某种原因没有设置资产（但速度较慢）
 		if (!bWantsFullScan)
 		{
 			const FString RetargetSourceAssetFile = AssetData.GetTagValueRef<FString>(SearchableName);

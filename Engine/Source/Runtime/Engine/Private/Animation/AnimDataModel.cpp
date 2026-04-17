@@ -32,7 +32,7 @@ void UAnimDataModel::PostLoad()
 	if (GetLinkerCustomVersion(FUE5MainStreamObjectVersion::GUID) < FUE5MainStreamObjectVersion::ForceUpdateAnimationAssetCurveTangents)
 	{
 		// Forcefully AutoSetTangents to fix-up any imported sequences pre the fix for flattening first/last key leave/arrive tangents
-		// 强制自动设置切线以修复修复前的任何导入序列，以展平第一个/最后一个关键离开/到达切线
+  // 强制自动设置切线以修复修复前的任何导入序列，以展平第一个/最后一个关键离开/到达切线
 		GetNotifier().Notify(EAnimDataModelNotifyType::BracketOpened);
 		for (FFloatCurve& FloatCurve : CurveData.FloatCurves)
 		{
@@ -51,7 +51,7 @@ void UAnimDataModel::PostLoad()
 		if (bHasBoneTracks)
 		{
 			// Number of keys was used directly rather than Max(Value,2), as a single _frame_ animation should always have two _keys_ 
-			// 直接使用键数而不是 Max(Value,2)，因为单个_frame_动画应始终有两个_keys_
+   // 直接使用键数而不是 Max(Value,2)，因为单个_frame_动画应始终有两个_keys_
 			const int32 ActualNumKeys = BoneAnimationTracks[0].InternalTrackData.PosKeys.Num();
 			if (ActualNumKeys == 1 && NumberOfKeys == 2)
 			{
@@ -84,7 +84,7 @@ void UAnimDataModel::PostLoad()
 			if (bHasBoneTracks)
 			{
 				// Number of keys was rounded up from sequence length, so set play length from stored number of bone keys 
-				// 键的数量是根据序列长度向上舍入的，因此根据存储的骨键数量设置播放长度
+    // 键的数量是根据序列长度向上舍入的，因此根据存储的骨键数量设置播放长度
 				const int32 ActualNumKeys = bHasBoneTracks ? FMath::Min(BoneAnimationTracks[0].InternalTrackData.PosKeys.Num(), NumberOfKeys) : NumberOfKeys;
 				if (ActualNumKeys != NumberOfKeys)
 				{
@@ -98,7 +98,7 @@ void UAnimDataModel::PostLoad()
 			else
 			{
 				// No way to determine 'correct' length so set current PlayLength value to # of frames * frame-rate
-				// 无法确定“正确”长度，因此将当前 PlayLength 值设置为帧数 * 帧速率
+    // 无法确定“正确”长度，因此将当前 PlayLength 值设置为帧数 * 帧速率
 				PlayLength = FrameRate.AsSeconds(NumberOfFrames);
 			}
 			GetNotifier().Notify(EAnimDataModelNotifyType::Populated);
@@ -403,7 +403,7 @@ const FRichCurve* UAnimDataModel::FindRichCurve(const FAnimationCurveIdentifier&
 			if (CurveIdentifier.Channel != ETransformCurveChannel::Invalid && CurveIdentifier.Axis != EVectorCurveChannel::Invalid)
 			{
 				// Dealing with transform curve
-				// [翻译失败: Dealing with transform curve]
+    // 处理变换曲线
 				const FTransformCurve* TransformCurve = FindTransformCurve(CurveIdentifier);
 				if (TransformCurve)
 				{
@@ -462,7 +462,7 @@ int32 UAnimDataModel::GetNumberOfAttributes() const
 int32 UAnimDataModel::GetNumberOfAttributesForBoneIndex(const int32 BoneIndex) const
 {
 	// Sum up total number of attributes with provided bone index
-	// [翻译失败: Sum up total number of attributes with provided bone index]
+ // 总结具有提供的骨骼索引的属性总数
 	const int32 NumberOfBoneAttributes = Algo::Accumulate<int32>(AnimatedBoneAttributes, 0, [BoneIndex](int32 Sum, const FAnimatedBoneAttribute& Attribute) -> int32
 	{
 		Sum += Attribute.Identifier.GetBoneIndex() == BoneIndex ? 1 : 0;
@@ -621,7 +621,7 @@ void ExtractPose(const TArray<FBoneAnimationTrack>& BoneAnimationTracks, const T
 	{
 		const int32 SkeletonBoneIndex = AnimationTrack.BoneTreeIndex;
 		// not sure it's safe to assume that SkeletonBoneIndex can never be INDEX_NONE
-		// 不确定假设 SkeletonBoneIndex 永远不会是 INDEX_NONE 是否安全
+  // 不确定假设 SkeletonBoneIndex 永远不会是 INDEX_NONE 是否安全
 		if ((SkeletonBoneIndex != INDEX_NONE) && (SkeletonBoneIndex < MAX_BONES))
 		{
 			const FCompactPoseBoneIndex PoseBoneIndex = RequiredBones.GetCompactPoseIndexFromSkeletonIndex(SkeletonBoneIndex);
@@ -633,19 +633,19 @@ void ExtractPose(const TArray<FBoneAnimationTrack>& BoneAnimationTracks, const T
 					if (PoseBoneIndex == VB.VBIndex)
 					{
 						// Remove this bone as we have written data for it (false so we dont resize allocation)
-						// 删除该骨骼，因为我们已经为其写入了数据（错误，因此我们不调整分配大小）
+      // 删除该骨骼，因为我们已经为其写入了数据（错误，因此我们不调整分配大小）
 						VBCompactPoseData.RemoveAtSwap(Idx, EAllowShrinking::No);
 						break; //Modified TArray so must break here
 					}
 				}
 				
 				// extract animation
-				// 提取动画
+    // 提取动画
 				const FRawAnimSequenceTrack& TrackToExtract = AnimationTrack.InternalTrackData;
 				auto OverrideTransform = OverrideBoneTransforms.Find(AnimationTrack.Name);
 				{
 					// Bail out (with rather wacky data) if data is empty for some reason.
-					// 如果由于某种原因数据为空，则退出（使用相当古怪的数据）。
+     // 如果由于某种原因数据为空，则退出（使用相当古怪的数据）。
 					if (TrackToExtract.PosKeys.Num() == 0 || TrackToExtract.RotKeys.Num() == 0)
 					{
 						InOutPose[PoseBoneIndex].SetIdentity();
@@ -692,7 +692,7 @@ void ExtractPose(const TArray<FBoneAnimationTrack>& BoneAnimationTracks, const T
 	}
 
 	//Build Virtual Bones
-	//构建虚拟骨骼
+ // 构建虚拟骨骼
 	if (VBCompactPoseData.Num() > 0)
 	{
 		FCSPose<FCompactPose> CSPose1;
@@ -737,7 +737,7 @@ void UAnimDataModel::Evaluate(FAnimationPoseData& InOutPoseData, const UE::Anim:
 	FCompactPose& OutPose = InOutPoseData.GetPose();
 	
 	// Generate keys to interpolate between
-	// 生成键以在之间进行插值
+ // 生成键以在之间进行插值
 	int32 KeyIndex1, KeyIndex2;
 	float Alpha;
 	FAnimationRuntime::GetKeyIndicesFromTime(KeyIndex1, KeyIndex2, Alpha, Time, FrameRate, NumberOfKeys);
@@ -745,7 +745,7 @@ void UAnimDataModel::Evaluate(FAnimationPoseData& InOutPoseData, const UE::Anim:
 	if (InterpolationType == EAnimInterpolationType::Step)
 	{
 		// Force stepping between keys
-		// 在按键之间强制步进
+  // 在按键之间强制步进
 		Alpha = 0.f;
 	}
 
@@ -763,7 +763,7 @@ void UAnimDataModel::Evaluate(FAnimationPoseData& InOutPoseData, const UE::Anim:
 	}
 
 	// Evaluate animation float curve data
-	// 评估动画浮动曲线数据
+ // 评估动画浮动曲线数据
 	UE::Anim::EvaluateFloatCurvesFromModel(this, InOutPoseData.GetCurve(), Time);
 
 	const double TimePerFrame = FrameRate.AsInterval();
@@ -774,14 +774,14 @@ void UAnimDataModel::Evaluate(FAnimationPoseData& InOutPoseData, const UE::Anim:
 		for (const FTransformCurve& Curve : GetTransformCurves())
 		{
 			// if disabled, do not handle
-			// 如果禁用，则不处理
+   // 如果禁用，则不处理
 			if (Curve.GetCurveTypeFlag(AACF_Disabled))
 			{
 				continue;
 			}
 
 			// note we're not checking Curve.GetCurveTypeFlags() yet
-			// 请注意，我们还没有检查 Curve.GetCurveTypeFlags()
+   // 请注意，我们还没有检查 Curve.GetCurveTypeFlags()
 			ActiveCurves.FindOrAdd(Curve.GetName(), &Curve);
 		}
 	}
@@ -804,7 +804,7 @@ void UAnimDataModel::Evaluate(FAnimationPoseData& InOutPoseData, const UE::Anim:
 	{
 		const FCompactPoseBoneIndex PoseBoneIndex = RequiredBones.GetCompactPoseIndexFromSkeletonIndex(Attribute.Identifier.GetBoneIndex());
 		// Only add attribute if the bone its tied to exists in the currently evaluated set of bones
-		// 仅当所绑定的骨骼存在于当前评估的骨骼集中时才添加属性
+  // 仅当所绑定的骨骼存在于当前评估的骨骼集中时才添加属性
 		if(PoseBoneIndex.IsValid())
 		{
 			UE::Anim::Attributes::GetAttributeValue(InOutPoseData.GetAttributes(), PoseBoneIndex, Attribute, EvaluationContext.SampleFrameRate.AsSeconds(EvaluationContext.SampleTime));
@@ -832,7 +832,7 @@ FRichCurve* UAnimDataModel::GetMutableRichCurve(const FAnimationCurveIdentifier&
 			if (CurveIdentifier.Channel != ETransformCurveChannel::Invalid && CurveIdentifier.Axis != EVectorCurveChannel::Invalid)
 			{
 				// Dealing with transform curve
-				// 处理变换曲线
+    // 处理变换曲线
 				FTransformCurve* TransformCurve = FindMutableTransformCurveById(CurveIdentifier);
 				if (TransformCurve)
 				{

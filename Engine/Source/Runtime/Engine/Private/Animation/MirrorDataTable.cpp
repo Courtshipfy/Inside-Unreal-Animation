@@ -105,7 +105,7 @@ FName UMirrorDataTable::GetMirrorName(FName InName, const TArray<FMirrorFindRepl
 		if (regExStr.FindReplaceMethod == EMirrorFindReplaceMethod::Prefix)
 		{
 			// convert prefix expression to regex that matches start of string, prefix, and any number of characters
-			// 将前缀表达式转换为匹配字符串开头、前缀和任意数量字符的正则表达式
+   // 将前缀表达式转换为匹配字符串开头、前缀和任意数量字符的正则表达式
 			FindString = FindString + TEXT("([^}]*)");
 			FindString = TEXT("^") + FindString;
 			ReplaceString = ReplaceString + TEXT("$1");
@@ -114,7 +114,7 @@ FName UMirrorDataTable::GetMirrorName(FName InName, const TArray<FMirrorFindRepl
 		else if (regExStr.FindReplaceMethod == EMirrorFindReplaceMethod::Suffix)
 		{
 			// convert suffix expression to regex that matches any number of characters start, the suffix, and end of string
-			// 将后缀表达式转换为匹配任意数量的字符串开头、后缀和结尾字符的正则表达式
+   // 将后缀表达式转换为匹配任意数量的字符串开头、后缀和结尾字符的正则表达式
 			FindString = TEXT("([^}]*)") + FindString + TEXT("$");
 			ReplaceString = TEXT("$1") + ReplaceString;
 		}
@@ -166,7 +166,7 @@ FName UMirrorDataTable::FindBestMirroredBone(
 	}
 	
 	// if the bone with the mirrored name exists in the skeleton, then great just use that...
-	// 如果骨骼中存在具有镜像名称的骨骼，那么就可以使用它......
+ // 如果骨骼中存在具有镜像名称的骨骼，那么就可以使用它......
 	const FName MirroredName = GetSettingsMirrorName(InBoneName);
 	if (InRefSkeleton.FindBoneIndex(MirroredName) != INDEX_NONE)
 	{
@@ -174,7 +174,7 @@ FName UMirrorDataTable::FindBestMirroredBone(
 	}
 
 	// fallback to closest mirrored bone, breaking ties (coincident bones) with fuzzy string score
-	// 回退到最近的镜像骨骼，用模糊字符串分数打破联系（重合骨骼）
+ // 回退到最近的镜像骨骼，用模糊字符串分数打破联系（重合骨骼）
 	TArray<FTransform> RefPoseGlobal;
 	FAnimationRuntime::FillUpComponentSpaceTransforms(InRefSkeleton, InRefSkeleton.GetRefBonePose(), RefPoseGlobal);
 	FVector MirroredLocation = RefPoseGlobal[SourceBoneIndex].GetLocation();
@@ -194,7 +194,7 @@ FName UMirrorDataTable::FindBestMirroredBone(
 	}
 
 	// find closest bone and all bones near the mirrored location within our search threshold
-	// 在我们的搜索阈值内找到最近的骨骼和镜像位置附近的所有骨骼
+ // 在我们的搜索阈值内找到最近的骨骼和镜像位置附近的所有骨骼
 	TArray<int32> BonesWithinThreshold;
 	int32 ClosestBone = 0;
 	int32 CurrentBone = 0;
@@ -215,18 +215,18 @@ FName UMirrorDataTable::FindBestMirroredBone(
 	}
 
 	// no other bones were found near the mirrored location, so return the closest one
-	// 在镜像位置附近没有发现其他骨头，因此返回最近的骨头
+ // 在镜像位置附近没有发现其他骨头，因此返回最近的骨头
 	if (BonesWithinThreshold.Num() <= 1)
 	{
 		return InRefSkeleton.GetBoneName(ClosestBone);
 	}
 	
 	// in the case where we have multiple bones at or near the mirrored location (that are within our search threshold)
-	// 如果我们在镜像位置或附近有多个骨骼（在我们的搜索阈值内）
+ // 如果我们在镜像位置或附近有多个骨骼（在我们的搜索阈值内）
 	// it would be arbitrary to pick the "closest" one since bones are not always placed with that degree of precision.
-	// 选择“最接近”的骨头是任意的，因为骨头的放置并不总是那么精确。
+ // 选择“最接近”的骨头是任意的，因为骨头的放置并不总是那么精确。
 	// in this case, we break the tie with a fuzzy string comparison with the source bone name...
-	// 在这种情况下，我们通过与源骨骼名称的模糊字符串比较来打破平局......
+ // 在这种情况下，我们通过与源骨骼名称的模糊字符串比较来打破平局......
 	const FString SourceBoneStr = InBoneName.ToString().ToLower();
 	float BestScore = 0.f;
 	int32 BestBoneIndex = INDEX_NONE;
@@ -268,9 +268,9 @@ void UMirrorDataTable::FindReplaceMirroredNames()
 	auto AddMirrorRow = [this, &bChangedTable, &NamesByCategory](const FName& Name, const FName& MirroredName, EMirrorRowType::Type RowType)
 	{
 		// directly add rows to avoid using FDataTableEditorUtils, which is not appropriate at this point
-		// 直接添加行以避免使用FDataTableEditorUtils，此时不合适
+  // 直接添加行以避免使用FDataTableEditorUtils，此时不合适
 		// equivalent to FDataTableEditorUtils::AddRow(DataTable, BoneName);
-		// 相当于 FDataTableEditorUtils::AddRow(DataTable, BoneName);
+  // 相当于 FDataTableEditorUtils::AddRow(DataTable, BoneName);
 		static const FString CategoryName[] = { TEXT(":Bone"), TEXT(":Notify"), TEXT(":Curve"), TEXT(":SyncMarker") };
 		if (!NamesByCategory[RowType].Contains(Name))
 		{
@@ -280,7 +280,7 @@ void UMirrorDataTable::FindReplaceMirroredNames()
 			while (ExistingRow)
 			{
 				// Row names must be unique - in this case append a category name
-				// 行名称必须是唯一的 - 在本例中附加一个类别名称
+    // 行名称必须是唯一的 - 在本例中附加一个类别名称
 				FString RowString = Name.ToString() + CategoryName[RowType];
 				if (RenameAttempts > 0)
 				{
@@ -295,11 +295,11 @@ void UMirrorDataTable::FindReplaceMirroredNames()
 			{
 				Modify();
 				// Allocate data to store information, using UScriptStruct to know its size
-				// 分配数据来存储信息，使用UScriptStruct知道其大小
+    // 分配数据来存储信息，使用UScriptStruct知道其大小
 				uint8* RowData = (uint8*)FMemory::Malloc(RowStruct->GetStructureSize());
 				RowStruct->InitializeStruct(RowData);
 				// Add to row map
-				// 添加到行图
+    // 添加到行图
 				AddRowInternal(RowName, RowData);
 				bChangedTable = true;
 			}
@@ -345,7 +345,7 @@ void UMirrorDataTable::FindReplaceMirroredNames()
 	Skeleton->GetCurveMetaDataNames(CurveNames);
 
 	// For every source curve, try to find the curve with the same name in the target.
-	// 对于每条源曲线，尝试在目标中查找同名曲线。
+ // 对于每条源曲线，尝试在目标中查找同名曲线。
 	for (const FName& CurveName : CurveNames)
 	{
 		FName MirroredName = FindReplace(CurveName);
@@ -375,7 +375,7 @@ void UMirrorDataTable::FillCompactPoseMirrorBones(const FBoneContainer& BoneCont
 			FSkeletonPoseBoneIndex SkeletonPoseBoneIndex = BoneContainer.GetSkeletonPoseIndexFromCompactPoseIndex(FCompactPoseBoneIndex(CompactBoneIndex));
 
 			//Mirror Bone
-			//[翻译失败: Mirror Bone]
+   // 镜骨
 			const FSkeletonPoseBoneIndex MirrorIndex = MirrorBoneIndexes.IsValidIndex(SkeletonPoseBoneIndex.GetInt()) ? MirrorBoneIndexes[SkeletonPoseBoneIndex] : FSkeletonPoseBoneIndex(INDEX_NONE);
 
 			OutCompactPoseMirrorBones.Add(BoneContainer.GetCompactPoseIndexFromSkeletonPoseIndex(MirrorIndex));
@@ -395,7 +395,7 @@ void UMirrorDataTable::FillMirrorBoneIndexes(const USkeleton* InSkeleton, TCusto
 	const FReferenceSkeleton& ReferenceSkeleton = InSkeleton->GetReferenceSkeleton();
 
 	// Reset the mirror table to defaults (no mirroring)
-	// [翻译失败: Reset the mirror table to defaults (no mirroring)]
+ // 将镜像表重置为默认值（无镜像）
 	OutMirrorBoneIndexes.SetNumUninitialized(ReferenceSkeleton.GetNum());
 	FMemory::Memset(OutMirrorBoneIndexes.GetData(), INDEX_NONE, OutMirrorBoneIndexes.Num() * OutMirrorBoneIndexes.GetTypeSize());
 
@@ -416,7 +416,7 @@ void UMirrorDataTable::FillMirrorBoneIndexes(const USkeleton* InSkeleton, TCusto
 			if (!OutMirrorBoneIndexes[BoneIndex].IsValid())
 			{
 				// Find the candidate mirror partner for this bone (falling back to mirroring to self)
-				// [翻译失败: Find the candidate mirror partner for this bone (falling back to mirroring to self)]
+    // 找到该骨骼的候选镜像伙伴（回到镜像自身）
 				FName SourceBoneName = ReferenceSkeleton.GetBoneName(BoneIndex);
 				int32 MirrorBoneIndex = INDEX_NONE;
 
@@ -481,7 +481,7 @@ void UMirrorDataTable::FillMirrorArrays()
 			case  EMirrorRowType::Curve:
 			{
 				// curves swap, so only one entry should exist.  For instance, if the table has (Left, Right) and (Right, Left) only add one item
-				// [翻译失败: curves swap, so only one entry should exist.  For instance, if the table has (Left, Right) and (Right, Left) only add one item]
+    // 曲线交换，因此只应存在一个条目。  例如，如果表格有（左，右）和（右，左），则仅添加一项
 				const FName* TestMirroredMatch = CurveToMirrorCurveMap.Find(Value.MirroredName);
 				if (TestMirroredMatch == nullptr || *TestMirroredMatch != Value.Name)
 				{

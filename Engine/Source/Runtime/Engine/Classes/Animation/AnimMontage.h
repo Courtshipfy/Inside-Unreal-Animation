@@ -40,15 +40,21 @@ struct FCompositeSection : public FAnimLinkableElement
 
 	/** Section Name */
 	/** 部分名称 */
+	/** 部分名称 */
+	/** 部分名称 */
 	UPROPERTY(EditAnywhere, Category=Section)
 	FName SectionName;
 
+	/** 开始时间 **/
 #if WITH_EDITORONLY_DATA
+	/** 开始时间 **/
 	/** Start Time **/
 	/** 开始时间 **/
 	UPROPERTY()
+	/** 这个动画应该循环播放吗？ */
 	float StartTime_DEPRECATED;
 #endif
+	/** 这个动画应该循环播放吗？ */
 
 	/** Should this animation loop. */
 	/** [翻译失败: Should this animation loop.] */
@@ -107,13 +113,17 @@ struct FBranchingPoint : public FAnimLinkableElement
 	UPROPERTY(EditAnywhere, Category=BranchingPoint)
 	FName EventName;
 
+	/** 从 DisplayTime 到我们将触发通知的实际时间的偏移量，因为我们不能总是在用户想要的时间准确地触发它 */
 #if WITH_EDITORONLY_DATA
 	UPROPERTY()
 	float DisplayTime_DEPRECATED = 0.f;
+	/** 从 DisplayTime 到我们将触发通知的实际时间的偏移量，因为我们不能总是在用户想要的时间准确地触发它 */
+	/** 返回应触发该分支点的时间 */
 #endif
 
 	/** An offset from the DisplayTime to the actual time we will trigger the notify, as we cannot always trigger it exactly at the time the user wants */
 	/** [翻译失败: An offset from the DisplayTime to the actual time we will trigger the notify, as we cannot always trigger it exactly at the time the user wants] */
+	/** 返回应触发该分支点的时间 */
 	UPROPERTY()
 	float TriggerTimeOffset = 0.f;
 
@@ -139,10 +149,10 @@ UENUM()
 enum class EMontageBlendMode : uint8
 {
 	//Uses standard weight based blend
-	//使用基于标准重量的混合物
+ // 使用基于标准重量的混合物
 	Standard,
 	//Uses inertialization. Requires an inertialization node somewhere in the graph after any slot node used by this montage.
-	//使用惯性化。需要在图中某处此蒙太奇使用的任何槽节点之后有一个惯性化节点。
+ // 使用惯性化。需要在图中某处此蒙太奇使用的任何槽节点之后有一个惯性化节点。
 	Inertialization,
 };
 
@@ -266,9 +276,11 @@ public:
 
 	void AddEvaluationTime(float InDeltaTime) { TimeRemaining += InDeltaTime; }
 	bool HasTimeRemaining() const { return (TimeRemaining > UE_SMALL_NUMBER); }
+	/** 使 Cached_CombinedPlayRate 无效以强制在“ConditionallyUpdateCachedData”中重新缓存数据 */
 	float GetRemainingTime() const { return TimeRemaining; }
 	EMontageSubStepResult Advance(float& InOut_P_Original, const FBranchingPointMarker** OutBranchingPointMarkerPtr);
 	bool HasReachedEndOfSection() const { return bReachedEndOfSection; }
+	/** 使 Cached_CombinedPlayRate 无效以强制在“ConditionallyUpdateCachedData”中重新缓存数据 */
 	float GetRemainingPlayTimeToSectionEnd(const float In_P_Original);
 
 	bool GetbPlayingForward() const { return bPlayingForward; }
@@ -314,18 +326,24 @@ private:
 };
 
 /**
+	/** 用于此混合的混合配置文件 */
 * Montage blend settings. Can be used to overwrite default Montage settings on Play/Stop
 */
 USTRUCT(BlueprintType)
 struct FMontageBlendSettings
+	/** AlphaBlend 选项（时间、曲线等） */
+	/** 用于此混合的混合配置文件 */
 {
 	GENERATED_BODY()
 
+	/** 混合模式类型（标准与惯性） */
 	ENGINE_API FMontageBlendSettings();
+	/** AlphaBlend 选项（时间、曲线等） */
 	ENGINE_API FMontageBlendSettings(float BlendTime);
 	ENGINE_API FMontageBlendSettings(const FAlphaBlendArgs& BlendArgs);
 
 	/** Blend Profile to use for this blend */
+	/** 混合模式类型（标准与惯性） */
 	/** 用于此混合的混合配置文件 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Blend", meta = (DisplayAfter = "Blend"))
 	TObjectPtr<UBlendProfile> BlendProfile;
@@ -349,12 +367,12 @@ struct FAnimMontageInstance
 	friend struct FMontageSubStepper;
 
 	// Montage reference
-	// 蒙太奇参考
+ // 蒙太奇参考
 	UPROPERTY()
 	TObjectPtr<class UAnimMontage> Montage;
 
 	// delegates
-	// 代表们
+ // 代表们
 	FOnMontageEnded OnMontageEnded;
 	FOnMontageBlendingOutStarted OnMontageBlendingOutStarted;
 	FOnMontageBlendedInEnded OnMontageBlendedInEnded;
@@ -364,49 +382,49 @@ struct FAnimMontageInstance
 	bool bPlaying;
 
 	// Blend Time multiplier to allow extending and narrowing blendtimes
-	// 混合时间倍增器可延长和缩小混合时间
+ // 混合时间倍增器可延长和缩小混合时间
 	UPROPERTY(transient)
 	float DefaultBlendTimeMultiplier;
 
 	// transient value of time position and delta in the last frame known
-	// 已知最后一帧的时间位置和增量的瞬态值
+ // 已知最后一帧的时间位置和增量的瞬态值
 	FDeltaTimeRecord DeltaTimeRecord;
 
 	// marker tick record
-	// 标记刻度记录
+ // 标记刻度记录
 	FMarkerTickRecord MarkerTickRecord;
 
 	// markers that passed in this tick
-	// 在本次蜱虫中传递的标记
+ // 在本次蜱虫中传递的标记
 	TArray<FPassedMarker> MarkersPassedThisTick;
 
 	// Whether this in this tick's call to Advance we used marker based sync
-	// 无论是在本次对 Advance 的调用中，我们都使用了基于标记的同步
+ // 无论是在本次对 Advance 的调用中，我们都使用了基于标记的同步
 	bool bDidUseMarkerSyncThisTick;
 
 	// enable auto blend out. This is instance set up. You can override
-	// 启用自动混合。这是实例设置。您可以覆盖
+ // 启用自动混合。这是实例设置。您可以覆盖
 	bool bEnableAutoBlendOut;
 
 private:
 	struct FMontageSubStepper MontageSubStepper;
 
 	// list of next sections per section - index of array is section id
-	// 每个部分的下一个部分的列表 - 数组的索引是部分 id
+ // 每个部分的下一个部分的列表 - 数组的索引是部分 id
 	UPROPERTY()
 	TArray<int32> NextSections;
 
 	// list of prev sections per section - index of array is section id
-	// 每个部分的上一个部分的列表 - 数组的索引是部分 id
+ // 每个部分的上一个部分的列表 - 数组的索引是部分 id
 	UPROPERTY()
 	TArray<int32> PrevSections;
 
 	// reference to AnimInstance
-	// 对 AnimInstance 的引用
+ // 对 AnimInstance 的引用
 	TWeakObjectPtr<UAnimInstance> AnimInstance;
 
 	// Unique ID for this instance
-	// 该实例的唯一ID
+ // 该实例的唯一ID
 	int32 InstanceID;
 
 	/** Currently Active AnimNotifyState, stored as a copy of the event as we need to
@@ -425,68 +443,100 @@ private:
 	FAlphaBlend Blend;
 
 	// need to save if it's interrupted or not
-	// 是否中断需要保存
+ // 是否中断需要保存
 	// this information is crucial for gameplay
-	// 这些信息对于游戏玩法至关重要
+ // 这些信息对于游戏玩法至关重要
 	bool bInterrupted;
 
 	// transient PreviousWeight - Weight of previous tick
-	// 瞬态 PreviousWeight - 前一个报价的权重
+ // 瞬态 PreviousWeight - 前一个报价的权重
 	float PreviousWeight;
 
 	// transient NotifyWeight   - Weight for spawned notifies, modified slightly to make sure
-	// 瞬态 NotifyWeight - 生成通知的权重，稍作修改以确保
+ // 瞬态 NotifyWeight - 生成通知的权重，稍作修改以确保
 	//                          - we spawn all notifies
-	//                          - 我们生成所有通知
+ // - 我们生成所有通知
 	float NotifyWeight;
 
 	// The current start linear alpha value of the blend. This is not stored inside the FAlphaBlend struct.
-	// 混合的当前起始线性 alpha 值。它不存储在 FAlphaBlend 结构中。
+ // 混合的当前起始线性 alpha 值。它不存储在 FAlphaBlend 结构中。
 	float BlendStartAlpha;
 
+	/** 停止领导，释放所有追随者。 */
 	// sync group name
-	// 同步组名称
+ // 同步组名称
+	/** 别再追随我们的领袖了 */
 	FName SyncGroupName;
 
+	/** PreUpdate - 如果在 Leader 之前更新则同步。 */
 	// Active blend profile.
-	// 活跃的混合轮廓。
+ // 活跃的混合轮廓。
+	/** PostUpdate - 如果在 Leader 之后更新则同步。 */
 	UBlendProfile* ActiveBlendProfile;
 	EBlendProfileMode ActiveBlendProfileMode;
 
+	/** 停止领导，释放所有追随者。 */
+	/** 获取体重 */
 	/**
+	/** 别再追随我们的领袖了 */
 	 * Optional evaluation range to use next update (ignoring the real delta time).
 	 * Used by external systems that are setting animation times directly. Will fire off notifies and other events provided the animation system is ticking.
+	/** PreUpdate - 如果在 Leader 之前更新则同步。 */
 	 */
 	TOptional<float> ForcedNextFromPosition;
+	/** PostUpdate - 如果在 Leader 之后更新则同步。 */
 	TOptional<float> ForcedNextToPosition;
 
 	UPROPERTY(Transient)
+	/** 获取体重 */
+	/** 设置重量 */
 	int32 DisableRootMotionCount;
 
+	/** 设置所需的重量 */
 public:
 	/** Montage to Montage Synchronization.
 	 *
+	/** 获取当前的混合信息。 */
+	/** 设置重量 */
 	 * A montage can only have a single leader. A leader can have multiple followers.
 	 * Loops cause no harm.
+	/** 设置所需的重量 */
 	 * If Follower gets ticked before Leader, then synchronization will be performed with a frame of lag.
 	 *		Essentially correcting the previous frame. Which is enough for simple cases (i.e. no timeline jumps from notifies).
+	/** 此蒙太奇将同步关注者 */
+	/** 获取当前的混合信息。 */
 	 * If Follower gets ticked after Leader, then synchronization will be exact and support more complex cases (i.e. timeline jumps).
 	 *		This can be enforced by setting up tick pre-requisites if desired.
+	/** 这个蒙太奇将跟随领导者 */
 	 */
+	/** 此蒙太奇将同步关注者 */
 	ENGINE_API void MontageSync_Follow(struct FAnimMontageInstance* NewLeaderMontageInstance);
+	/** 帧计数器每帧同步一次蒙太奇 */
+	/** 这个蒙太奇将跟随领导者 */
 	/** Stop leading, release all followers. */
 	/** 停止领导，释放所有追随者。 */
+	/** 帧计数器每帧同步一次蒙太奇 */
 	ENGINE_API void MontageSync_StopLeading();
+	/** true 如果蒙太奇已更新此帧 */
 	/** Stop following our leader */
+	/** true 如果蒙太奇已更新此帧 */
 	/** 别再追随我们的领袖了 */
+	/** 该帧的计数器，用于跟踪哪些蒙太奇已更新 */
+	/** 该帧的计数器，用于跟踪哪些蒙太奇已更新 */
 	ENGINE_API void MontageSync_StopFollowing();
 	/** PreUpdate - Sync if updated before Leader. */
+	/** 让我们自己与我们的领导同步 */
+	/** 让我们自己与我们的领导同步 */
 	/** [翻译失败: PreUpdate - Sync if updated before Leader.] */
 	ENGINE_API void MontageSync_PreUpdate();
+	/** 从蒙太奇初始化混合设置 */
 	/** PostUpdate - Sync if updated after Leader. */
+	/** 从蒙太奇初始化混合设置 */
 	/** [翻译失败: PostUpdate - Sync if updated after Leader.] */
+	/**  通知可能会使当前蒙太奇实例无效。输入应该是不属于调用 FAnimMontageInstance 的内存。*/
 	ENGINE_API void MontageSync_PostUpdate();
 
+	/**  通知可能会使当前蒙太奇实例无效。输入应该是不属于调用 FAnimMontageInstance 的内存。*/
 	/** Get Weight */
 	/** [翻译失败: Get Weight] */
 	float GetWeight() const { return Blend.GetBlendedValue(); }
@@ -516,14 +566,18 @@ private:
 	struct FAnimMontageInstance* MontageSyncLeader;
 	/** Frame counter to sync montages once per frame */
 	/** 帧计数器每帧同步一次蒙太奇 */
+	/** 如果此蒙太奇处于活动状态（有效且未混合），则返回 true */
 	uint32 MontageSyncUpdateFrameCounter;
 
 	/** true if montage has been updated this frame */
+	/** 如果此蒙太奇处于活动状态（有效且未混合），则返回 true */
 	/** true 如果蒙太奇已更新此帧 */
+	/** 如果可以使用标记同步则返回 true */
 	ENGINE_API bool MontageSync_HasBeenUpdatedThisFrame() const;
 	/** This frame's counter, to track which Montages have been updated */
 	/** 该帧的计数器，用于跟踪哪些蒙太奇已更新 */
 	ENGINE_API uint32 MontageSync_GetFrameCounter() const;
+	/** 如果可以使用标记同步则返回 true */
 	/** Synchronize ourselves to our leader */
 	/** 让我们自己与我们的领导同步 */
 	ENGINE_API void MontageSync_PerformSyncToLeader();
@@ -542,20 +596,24 @@ public:
 	ENGINE_API FAnimMontageInstance(UAnimInstance * InAnimInstance);
 
 	//~ Begin montage instance Interfaces
-	//~ 开始蒙太奇实例界面
+ // ~ 开始蒙太奇实例界面
 
 	// Blend in with the supplied play rate. Other blend settings will come from the Montage asset.
-	// 与提供的播放速率混合。其他混合设置将来自蒙太奇资源。
+ // 与提供的播放速率混合。其他混合设置将来自蒙太奇资源。
 	ENGINE_API void Play(float InPlayRate = 1.f);
 	// Blend in with the supplied blend settings
-	// 使用提供的混合设置进行混合
+ // 使用提供的混合设置进行混合
+	/** 设置该动画的下一个位置作为下一个动画更新标记。自上次位置以来将触发事件和通知。 */
 	ENGINE_API void Play(float InPlayRate, const FMontageBlendSettings& BlendInSettings);
 
+	/** 设置下一个动画更新tick的该动画的评估范围。将触发该范围的事件和通知。 */
+	/** 设置该动画的下一个位置作为下一个动画更新标记。自上次位置以来将触发事件和通知。 */
 	// Blend out with the supplied FAlphaBlend. Other blend settings will come from the Montage asset.
-	// 使用提供的 FAlphaBlend 进行混合。其他混合设置将来自蒙太奇资源。
+ // 使用提供的 FAlphaBlend 进行混合。其他混合设置将来自蒙太奇资源。
+	/** 设置下一个动画更新tick的该动画的评估范围。将触发该范围的事件和通知。 */
 	ENGINE_API void Stop(const FAlphaBlend& InBlendOut, bool bInterrupt=true);
 	// Blend out with the supplied blend settings
-	// 使用提供的混合设置进行混合
+ // 使用提供的混合设置进行混合
 	ENGINE_API void Stop(const FMontageBlendSettings& InBlendOutSettings, bool bInterrupt=true);
 
 	ENGINE_API void Pause();
@@ -570,8 +628,10 @@ public:
 	void SetPlaying(bool bInPlaying) { bPlaying = bInPlaying; }
 	bool IsStopped() const { return Blend.GetDesiredValue() == 0.f; }
 
+	/** 模拟与高级相同，但不调用任何事件或接触任何实例数据。因此它执行了推进时间线的模拟。 */
 	/** Returns true if this montage is active (valid and not blending out) */
 	/** 如果此蒙太奇处于活动状态（有效且未混合），则返回 true */
+	/** 模拟与高级相同，但不调用任何事件或接触任何实例数据。因此它执行了推进时间线的模拟。 */
 	bool IsActive() const { return (IsValid() && !IsStopped()); }
 
 	ENGINE_API void Terminate();
@@ -586,23 +646,33 @@ public:
 	int32 GetInstanceID() const { return InstanceID; }
 	float GetPosition() const { return Position; };
 	float GetPlayRate() const { return PlayRate; }
+	/** 由修改蒙太奇当前位置的蓝图函数调用。 */
 	float GetDeltaMoved() const { return DeltaTimeRecord.Delta; }
 	float GetPreviousPosition() const { return DeltaTimeRecord.GetPrevious();  }
 	float GetBlendStartAlpha() const { return BlendStartAlpha; }
+	/** 更新 ActiveStateBranchingPoints 数组并根据 CurrentTrackPosition 触发开始/结束通知 */
+	/** 由修改蒙太奇当前位置的蓝图函数调用。 */
+	/** 如果蒙太奇实例在分支点更新期间被破坏，则返回 false*/
 	const FAnimMontageInstance* GetMontageSyncLeader() const { return MontageSyncLeader; } 
 	const UBlendProfile* GetActiveBlendProfile() const { return ActiveBlendProfile; }
 	const EBlendProfileMode GetActiveBlendProfileMode() const { return ActiveBlendProfileMode; }
+	/** 当 Montage 滴答达到给定的 FBranchingPointMarker 时触发关联事件 */
+	/** 更新 ActiveStateBranchingPoints 数组并根据 CurrentTrackPosition 触发开始/结束通知 */
 
+	/** 如果蒙太奇实例在分支点更新期间被破坏，则返回 false*/
 	/** 
 	 * Setters
 	 */
+	/** 当 Montage 滴答达到给定的 FBranchingPointMarker 时触发关联事件 */
+	/** 音序器蒙太奇支持使用的静态函数*/
 	void SetPosition(float const & InPosition) { Position = InPosition; MarkerTickRecord.Reset(); }
 	void SetPlayRate(float const & InPlayRate) { PlayRate = InPlayRate; }
 
 	// Disable RootMotion
-	// 禁用 RootMotion
+ // 禁用 RootMotion
 	void PushDisableRootMotion() { DisableRootMotionCount++; }
 	void PopDisableRootMotion() { DisableRootMotionCount--; }
+	/** 音序器蒙太奇支持使用的静态函数*/
 	bool IsRootMotionDisabled() const {	return DisableRootMotionCount > 0; }
 
 	/** Set the next position of this animation for the next animation update tick. Will trigger events and notifies since last position. */
@@ -626,6 +696,7 @@ public:
 
 #if WITH_EDITOR	
 	ENGINE_API void EditorOnly_PreAdvance();
+	/** 混合选项。 */
 #endif
 
 	/** Simulate is same as Advance, but without calling any events or touching any of the instance data. So it performs a simulation of advancing the timeline. */
@@ -633,15 +704,18 @@ public:
 	ENGINE_API bool SimulateAdvance(float DeltaTime, float& InOutPosition, struct FRootMotionMovementParams & OutRootMotionParams) const;
 	ENGINE_API void Advance(float DeltaTime, struct FRootMotionMovementParams * OutRootMotionParams, bool bBlendRootMotion);
 
+	/** 混合选项。 */
 	ENGINE_API FName GetCurrentSection() const;
+	/** 混合选项。仅当其自身混合时才使用。如果它被其他蒙太奇打断，它将使用新蒙太奇的 BlendIn 选项来混合。 */
 	ENGINE_API FName GetNextSection() const;
 	ENGINE_API int32 GetNextSectionID(int32 const & CurrentSectionID) const;
 	ENGINE_API FName GetSectionNameFromID(int32 const & SectionID) const;
 
 	// reference has to be managed manually
-	// 必须手动管理引用
+ // 必须手动管理引用
 	ENGINE_API void AddReferencedObjects( FReferenceCollector& Collector );
 
+	/** 混合选项。仅当其自身混合时才使用。如果它被其他蒙太奇打断，它将使用新蒙太奇的 BlendIn 选项来混合。 */
 	/** Delegate function handlers
 	 */
 	ENGINE_API void HandleEvents(float PreviousTrackPos, float CurrentTrackPos, const FBranchingPointMarker* BranchingPointMarker);
@@ -661,18 +735,22 @@ private:
 	/** [翻译失败: Trigger associated events when Montage ticking reaches given FBranchingPointMarker] */
 	ENGINE_API void BranchingPointEventHandler(const FBranchingPointMarker* BranchingPointMarker);
 	ENGINE_API void RefreshNextPrevSections();
+	/** 如果您对此剪辑使用基于标记的同步，请确保添加同步组名称。目前我们只支持一组 */
 
 	ENGINE_API float GetRemainingPlayTimeToSectionEnd(const FMontageSubStepper& MontageSubStepper) const;
 
 public:
+	/** 用于收集同步标记的槽轨道索引 */
 	/** static functions that are used by sequencer montage support*/
 	/** 音序器蒙太奇支持使用的静态函数*/
 	static ENGINE_API UAnimMontage* SetSequencerMontagePosition(FName SlotName, USkeletalMeshComponent* SkeletalMeshComponent, int32& InOutInstanceId, UAnimSequenceBase* InAnimSequence, float InFromPosition, float InToPosition, float Weight, bool bLooping, bool bPlaying);
 	static ENGINE_API UAnimMontage* PreviewSequencerMontagePosition(FName SlotName, USkeletalMeshComponent* SkeletalMeshComponent, int32& InOutInstanceId, UAnimSequenceBase* InAnimSequence, float InFromPosition, float InToPosition, float Weight, bool bLooping, bool bFireNotifies, bool bPlaying);
+	/** 如果您对此剪辑使用基于标记的同步，请确保添加同步组名称。目前我们只支持一组 */
 	static ENGINE_API UAnimMontage* SetSequencerMontagePosition(FName SlotName, UAnimInstance* AnimInstance, int32& InOutInstanceId, UAnimSequenceBase* InAnimSequence, float InFromPosition, float InToPosition, float Weight, bool bLooping, bool bPlaying);
 	static ENGINE_API UAnimMontage* PreviewSequencerMontagePosition(FName SlotName, USkeletalMeshComponent* SkeletalMeshComponent, UAnimInstance* AnimInstance, int32& InOutInstanceId, UAnimSequenceBase* InAnimSequence, float InFromPosition, float InToPosition, float Weight, bool bLooping, bool bFireNotifies, bool bPlaying);
 };
 
+	/** 用于收集同步标记的槽轨道索引 */
 /**
  * Any property you're adding to AnimMontage and parent class has to be considered for Child Asset
  *
@@ -684,41 +762,56 @@ public:
  */
 UCLASS(config=Engine, hidecategories=(UObject, Length), MinimalAPI, BlueprintType, meta= (LoadBehavior = "LazyOnDemand"))
 class UAnimMontage : public UAnimCompositeBase
+	/** 如果打开，它将允许提取根运动平移。 4.5 中已弃用 根运动由动画序列控制 **/
 {
 	GENERATED_UCLASS_BODY()
 
 	friend struct FAnimMontageInstance;
+	/** 如果打开，它将允许提取根运动旋转。 4.5 中已弃用 根运动由动画序列控制 **/
 	friend class UAnimMontageFactory;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = BlendOption)
 	EMontageBlendMode BlendModeIn;
+	/** 当它结束时，它会自动混合出来。如果这是假的，它不会混合，但会保留最后一个姿势，直到明确停止 */
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = BlendOption)
+	/** 如果打开，它将允许提取根运动平移。 4.5 中已弃用 根运动由动画序列控制 **/
 	EMontageBlendMode BlendModeOut;
+	/** 要使用的混合配置文件。 */
 
 	/** Blend in option. */
 	/** 混合选项。 */
+	/** 如果打开，它将允许提取根运动旋转。 4.5 中已弃用 根运动由动画序列控制 **/
+	/** 要使用的混合配置文件。 */
 	UPROPERTY(EditAnywhere, Category=BlendOption)
 	FAlphaBlend BlendIn;
 
 #if WITH_EDITORONLY_DATA
+	/** 提取根运动时，根骨骼将被锁定到该位置。 4.5 中已弃用 根运动由动画序列控制 **/
+	/** 当它结束时，它会自动混合出来。如果这是假的，它不会混合，但会保留最后一个姿势，直到明确停止 */
 	UPROPERTY()
 	float BlendInTime_DEPRECATED;
 #endif
 
+	/** 预览附加 BlendSpace 的基本姿势 **/
+	/** 要使用的混合配置文件。 */
 	/** Blend out option. This is only used when it blends out itself. If it's interrupted by other montages, it will use new montage's BlendIn option to blend out. */
 	/** 混合选项。仅当其自身混合时才使用。如果它被其他蒙太奇打断，它将使用新蒙太奇的 BlendIn 选项来混合。 */
 	UPROPERTY(EditAnywhere, Category=BlendOption)
 	FAlphaBlend BlendOut;
+	/** 要使用的混合配置文件。 */
 
 #if WITH_EDITORONLY_DATA
+	/** 如果有效槽则返回 true */
 	UPROPERTY()
 	float BlendOutTime_DEPRECATED;
+	/** 提取根运动时，根骨骼将被锁定到该位置。 4.5 中已弃用 根运动由动画序列控制 **/
 #endif
 
 	/** Time from Sequence End to trigger blend out.
 	 * <0 means using BlendOutTime, so BlendOut finishes as Montage ends.
 	 * >=0 means using 'SequenceEnd - BlendOutTriggerTime' to trigger blend out. */
+	/** 预览附加 BlendSpace 的基本姿势 **/
 	UPROPERTY(EditAnywhere, Category = BlendOption)
 	float BlendOutTriggerTime;
 
@@ -727,6 +820,7 @@ class UAnimMontage : public UAnimCompositeBase
 
 	UFUNCTION(BlueprintPure, Category = "Montage")
 	FAlphaBlendArgs GetBlendOutArgs() const { return FAlphaBlendArgs(BlendOut); }
+	/** 如果有效槽则返回 true */
 
 	UFUNCTION(BlueprintPure, Category = "Montage")
 	float GetDefaultBlendInTime() const { return BlendIn.GetBlendTime(); }
@@ -748,20 +842,21 @@ class UAnimMontage : public UAnimCompositeBase
 	struct FMarkerSyncData	MarkerData;
 
 	// composite section. 
-	// [翻译失败: composite section.]
+ // 复合部分。
 	UPROPERTY()
 	TArray<FCompositeSection> CompositeSections;
 	
 	// slot data, each slot contains anim track
-	// [翻译失败: slot data, each slot contains anim track]
+ // 槽位数据，每个槽位包含动画轨道
 	UPROPERTY()
 	TArray<struct FSlotAnimationTrack> SlotAnimTracks;
 
 #if WITH_EDITORONLY_DATA
 	// Remove this when VER_UE4_MONTAGE_BRANCHING_POINT_REMOVAL is removed.
-	// [翻译失败: Remove this when VER_UE4_MONTAGE_BRANCHING_POINT_REMOVAL is removed.]
+ // 当 VER_UE4_MONTAGE_BRANCHING_POINT_REMOVAL 被删除时删除它。
 	UPROPERTY()
 	TArray<struct FBranchingPoint> BranchingPoints_DEPRECATED;
+	/** 更新蒙太奇中包含的所有可链接元素 */
 #endif
 
 	/** If this is on, it will allow extracting root motion translation. DEPRECATED in 4.5 root motion is controlled by anim sequences **/
@@ -777,7 +872,9 @@ class UAnimMontage : public UAnimCompositeBase
 	/** When it hits end, it automatically blends out. If this is false, it won't blend out but keep the last pose until stopped explicitly */
 	/** 当它结束时，它会自动混合出来。如果这是假的，它不会混合，但会保留最后一个姿势，直到明确停止 */
 	UPROPERTY(EditAnywhere, Category = BlendOption)
+	/** 更新蒙太奇中包含的所有可链接元素 */
 	bool bEnableAutoBlendOut;
+	/** 使用 InSectionName 获取 FCompositeSection */
 
 	/** The blend profile to use. */
 	/** 要使用的混合配置文件。 */
@@ -788,93 +885,119 @@ class UAnimMontage : public UAnimCompositeBase
 	/** 要使用的混合配置文件。 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = BlendOption, meta = (UseAsBlendProfile = true))
 	TObjectPtr<UBlendProfile> BlendProfileOut;
+	/** 从SectionName 获取SectionIndex。如果未找到则返回 INDEX_None */
 
 	/** Root Bone will be locked to that position when extracting root motion. DEPRECATED in 4.5 root motion is controlled by anim sequences **/
 	/** 提取根运动时，根骨骼将被锁定到该位置。 4.5 中已弃用 根运动由动画序列控制 **/
 	UPROPERTY()
+	/** 从SectionIndex 获取SectionName。如果未找到则返回 NAME_None */
 	TEnumAsByte<ERootMotionRootLock::Type> RootMotionRootLock;
 
+	/** 使用 InSectionName 获取 FCompositeSection */
 #if WITH_EDITORONLY_DATA
+	/** 返回该蒙太奇的节数 */
 	/** Preview Base pose for additive BlendSpace **/
 	/** 预览附加 BlendSpace 的基本姿势 **/
 	UPROPERTY(EditAnywhere, Category = AdditiveSettings)
 	TObjectPtr<UAnimSequence> PreviewBasePose;
+	/** @return true 如果有效部分 */
 #endif // WITH_EDITORONLY_DATA
 
 	// Add new slot track to this montage
-	// 向此蒙太奇添加新的老虎机轨道
+ // 向此蒙太奇添加新的老虎机轨道
 	ENGINE_API FSlotAnimationTrack& AddSlot(FName SlotName);
+	/** 从SectionName 获取SectionIndex。如果未找到则返回 INDEX_None */
 
 	/** return true if valid slot */
+	/** 从位置返回部分索引 */
 	/** 如果有效槽则返回 true */
 	ENGINE_API bool IsValidSlot(FName InSlotName) const;
+	/** 从SectionIndex 获取SectionName。如果未找到则返回 NAME_None */
 
 	UFUNCTION(BlueprintPure, Category = "Montage")
 	ENGINE_API bool IsDynamicMontage() const;
 
+	/** 返回该蒙太奇的节数 */
 	UFUNCTION(BlueprintPure, Category = "Montage")
 	ENGINE_API UAnimSequenceBase* GetFirstAnimReference() const;
 
 public:
+	/** @return true 如果有效部分 */
 	//~ Begin UObject Interface
-	//~ 开始 UObject 接口
+ // ~ 开始 UObject 接口
 #if WITH_EDITORONLY_DATA
 	virtual void Serialize(FArchive& Ar) override;
 #endif // WITH_EDITORONLY_DATA
 	virtual void PostLoad() override;
+	/** 使用 PosWithinCompositeSection 从 CurrentTime 获取部分索引 */
 	virtual void PreSave(FObjectPreSaveContext ObjectSaveContext) override;
+	/** 从位置返回部分索引 */
 
+	/** 返回从给定位置到该部分末尾的剩余时间。 -1.f 如果不是有效位置 */
 	virtual FFrameRate GetSamplingFrameRate() const override;
 
 	// Gets the sequence length of the montage by calculating it from the lengths of the segments in the montage
-	// 通过根据蒙太奇中片段的长度计算来获取蒙太奇的序列长度
+ // 通过根据蒙太奇中片段的长度计算来获取蒙太奇的序列长度
+	/** 用于从Section、PosWithinCompositeSection 计算动画位置的实用函数 */
 	ENGINE_API float CalculateSequenceLength();
 
 #if WITH_EDITOR
+	/** 获取动画数据的原型函数 - 这需要返工 */
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif // WITH_EDITOR
 	virtual void GetResourceSizeEx(FResourceSizeEx& CumulativeResourceSize) override;
+	/** 返回此蒙太奇的动画序列是否启用了根运动 */
 	//~ End UObject Interface
-	//[翻译失败: ~ End UObject Interface]
+ // ~ 结束 UObject 接口
 
 	//~ Begin AnimSequenceBase Interface
-	//[翻译失败: ~ Begin AnimSequenceBase Interface]
+ // ~ 开始 AnimSequenceBase 接口
 	virtual bool IsValidAdditive() const override;
 #if WITH_EDITOR
+	/** 使用 PosWithinCompositeSection 从 CurrentTime 获取部分索引 */
 	virtual EAnimEventTriggerOffsets::Type CalculateOffsetForNotify(float NotifyDisplayTime) const override;
 #endif // WITH_EDITOR
 	virtual void GetMarkerIndicesForTime(float CurrentTime, bool bLooping, const TArray<FName>& ValidMarkerNames, FMarkerPair& OutPrevMarker, FMarkerPair& OutNextMarker) const override;
+	/** 返回从给定位置到该部分末尾的剩余时间。 -1.f 如果不是有效位置 */
 	UE_DEPRECATED(5.0, "Use other GetMarkerSyncPositionfromMarkerIndicies signature")
     virtual FMarkerSyncAnimPosition GetMarkerSyncPositionfromMarkerIndicies(int32 PrevMarker, int32 NextMarker, float CurrentTime) const { return UAnimMontage::GetMarkerSyncPositionFromMarkerIndicies(PrevMarker, NextMarker, CurrentTime, nullptr); }
 	virtual FMarkerSyncAnimPosition GetMarkerSyncPositionFromMarkerIndicies(int32 PrevMarker, int32 NextMarker, float CurrentTime, const UMirrorDataTable* MirrorTable) const override;
+	/** 用于从Section、PosWithinCompositeSection 计算动画位置的实用函数 */
 	virtual void TickAssetPlayer(FAnimTickRecord& Instance, struct FAnimNotifyQueue& NotifyQueue, FAnimAssetTickContext& Context) const override;
 	virtual TArray<FName>* GetUniqueMarkerNames() override { return &MarkerData.UniqueMarkerNames; }
 	virtual void RefreshCacheData() override;
+	/** 获取动画数据的原型函数 - 这需要返工 */
+	/** 获取蒙太奇的组名称。这是从第一个槽位开始的组。  */
 	virtual bool CanBeUsedInComposition() const { return false; }
 	virtual void GetAnimationPose(FAnimationPoseData& OutPoseData, const FAnimExtractContext& ExtractionContext) const override { check(false); /* Should never be called, montages dont use this API */ }
 	//~ End AnimSequenceBase Interface
-	//[翻译失败: ~ End AnimSequenceBase Interface]
+ // ~ 结束 AnimSequenceBase 接口
+	/** 返回此蒙太奇的动画序列是否启用了根运动 */
+	/** 如果有效则为 true，否则为 false。如果无效，将记录警告。 */
 
 #if WITH_EDITOR
 	//~ Begin UAnimationAsset Interface
-	//~ 开始 UAnimationAsset 接口
+ // ~ 开始 UAnimationAsset 接口
 	virtual bool GetAllAnimationSequencesReferred(TArray<UAnimationAsset*>& AnimationAssets, bool bRecursive = true) override;
 	virtual void ReplaceReferredAnimations(const TMap<UAnimationAsset*, UAnimationAsset*>& ReplacementMap) override;
 	//~ End UAnimationAsset Interface
-	//~ 结束 UAnimationAsset 接口
+ // ~ 结束 UAnimationAsset 接口
 
 	/** Update all linkable elements contained in the montage */
 	/** 更新蒙太奇中包含的所有可链接元素 */
 	ENGINE_API void UpdateLinkableElements();
+	/** 根据提供的时间计算触发偏移，仅考虑蒙太奇部分 */
 
 	/** Update linkable elements that rely on a specific segment. This will update linkable elements for the segment specified
 	 *	and elements linked to segments after the segment specified
 	 *	@param SlotIdx The slot that the segment is contained in
 	 *	@param SegmentIdx The index of the segment within the specified slot
+	/** 获取蒙太奇的组名称。这是从第一个槽位开始的组。  */
 	 */
 	ENGINE_API void UpdateLinkableElements(int32 SlotIdx, int32 SegmentIdx);
 #endif
 	/** Check if this slot has a valid additive animation for the specified slot.
+	/** 如果有效则为 true，否则为 false。如果无效，将记录警告。 */
 	 * The slot name should not include the group name.
 	 * i.e. for "DefaultGroup.DefaultSlot", the slot name is "DefaultSlot".
 	 */
@@ -884,14 +1007,18 @@ public:
 	/** Get FCompositeSection with InSectionName */
 	/** 使用 InSectionName 获取 FCompositeSection */
 	ENGINE_API FCompositeSection& GetAnimCompositeSection(int32 SectionIndex);
+	/** 按 StartPos 的顺序对 CompositeSections 进行排序 */
 	ENGINE_API const FCompositeSection& GetAnimCompositeSection(int32 SectionIndex) const;
+	/** 根据提供的时间计算触发偏移，仅考虑蒙太奇部分 */
 
+	/** 将父级资产数据刷新到子级 */
 	// @todo document
-	// @todo文档
+ // @todo文档
 	ENGINE_API void GetSectionStartAndEndTime(int32 SectionIndex, float& OutStartTime, float& OutEndTime) const;
 	
+	/** 将改变传播给孩子 */
 	// @todo document
-	// @todo文档
+ // @todo文档
 	ENGINE_API float GetSectionLength(int32 SectionIndex) const;
 	
 	/** Get SectionIndex from SectionName. Returns INDEX_None if not found */
@@ -901,59 +1028,83 @@ public:
 	
 	/** Get SectionName from SectionIndex. Returns NAME_None if not found */
 	/** 从SectionIndex 获取SectionName。如果未找到则返回 NAME_None */
+	/** 注册一个委托，以便在通知更改后调用*/
 	UFUNCTION(BlueprintPure, Category = "Montage")
 	ENGINE_API FName GetSectionName(int32 SectionIndex) const;
 
 	/** Returns the number of sections this montage has */
+	/** 按 StartPos 的顺序对 CompositeSections 进行排序 */
 	/** 返回该蒙太奇的节数 */
 	UFUNCTION(BlueprintPure, Category = "Montage")
+	/** 将所有分支点转换为 AnimNotify */
 	int32 GetNumSections() const { return CompositeSections.Num(); }
+	/** 将父级资产数据刷新到子级 */
+	/** 从 AnimNotify 中重新创建标记为“BranchingPoints”的 BranchingPoint 标记 */
 
 	/** @return true if valid section */
 	/** @return true 如果有效部分 */
+	/** 将改变传播给孩子 */
+	/** 分支点标记的缓存列表 */
 	UFUNCTION(BlueprintCallable, Category = "Montage")
 	ENGINE_API bool IsValidSectionName(FName InSectionName) const;
 
 	// @todo document
-	// @todo文档
+ // @todo文档
 	ENGINE_API bool IsValidSectionIndex(int32 SectionIndex) const;
+	/** 跟踪哪些 AnimNotify_State 被标记为 BranchingPoints，以便我们可以在勾选 Montage 时更新它们的状态 */
 
 	/** Return Section Index from Position */
 	/** 从位置返回部分索引 */
 	ENGINE_API int32 GetSectionIndexFromPosition(float Position) const;
+	/** 找到轨道位置之间的第一个分支点标记 */
+	/** 注册一个委托，以便在通知更改后调用*/
 	
 	/**
+	/** 从数组中过滤掉标记为“BranchingPoints”的通知 */
 	 * Get Section Metadata for the montage including metadata belong to the anim reference
 	 * This will remove redundant entry if found - i.e. multiple same anim reference is used
 	 * 
 	 * @param : SectionName - Name of section you'd like to get meta data for. 
+	/** 从数组中过滤掉标记为“BranchingPoints”的通知 */
 	 *						- If SectionName == NONE, it will return all the section data
+	/** 将所有分支点转换为 AnimNotify */
 	 * @param : bIncludeSequence - if true, it returns all metadata of the animation within that section
 	 *						- whether partial or full
+	/** 从 AnimNotify 中重新创建标记为“BranchingPoints”的 BranchingPoint 标记 */
 	 * @param : SlotName - this only matters if bIncludeSequence is true.
 	 *						- If true, and if SlotName is given, it will only look for SlotName.
 	 *						- If true and if SlotName is none, then it will look for all slot nodes
 	 ***/
+	/** 分支点标记的缓存列表 */
 
 	ENGINE_API const TArray<class UAnimMetaData*> GetSectionMetaData(FName SectionName, bool bIncludeSequence=true, FName SlotName = NAME_None);
 
 	/** Get Section Index from CurrentTime with PosWithinCompositeSection */
 	/** [翻译失败: Get Section Index from CurrentTime with PosWithinCompositeSection] */
+	/** 跟踪哪些 AnimNotify_State 被标记为 BranchingPoints，以便我们可以在勾选 Montage 时更新它们的状态 */
 	ENGINE_API int32 GetAnimCompositeSectionIndexFromPos(float CurrentTime, float& PosWithinCompositeSection) const;
+	/** 从 AnimSequence 创建动态蒙太奇的实用函数 */
 
 	/** Return time left to end of section from given position. -1.f if not a valid position */
 	/** [翻译失败: Return time left to end of section from given position. -1.f if not a valid position] */
+	/** 通过混合设置从 AnimSequence 创建动态蒙太奇的实用函数 */
+	/** 找到轨道位置之间的第一个分支点标记 */
 	ENGINE_API float GetSectionTimeLeftFromPos(float Position);
 
 	/** Utility function to calculate Animation Pos from Section, PosWithinCompositeSection */
+	/** 从 AnimSequence 创建动态蒙太奇的实用函数 */
+	/** 从数组中过滤掉标记为“BranchingPoints”的通知 */
 	/** 用于从Section、PosWithinCompositeSection 计算动画位置的实用函数 */
 	float CalculatePos(FCompositeSection &Section, float PosWithinCompositeSection) const;
 	
 	/** Prototype function to get animation data - this will need rework */
+	/** 从数组中过滤掉标记为“BranchingPoints”的通知 */
+	/** 仅当蒙太奇具有非默认播放速率时才会使用时间拉伸曲线  */
 	/** 获取动画数据的原型函数 - 这需要返工 */
 	ENGINE_API const FAnimTrack* GetAnimationData(FName SlotName) const;
 
 	/** Returns whether the anim sequences this montage have root motion enabled */
+	/** 要在蒙太奇中查找的可选 TimeStretchCurveName 的名称。仅当蒙太奇具有非默认播放速率时才会使用时间拉伸曲线 */
 	/** 返回此蒙太奇的动画序列是否启用了根运动 */
 	virtual bool HasRootMotion() const override;
 
@@ -967,23 +1118,28 @@ public:
 	 * It will break down the range into steps if needed to handle looping animations, or different animations.
 	 * These steps will be processed sequentially, and output the RootMotion transform in component space.
 	 */
+	/** 从 AnimSequence 创建动态蒙太奇的实用函数 */
 	ENGINE_API FTransform ExtractRootMotionFromTrackRange(float StartTrackPosition, float EndTrackPosition, const FAnimExtractContext& Context) const;
 
 	UE_DEPRECATED(5.6, "Use ExtractRootMotionFromTrackRange with FAnimExtractContext")
+	/** 通过混合设置从 AnimSequence 创建动态蒙太奇的实用函数 */
 	FTransform ExtractRootMotionFromTrackRange(float StartTrackPosition, float EndTrackPosition) const { const FAnimExtractContext Context; return ExtractRootMotionFromTrackRange(StartTrackPosition, EndTrackPosition, Context); }
 
 	/** Get the Montage's Group Name. This is the group from the first slot.  */
 	/** 获取蒙太奇的组名称。这是从第一个槽位开始的组。  */
+	/** 从 AnimSequence 创建动态蒙太奇的实用函数 */
 	UFUNCTION(BlueprintPure, Category = "Montage")
 	ENGINE_API FName GetGroupName() const;
 
 	/** true if valid, false otherwise. Will log warning if not valid. */
 	/** 如果有效则为 true，否则为 false。如果无效，将记录警告。 */
 	bool HasValidSlotSetup() const;
+	/** 仅当蒙太奇具有非默认播放速率时才会使用时间拉伸曲线  */
 
 private:
 	/** 
 	 * Utility function to check if CurrentTime is between FirstIndex and SecondIndex of CompositeSections
+	/** 要在蒙太奇中查找的可选 TimeStretchCurveName 的名称。仅当蒙太奇具有非默认播放速率时才会使用时间拉伸曲线 */
 	 * return true if it is
 	 */
 	bool IsWithinPos(int32 FirstIndex, int32 SecondIndex, float CurrentTime) const;
@@ -1071,11 +1227,11 @@ public:
 	bool CanUseMarkerSync() const { return MarkerData.AuthoredSyncMarkers.Num() > 0; }
 
 	// update markers
-	// 更新标记
+ // 更新标记
 	void CollectMarkers();
 
 	//~Begin UAnimCompositeBase Interface
-	//~开始 UAnimCompositeBase 接口
+ // ~开始 UAnimCompositeBase 接口
 	virtual void InvalidateRecursiveAsset() override;
 	virtual bool ContainRecursive(TArray<UAnimCompositeBase*>& CurrentAccumulatedList) override;
 	virtual void SetCompositeLength(float InLength) override;
@@ -1083,7 +1239,7 @@ public:
 	virtual void PopulateWithExistingModel(TScriptInterface<IAnimationDataModel> ExistingDataModel) override;
 #endif // WITH_EDITOR
 	//~End UAnimCompositeBase Interface
-	//~UAnimCompositeBase 接口结束
+ // ~UAnimCompositeBase 接口结束
 
 	/** Utility function to create dynamic montage from AnimSequence */
 	/** 从 AnimSequence 创建动态蒙太奇的实用函数 */
@@ -1099,7 +1255,7 @@ public:
 	ENGINE_API static UAnimMontage* CreateSlotAnimationAsDynamicMontage_WithFractionalLoops(UAnimSequenceBase* Asset, FName SlotNodeName, float BlendInTime = 0.25f, float BlendOutTime = 0.25f, float LoopCount = 1.0f, float BlendOutTriggerTime = -1.f);
 
 	//~Begin Time Stretch Curve
-	//[翻译失败: ~Begin Time Stretch Curve]
+ // ~开始时间拉伸曲线
 public:
 
 	/** Time stretch curve will only be used when the montage has a non-default play rate  */
@@ -1116,7 +1272,7 @@ private:
 #if WITH_EDITOR
 	void BakeTimeStretchCurve();
 	//~End Time Stretch Curve
-	//~结束时间拉伸曲线
+ // ~结束时间拉伸曲线
 	virtual void UpdateCommonTargetFrameRate() override;
 #endif // WITH_EDITOR
 };

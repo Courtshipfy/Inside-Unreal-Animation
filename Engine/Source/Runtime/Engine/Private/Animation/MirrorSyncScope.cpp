@@ -38,9 +38,9 @@ FMirrorSyncScope::FMirrorSyncScope(const FAnimationBaseContext& InContext, const
 	if (FMirrorSyncScope* ParentMirrorScope = InContext.GetMessage<FMirrorSyncScope>())
 	{
 		// Syncing is done when animation sequences are evaluated, which means we need to examine the stack of mirror
-		// 同步是在评估动画序列时完成的，这意味着我们需要检查镜像堆栈
+  // 同步是在评估动画序列时完成的，这意味着我们需要检查镜像堆栈
 		// nodes to determine if we can simply enable and disable sync mirroring.  
-		// 节点来确定我们是否可以简单地启用和禁用同步镜像。
+  // 节点来确定我们是否可以简单地启用和禁用同步镜像。
 		MirrorScopeDepth = ParentMirrorScope->GetMirrorScopeDepth() + 1;
 		OuterScopeMirrorDataTable = ParentMirrorScope->MirrorDataTable;
 		if (MirrorScopeDepth % 2 == 0)

@@ -13,11 +13,11 @@
 void FConstraintOffset::ApplyInverseOffset(const FTransform& InTarget, FTransform& OutSource) const
 {
 	// in this matter, parent is accumulated first, and then individual component gets applied
-	// 在这种情况下，首先累积父级，然后应用单个组件
+ // 在这种情况下，首先累积父级，然后应用单个组件
 	// I think that will be more consistent than going the other way
-	// 我认为这比采取其他方式更加一致
+ // 我认为这比采取其他方式更加一致
 	// this parent is confusing, rename?
-	// 这位家长很困惑，重命名吗？
+ // 这位家长很困惑，重命名吗？
 	OutSource = Parent.GetRelativeTransformReverse(InTarget);
 
 	if (Translation != FVector::ZeroVector)
@@ -31,7 +31,7 @@ void FConstraintOffset::ApplyInverseOffset(const FTransform& InTarget, FTransfor
 	}
 
 	// I know I'm doing just != , not nearly
-	// 我知道我只是在做 != ，而不是几乎
+ // 我知道我只是在做 != ，而不是几乎
 	if (Scale != FVector::OneVector)
 	{
 		OutSource.SetScale3D(OutSource.GetScale3D() * Scale);
@@ -43,7 +43,7 @@ void FConstraintOffset::SaveInverseOffset(const FTransform& Source, const FTrans
 	Reset();
 
 	// override previous value, this is rule
-	// 覆盖以前的值，这是规则
+ // 覆盖以前的值，这是规则
 	if (Operator.bParent)
 	{
 		Parent = Target.GetRelativeTransform(Source);
@@ -77,17 +77,17 @@ void FConstraintData::ApplyInverseOffset(const FTransform& InTarget, FTransform&
 	if (bMaintainOffset)
 	{
 		//The offset is saved based on 
-		//偏移量的保存基于
+  // 偏移量的保存基于
 		// (Source - Target) - BaseTransform  (SaveInverseOffset)
-		// （源 - 目标） - BaseTransform (SaveInverseOffset)
+  // （源 - 目标） - BaseTransform (SaveInverseOffset)
 		// note that all of them is in component space
-		// 请注意，它们都在组件空间中
+  // 请注意，它们都在组件空间中
 		// and also depending on rotation or translation or scale, how the inverse is calculated is different
-		// 并且根据旋转、平移或缩放，计算倒数的方式也不同
+  // 并且根据旋转、平移或缩放，计算倒数的方式也不同
 		// This will get applied to 
-		// 这将被应用到
+  // 这将被应用到
 		// Offset + [NewBaseTransform] + [NewTargetTransform] = [New SourceTransform] (ApplyInverseOffset)
-		// 偏移量 + [NewBaseTransform] + [NewTargetTransform] = [New SourceTransform] (ApplyInverseOffset)
+  // 偏移量 + [NewBaseTransform] + [NewTargetTransform] = [New SourceTransform] (ApplyInverseOffset)
 		if (Constraint.DoesAffectTransform())
 		{
 			OutSource = (Offset * InBaseTransform) * InTarget;
@@ -124,17 +124,17 @@ void FConstraintData::SaveInverseOffset(const FTransform& Source, const FTransfo
 	if (bMaintainOffset)
 	{
 		//The offset is saved based on 
-		//偏移量的保存基于
+  // 偏移量的保存基于
 		// (Source - Target) - BaseTransform  (SaveInverseOffset)
-		// （源 - 目标） - BaseTransform (SaveInverseOffset)
+  // （源 - 目标） - BaseTransform (SaveInverseOffset)
 		// note that all of them is in component space
-		// 请注意，它们都在组件空间中
+  // 请注意，它们都在组件空间中
 		// and also depending on rotation or translation or scale, how the inverse is calculated is different
-		// 并且根据旋转、平移或缩放，计算倒数的方式也不同
+  // 并且根据旋转、平移或缩放，计算倒数的方式也不同
 		// This will get applied to 
-		// 这将被应用到
+  // 这将被应用到
 		// Offset + [NewBaseTransform] + [NewTargetTransform] = [New SourceTransform] (ApplyInverseOffset)
-		// 偏移量 + [NewBaseTransform] + [NewTargetTransform] = [New SourceTransform] (ApplyInverseOffset)
+  // 偏移量 + [NewBaseTransform] + [NewTargetTransform] = [New SourceTransform] (ApplyInverseOffset)
 		if (Constraint.DoesAffectTransform())
 		{
 			FTransform ToSource = Source.GetRelativeTransform(Target);
@@ -151,13 +151,13 @@ void FConstraintData::SaveInverseOffset(const FTransform& Source, const FTransfo
 			if (Constraint.DoesAffectRotation())
 			{
 				// this is same as local target's inverse * local source
-				// 这与本地目标的逆 * 本地源相同
+    // 这与本地目标的逆 * 本地源相同
 				// (target.Inverse() * base) * (source.Inverse() * base).inverse()
-				// (目标.Inverse() * 基数) * (源.Inverse() * 基数).inverse()
+    // (目标.Inverse() * 基数) * (源.Inverse() * 基数).inverse()
 				// = (target.Inverse() * base * base.Inverse() * source
-				// = (目标.Inverse() * 基数 * 基数.Inverse() * 源
+    // = (目标.Inverse() * 基数 * 基数.Inverse() * 源
 				// = target.Inverse() * source
-				// = 目标.Inverse() * 源
+    // = 目标.Inverse() * 源
 				FQuat DeltaRotation = Target.GetRotation().Inverse() * Source.GetRotation();
 				Offset.SetRotation(InBaseTransform.GetRotation().Inverse() * DeltaRotation);
 				Offset.NormalizeRotation();
@@ -179,11 +179,11 @@ void FConstraintData::ApplyConstraintTransform(const FTransform& TargetTransform
 	FTransform OffsetTargetTransform;
 
 	// now apply inverse on the target since that's what we're applying
-	// 现在对目标应用逆，因为这就是我们正在应用的
+ // 现在对目标应用逆，因为这就是我们正在应用的
 	ApplyInverseOffset(TargetTransform, OffsetTargetTransform, CurrentParentTransform);
 
 	// give the offset target transform
-	// 给出偏移目标变换
+ // 给出偏移目标变换
 	Constraint.ApplyConstraintTransform(OffsetTargetTransform, InCurrentTransform, CurrentParentTransform, Weight, BlendHelperInLocalSpace);
 }
 
@@ -223,7 +223,7 @@ void FTransformConstraintDescription::AccumulateConstraintTransform(const FTrans
 void FAimConstraintDescription::AccumulateConstraintTransform(const FTransform& TargetTransform, const FTransform& CurrentTransform, const FTransform& CurrentParentTransform, float Weight, FMultiTransformBlendHelper& BlendHelperInLocalSpace) const
 {
 	// need current transform - I need global transform of Target, I think incoming is local space
-	// 需要当前变换 - 我需要目标的全局变换，我认为传入的是本地空间
+ // 需要当前变换 - 我需要目标的全局变换，我认为传入的是本地空间
 	FTransform NewTransform = CurrentTransform;
 
 	if (bUseLookUp)

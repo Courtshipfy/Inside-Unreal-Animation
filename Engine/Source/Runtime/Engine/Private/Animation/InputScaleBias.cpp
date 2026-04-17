@@ -9,7 +9,7 @@
 
 /////////////////////////////////////////////////////
 // FInputScaleBias
-// [翻译失败: FInputScaleBias]
+// F输入比例偏差
 
 float FInputScaleBias::ApplyTo(float Value) const
 {
@@ -44,7 +44,7 @@ FText FInputScaleBias::GetFriendlyName(FText InFriendlyName) const
 		Args.Add(TEXT("Bias"), FText::AsNumber(Bias));
 
 		// '-' Sign already included in Scale above.
-		// [翻译失败: '-' Sign already included in Scale above.]
+  // '-' 符号已包含在上面的比例中。
 		if (Scale < 0.f)
 		{
 			OutFriendlyName = FText::Format(LOCTEXT("FInputScaleBias_Bias", "{Bias} {PinFriendlyName}"), Args);
@@ -61,7 +61,7 @@ FText FInputScaleBias::GetFriendlyName(FText InFriendlyName) const
 
 /////////////////////////////////////////////////////
 // FInputClamp
-// [翻译失败: FInputClamp]
+// F输入钳位
 
 #if WITH_EDITOR
 FText FInputClampConstants::GetFriendlyName(FText InFriendlyName) const
@@ -69,7 +69,7 @@ FText FInputClampConstants::GetFriendlyName(FText InFriendlyName) const
 	FText OutFriendlyName = InFriendlyName;
 
 	// Clamp
-	// 夹钳
+ // 夹钳
 	if (bClampResult)
 	{
 		FFormatNamedArguments Args;
@@ -80,7 +80,7 @@ FText FInputClampConstants::GetFriendlyName(FText InFriendlyName) const
 	}
 
 	// Interp
-	// 解释者
+ // 解释者
 	if (bInterpResult)
 	{
 		FFormatNamedArguments Args;
@@ -115,10 +115,20 @@ float FInputClampState::ApplyTo(const FInputClampConstants& InConstants, float I
 	}
 
 	bInitialized = true;
+// FInputScaleBiasClamp
+// FInputScaleBiasClamp
 	return Result;
 }
 
+ // FInputScaleBiasClamp
+ // FInputScaleBiasClamp
+ // FInputScaleBiasClamp
+ // FInputScaleBiasClamp
 /////////////////////////////////////////////////////
+// FInputScaleBiasClamp
+// FInputScaleBiasClamp
+// FInputScaleBiasClamp
+// FInputScaleBiasClamp
 // FInputScaleBiasClamp
 // FInputScaleBiasClamp
 
@@ -159,7 +169,7 @@ FText FInputScaleBiasClamp::GetFriendlyName(FText InFriendlyName) const
 	FText OutFriendlyName = InFriendlyName;
 
 	// MapRange
-	// 地图范围
+ // 地图范围
 	if (bMapRange)
 	{
 		FFormatNamedArguments Args;
@@ -194,7 +204,7 @@ FText FInputScaleBiasClamp::GetFriendlyName(FText InFriendlyName) const
 		Args.Add(TEXT("Bias"), FText::AsNumber(Bias));
 
 		// '-' Sign already included in Scale above.
-		// '-' 符号已包含在上面的比例中。
+  // '-' 符号已包含在上面的比例中。
 		if (Scale < 0.f)
 		{
 			OutFriendlyName = FText::Format(LOCTEXT("FInputScaleBias_Bias", "{Bias} {PinFriendlyName}"), Args);
@@ -206,7 +216,7 @@ FText FInputScaleBiasClamp::GetFriendlyName(FText InFriendlyName) const
 	}
 
 	// Clamp
-	// 夹钳
+ // 夹钳
 	if (bClampResult)
 	{
 		FFormatNamedArguments Args;
@@ -217,7 +227,7 @@ FText FInputScaleBiasClamp::GetFriendlyName(FText InFriendlyName) const
 	}
 
 	// Interp
-	// 解释者
+ // 解释者
 	if (bInterpResult)
 	{
 		FFormatNamedArguments Args;
@@ -291,7 +301,7 @@ bool FInputAlphaBoolBlend::Serialize(FArchive& Ar)
 		if (CustomVersion < FFortniteMainBranchObjectVersion::ChangeDefaultAlphaBlendType)
 		{
 			// Switch the default back to Linear so old data remains the same
-			// 将默认值切换回线性，以便旧数据保持不变
+   // 将默认值切换回线性，以便旧数据保持不变
 			BlendOption = EAlphaBlendOption::Linear;
 		}
 	}
@@ -310,7 +320,7 @@ bool FInputAlphaBoolBlend::Serialize(FStructuredArchive::FSlot Slot)
 		if (CustomVersion < FFortniteMainBranchObjectVersion::ChangeDefaultAlphaBlendType)
 		{
 			// Switch the default back to Linear so old data remains the same
-			// 将默认值切换回线性，以便旧数据保持不变
+   // 将默认值切换回线性，以便旧数据保持不变
 			BlendOption = EAlphaBlendOption::Linear;
 		}
 	}
@@ -324,7 +334,7 @@ FText FInputScaleBiasClampConstants::GetFriendlyName(FText InFriendlyName) const
 	FText OutFriendlyName = InFriendlyName;
 
 	// MapRange
-	// 地图范围
+ // 地图范围
 	if (bMapRange)
 	{
 		FFormatNamedArguments Args;
@@ -359,7 +369,7 @@ FText FInputScaleBiasClampConstants::GetFriendlyName(FText InFriendlyName) const
 		Args.Add(TEXT("Bias"), FText::AsNumber(Bias));
 
 		// '-' Sign already included in Scale above.
-		// '-' 符号已包含在上面的比例中。
+  // '-' 符号已包含在上面的比例中。
 		if (Scale < 0.f)
 		{
 			OutFriendlyName = FText::Format(LOCTEXT("FInputScaleBias_Bias", "{Bias} {PinFriendlyName}"), Args);
@@ -371,7 +381,7 @@ FText FInputScaleBiasClampConstants::GetFriendlyName(FText InFriendlyName) const
 	}
 
 	// Clamp
-	// 夹钳
+ // 夹钳
 	if (bClampResult)
 	{
 		FFormatNamedArguments Args;
@@ -382,7 +392,7 @@ FText FInputScaleBiasClampConstants::GetFriendlyName(FText InFriendlyName) const
 	}
 
 	// Interp
-	// 解释者
+ // 解释者
 	if (bInterpResult)
 	{
 		FFormatNamedArguments Args;
@@ -397,6 +407,8 @@ FText FInputScaleBiasClampConstants::GetFriendlyName(FText InFriendlyName) const
 
 void FInputScaleBiasClampConstants::CopyFromLegacy(const FInputScaleBiasClamp& InLegacy)
 {
+// FInputAlphaBool
+// FInputAlphaBool
 	bMapRange = InLegacy.bMapRange;
 	bClampResult = InLegacy.bClampResult;
 	bInterpResult = InLegacy.bInterpResult;
@@ -407,11 +419,19 @@ void FInputScaleBiasClampConstants::CopyFromLegacy(const FInputScaleBiasClamp& I
 	ClampMin = InLegacy.ClampMin;
 	ClampMax = InLegacy.ClampMax;
 	InterpSpeedIncreasing = InLegacy.InterpSpeedIncreasing;
+ // FInputAlphaBool
+ // FInputAlphaBool
 	InterpSpeedDecreasing = InLegacy.InterpSpeedDecreasing;
+ // FInputAlphaBool
+ // FInputAlphaBool
 }
 #endif
+// FInputAlphaBool
+// FInputAlphaBool
 
 /////////////////////////////////////////////////////
+// FInputAlphaBool
+// FInputAlphaBool
 // FInputAlphaBool
 // FInputAlphaBool
 

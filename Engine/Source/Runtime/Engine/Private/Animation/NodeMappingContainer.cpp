@@ -59,7 +59,7 @@ void UNodeMappingContainer::SetAsset(UObject* InAsset, TMap<FName, FNodeItem>& O
 		INodeMappingProviderInterface* Interface = nullptr;
 
 		// if BP Asset, finding interface goes to CDO
-		// 如果是BP资产，找到接口去CDO
+  // 如果是BP资产，找到接口去CDO
 		if (BPAsset)
 {
 			UObject* BPAssetCDO = BPAsset->GeneratedClass->GetDefaultObject();
@@ -71,18 +71,18 @@ void UNodeMappingContainer::SetAsset(UObject* InAsset, TMap<FName, FNodeItem>& O
 	}
 
 		// once we find interface
-		// 一旦我们找到接口
+  // 一旦我们找到接口
 		if (Interface)
 		{
 			TArray<FName> Names;
 			TArray<FNodeItem> NodeItems;
 
 			// get node items
-			// 获取节点项
+   // 获取节点项
 			Interface->GetMappableNodeData(Names, NodeItems);
 
 			// ensure they both matches
-			// 确保它们都匹配
+   // 确保它们都匹配
 			if (ensure(Names.Num() == NodeItems.Num()))
 			{
 				for (int32 Index = 0; Index < Names.Num(); ++Index)
@@ -104,28 +104,28 @@ void UNodeMappingContainer::RefreshDataFromAssets()
 void UNodeMappingContainer::SetSourceAsset(UObject* InSourceAsset)
 {
 	// we just set this all the time since the source asset may have changed or not
-	// 我们只是一直设置这个，因为源资产可能已经改变或没有改变
+ // 我们只是一直设置这个，因为源资产可能已经改变或没有改变
 	SourceAsset = InSourceAsset;
 	SetAsset(InSourceAsset, SourceItems);
 
 	// verify if the mapping is still valid. 
-	// 验证映射是否仍然有效。
+ // 验证映射是否仍然有效。
 	// delete that doesn't exists
-	// 删除不存在的
+ // 删除不存在的
 	ValidateMapping();
 }
 
 void UNodeMappingContainer::SetTargetAsset(UObject* InTargetAsset)
 {
 	// we just set this all the time since the source asset may have changed or not
-	// [翻译失败: we just set this all the time since the source asset may have changed or not]
+ // 我们只是一直设置这个，因为源资产可能已经改变或没有改变
 	TargetAsset = InTargetAsset;
 	SetAsset(InTargetAsset, TargetItems);
 
 	// verify if the mapping is still valid. 
-	// [翻译失败: verify if the mapping is still valid.]
+ // 验证映射是否仍然有效。
 	// delete that doesn't exists
-	// [翻译失败: delete that doesn't exists]
+ // 删除不存在的
 	ValidateMapping();
 }
 
@@ -136,7 +136,7 @@ void UNodeMappingContainer::ValidateMapping()
 	for (auto Iter = SourceToTarget.CreateIterator(); Iter; ++Iter)
 	{
 		// make sure both exists still
-		// 确保两者仍然存在
+  // 确保两者仍然存在
 		if (!SourceItems.Find(Iter.Key()) || !TargetItems.Find(Iter.Value()))
 	{
 			ItemsToRemove.Add(Iter.Key());
@@ -144,7 +144,7 @@ void UNodeMappingContainer::ValidateMapping()
 	}
 
 	// remove the list
-	// [翻译失败: remove the list]
+ // 删除列表
 	for (int32 Index = 0; Index < ItemsToRemove.Num(); ++Index)
 	{
 		SourceToTarget.Remove(ItemsToRemove[Index]);
@@ -154,17 +154,17 @@ void UNodeMappingContainer::ValidateMapping()
 void UNodeMappingContainer::AddDefaultMapping()
 {
 	// this is slow - editor only functionality
-	// [翻译失败: this is slow - editor only functionality]
+ // 这很慢 - 仅限编辑器功能
 	for (auto Iter = SourceItems.CreateConstIterator(); Iter; ++Iter)
 	{
 		const FName& SourceName = Iter.Key();
 
 		// see if target has it
-		// 看看目标是否有
+  // 看看目标是否有
 		if (TargetItems.Contains(SourceName))
 		{
 			// if so,  add to mapping
-			// 如果是这样，添加到映射
+   // 如果是这样，添加到映射
 			AddMapping(SourceName, SourceName);
 		}
 		}
@@ -178,7 +178,7 @@ void UNodeMappingContainer::GetTargetToSourceMappingTable(TMap<FName, FName>& Ou
 	for (auto Iter = SourceToTarget.CreateConstIterator(); Iter; ++Iter)
 	{
 		// this will have issue if it has same value for multiple sources
-		// 如果多个来源具有相同的值，这将会出现问题
+  // 如果多个来源具有相同的值，这将会出现问题
 		FName& Value = OutMappingTable.FindOrAdd(Iter.Value());
 		Value = Iter.Key();
 	}

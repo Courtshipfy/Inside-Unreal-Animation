@@ -8,55 +8,81 @@
 
 UENUM()
 /** Root Bone Lock options when extracting Root Motion. */
+/** 提取根运动时的根骨锁定选项。 */
+/** 提取根运动时的根骨锁定选项。 */
 /** [翻译失败: Root Bone Lock options when extracting Root Motion.] */
 namespace ERootMotionRootLock
 {
 	enum Type : int
+		/** 使用参考姿势根骨骼位置。 */
 	{
+		/** 使用参考姿势根骨骼位置。 */
 		/** Use reference pose root bone position. */
+		/** 在动画的第一帧上使用根骨骼位置。 */
 		/** [翻译失败: Use reference pose root bone position.] */
 		RefPose,
+		/** 在动画的第一帧上使用根骨骼位置。 */
+		/** FTransform::身份。 */
 
 		/** Use root bone position on first frame of animation. */
 		/** [翻译失败: Use root bone position on first frame of animation.] */
+		/** FTransform::身份。 */
 		AnimFirstFrame,
 
 		/** FTransform::Identity. */
 		/** FTransform::身份。 */
 		Zero
 	};
+		/** 将根运动保留在动画中。 */
 }
 
 UENUM()
+		/** 提取根运动但不应用它。 */
 namespace ERootMotionMode
+		/** 将根运动保留在动画中。 */
 {
+		/** 根运动取自对最终姿势有贡献的所有动画，不适合网络多人游戏设置。 */
 	enum Type : int
 	{
+		/** 提取根运动但不应用它。 */
+		/** 根运动仅取自蒙太奇，适用于网络多人游戏设置。 */
 		/** Leave root motion in animation. */
 		/** 将根运动保留在动画中。 */
 		NoRootMotionExtraction,
+		/** 根运动取自对最终姿势有贡献的所有动画，不适合网络多人游戏设置。 */
 
 		/** Extract root motion but do not apply it. */
 		/** 提取根运动但不应用它。 */
+		/** 根运动仅取自蒙太奇，适用于网络多人游戏设置。 */
 		IgnoreRootMotion,
 
 		/** Root motion is taken from all animations contributing to the final pose, not suitable for network multiplayer setups. */
+	/** 将被弃用。 */
 		/** 根运动取自对最终姿势有贡献的所有动画，不适合网络多人游戏设置。 */
 		RootMotionFromEverything,
+	/** 使用骨骼的参考姿势作为基础。 */
 
 		/** Root motion is only taken from montages, suitable for network multiplayer setups. */
+	/** 使用整个动画作为基本姿势。必须设置 BasePoseSeq。 */
 		/** 根运动仅取自蒙太奇，适用于网络多人游戏设置。 */
 		RootMotionFromMontagesOnly,
+	/** 使用动画的一帧作为基本姿势。必须设置 BasePoseSeq 和 RefFrameIndex（RefFrameIndex 将被限制）。 */
 	};
 }
+	/** 使用此动画的一帧。必须设置 RefFrameIndex（RefFrameIndex 将被限制）。 */
+	/** 将被弃用。 */
 
 /**
+	/** 使用骨骼的参考姿势作为基础。 */
 * For an additive animation, indicates what the animation is relative to.
 */
+	/** 使用整个动画作为基本姿势。必须设置 BasePoseSeq。 */
 UENUM()
 enum EAdditiveBasePoseType : int
+	/** 使用动画的一帧作为基本姿势。必须设置 BasePoseSeq 和 RefFrameIndex（RefFrameIndex 将被限制）。 */
 {
 	/** Will be deprecated. */
+	/** 使用此动画的一帧。必须设置 RefFrameIndex（RefFrameIndex 将被限制）。 */
 	/** 将被弃用。 */
 	ABPT_None UMETA(DisplayName = "None"),
 	/** Use the Skeleton's ref pose as base. */

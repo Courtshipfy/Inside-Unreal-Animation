@@ -14,7 +14,7 @@ namespace AnimationCore
 static void AccumulateConstraintTransform(const FTransform& TargetTransform, const FConstraintDescription& Operator, float Weight, FComponentBlendHelper& BlendHelper)
 {
 	// now filter by operation
-	// 现在按操作过滤
+ // 现在按操作过滤
 	if (Operator.bParent)
 	{
 		BlendHelper.AddParent(TargetTransform, Weight);
@@ -60,9 +60,9 @@ FTransform SolveConstraints(const FTransform& CurrentTransform, const FTransform
 		if (Constraint.Weight > ZERO_ANIMWEIGHT_THRESH)
 		{
 			// constraint has to happen in relative to parent to keep the hierarchy data
-			// 约束必须发生在相对于父级的情况下才能保留层次结构数据
+   // 约束必须发生在相对于父级的情况下才能保留层次结构数据
 			// we'd like to test if this would work well with rotation
-			// 我们想测试一下这是否适合旋转
+   // 我们想测试一下这是否适合旋转
 			FTransform ConstraintTransform = OnGetGlobalTransform.Execute(Constraint.TargetNode);
 			FTransform ConstraintToParent = ConstraintTransform.GetRelativeTransform(BaseTransform);
 			AccumulateConstraintTransform(ConstraintToParent, Constraint.Operator, Constraint.Weight, BlendHelper);
@@ -70,7 +70,7 @@ FTransform SolveConstraints(const FTransform& CurrentTransform, const FTransform
 	}
 
 	// @note : parent and any other combination of constraints won't work
-	// @note：父级和任何其他约束组合都不起作用
+ // @note：父级和任何其他约束组合都不起作用
 	FTransform ParentTransform;
 	if (BlendHelper.GetBlendedParent(ParentTransform))
 	{
@@ -82,7 +82,7 @@ FTransform SolveConstraints(const FTransform& CurrentTransform, const FTransform
 		if (BlendHelper.GetBlendedTranslation(BlendedTranslation))
 		{
 			// if any result
-			// 如果有结果的话
+   // 如果有结果的话
 			BlendedTransform.SetTranslation(BlendedTranslation);
 		}
 		FQuat BlendedRotation;
@@ -122,21 +122,21 @@ FQuat SolveAim(const FTransform& CurrentTransform, const FVector& TargetPosition
 
 			FVector DeltaTarget = ToTarget - AimVector;
 			// clamp delta target to within the ratio
-			// 将 Delta 目标限制在比率范围内
+   // 将 Delta 目标限制在比率范围内
 			DeltaTarget *= (AimClampInRadians / DiffAngle);
 			// set new target
-			// 设定新目标
+   // 设定新目标
 			ToTarget = AimVector + DeltaTarget;
 			ToTarget.Normalize();
 		}
 	}
 
 	// if want to use look up, project to the plane
-	// 如果要使用查找，则投影到平面
+ // 如果要使用查找，则投影到平面
 	if (bUseUpVector)
 	{
 		// project target to the plane
-		// 将目标投影到飞机上
+  // 将目标投影到飞机上
 		ToTarget = FVector::VectorPlaneProject(ToTarget, UpVector);
 		ToTarget.Normalize();
 	}
@@ -163,16 +163,16 @@ FTransform SolveConstraints(const FTransform& CurrentTransform, const FTransform
 		if (Constraint.Weight > ZERO_ANIMWEIGHT_THRESH)
 		{
 			// constraint has to happen in relative to parent to keep the hierarchy data
-			// 约束必须发生在相对于父级的情况下才能保留层次结构数据
+   // 约束必须发生在相对于父级的情况下才能保留层次结构数据
 			// we'd like to test if this would work well with rotation
-			// 我们想测试一下这是否适合旋转
+   // 我们想测试一下这是否适合旋转
 			FTransform ConstraintTransform = Constraint.CurrentTransform;
 			Constraint.ApplyConstraintTransform(ConstraintTransform, CurrentTransform, CurrentParentTransform, BlendHelperInLocalSpace);
 		}
 	}
 
 	// @note : parent and any other combination of constraints won't work
-	// @note：父级和任何其他约束组合都不起作用
+ // @note：父级和任何其他约束组合都不起作用
 	FTransform ParentTransform;
 	if (BlendHelperInLocalSpace.GetBlendedParent(ParentTransform))
 	{
@@ -184,7 +184,7 @@ FTransform SolveConstraints(const FTransform& CurrentTransform, const FTransform
 		if (BlendHelperInLocalSpace.GetBlendedTranslation(BlendedTranslation))
 		{
 			// if any result
-			// 如果有结果的话
+   // 如果有结果的话
 			BlendedLocalTransform.SetTranslation(BlendedTranslation);
 		}
 		FQuat BlendedRotation;
@@ -271,7 +271,7 @@ FQuat QuatFromEuler(const FVector& XYZAnglesInDegrees, EEulerRotationOrder Rotat
 	}
 
 	// should not happen
-	// 不应该发生
+ // 不应该发生
 	return FQuat::Identity;
 }
 
@@ -328,11 +328,11 @@ FVector EulerFromQuat(const FQuat& Rotation, EEulerRotationOrder RotationOrder, 
 	else if ( RotationOrder == EEulerRotationOrder::XZY )
 	{
 		// using KINDA_SMALL_NUMBER instead of SMALL_NUMBER so that it
-		// 使用 KINDA_SMALL_NUMBER 而不是 SMALL_NUMBER，以便
+  // 使用 KINDA_SMALL_NUMBER 而不是 SMALL_NUMBER，以便
 		// better covers singularity cases, a specific case that was causing problems
-		// 更好地涵盖奇点案例，即导致问题的特定案例
+  // 更好地涵盖奇点案例，即导致问题的特定案例
 		// was Quat(0.122787803968.., -0.122787803968.., -0.696364240320.., 0.696364240320..)
-		// 是季铵盐（0.122787803968..，-0.122787803968..，-0.696364240320..，0.696364240320..）
+  // 是季铵盐（0.122787803968..，-0.122787803968..，-0.696364240320..，0.696364240320..）
 		Result.Z = FMath::Asin( FMath::Clamp( AxisY.X, -1.0, 1.0 ) );
 
 		if ( FMath::Abs( AxisY.X ) < 1.0 - DOUBLE_KINDA_SMALL_NUMBER)

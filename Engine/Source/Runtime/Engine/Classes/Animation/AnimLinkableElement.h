@@ -11,16 +11,24 @@ class UAnimSequenceBase;
 struct FAnimSegment;
 
 /** Supported types of time for a linked element */
+/** 链接元素支持的时间类型 */
+/** 链接元素支持的时间类型 */
 /** [翻译失败: Supported types of time for a linked element] */
 UENUM()
 namespace EAnimLinkMethod
 {
 	enum Type : int
+		/** 元素停留在特定时间而不移动。 */
 	{
+		/** 元素停留在特定时间而不移动。 */
+		/** 元素随其段移动，但当段大小改变时则不移动。 */
 		/** Element stays at a specific time without moving. */
 		/** 元素停留在特定时间而不移动。 */
+		/** 元素随其线段移动，并在整个线段中保持一定比例。 */
+		/** 元素随其段移动，但当段大小改变时则不移动。 */
 		Absolute,
 		/** Element moves with its segment, but not when the segment changes size. */
+		/** 元素随其线段移动，并在整个线段中保持一定比例。 */
 		/** 元素随其段移动，但当段大小改变时则不移动。 */
 		Relative,
 		/** Element moves with its segment and will stay at a certain proportion through the segment. */
@@ -54,10 +62,12 @@ struct FAnimLinkableElement
 	, SegmentLength(0.f)
 	, LinkValue(0.f)
 	, LinkedSequence(nullptr)
+	/** 更新此元素的计时信息。除非该元素没有，否则不会搜索新段 */
 	{
 	}
 
 	virtual ~FAnimLinkableElement()
+	/** 更新此元素的计时信息。除非该元素没有，否则不会搜索新段 */
 	{
 	}
 
@@ -78,14 +88,18 @@ struct FAnimLinkableElement
 	 * @param InSlotIndex The slot in the montage to detect segments in
 	 */
 	UE_DEPRECATED(5.1, "LinkMontage has been deprecated, use Link instead")
+	/** 清除该元素中的链接信息，使蒙太奇链接保持完整 */
 	ENGINE_API void LinkMontage(UAnimMontage* Montage, float AbsMontageTime, int32 InSlotIndex = 0);
 
 	/** Link this element to a Sequence, Just setting basic data as sequences don't need full linking 
+	/** 当该元素的属性更改时调用 */
 	 * @param Sequence The sequence to link to
 	 * @param AbsSequenceTime The time in the sequence that this element should be placed at
+	/** 清除该元素中的链接信息，使蒙太奇链接保持完整 */
 	 */
 	UE_DEPRECATED(5.1, "LinkSequence has been deprecated, use Link instead")
 	ENGINE_API void LinkSequence(UAnimSequenceBase* Sequence, float AbsSequenceTime);
+	/** 当该元素的属性更改时调用 */
 
 	/** Clear the linking information from this element, leaves montage link intact */
 	/** [翻译失败: Clear the linking information from this element, leaves montage link intact] */
@@ -93,84 +107,114 @@ struct FAnimLinkableElement
 
 	/** Called when the properties of this element are changed */
 	/** [翻译失败: Called when the properties of this element are changed] */
+	/** 获取该元素链接到的序列 */
 	ENGINE_API void OnChanged(float NewMontageTime);
 
 	/** Gets the current time for this element 
+	/** 获取此元素链接到的蒙太奇（如果有） */
 	 * @param ReferenceFrame What kind of time to return
 	 */
 	ENGINE_API float GetTime(EAnimLinkMethod::Type ReferenceFrame = EAnimLinkMethod::Absolute) const;
 
+	/** 获取该元素链接到的序列 */
 	/** Sets the time of this element
 	 * @param NewTime The time to set this element to
 	 * @param ReferenceFrame The kind of time being passed to this method
+	/** 获取此元素链接到的蒙太奇（如果有） */
 	 */
 	ENGINE_API virtual void SetTime(float NewTime, EAnimLinkMethod::Type ReferenceFrame = EAnimLinkMethod::Absolute);
 
 	/** Gets the sequence this element is linked to */
+	/** 获取用于将该元素链接到其段的方法 */
 	/** [翻译失败: Gets the sequence this element is linked to] */
 	const UAnimSequenceBase* GetLinkedSequence() const {return LinkedSequence;}
 
+	/** 获取该元素当前链接到的槽索引 */
 	/** Gets the Montage this element is linked to, if any */
 	/** [翻译失败: Gets the Montage this element is linked to, if any] */
 	const UAnimMontage* GetLinkedMontage() const { return LinkedMontage; }
+	/** 获取该元素当前链接到的段的索引 */
 
 	/** Changes the way this element is linked to its segment
 	 * @param NewLinkMethod The new linking method to use
+	/** 获取用于将该元素链接到其段的方法 */
 	 */
 	ENGINE_API void ChangeLinkMethod(EAnimLinkMethod::Type NewLinkMethod);
 
+	/** 获取该元素当前链接到的槽索引 */
+	/** 如果内部状态需要重新链接，则重新链接此元素 */
 	/** Change the montage slot that this element is linked to
 	 * @param NewSlotIndex The new slot to link to
 	 */
+	/** 获取该元素当前链接到的段的索引 */
 	ENGINE_API void ChangeSlotIndex(int32 NewSlotIndex);
 
 	/** Get the method used to link this element to its segment */
 	/** [翻译失败: Get the method used to link this element to its segment] */
 	EAnimLinkMethod::Type GetLinkMethod() const {return LinkMethod;}
 
+	/** 获取当前槽位中当前蒙太奇中该元素出现时的片段 */
 	/** Get the slot index this element is currently linked to */
 	/** [翻译失败: Get the slot index this element is currently linked to] */
+	/** 如果内部状态需要重新链接，则重新链接此元素 */
+	/** 该元素当前链接到的蒙太奇 */
 	int32 GetSlotIndex() const {return SlotIndex;}
 	
 	/** Get the index of the segment this element is currently linked to */
 	/** 获取该元素当前链接到的段的索引 */
+	/** 我们当前在 LinkedMontage 中使用的槽索引 */
 	int32 GetSegmentIndex() const {return SegmentIndex;}
 
 	/** Directly sets segment index
 	 *	@param NewSegmentIndex New segment index
+	/** 我们正在使用的槽内链接到的段的索引 */
 	 */
 	void SetSegmentIndex(int32 NewSegmentIndex) {SegmentIndex = NewSegmentIndex;}
+	/** 获取当前槽位中当前蒙太奇中该元素出现时的片段 */
 
+	/** 我们用来计算时间的方法 */
 	/** Relinks this element if internal state requires relinking */
 	/** 如果内部状态需要重新链接，则重新链接此元素 */
+	/** 该元素当前链接到的蒙太奇 */
 	ENGINE_API bool ConditionalRelink();
+	/** 缓存的链接方法用于当LinkMethod改变时转换时间，总是与当前存储的时间相关 */
 
 	/** Refreshes the current segment data (Begin time, length etc.) and validate the link time
 	 *  Intended to update the internal state when segment lengths/times could have changed
+	/** 我们当前在 LinkedMontage 中使用的槽索引 */
+	/** 我们当前链接的片段开始的绝对时间 */
 	 */
 	ENGINE_API void RefreshSegmentOnLoad();
 
 protected:
+	/** 当前链接段的绝对长度 */
+	/** 我们正在使用的槽内链接到的段的索引 */
 
 	/** Gets the segment in the current montage in the current slot that is at the time of this element */
 	/** 获取当前槽位中当前蒙太奇中该元素出现时的片段 */
+	/** 这段蒙太奇的时间。这将根据我们用来链接该元素的时间的方法而有所不同 */
 	FAnimSegment* GetSegmentAtCurrentTime();
+	/** 我们用来计算时间的方法 */
 
 	/** The montage that this element is currently linked to */
 	/** 该元素当前链接到的蒙太奇 */
 	UPROPERTY()
+	/** 缓存的链接方法用于当LinkMethod改变时转换时间，总是与当前存储的时间相关 */
 	TObjectPtr<UAnimMontage> LinkedMontage;
 
 	/** The slot index we are currently using within LinkedMontage */
 	/** 我们当前在 LinkedMontage 中使用的槽索引 */
+	/** 我们当前链接的片段开始的绝对时间 */
 	UPROPERTY(EditAnywhere, Category=AnimLink)
 	int32 SlotIndex;
 
 	/** The index of the segment we are linked to within the slot we are using */
+	/** 当前链接段的绝对长度 */
 	/** 我们正在使用的槽内链接到的段的索引 */
 	UPROPERTY()
 	int32 SegmentIndex;
 
+	/** 这段蒙太奇的时间。这将根据我们用来链接该元素的时间的方法而有所不同 */
 	/** The method we are using to calculate our times */
 	/** 我们用来计算时间的方法 */
 	UPROPERTY(EditAnywhere, Category=AnimLink)

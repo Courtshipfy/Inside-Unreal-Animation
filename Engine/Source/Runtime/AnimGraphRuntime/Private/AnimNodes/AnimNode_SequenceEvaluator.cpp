@@ -34,7 +34,7 @@ void FAnimNode_SequenceEvaluatorBase::UpdateAssetPlayer(const FAnimationUpdateCo
 {
 	GetEvaluateGraphExposedInputs().Execute(Context);
 	// We split this off so subclasses can insert code between the two to set the explicit time.
-	// 我们将其分开，以便子类可以在两者之间插入代码来设置显式时间。
+ // 我们将其分开，以便子类可以在两者之间插入代码来设置显式时间。
 	PostExposedInputsUpdateAssetPlayer(Context);
 }
 
@@ -46,7 +46,7 @@ void FAnimNode_SequenceEvaluatorBase::PostExposedInputsUpdateAssetPlayer(const F
 	if (CurrentSequence)
 	{
 		// Clamp input to a valid position on this sequence's time line.
-		// 将输入钳位到该序列时间线上的有效位置。
+  // 将输入钳位到该序列时间线上的有效位置。
 		CurrentExplicitTime = FMath::Clamp(CurrentExplicitTime, 0.f, CurrentSequence->GetPlayLength());
 
 		if ((!GetTeleportToExplicitTime() || (GetGroupName() != NAME_None) || (GetGroupMethod() == EAnimSyncMethod::Graph)) && CurrentSequence->GetSkeleton() != nullptr)
@@ -65,9 +65,9 @@ void FAnimNode_SequenceEvaluatorBase::PostExposedInputsUpdateAssetPlayer(const F
 			const float TimeJump = GetEffectiveDeltaTime(CurrentExplicitTime, InternalTimeAccumulator);
 
 			// if you jump from front to end or end to front, your time jump is 0.f, so nothing moves
-			// 如果你从头到尾或从​​头到头跳，你的时间跳跃是0.f，所以没有任何移动
+   // 如果你从头到尾或从​​头到头跳，你的时间跳跃是0.f，所以没有任何移动
 			// to prevent that from happening, we set current accumulator to explicit time
-			// 为了防止这种情况发生，我们将当前累加器设置为明确的时间
+   // 为了防止这种情况发生，我们将当前累加器设置为明确的时间
 			if (TimeJump == 0.f)
 			{
 				InternalTimeAccumulator = CurrentExplicitTime;

@@ -27,7 +27,7 @@ static void GetCandidateSystems(USkeletalMeshComponent& MeshComp, ParticleSystem
 	else
 	{
 		// No actor owner in some editor windows. Get PSCs spawned by the MeshComp.
-		// 某些编辑器窗口中没有演员所有者。获取由 MeshComp 生成的 PSC。
+  // 某些编辑器窗口中没有演员所有者。获取由 MeshComp 生成的 PSC。
 		ForEachObjectWithOuter(&MeshComp, [&Components](UObject* Child)
 		{
 			if (UParticleSystemComponent* ChildPSC = Cast<UParticleSystemComponent>(Child))
@@ -39,6 +39,16 @@ static void GetCandidateSystems(USkeletalMeshComponent& MeshComp, ParticleSystem
 }
 
 /////////////////////////////////////////////////////
+// UAnimNotifyState_Trail
+// UAnimNotifyState_Trail
+// UAnimNotifyState_Trail
+// UAnimNotifyState_Trail
+// UAnimNotifyState_Trail
+// UAnimNotifyState_Trail
+// UAnimNotifyState_Trail
+// UAnimNotifyState_Trail
+// UAnimNotifyState_Trail
+// UAnimNotifyState_Trail
 // UAnimNotifyState_Trail
 // UAnimNotifyState_Trail
 
@@ -75,7 +85,7 @@ float UAnimNotifyState_Trail::GetCurveWidth(USkeletalMeshComponent* MeshComp) co
 		if (!AnimInst->GetCurveValue(WidthScaleCurve, Width))
 		{
 			// Fallback to 1.f if curve was not found
-			// 如果未找到曲线，则回退到 1.f
+   // 如果未找到曲线，则回退到 1.f
 			Width = 1.f;
 		}
 	}
@@ -127,15 +137,15 @@ void UAnimNotifyState_Trail::NotifyBegin(class USkeletalMeshComponent * MeshComp
 			if (TrailEmitters.Num() > 0)
 			{
 				// This has active emitters, we'll just restart this one.
-				// 它有活动的发射器，我们只需重新启动这个发射器即可。
+    // 它有活动的发射器，我们只需重新启动这个发射器即可。
 				bFoundExistingTrail = true;
 
 				//If there are any trails, ensure the template hasn't been changed. Also destroy the component if there are errors.
-				//如果有任何痕迹，请确保模板没有被更改。如果出现错误，还要销毁该组件。
+    // 如果有任何痕迹，请确保模板没有被更改。如果出现错误，还要销毁该组件。
 				if (bError || (PSTemplate != ParticleComp->Template && ParticleComp->GetOuter() == MeshComp))
 				{
 					//The PSTemplate was changed so we need to destroy this system and create it again with the new template. May be able to just change the template?
-					//PSTemplate 已更改，因此我们需要销毁该系统并使用新模板重新创建它。可以直接改模板吗？
+     // PSTemplate 已更改，因此我们需要销毁该系统并使用新模板重新创建它。可以直接改模板吗？
 					ParticleComp->DestroyComponent();
 				}
 				else
@@ -157,13 +167,13 @@ void UAnimNotifyState_Trail::NotifyBegin(class USkeletalMeshComponent * MeshComp
 		else if (ParticleComp->bAllowRecycling && !ParticleComp->IsActive())
 		{
 			// We prefer to recycle one with a matching template, and prefer one created by us.
-			// 我们更喜欢回收具有匹配模板的模板，并且更喜欢由我们创建的模板。
+   // 我们更喜欢回收具有匹配模板的模板，并且更喜欢由我们创建的模板。
 			// 0: matching template, owned by mesh
-			// 0：匹配模板，归mesh所有
+   // 0：匹配模板，归mesh所有
 			// 1: matching template, owned by actor
-			// 1：匹配模板，演员拥有
+   // 1：匹配模板，演员拥有
 			// 2: non-matching template, owned by actor or mesh
-			// 2：不匹配的模板，由actor或mesh拥有
+   // 2：不匹配的模板，由actor或mesh拥有
 			int32 RecycleIndex = 2;
 			if (ParticleComp->Template == PSTemplate)
 			{
@@ -176,7 +186,7 @@ void UAnimNotifyState_Trail::NotifyBegin(class USkeletalMeshComponent * MeshComp
 	if (!bFoundExistingTrail && !bError)
 	{
 		// Spawn a new component from PSTemplate, or recycle an old one.
-		// 从 PSTemplate 生成一个新组件，或回收旧组件。
+  // 从 PSTemplate 生成一个新组件，或回收旧组件。
 		UParticleSystemComponent* RecycleComponent = (RecycleCandidates[0] ? RecycleCandidates[0] : (RecycleCandidates[1] ? RecycleCandidates[1] : RecycleCandidates[2]));
 		UParticleSystemComponent* NewParticleComp = (RecycleComponent ? RecycleComponent : NewObject<UParticleSystemComponent>(MeshComp));
 		NewParticleComp->bAutoDestroy = (RecycleComponent ? false : !bRecycleSpawnedSystems);
@@ -189,14 +199,14 @@ void UAnimNotifyState_Trail::NotifyBegin(class USkeletalMeshComponent * MeshComp
 		NewParticleComp->SetAutoAttachParams(MeshComp, NAME_None);
 
 		// When recycling we can avoid setting the template if set already.
-		// 回收时我们可以避免设置模板（如果已经设置）。
+  // 回收时我们可以避免设置模板（如果已经设置）。
 		if (NewParticleComp->Template != PSTemplate)
 		{
 			NewParticleComp->SetTemplate(PSTemplate);
 		}
 
 		// Recycled components are usually already registered
-		// 回收的组件通常已经注册
+  // 回收的组件通常已经注册
 		if (!NewParticleComp->IsRegistered())
 		{
 			NewParticleComp->RegisterComponentWithWorld(MeshComp->GetWorld());
@@ -322,7 +332,7 @@ UParticleSystemComponent* UAnimNotifyState_Trail::GetParticleSystemComponent(USk
 			if (TrailEmitters.Num() > 0)
 			{
 				// We have a trail emitter, so return this one
-				// 我们有一个尾迹发射器，所以归还这个
+    // 我们有一个尾迹发射器，所以归还这个
 				return ParticleComp;
 			}
 		}
@@ -338,7 +348,7 @@ bool UAnimNotifyState_Trail::ValidateInput(class USkeletalMeshComponent * MeshCo
 	MeshComp->ClearAnimNotifyErrors(this);
 
 	//Validate the user input and report any errors.
-	//验证用户输入并报告任何错误。
+ // 验证用户输入并报告任何错误。
 	if (FirstSocketName == NAME_None)
 	{
 		if (bReportErrors)

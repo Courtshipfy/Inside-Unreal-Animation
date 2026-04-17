@@ -18,6 +18,8 @@ UVariableFrameStrippingSettings::UVariableFrameStrippingSettings(const FObjectIn
 
 #if WITH_EDITORONLY_DATA
 /** Generates a DDC key that takes into account the current settings, selected codec, input anim sequence and TargetPlatform */
+/** 生成考虑当前设置、所选编解码器、输入动画序列和 TargetPlatform 的 DDC 密钥 */
+/** 生成考虑当前设置、所选编解码器、输入动画序列和 TargetPlatform 的 DDC 密钥 */
 /** [翻译失败: Generates a DDC key that takes into account the current settings, selected codec, input anim sequence and TargetPlatform] */
 void UVariableFrameStrippingSettings::PopulateDDCKey(const UE::Anim::Compression::FAnimDDCKeyArgs& KeyArgs, FArchive& Ar)
 {

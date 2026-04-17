@@ -41,7 +41,7 @@ namespace AnimationCore
 		OutBoneTransforms.SetNum(BoneCount);
 
 		// First calculate positions & scales
-		// 首先计算位置和比例
+  // 首先计算位置和比例
 		for (int32 BoneIndex = 0; BoneIndex < BoneCount; BoneIndex++)
 		{
 			SplineAlphas[BoneIndex] = BoneIndex > 0 ? FindParamAtFirstSphereIntersection.Execute(PreviousPoint, BoneLengths[BoneIndex] * TotalStretchRatio, StartingLinearIndex) : InitialAlpha;
@@ -54,22 +54,22 @@ namespace AnimationCore
 		}
 
 		// Now calculate rotations
-		// 现在计算旋转
+  // 现在计算旋转
 		for (int32 BoneIndex = 0; BoneIndex < BoneCount; BoneIndex++)
 		{
 			FTransform& BoneTransform = OutBoneTransforms[BoneIndex];
 
 			// Get the rotation that the spline provides
-			// 获取样条线提供的旋转
+   // 获取样条线提供的旋转
 			FQuat SplineRotation = RotationSpline.Eval(SplineAlphas[BoneIndex]);
 
 			// Build roll/twist rotation
-			// 构建滚动/扭转旋转
+   // 构建滚动/扭转旋转
 			const float TotalRoll = Roll + Twist.Execute(SplineAlphas[BoneIndex] / TotalSplineAlpha);
 			FQuat RollRotation = FRotator(BoneAxis == EAxis::Y ? TotalRoll : 0.0f, BoneAxis == EAxis::X ? TotalRoll : 0.0f, BoneAxis == EAxis::Z ? TotalRoll : 0.0f).Quaternion();
 
 			// Correct rotation of bone to align our orientation onto the spline
-			// 正确旋转骨骼以将我们的方向与样条线对齐
+   // 正确旋转骨骼以将我们的方向与样条线对齐
 			FQuat DirectionCorrectingRotation(FQuat::Identity);
 			FQuat BoneOffsetRotation(FQuat::Identity);
 			if (BoneIndex < BoneCount - 1)
@@ -77,15 +77,15 @@ namespace AnimationCore
 				FVector NewBoneDir = OutBoneTransforms[BoneIndex + 1].GetLocation() - BoneTransform.GetLocation();
 
 				// Only try and correct direction if we get a non-zero tangent.
-				// 仅当我们得到非零切线时才尝试纠正方向。
+    // 仅当我们得到非零切线时才尝试纠正方向。
 				if (NewBoneDir.Normalize())
 				{
 					// Calculate the direction that bone is currently pointing.
-					// 计算骨骼当前指向的方向。
+     // 计算骨骼当前指向的方向。
 					const FVector CurrentBoneDir = BoneTransforms[BoneIndex + 1].GetUnitAxis(BoneAxis).GetSafeNormal();
 
 					// Calculate a quaternion that gets us from our current rotation to the desired one.
-					// 计算一个四元数，使我们从当前的旋转到所需的旋转。
+     // 计算一个四元数，使我们从当前的旋转到所需的旋转。
 					DirectionCorrectingRotation = FQuat::FindBetweenNormals(CurrentBoneDir, NewBoneDir);
 				}
 

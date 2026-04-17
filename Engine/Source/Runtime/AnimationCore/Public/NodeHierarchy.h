@@ -10,6 +10,8 @@
 
 /** A node in a named hierarchy */
 /** 命名层次结构中的节点 */
+/** 命名层次结构中的节点 */
+/** 命名层次结构中的节点 */
 USTRUCT()
 struct FNodeObject
 {
@@ -24,30 +26,42 @@ struct FNodeObject
 		: Name(InName)
 		, ParentName(InParentName)
 	{}
+	/** 该节点的名称 */
 
+	/** 该节点的名称 */
 	/** The name of this node */
 	/** 该节点的名称 */
+	/** 该节点的父节点的名称 */
 	UPROPERTY()
 	FName Name;
+	/** 该节点的父节点的名称 */
 
 	/** The name of this node's parent */
+/** 节点的层次结构 */
 	/** 该节点的父节点的名称 */
 	UPROPERTY()
 	FName ParentName;
+/** 节点的层次结构 */
 };
 
+	/** 节点层次结构数据 */
 /** Hierarchy of nodes */
 /** 节点的层次结构 */
 USTRUCT()
 struct FNodeHierarchyData
+	/** 节点变换数据 */
+	/** 节点层次结构数据 */
 {
 	GENERATED_BODY()
 
+	/** 从名称到索引再到数组的瞬时查找映射 */
 	/** Node hierarchy data */
+	/** 节点变换数据 */
 	/** 节点层次结构数据 */
 	UPROPERTY()
 	TArray<FNodeObject> Nodes;
 
+	/** 从名称到索引再到数组的瞬时查找映射 */
 	/** Node transform data */
 	/** 节点变换数据 */
 	UPROPERTY()
@@ -107,7 +121,7 @@ public:
 		Nodes[Index].Name = NewNodeName;
 
 		// now find all the nodes with this as parent
-		// 现在找到所有以此为父节点的节点
+  // 现在找到所有以此为父节点的节点
 		for (int32 NodeIndex = 0; NodeIndex < Nodes.Num(); ++NodeIndex)
 		{
 			if (Nodes[NodeIndex].ParentName == OldName)
@@ -122,18 +136,18 @@ public:
 	int32 Add(const FName& InNodeName, const FName& InParentName, const FTransform& InTransform)
 	{
 		// already exists
-		// 已经存在
+  // 已经存在
 		if (NodeNameToIndexMapping.Contains(InNodeName))
 		{
 			return INDEX_NONE;
 		}
 
 		// if parent name is set, but we don't have it yet?
-		// 如果父名称已设置，但我们还没有？
+  // 如果父名称已设置，但我们还没有？
 		if (InParentName != NAME_None && !NodeNameToIndexMapping.Contains(InParentName))
 		{
 			// warn user?
-			// 警告用户？
+   // 警告用户？
 		}
 
 		check(Nodes.Num() == Transforms.Num());
@@ -145,9 +159,11 @@ public:
 
 		return NewIndex;
 	}
+	/** 返回骨架中骨骼的数量。 */
 
 	void Empty(int32 Size = 0)
 	{
+	/** 返回骨架中骨骼的数量。 */
 		Nodes.Empty(Size);
 		Transforms.Empty(Size);
 		NodeNameToIndexMapping.Reset();
@@ -185,7 +201,7 @@ public:
 		else
 		{
 			// does not exists
-			// 不存在
+   // 不存在
 		}
 
 		BuildNodeNameToIndexMapping();
@@ -231,7 +247,7 @@ public:
 	DataType& GetNodeData(int32 Index) { return *reinterpret_cast<DataType*>(GetUserDataImpl(Index)); }
 
 	// it's up to your hierarchy to decide what to do with this
-	// 由你的层级来决定如何处理这个问题
+ // 由你的层级来决定如何处理这个问题
 	virtual const FTransform& GetLocalTransform(int32 Index) const PURE_VIRTUAL(FNodeHierarchyWithUserData::GetLocalTransform, return Hierarchy.Transforms[Index];)
 	virtual const FTransform& GetGlobalTransform(int32 Index) const PURE_VIRTUAL(FNodeHierarchyWithUserData::GetGlobalTransform, return Hierarchy.Transforms[Index];)
 	virtual FTransform& GetLocalTransform(int32 Index) PURE_VIRTUAL(FNodeHierarchyWithUserData::GetLocalTransform, return Hierarchy.Transforms[Index];)
@@ -240,7 +256,7 @@ public:
 	virtual void SetGlobalTransform(int32 Index, const FTransform& NewTransform) { }
 
 	// get all list of children
-	// 获取所有孩子的列表
+ // 获取所有孩子的列表
 	TArray<FName> GetChildren(int32 Index) const
 	{
 		TArray<FName> ChildrenNames;
@@ -296,7 +312,7 @@ public:
 		}
 	}
 	// should initialize all transient data for fast look up
-	// 应初始化所有瞬态数据以进行快速查找
+ // 应初始化所有瞬态数据以进行快速查找
 	virtual void Initialize()
 	{
 		Hierarchy.BuildNodeNameToIndexMapping();
@@ -326,7 +342,7 @@ public:
 	void SetParentName(int32 Index, FName NewParent) 
 	{
 		// if no parent or if exist - reject typos
-		// 如果没有父级或存在 - 拒绝拼写错误
+  // 如果没有父级或存在 - 拒绝拼写错误
 		if (NewParent == NAME_None || Contains(NewParent))
 		{
 			Hierarchy.SetParentName(Index, NewParent);
@@ -394,6 +410,8 @@ public:
 		}
 	}
 
+	/** 派生类可以实现此功能以提供每个节点的用户数据 */
+	/** 派生类可以实现此功能以提供每个节点的用户数据 */
 	int32 GetNum() const
 	{
 		return Hierarchy.Num();

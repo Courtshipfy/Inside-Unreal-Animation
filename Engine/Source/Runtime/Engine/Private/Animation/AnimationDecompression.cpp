@@ -25,7 +25,7 @@ struct FGetBonePoseScratchArea : public TThreadSingleton<FGetBonePoseScratchArea
 	BoneTrackArray OrientAndScaleRetargetingPairs;
 
 	// A bit set that specifies whether a compact bone index has its rotation animated by the sequence or not
-	// 指定紧凑骨骼索引是否通过序列进行旋转动画的位集
+ // 指定紧凑骨骼索引是否通过序列进行旋转动画的位集
 	TBitArray<> AnimatedCompactRotations;
 };
 
@@ -64,7 +64,7 @@ void DecompressPose(FCompactPose& OutPose,
 	BoneTrackArray& OrientAndScaleRetargetingPairs = ScratchArea.OrientAndScaleRetargetingPairs;
 
 	// build a list of desired bones
-	// 建立所需骨骼的列表
+ // 建立所需骨骼的列表
 	RotationScalePairs.Reset();
 	TranslationPairs.Reset();
 	AnimScaleRetargetingPairs.Reset();
@@ -82,17 +82,17 @@ void DecompressPose(FCompactPose& OutPose,
 	}
 
 	// Optimization: assuming first index is root bone. That should always be the case in Skeletons.
-	// 优化：假设第一个索引是根骨骼。在《骷髅》中应该始终如此。
+ // 优化：假设第一个索引是根骨骼。在《骷髅》中应该始终如此。
 	checkSlow((RequiredBones.GetMeshPoseIndexFromSkeletonPoseIndex(FSkeletonPoseBoneIndex(0)) == FMeshPoseBoneIndex(0)));
 	// this is not guaranteed for AnimSequences though... If Root is not animated, Track will not exist.
-	// 但这对于 AnimSequences 来说并不能保证...如果 Root 没有动画，Track 将不存在。
+ // 但这对于 AnimSequences 来说并不能保证...如果 Root 没有动画，Track 将不存在。
 	const bool bFirstTrackIsRootBone = (CompressedData.GetSkeletonIndexFromTrackIndex(0) == 0);
 
 	{
 		SCOPE_CYCLE_COUNTER(STAT_BuildAnimTrackPairs);
 
 		// Handle root bone separately if it is track 0. so we start w/ Index 1.
-		// 如果根骨骼是轨道 0，则单独处理根骨骼。因此我们从索引 1 开始。
+  // 如果根骨骼是轨道 0，则单独处理根骨骼。因此我们从索引 1 开始。
 		for (int32 TrackIndex = (bFirstTrackIsRootBone ? 1 : 0); TrackIndex < NumTracks; TrackIndex++)
 		{
 			const int32 SourceSkeletonBoneIndex = CompressedData.GetSkeletonIndexFromTrackIndex(TrackIndex);
@@ -103,7 +103,7 @@ void DecompressPose(FCompactPose& OutPose,
 				const FSkeletonPoseBoneIndex SkeletonPoseBoneIndex(TargetSkeletonBoneIndex);
 				const FCompactPoseBoneIndex BoneIndex = RequiredBones.GetCompactPoseIndexFromSkeletonPoseIndex(SkeletonPoseBoneIndex);
 				//Nasty, we break our type safety, code in the lower levels should be adjusted for this
-				//[翻译失败: Nasty, we break our type safety, code in the lower levels should be adjusted for this]
+    // 讨厌，我们破坏了类型安全，应为此调整较低级别的代码
 				const int32 CompactPoseBoneIndex = BoneIndex.GetInt();
 				if (CompactPoseBoneIndex != INDEX_NONE)
 				{
@@ -115,7 +115,7 @@ void DecompressPose(FCompactPose& OutPose,
 					}
 
 					// Check what retarget mode to use for the translational retargeting for this specific bone.
-					// [翻译失败: Check what retarget mode to use for the translational retargeting for this specific bone.]
+     // 检查用于该特定骨骼的平移重定向的重定向模式。
 					const EBoneTranslationRetargetingMode::Type RetargetMode = FAnimationRuntime::GetBoneTranslationRetargetingMode(
 						bUseSourceRetargetModes,
 						SourceSkeletonBoneIndex,
@@ -125,7 +125,7 @@ void DecompressPose(FCompactPose& OutPose,
 						bDisableRetargeting);
 
 					// Skip extracting translation component for EBoneTranslationRetargetingMode::Skeleton.
-					// [翻译失败: Skip extracting translation component for EBoneTranslationRetargetingMode::Skeleton.]
+     // 跳过提取 EBoneTranslationRetargetingMode::Skeleton 的翻译组件。
 					switch (RetargetMode)
 					{
 					case EBoneTranslationRetargetingMode::Animation:
@@ -139,9 +139,9 @@ void DecompressPose(FCompactPose& OutPose,
 						TranslationPairs.Add(BoneTrackPair(CompactPoseBoneIndex, TrackIndex));
 
 						// With baked additives, we can skip 'AnimationRelative' tracks, as the relative transform gets canceled out.
-						// 使用烘焙的添加剂，我们可以跳过“AnimationRelative”轨道，因为相对变换被取消。
+      // 使用烘焙的添加剂，我们可以跳过“AnimationRelative”轨道，因为相对变换被取消。
 						// (A1 + Rel) - (A2 + Rel) = A1 - A2.
-						// (A1 + 相对) - (A2 + 相对) = A1 - A2。
+      // (A1 + 相对) - (A2 + 相对) = A1 - A2。
 						if (!DecompressionContext.IsAdditiveAnimation())
 						{
 							AnimRelativeRetargetingPairs.Add(BoneTrackPair(CompactPoseBoneIndex, SourceSkeletonBoneIndex));
@@ -151,7 +151,7 @@ void DecompressPose(FCompactPose& OutPose,
 						TranslationPairs.Add(BoneTrackPair(CompactPoseBoneIndex, TrackIndex));
 
 						// Additives remain additives, they're not retargeted.
-						// [翻译失败: Additives remain additives, they're not retargeted.]
+      // 添加剂仍然是添加剂，它们没有被重新定位。
 						if (!DecompressionContext.IsAdditiveAnimation())
 						{
 							OrientAndScaleRetargetingPairs.Add(BoneTrackPair(CompactPoseBoneIndex, SourceSkeletonBoneIndex));
@@ -171,7 +171,7 @@ void DecompressPose(FCompactPose& OutPose,
 		DecompressionContext.Seek(ExtractionContext.CurrentTime);
 
 		// Handle Root Bone separately
-		// 单独处理根骨
+  // 单独处理根骨
 		if (bFirstTrackIsRootBone)
 		{
 			const int32 TrackIndex = 0;
@@ -181,17 +181,17 @@ void DecompressPose(FCompactPose& OutPose,
 			CompressedData.BoneCompressionCodec->DecompressBone(DecompressionContext, TrackIndex, RootAtom);
 
 			// Retarget the root onto the target skeleton (correcting for differences in rest poses)
-			// 将根重新定位到目标骨架上（纠正休息姿势的差异）
+   // 将根重新定位到目标骨架上（纠正休息姿势的差异）
 			if (SkeletonRemapping.RequiresReferencePoseRetarget())
 			{
 				// Root bone does not require fix-up for additive animations as there is no parent delta rotation to account for
-				// 根骨骼不需要修复附加动画，因为没有需要考虑的父级增量旋转
+    // 根骨骼不需要修复附加动画，因为没有需要考虑的父级增量旋转
 				if (!DecompressionContext.IsAdditiveAnimation())
 				{
 					constexpr int32 SkeletonBoneIndex = 0;
 
 					// Check what retarget mode to use for the translational retargeting for this specific bone.
-					// 检查用于该特定骨骼的平移重定向的重定向模式。
+     // 检查用于该特定骨骼的平移重定向的重定向模式。
 					const EBoneTranslationRetargetingMode::Type RetargetMode = FAnimationRuntime::GetBoneTranslationRetargetingMode(
 						bUseSourceRetargetModes,
 						SkeletonBoneIndex,
@@ -209,21 +209,21 @@ void DecompressPose(FCompactPose& OutPose,
 			}
 
 			// @laurent - we should look into splitting rotation and translation tracks, so we don't have to process translation twice.
-			// @laurent - 我们应该考虑分割旋转和平移轨道，这样我们就不必处​​理两次翻译。
+   // @laurent - 我们应该考虑分割旋转和平移轨道，这样我们就不必处​​理两次翻译。
 			FAnimationRuntime::RetargetBoneTransform(DecompressionContext.GetSourceSkeleton(), DecompressionContext.AnimName, RetargetTransforms, RootAtom, 0, RootBone, RequiredBones, DecompressionContext.IsAdditiveAnimation());
 		}
 
 		if (RotationScalePairs.Num() > 0)
 		{
 			// get the remaining bone atoms
-			// 获取剩余的骨原子
+   // 获取剩余的骨原子
 			TArrayView<FTransform> OutPoseBones = OutPose.GetMutableBones();
 			CompressedData.BoneCompressionCodec->DecompressPose(DecompressionContext, RotationScalePairs, TranslationPairs, RotationScalePairs, OutPoseBones);
 		}
 	}
 
 	// Retarget the pose onto the target skeleton (correcting for differences in rest poses)
-	// 将姿势重新定位到目标骨架上（纠正休息姿势的差异）
+ // 将姿势重新定位到目标骨架上（纠正休息姿势的差异）
 	if (SkeletonRemapping.RequiresReferencePoseRetarget())
 	{
 		if (DecompressionContext.IsAdditiveAnimation())
@@ -237,14 +237,14 @@ void DecompressPose(FCompactPose& OutPose,
 				}
 
 				// Mesh space additives do not require fix-up
-				// 网格空间添加剂不需要修复
+    // 网格空间添加剂不需要修复
 				if (DecompressionContext.GetAdditiveType() == AAT_LocalSpaceBase)
 				{
 					OutPose[BoneIndex].SetRotation(SkeletonRemapping.RetargetAdditiveRotationToTargetSkeleton(TargetSkeletonBoneIndex.GetInt(), OutPose[BoneIndex].GetRotation()));
 				}
 			
 				// Check what retarget mode to use for the translational retargeting for this specific bone.
-				// 检查用于该特定骨骼的平移重定向的重定向模式。
+    // 检查用于该特定骨骼的平移重定向的重定向模式。
 				const int32 SourceSkeletonBoneIndex = SkeletonRemapping.GetSourceSkeletonBoneIndex(TargetSkeletonBoneIndex.GetInt());
 				const EBoneTranslationRetargetingMode::Type RetargetMode = FAnimationRuntime::GetBoneTranslationRetargetingMode(
 					bUseSourceRetargetModes,
@@ -273,7 +273,7 @@ void DecompressPose(FCompactPose& OutPose,
 				OutPose[BoneIndex].SetRotation(SkeletonRemapping.RetargetBoneRotationToTargetSkeleton(TargetSkeletonBoneIndex.GetInt(), OutPose[BoneIndex].GetRotation()));
 
 				// Check what retarget mode to use for the translational retargeting for this specific bone.
-				// 检查用于该特定骨骼的平移重定向的重定向模式。
+    // 检查用于该特定骨骼的平移重定向的重定向模式。
 				const int32 SourceSkeletonBoneIndex = SkeletonRemapping.GetSourceSkeletonBoneIndex(TargetSkeletonBoneIndex.GetInt());
 				const EBoneTranslationRetargetingMode::Type RetargetMode = FAnimationRuntime::GetBoneTranslationRetargetingMode(
 					bUseSourceRetargetModes,
@@ -292,14 +292,14 @@ void DecompressPose(FCompactPose& OutPose,
 	}
 
 	// Once pose has been extracted, snap root bone back to first frame if we are extracting root motion.
-	// 提取姿势后，如果我们要提取根运动，请将根骨骼恢复到第一帧。
+ // 提取姿势后，如果我们要提取根运动，请将根骨骼恢复到第一帧。
 	if ((ExtractionContext.bExtractRootMotion && RootMotionReset.bEnableRootMotion) || RootMotionReset.bForceRootLock)
 	{
 		RootMotionReset.ResetRootBoneForRootMotion(OutPose[FCompactPoseBoneIndex(0)], RequiredBones);
 	}
 
 	// Anim Scale Retargeting
-	// 动画比例重定向
+ // 动画比例重定向
 	int32 const NumBonesToScaleRetarget = AnimScaleRetargetingPairs.Num();
 	if (NumBonesToScaleRetarget > 0)
 	{
@@ -315,7 +315,7 @@ void DecompressPose(FCompactPose& OutPose,
 			}
 
 			// @todo - precache that in FBoneContainer when we have SkeletonIndex->TrackIndex mapping. So we can just apply scale right away.
-			// @todo - 当我们有 SkeletonIndex->​​TrackIndex 映射时，在 FBoneContainer 中预缓存它。所以我们可以立即应用比例。
+   // @todo - 当我们有 SkeletonIndex->​​TrackIndex 映射时，在 FBoneContainer 中预缓存它。所以我们可以立即应用比例。
 			float const SourceTranslationLength = AuthoredOnRefSkeleton[SourceSkeletonBoneIndex].GetTranslation().Size();
 			if (SourceTranslationLength > UE_KINDA_SMALL_NUMBER)
 			{
@@ -326,7 +326,7 @@ void DecompressPose(FCompactPose& OutPose,
 	}
 
 	// Anim Relative Retargeting
-	// 动画相对重定向
+ // 动画相对重定向
 	int32 const NumBonesToRelativeRetarget = AnimRelativeRetargetingPairs.Num();
 	if (NumBonesToRelativeRetarget > 0)
 	{
@@ -344,7 +344,7 @@ void DecompressPose(FCompactPose& OutPose,
 			const FTransform& RefPoseTransform = RequiredBones.GetRefPoseTransform(BoneIndex);
 
 			// Remap the base pose onto the target skeleton so that we are working entirely in target space
-			// 将基本姿势重新映射到目标骨架上，以便我们完全在目标空间中工作
+   // 将基本姿势重新映射到目标骨架上，以便我们完全在目标空间中工作
 			const FTransform& RefBaseTransform = AuthoredOnRefSkeleton[SourceSkeletonBoneIndex];
 			const FTransform* BaseTransform = &RefBaseTransform;
 			FTransform RetargetBaseTransform;
@@ -356,7 +356,7 @@ void DecompressPose(FCompactPose& OutPose,
 			}
 
 			// Apply the retargeting as if it were an additive difference between the current skeleton and the retarget skeleton. 
-			// 应用重定向，就好像它是当前骨架和重定向骨架之间的附加差异。
+   // 应用重定向，就好像它是当前骨架和重定向骨架之间的附加差异。
 			OutPose[BoneIndex].SetRotation(OutPose[BoneIndex].GetRotation() * BaseTransform->GetRotation().Inverse() * RefPoseTransform.GetRotation());
 			OutPose[BoneIndex].SetTranslation(OutPose[BoneIndex].GetTranslation() + (RefPoseTransform.GetTranslation() - BaseTransform->GetTranslation()));
 			OutPose[BoneIndex].SetScale3D(OutPose[BoneIndex].GetScale3D() * (RefPoseTransform.GetScale3D() * BaseTransform->GetSafeScaleReciprocal(BaseTransform->GetScale3D())));
@@ -365,7 +365,7 @@ void DecompressPose(FCompactPose& OutPose,
 	}
 
 	// Translation 'Orient and Scale' Translation Retargeting
-	// 翻译“定向和规模” 翻译重定向
+ // 翻译“定向和规模” 翻译重定向
 	const int32 NumBonesToOrientAndScaleRetarget = OrientAndScaleRetargetingPairs.Num();
 	if (NumBonesToOrientAndScaleRetarget > 0)
 	{
@@ -374,7 +374,7 @@ void DecompressPose(FCompactPose& OutPose,
 		const TArray<int32>& CompactPoseIndexToOrientAndScaleIndex = RetargetSourceCachedData.CompactPoseIndexToOrientAndScaleIndex;
 
 		// If we have any cached retargeting data.
-		// 如果我们有任何缓存的重定向数据。
+  // 如果我们有任何缓存的重定向数据。
 		if (OrientAndScaleDataArray.Num() > 0 && CompactPoseIndexToOrientAndScaleIndex.Num() == NumCompactBones)
 		{
 			for (int32 Index = 0; Index < NumBonesToOrientAndScaleRetarget; Index++)
@@ -389,7 +389,7 @@ void DecompressPose(FCompactPose& OutPose,
 					const FVector AnimatedTranslation = BoneTransform.GetTranslation();
 
 					// If Translation is not animated, we can just copy the TargetTranslation. No retargeting needs to be done.
-					// 如果 Translation 没有动画，我们可以复制 TargetTranslation。无需进行重定向。
+     // 如果 Translation 没有动画，我们可以复制 TargetTranslation。无需进行重定向。
 					const FVector NewTranslation = (AnimatedTranslation - OrientAndScaleData.SourceTranslation).IsNearlyZero(BONE_TRANS_RT_ORIENT_AND_SCALE_PRECISION) ?
 						OrientAndScaleData.TargetTranslation :
 						OrientAndScaleData.TranslationDeltaOrient.RotateVector(AnimatedTranslation) * OrientAndScaleData.TranslationScale;
@@ -403,28 +403,28 @@ void DecompressPose(FCompactPose& OutPose,
 	if (bIsMeshSpaceAdditive)
 	{
 		// When an animation is a mesh-space additive, bones that aren't animated will end up with some non-identity
-		// 当动画是网格空间添加剂时，未设置动画的骨骼最终会出现一些非同一性
+  // 当动画是网格空间添加剂时，未设置动画的骨骼最终会出现一些非同一性
 		// delta relative to the base used to create the additive. This is because the delta is calculated in mesh-space
-		// 相对于用于创建添加剂的碱的增量。这是因为增量是在网格空间中计算的
+  // 相对于用于创建添加剂的碱的增量。这是因为增量是在网格空间中计算的
 		// unlike regular additive animations where bones that aren't animated has an identity delta. For rotations,
-		// 与常规的附加动画不同，在常规附加动画中，未动画的骨骼具有身份增量。对于旋转，
+  // 与常规的附加动画不同，在常规附加动画中，未动画的骨骼具有身份增量。对于旋转，
 		// this mesh-space delta will be the parent bone rotation.
-		// 该网格空间增量将是父骨骼旋转。
+  // 该网格空间增量将是父骨骼旋转。
 		// However, if a bone isn't animated in the sequence but present on the target skeleton, we have no data for it
-		// 但是，如果骨骼在序列中没有动画但出现在目标骨架上，则我们没有它的数据
+  // 但是，如果骨骼在序列中没有动画但出现在目标骨架上，则我们没有它的数据
 		// and the output pose will contain an identity delta which isn't what we want. As such, bones missing from
-		// 并且输出姿势将包含一个身份增量，这不是我们想要的。因此，骨骼缺失
+  // 并且输出姿势将包含一个身份增量，这不是我们想要的。因此，骨骼缺失
 		// the sequence have their rotation set to their parent.
-		// 该序列将其轮换设置为其父级。
+  // 该序列将其轮换设置为其父级。
 
 		// We always skip the root since it has no parent (its delta value is fine as the identity)
-		// [翻译失败: We always skip the root since it has no parent (its delta value is fine as the identity)]
+  // 我们总是跳过根，因为它没有父级（它的增量值可以作为身份）
 		for (FCompactPoseBoneIndex CompactBoneIndex(1); CompactBoneIndex < NumCompactBones; ++CompactBoneIndex)
 		{
 			if (!AnimatedCompactRotations[CompactBoneIndex.GetInt()])
 			{
 				// This bone wasn't animated in the sequence, fix it up
-				// [翻译失败: This bone wasn't animated in the sequence, fix it up]
+    // 该骨骼在序列中没有动画，请修复它
 				const FCompactPoseBoneIndex CompactParentIndex = RequiredBones.GetParentBoneIndex(CompactBoneIndex);
 				OutPose[CompactBoneIndex].SetRotation(OutPose[CompactParentIndex].GetRotation());
 			}

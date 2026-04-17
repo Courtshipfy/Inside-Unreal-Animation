@@ -29,15 +29,17 @@ public:
 	{}
 
 	// Called when there are Update() calls that were skipped due to pose caching. 
-	// 当由于姿势缓存而跳过 Update() 调用时调用。
+ // 当由于姿势缓存而跳过 Update() 调用时调用。
 	void OnUpdatesSkipped(TArrayView<const FMessageStack> InSkippedUpdates) { Function(InSkippedUpdates); }
 
 private:
 	// Function to call
-	// 要调用的函数
+ // 要调用的函数
+/** 用于缓存姿势生命周期的 RAII 助手（因为它们存储在内存堆栈上） */
 	TUniqueFunction<void(TArrayView<const FMessageStack>)> Function;
 };
 
+/** 用于缓存姿势生命周期的 RAII 助手（因为它们存储在内存堆栈上） */
 /** RAII helper for cached pose lifetimes (as they are stored on the mem stack) */
 /** 用于缓存姿势生命周期的 RAII 助手（因为它们存储在内存堆栈上） */
 struct FCachedPoseScope
@@ -51,9 +53,11 @@ struct FCachedPoseScope
 USTRUCT(BlueprintInternalUseOnly)
 struct FAnimNode_SaveCachedPose : public FAnimNode_Base
 {
+	/** 故意不暴露，由 AnimBlueprintCompiler 设置 */
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Links)
+	/** 故意不暴露，由 AnimBlueprintCompiler 设置 */
 	FPoseLink Pose;
 
 	/** Intentionally not exposed, set by AnimBlueprintCompiler */
@@ -81,14 +85,14 @@ public:
 	ENGINE_API FAnimNode_SaveCachedPose();
 
 	// FAnimNode_Base interface
-	// FAnimNode_Base接口
+ // FAnimNode_Base接口
 	ENGINE_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ENGINE_API virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
 	ENGINE_API virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override;
 	ENGINE_API virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 	ENGINE_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
-	// FAnimNode_Base接口结束
+ // FAnimNode_Base接口结束
 
 	ENGINE_API void PostGraphUpdate();
 };

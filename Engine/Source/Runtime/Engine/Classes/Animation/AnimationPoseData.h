@@ -13,16 +13,22 @@ namespace UE { namespace Anim { struct FStackAttributeContainer; } }
 
 /** Structure used for passing around animation pose related data throughout the Animation Runtime */
 /** 用于在整个动画运行时传递动画姿势相关数据的结构 */
+/** 用于在整个动画运行时传递动画姿势相关数据的结构 */
+/** 用于在整个动画运行时传递动画姿势相关数据的结构 */
 struct FAnimationPoseData
 {
 	ENGINE_API FAnimationPoseData(FPoseContext& InPoseContext);
 	ENGINE_API FAnimationPoseData(FSlotEvaluationPose& InSlotPoseContext);
 	ENGINE_API FAnimationPoseData(FCompactPose& InPose, FBlendedCurve& InCurve, UE::Anim::FStackAttributeContainer& InAttributes);
+	/** 没有默认构造函数或赋值 */
 	
+	/** 没有默认构造函数或赋值 */
 	/** No default constructor, or assignment */
 	/** 没有默认构造函数或赋值 */
+	/** 用于包裹结构的吸气剂 */
 	FAnimationPoseData() = delete;
 	FAnimationPoseData& operator=(FAnimationPoseData&& Other) = delete;
+	/** 用于包裹结构的吸气剂 */
 
 	/** Getters for the wrapped structures */
 	/** 用于包裹结构的吸气剂 */

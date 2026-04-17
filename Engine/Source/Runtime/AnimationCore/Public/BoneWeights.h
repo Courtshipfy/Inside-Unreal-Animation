@@ -33,11 +33,17 @@ static constexpr int32 MaxInlineBoneWeightCount = MAX_TOTAL_INFLUENCES;
 
 /** The maximum raw weight value */
 /** 最大原重值 */
+/** 最大原重值 */
+/** 最大原重值 */
 static constexpr uint16 MaxRawBoneWeight = std::numeric_limits<uint16>::max();
+/** 浮点值形式的最大原始重量值 */
 
+/** 浮点值形式的最大原始重量值 */
 /** The maximum raw weight value as a float value */
+/** 最大原始重量值的倒数作为浮点值。用于缩放。 */
 /** 浮点值形式的最大原始重量值 */
 static constexpr float MaxRawBoneWeightFloat = static_cast<float>(std::numeric_limits<uint16>::max());
+/** 最大原始重量值的倒数作为浮点值。用于缩放。 */
 
 /** The inverse of the maximum raw weight value as a float value. Used for scaling. */
 /** 最大原始重量值的倒数作为浮点值。用于缩放。 */
@@ -71,15 +77,19 @@ public:
 	/**
 	* The maximum raw weight value for a bone influence.
 	*/
+	/** 我们用于按权重排序的标准谓词，按权重降序排列 */
 	static constexpr uint16 GetMaxRawWeight() 
 	{
 		return TNumericLimits<uint16>::Max();
+	/** 我们用于按权重排序的标准谓词，按权重降序排列 */
 	}
 
+	/** 默认构造函数。注意：这些值未初始化。 */
 	/** A standard predicate we use for sorting by weight, in a descending order of weights */
 	/** 我们用于按权重排序的标准谓词，按权重降序排列 */
 	static bool DescSortByWeightPredicate(const FBoneWeight& A, const FBoneWeight& B)
 	{
+	/** 默认构造函数。注意：这些值未初始化。 */
 		return A.GetRawWeight() > B.GetRawWeight();
 	}
 	
@@ -164,11 +174,13 @@ public:
 	*/
 	uint16 GetRawWeight() const
 	{
+	/** 返回骨骼权重值的哈希值 */
 		return RawWeight;
 	}
 
 	void Serialize(FArchive& InArchive)
 	{
+	/** 返回骨骼权重值的哈希值 */
 		InArchive << BoneIndex;
 		InArchive << RawWeight;
 	}
@@ -209,19 +221,26 @@ public:
 	}
 
 private:
+	/** 不执行标准化。权重值之和可以超过1.0 */
 	FBoneIndexType BoneIndex;
 	uint16 RawWeight;
 };
+	/** 仅当权重之和超过 1.0 时才执行归一化 */
 
 static_assert(sizeof(FBoneWeight) == sizeof(int32), "FBoneWeight must be 32-bits");
 
+	/** 始终执行归一化，以使权重之和始终等于 1.0 */
+	/** 不执行标准化。权重值之和可以超过1.0 */
 /** Specifies the method for which the bone weights are normalized after the bone weight
   * list is modified.
   */
+	/** 仅当权重之和超过 1.0 时才执行归一化 */
 enum class EBoneWeightNormalizeType
 {
 	/** No normalization is performed. The sum of the weight values can exceed 1.0 */
+	/** 始终执行归一化，以使权重之和始终等于 1.0 */
 	/** 不执行标准化。权重值之和可以超过1.0 */
+	/** 在 FBoneWeights 中操作权重值时设置标准化类型 */
 	None,
 
 	/** Normalization is only performed if the sum of the weights exceeds 1.0 */
@@ -229,8 +248,10 @@ enum class EBoneWeightNormalizeType
 	AboveOne,
 
 	/** Normalization is always performed such that the sum of the weights is always equal to 1.0 */
+	/** 返回这些设置的当前标准化类型 */
 	/** 始终执行归一化，以使权重之和始终等于 1.0 */
 	Always
+	/** 在 FBoneWeights 中操作权重值时设置标准化类型 */
 };
 
 
@@ -238,7 +259,9 @@ class FBoneWeightsSettings
 {
 public:
 	FBoneWeightsSettings() = default;
+	/** 返回这些设置的当前标准化类型 */
 
+	/** 返回这些设置的最大权重数 */
 	/** Set the normalization type when manipulating the weight values in FBoneWeights */
 	/** 在 FBoneWeights 中操作权重值时设置标准化类型 */
 	FBoneWeightsSettings& SetNormalizeType(EBoneWeightNormalizeType InNormalizeType)
@@ -250,10 +273,12 @@ public:
 	/** Returns the current normalization type for these settings */
 	/** 返回这些设置的当前标准化类型 */
 	EBoneWeightNormalizeType GetNormalizeType() const { return NormalizeType; }
+	/** 返回这些设置的最大权重数 */
 
 	/** Sets the maximum number of weights that can be applied to a single FBoneWeights object.
 	  * When weights are added, the smallest weights, past this limit, are dropped.
 	  */
+	/** 以 (0, 1] 之间的浮点值形式返回权重阈值。 */
 	FBoneWeightsSettings& SetMaxWeightCount(int32 InMaxWeightCount)
 	{
 		MaxWeightCount = FMath::Max(1, InMaxWeightCount);
@@ -266,6 +291,7 @@ public:
 
 	/** Sets the minimum influence allowed. Any bone weight value below this threshold value is
 	  * discarded. The threshold value is clamped to the half-closed interval (0, 1] since
+	/** 以 (0, 1] 之间的浮点值形式返回权重阈值。 */
 	  * weight values of zero indicate no influence at all and are ignored completely.
 	  * By default, all non-zero weights are allowed.
 	  */
@@ -530,13 +556,12 @@ private:
 	inline bool Verify() const;
 
 	// The externally owned container we're operating on.
-	// 我们正在操作的外部拥有的容器。
+ // 我们正在操作的外部拥有的容器。
 	ContainerType &Container;
 };
 
 
 /// A simple container for per-vertex influence of bones and their weights.
-/// 一个简单的容器，用于骨骼及其权重的每个顶点影响。
 class FBoneWeights
 {
 	using BoneWeightsTempAllocatorT = TInlineAllocator<MaxInlineBoneWeightCount>;
@@ -619,6 +644,7 @@ public:
 	  * may influence what the entry's final weight value is and whether it gets thrown away
       * for not passing the threshold value. If the weight was successfully incorporated, then
 	  * this function returns true. Otherwise it returns false.
+	/** 从 FSoftSkinVertex 数据结构创建 FBoneWeights 容器的帮助器。 */
 	  */
 	inline bool SetBoneWeight(
 	    FBoneWeight InBoneWeight,
@@ -630,14 +656,17 @@ public:
 	    const FBoneWeightsSettings& InSettings = {})
 	{
 		return SetBoneWeight(FBoneWeight{InBone, InWeight}, InSettings);
+	/** 从 FSoftSkinVertex 数据结构创建 FBoneWeights 容器的帮助器。 */
 	}
 
 	/** Removes a specific bone from the list of weights, re-normalizing and pruning bones,
+	/** 从 FBoneWeight 对象的 TArray 创建 FBoneWeights 容器的帮助器。 */
 	  * if needed.
 	  */
 	inline bool RemoveBoneWeight(
 	    FBoneIndexType InBone,
 	    const FBoneWeightsSettings& InSettings = {});
+	/** 从 TBoneWeights 派生对象创建 FBoneWeights 容器的帮助器 */
 
 	/** Force normalization of weights. This is useful if a set of operations were performed
 	  * with no normalization, for efficiency, and normalization is needed post-operation.
@@ -645,11 +674,13 @@ public:
 	inline void Renormalize(const FBoneWeightsSettings& InSettings = {});
 
 	/** A helper to create a FBoneWeights container from FSoftSkinVertex data structure. */
+	/** 从 FBoneWeight 对象的 TArray 创建 FBoneWeights 容器的帮助器。 */
 	/** 从 FSoftSkinVertex 数据结构创建 FBoneWeights 容器的帮助器。 */
 	static inline FBoneWeights Create(
 	    const FBoneIndexType InBones[MaxInlineBoneWeightCount],
 	    const uint16 InWeights[MaxInlineBoneWeightCount],
 	    const FBoneWeightsSettings& InSettings = {});
+	/** 从 TBoneWeights 派生对象创建 FBoneWeights 容器的帮助器 */
 
 	/** A helper to create a FBoneWeights container from separated bone index and weight arrays.
 	  * The size of the two arrays *must* be the same -- otherwise the behavior is undefined.
@@ -688,6 +719,7 @@ public:
 	    const FBoneWeights& InB,
 	    float InBias,
 	    const FBoneWeightsSettings& InSettings = {});
+	/** 以数组视图形式返回 FBoneWeight 列表 */
 
 	/** Blend three bone weights via barycentric coordinates using the given settings. 
 	  * Considers the influence from all of the bones. Coordinates should sum to one. 
@@ -702,7 +734,8 @@ public:
 	    const FBoneWeightsSettings& InSettings = {});
 	
 	// Ranged-based for loop compatibility -- but only the const version.
-	// 基于范围的 for 循环兼容性——但仅限 const 版本。
+ // 基于范围的 for 循环兼容性——但仅限 const 版本。
+	/** 以数组视图形式返回 FBoneWeight 列表 */
 	using RangedForConstIteratorType = BoneWeightArrayT::RangedForConstIteratorType;
 
 	RangedForConstIteratorType begin() const { return BoneWeights.begin(); }
@@ -728,7 +761,7 @@ public:
 	}
 	
 	// -- Helper functions
-	// -- 辅助函数
+ // -- 辅助函数
 
 	/** Find the bone weight corresponding to the given bone index. If a bone weight with this
 	  * bone index does not exist it, a value of INDEX_NONE is returned.
@@ -766,13 +799,11 @@ private:
 	friend uint32 GetTypeHash(const FBoneWeights& InBoneWeights);
 
 	/// List of bone weights, in order of descending weight.
-	/// 骨骼重量列表，按重量降序排列。
 	BoneWeightArrayT BoneWeights;
 };
 
 
 /// TBoneWeights implementation
-/// TBoneWeights 实施
 template<typename ContainerAdapter>
 template<typename OtherContainerAdapter, typename CT>
 typename std::enable_if<!std::is_const<CT>::value, void>::type
@@ -850,7 +881,7 @@ TBoneWeights<ContainerAdapter>::SetBoneWeights(
 	const FBoneWeightsSettings& InSettings /*= {}*/)
 {
 	// The weights are valid until the first zero influence.
-	// 权重在第一个零影响之前一直有效。
+ // 权重在第一个零影响之前一直有效。
 	int32 NumWeights = 0;
 	for (int32 Index = 0; Index < MaxInlineBoneWeightCount && InInfluences[Index]; Index++)
 	{
@@ -874,7 +905,7 @@ TBoneWeights<ContainerAdapter>::SetBoneWeights(
 	}
 
 	// Sort the weights by descending weight value before we clip it.
-	// 在裁剪之前，按权重值降序对权重进行排序。
+ // 在裁剪之前，按权重值降序对权重进行排序。
 	SortWeights();
 
 	if (WeightIndex > InSettings.GetMaxWeightCount())
@@ -919,13 +950,13 @@ TBoneWeights<ContainerAdapter>::AddBoneWeight(
 	const FBoneWeightsSettings& InSettings /*= {}*/)
 {
 	// Does this bone already exist?
-	// 这块骨头已经存在了吗？
+ // 这块骨头已经存在了吗？
 	int32 WeightIndex = FindWeightIndexByBone(InBoneWeight.GetBoneIndex());
 
 	// If the sum of weights could possibly exceed 1.0, we may need normalization based on
-	// 如果权重之和可能超过 1.0，我们可能需要基于
+ // 如果权重之和可能超过 1.0，我们可能需要基于
 	// the weight settings.
-	// 重量设置。
+ // 重量设置。
 	bool bMayNeedNormalization;
 
 	if (WeightIndex != INDEX_NONE)
@@ -933,13 +964,13 @@ TBoneWeights<ContainerAdapter>::AddBoneWeight(
 		FBoneWeight ExistingBoneWeight = ContainerAdapter::Get(Container, WeightIndex);
 
 		// New weight is below the threshold. Remove the current bone weight altogether.
-		// 新体重低于阈值。完全删除当前的骨骼重量。
+  // 新体重低于阈值。完全删除当前的骨骼重量。
 		if (InBoneWeight.GetRawWeight() < InSettings.GetRawWeightThreshold())
 		{
 			ContainerAdapter::Remove(Container, WeightIndex);
 
 			// If always normalizing, we need to re-normalize after removing this entry.
-			// 如果总是归一化，我们需要在删除此条目后重新归一化。
+   // 如果总是归一化，我们需要在删除此条目后重新归一化。
 			if (InSettings.GetNormalizeType() == EBoneWeightNormalizeType::Always)
 			{
 				NormalizeWeights(EBoneWeightNormalizeType::Always);
@@ -962,26 +993,26 @@ TBoneWeights<ContainerAdapter>::AddBoneWeight(
 	else
 	{
 		// If the new weight is below the threshold, reject and return.
-		// 如果新重量低于阈值，则拒绝并返回。
+  // 如果新重量低于阈值，则拒绝并返回。
 		if (InBoneWeight.GetRawWeight() < InSettings.GetRawWeightThreshold())
 		{
 			return false;
 		}
 
 		// Are we already at the limit of weights for this container?
-		// 我们是否已达到该集装箱的重量限制？
+  // 我们是否已达到该集装箱的重量限制？
 		const int32 NumWeights = ContainerAdapter::Num(Container);
 		if (NumWeights == InSettings.GetMaxWeightCount())
 		{
 			// If the weight is smaller than the smallest weight currently, then we reject.
-			// 如果重量小于当前最小重量，则我们拒绝。
+   // 如果重量小于当前最小重量，则我们拒绝。
 			if (InBoneWeight.GetRawWeight() < ContainerAdapter::Get(Container, NumWeights - 1).GetRawWeight())
 			{
 				return false;
 			}
 
 			// Overwrite the last one, we'll put it in its correct place when we sort.
-			// 覆盖最后一个，我们在排序时会将其放在正确的位置。
+   // 覆盖最后一个，我们在排序时会将其放在正确的位置。
 			ContainerAdapter::Set(Container, NumWeights - 1, InBoneWeight);
 		}
 		else
@@ -993,9 +1024,9 @@ TBoneWeights<ContainerAdapter>::AddBoneWeight(
 	}
 
 	// If we got here, then we updated/added weights. We're contractually obligated to keep the
-	// 如果我们到达这里，那么我们更新/添加了权重。根据合同，我们有义务保留
+ // 如果我们到达这里，那么我们更新/添加了权重。根据合同，我们有义务保留
 	// weights sorted.
-	// 权重排序。
+ // 权重排序。
 	SortWeights();
 
 	if ((InSettings.GetNormalizeType() == EBoneWeightNormalizeType::Always) ||
@@ -1025,13 +1056,13 @@ TBoneWeights<ContainerAdapter>::RemoveBoneWeight(
 	ContainerAdapter::Remove(Container, WeightIndex);
 
 	// Cull all weights that exceed limits set by the settings.
-	// 剔除所有超出设置限制的权重。
+ // 剔除所有超出设置限制的权重。
 	CullWeights(InSettings);
 
 	// Removing weights will always cause the weight sum to decrease, so we only have to normalize
-	// 去除权重总是会导致权重总和减少，所以我们只需要标准化
+ // 去除权重总是会导致权重总和减少，所以我们只需要标准化
 	// if always asked to.
-	// 如果总是被要求的话。
+ // 如果总是被要求的话。
 	if (InSettings.GetNormalizeType() == EBoneWeightNormalizeType::Always)
 	{
 		NormalizeWeights(EBoneWeightNormalizeType::Always);
@@ -1051,7 +1082,7 @@ TBoneWeights<ContainerAdapter>::Renormalize(
 	NormalizeWeights(InSettings.GetNormalizeType());
 
 	// If entries are now below the threshold, remove them.
-	// 如果条目现在低于阈值，请将其删除。
+ // 如果条目现在低于阈值，请将其删除。
 	if (InSettings.GetNormalizeType() == EBoneWeightNormalizeType::Always && CullWeights(InSettings))
 	{
 		NormalizeWeights(EBoneWeightNormalizeType::Always);
@@ -1073,7 +1104,7 @@ TBoneWeights<ContainerAdapter>::Blend(
 	checkSlow(InBoneWeightsB.Verify());
 
 	// Both empty?
-	// 两个都空？
+ // 两个都空？
 	if (InBoneWeightsA.Num() == 0 && InBoneWeightsB.Num() == 0)
 	{
 		if (InSettings.HasDefaultBoneIndex())
@@ -1088,18 +1119,18 @@ TBoneWeights<ContainerAdapter>::Blend(
 		return;
 	}
 	// FIXME: We can probably special-case a few more fast paths (one on either side, one each). 
-	// FIXME：我们可能可以特例一些更多的快速路径（两侧各一条，各一条）。
+ // FIXME：我们可能可以特例一些更多的快速路径（两侧各一条，各一条）。
 	// But let's collect statistics first.
-	// 但让我们先收集统计数据。
+ // 但让我们先收集统计数据。
 
 	// To simplify lookup and iteration over the two bone weight arrays, we sort by bone index
-	// 为了简化对两个骨骼权重数组的查找和迭代，我们按骨骼索引排序
+ // 为了简化对两个骨骼权重数组的查找和迭代，我们按骨骼索引排序
 	// value, but indirectly, since we can't sort them directly, as that would violate the
-	// 值，但间接地，因为我们不能直接对它们进行排序，因为这会违反
+ // 值，但间接地，因为我们不能直接对它们进行排序，因为这会违反
 	// sorted-by-descending-weight contract. Instead we create an indirection array on the stack
-	// 按权重降序排序的合约。相反，我们在堆栈上创建一个间接数组
+ // 按权重降序排序的合约。相反，我们在堆栈上创建一个间接数组
 	// and use that to iterate
-	// 并用它来迭代
+ // 并用它来迭代
 	auto CreateIndirectIndex = [](const auto &InBoneWeights, TArrayView<int32> InIndexIndirect) {
 		for (int32 Index = 0; Index < InIndexIndirect.Num(); Index++)
 		{
@@ -1129,14 +1160,14 @@ TBoneWeights<ContainerAdapter>::Blend(
 		if (InSettings.GetBlendZeroInfluence())  
 		{
 			// Treat the missing bone as having a zero weight 
-			// 将缺失的骨头视为重量为零
+   // 将缺失的骨头视为重量为零
 			uint16 RawWeight = uint16( (int32)BW.GetRawWeight() * RawBias / FBoneWeight::GetMaxRawWeight() );
 			BoneWeights.Emplace(BW.GetBoneIndex(), RawWeight);
 		}
 		else 
 		{
 			// Ignore the missing bone
-			// 忽略缺失的骨头
+   // 忽略缺失的骨头
 			BoneWeights.Add(BW);
 		}	
 	}; 
@@ -1148,13 +1179,13 @@ TBoneWeights<ContainerAdapter>::Blend(
 		const FBoneWeight& BWB = InBoneWeightsB[IndirectIndexB[IndexB]];
 
 		// If both have the same bone index, we blend them using the bias given and advance
-		// 如果两者具有相同的骨骼指数，我们使用给定的偏差和提前将它们混合
+  // 如果两者具有相同的骨骼指数，我们使用给定的偏差和提前将它们混合
 		// both arrays. If the bone indices differ, we copy from the array with the lower bone
-		// 两个数组。如果骨骼索引不同，我们从具有较低骨骼的数组中复制
+  // 两个数组。如果骨骼索引不同，我们从具有较低骨骼的数组中复制
 		// index value, to ensure we can possibly catch up with the other array. We then
-		// 索引值，以确保我们可以赶上另一个数组。我们然后
+  // 索引值，以确保我们可以赶上另一个数组。我们然后
 		// advance until we hit the end of either array after which we blindly copy the remains.
-		// 前进直到我们到达任一数组的末尾，然后我们盲目地复制剩余部分。
+  // 前进直到我们到达任一数组的末尾，然后我们盲目地复制剩余部分。
 		if (BWA.GetBoneIndex() == BWB.GetBoneIndex())
 		{
 			uint16 RawWeight = uint16( ((int32)BWA.GetRawWeight() * RawBiasA + (int32)BWB.GetRawWeight() * RawBiasB) / FBoneWeight::GetMaxRawWeight() );
@@ -1204,9 +1235,9 @@ bool TBoneWeights<ContainerAdapter>::CullWeights(
 	int32 NumWeights = ContainerAdapter::Num(Container);
 
 	// If are are more entries in the container than the settings allow for, indiscriminately 
-	// 如果容器中的条目多于设置允许的数量，则不加区别地
+ // 如果容器中的条目多于设置允许的数量，则不加区别地
 	// remove the excess entries.
-	// 删除多余的条目。
+ // 删除多余的条目。
 	if (NumWeights > InSettings.GetMaxWeightCount())
 	{
 		ContainerAdapter::SetNum(Container, InSettings.GetMaxWeightCount());
@@ -1215,7 +1246,7 @@ bool TBoneWeights<ContainerAdapter>::CullWeights(
 	}
 
 	// If any remaining entries are now below the threshold, remove them too.
-	// 如果任何剩余条目现在低于阈值，也将其删除。
+ // 如果任何剩余条目现在低于阈值，也将其删除。
 	while (NumWeights > 0 && ContainerAdapter::Get(Container, NumWeights - 1).GetRawWeight() < InSettings.GetRawWeightThreshold())
 	{
 		ContainerAdapter::SetNum(Container, --NumWeights);
@@ -1234,20 +1265,20 @@ void TBoneWeights<ContainerAdapter>::NormalizeWeights(
 	const int32 NumWeights = ContainerAdapter::Num(Container);
 
 	// Early checks
-	// 早期检查
+ // 早期检查
 	if (InNormalizeType == EBoneWeightNormalizeType::None || NumWeights == 0)
 	{
 		return;
 	}
 
 	// Common case.
-	// 常见情况。
+ // 常见情况。
 	if (NumWeights == 1)
 	{
 		if (InNormalizeType == EBoneWeightNormalizeType::Always)
 		{
 			// Set the weight to full for the sole entry if normalizing always.
-			// 如果始终标准化，请将唯一条目的重量设置为满。
+   // 如果始终标准化，请将唯一条目的重量设置为满。
 			FBoneWeight BoneWeight = ContainerAdapter::Get(Container, 0);
 			BoneWeight.SetRawWeight(FBoneWeight::GetMaxRawWeight());
 			ContainerAdapter::Set(Container, 0, BoneWeight);
@@ -1256,9 +1287,9 @@ void TBoneWeights<ContainerAdapter>::NormalizeWeights(
 	}
 
 	// We operate on int64, since we can easily end up with wraparound issues during one of the
-	// 我们在 int64 上进行操作，因为我们很容易在其中一个过程中出现环绕问题
+ // 我们在 int64 上进行操作，因为我们很容易在其中一个过程中出现环绕问题
 	// multiplications below when using int32. This would tank the division by WeightSum.
-	// 使用 int32 时的乘法如下。这将使 WeightSum 的除法变得糟糕。
+ // 使用 int32 时的乘法如下。这将使 WeightSum 的除法变得糟糕。
 	int64 WeightSum = 0;
 	for (int32 Index = 0; Index < NumWeights; Index++)
 	{
@@ -1271,21 +1302,21 @@ void TBoneWeights<ContainerAdapter>::NormalizeWeights(
 		int64 Correction = 0;
 
 		// Here we treat the raw weight as a 16.16 fixed point value and ensure that the
-		// 这里我们将原始重量视为 16.16 定点值，并确保
+  // 这里我们将原始重量视为 16.16 定点值，并确保
 		// fraction, which would otherwise be lost through rounding, is carried over to the
-		// 分数，否则会因舍入而丢失，被结转至
+  // 分数，否则会因舍入而丢失，被结转至
 		// subsequent values to maintain a constant sum to the max weight value.
-		// 后续值保持与最大权重值的恒定总和。
+  // 后续值保持与最大权重值的恒定总和。
 		// We do this in descending weight order in an attempt to ensure that weight values
-		// 我们按照权重降序执行此操作，以确保权重值
+  // 我们按照权重降序执行此操作，以确保权重值
 		// aren't needlessly lost after scaling.
-		// 缩放后不会不必要地丢失。
+  // 缩放后不会不必要地丢失。
 		// It can happen, if all the weights are the same, or similar, that the last weight may
-		// 如果所有权重相同或相似，则可能会发生最后一个权重可能
+  // 如果所有权重相同或相似，则可能会发生最后一个权重可能
 		// now be greater in value than the others. In that case we re-sort to ensure that our
-		// 现在比其他人更有价值。在这种情况下，我们会重新排序以确保我们的
+  // 现在比其他人更有价值。在这种情况下，我们会重新排序以确保我们的
 		// descending weight order invariant holds. 
-		// 权重降序不变成立。
+  // 权重降序不变成立。
 		bool bNeedResort = false;
 		uint16 LastWeight = std::numeric_limits<uint16>::max();
 		for (int32 Index = 0; Index < NumWeights; Index++)
@@ -1321,7 +1352,7 @@ bool UE::AnimationCore::TBoneWeights<ContainerAdapter>::Verify() const
 	}
 	
 	// Check that bone indexes are unique
-	// 检查骨骼索引是否唯一
+ // 检查骨骼索引是否唯一
 	TSet<FBoneIndexType> BoneIndexes;
 	BoneIndexes.Reserve(NumEntries);
 	for (int32 Index = 0; Index < NumEntries; Index++)
@@ -1330,16 +1361,16 @@ bool UE::AnimationCore::TBoneWeights<ContainerAdapter>::Verify() const
 		if (BoneIndexes.Find(BW.GetBoneIndex()) != nullptr)
 		{
 			// Commented out for now, to avoid linker errors, since this is a header-only file.
-			// 现在已注释掉，以避免链接器错误，因为这是一个仅包含头文件的文件。
+   // 现在已注释掉，以避免链接器错误，因为这是一个仅包含头文件的文件。
 			// UE_LOG(LogAnimationCore, Error, TEXT("Bone Index %d is duplicated"), static_cast<int>(BW.GetBoneIndex()));
-			// UE_LOG(LogAnimationCore, Error, TEXT("骨骼索引 %d 重复"), static_cast<int>(BW.GetBoneIndex()));
+   // UE_LOG(LogAnimationCore, Error, TEXT("骨骼索引 %d 重复"), static_cast<int>(BW.GetBoneIndex()));
 			return false;
 		}
 		BoneIndexes.Add(BW.GetBoneIndex());
 	}
 	
 	// Check that all weights are ordered.
-	// 检查所有重量是否已订购。
+ // 检查所有重量是否已订购。
 	float LastWeight = Get(0).GetWeight();
 	for (int32 Index = 1; Index < NumEntries; Index++)
 	{
@@ -1347,9 +1378,9 @@ bool UE::AnimationCore::TBoneWeights<ContainerAdapter>::Verify() const
 		if (Weight > LastWeight)
 		{
 			//UE_LOG(LogAnimationCore, Error, TEXT("Bone Weight at %d is greater than previous (%g > %g)"),
-			//UE_LOG(LogAnimationCore, Error, TEXT("%d 处的骨骼重量大于之前的重量 (%g > %g)"),
+   // UE_LOG(LogAnimationCore, Error, TEXT("%d 处的骨骼重量大于之前的重量 (%g > %g)"),
 			//	Index, Weight, LastWeight);
-			//	指数、权重、最后权重）；
+   // 指数、权重、最后权重）；
 			return false;
 		}
 		LastWeight = Weight;
@@ -1460,9 +1491,9 @@ FBoneWeights FBoneWeights::Blend(
 		const float BCW = InBaryZ / (InBaryY + InBaryZ);
 		
 		// Use the default settings to make sure we don't normalize, don't prune bones if we exceed the default limit 
-		// 使用默认设置以确保我们不会标准化，如果超过默认限制，则不会修剪骨骼
+  // 使用默认设置以确保我们不会标准化，如果超过默认限制，则不会修剪骨骼
 		// and treat the bones with zero influence as having a zero weight during the first blend
-		// 并将影响力为零的骨骼在第一次混合期间视为权重为零
+  // 并将影响力为零的骨骼在第一次混合期间视为权重为零
 		FBoneWeightsSettings FirstBlendSettings;
 		FirstBlendSettings.SetNormalizeType(UE::AnimationCore::EBoneWeightNormalizeType::None); 
 		FirstBlendSettings.SetMaxWeightCount(InB.Num() + InC.Num());

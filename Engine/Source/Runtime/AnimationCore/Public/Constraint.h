@@ -121,18 +121,20 @@ struct FFilterOptionPerAxis
 	bool IsValid() const
 	{
 		// if none of them is set, it's not valid
-		// 如果没有设置，则无效
+  // 如果没有设置，则无效
 		return bX || bY || bZ;
 	}
 	
 	bool HasNoEffect() const
 	{
 		// if all of them are set the filter won't affect anything
-		// 如果所有这些都设置了，过滤器不会影响任何东西
+  // 如果所有这些都设置了，过滤器不会影响任何东西
 		return bX && bY && bZ;
 	}
 };
+/** 整个变换的过滤器 */
 
+/** 整个变换的过滤器 */
 /** A filter for a whole transform */
 /** 整个变换的过滤器 */
 USTRUCT(BlueprintType)
@@ -178,6 +180,8 @@ struct FTransformFilter
 		ScaleFilter.FilterVector(Scale, FVector::OneVector);
 		Input.Scale = Scale;
 	}
+/** 如何应用简单变换约束的描述 */
+/** 如何应用简单变换约束的描述 */
 };
 
 /** A description of how to apply a simple transform constraint */
@@ -197,7 +201,7 @@ struct FConstraintDescription
 	bool bScale;
 
 	// this does composed transform - where as individual will accumulate per component
-	// 这会进行组合变换 - 其中个体将累积每个组件
+ // 这会进行组合变换 - 其中个体将累积每个组件
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Constraint")
 	bool bParent;
 
@@ -258,10 +262,16 @@ struct FConstraintOffset
 	FConstraintOffset()
 		: Translation(FVector::ZeroVector)
 		, Rotation(FQuat::Identity)
+	/* 应用反向偏移 */
+	/* 应用反向偏移 */
 		, Scale(FVector::OneVector)
 		, Parent(FTransform::Identity)
+	/* 保存逆偏移 */
+	/* 保存逆偏移 */
 	{}
+	/** 清除偏移量 */
 
+	/** 清除偏移量 */
 	/* Apply the Inverse offset */
 	/* 应用反向偏移 */
 	ANIMATIONCORE_API void ApplyInverseOffset(const FTransform& InTarget, FTransform& OutSource) const;
@@ -295,12 +305,14 @@ struct FTransformConstraint
 	GENERATED_USTRUCT_BODY()
 
 	// @note thought of separating this out per each but we'll have an issue with applying transform in what order
-	// @note 考虑将其分开，但我们会遇到以什么顺序应用转换的问题
+ // @note 考虑将其分开，但我们会遇到以什么顺序应用转换的问题
 	// but something to think about if that seems better
-	// 但如果这样看起来更好的话，需要考虑一下
+ // 但如果这样看起来更好的话，需要考虑一下
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transform Constraint")
 	FConstraintDescription Operator;
 
+	/** 第一次应用约束时，保持距目标节点的偏移量 */
+	/** 第一次应用约束时，保持距目标节点的偏移量 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transform Constraint")
 	FName SourceNode;
 
@@ -326,21 +338,30 @@ struct FTransformConstraint
 	{
 		Ar << D.Operator;
 		Ar << D.SourceNode;
+/** 约束类型*/
 		Ar << D.TargetNode;
+/** 约束类型*/
 		Ar << D.Weight;
 		Ar << D.bMaintainOffset;
+	/** 变换约束 */
 
 		return Ar;
+	/** 变换约束 */
+	/** 目标约束*/
 	}
 };
 
+	/** MAX - 无效 */
+	/** 目标约束*/
 ////////////////////////////////////////////////////////////////
 /// new changes of constraints
-/// 约束条件的新变化
+	/** MAX - 无效 */
+/** 如何应用简单变换约束的描述 */
 
 /** Constraint Types*/
 /** 约束类型*/
 UENUM(BlueprintType)
+/** 如何应用简单变换约束的描述 */
 enum class EConstraintType : uint8
 {
 	/** Transform Constraint */
@@ -400,22 +421,26 @@ struct FConstraintDescriptionEx
 
 	/** 
 	 * Serializer 
+/** 变换约束类型*/
 	 */
 	virtual void Serialize(FArchive& Ar)
 	{
 		Ar << AxesFilterOption;
 	}
+/** 变换约束类型*/
 
 	friend FArchive & operator<<(FArchive & Ar, FConstraintDescriptionEx & D)
 	{
 		D.Serialize(Ar);
 		return Ar;
+/** 如何应用简单变换约束的描述 */
 	}
 };
 template<>
 struct TStructOpsTypeTraits<FConstraintDescriptionEx> : public TStructOpsTypeTraitsBase2<FConstraintDescriptionEx>
 {
 	enum
+/** 如何应用简单变换约束的描述 */
 	{
 		WithPureVirtual = true,
 	};
@@ -454,6 +479,7 @@ struct FTransformConstraintDescription : public FConstraintDescriptionEx
 	virtual bool DoesAffectTransform() const override { return TransformType == ETransformConstraintType::Parent; }
 
 	virtual FString GetDisplayString() const override
+/** 如何应用目标约束的描述 */
 	{
 		switch (TransformType)
 		{
@@ -461,6 +487,7 @@ struct FTransformConstraintDescription : public FConstraintDescriptionEx
 			return TEXT("Parent");
 		case ETransformConstraintType::Translation:
 			return TEXT("Translation");
+/** 如何应用目标约束的描述 */
 		case ETransformConstraintType::Rotation:
 			return TEXT("Rotation");
 		case ETransformConstraintType::Scale:
@@ -616,7 +643,7 @@ private:
 
 public:
 	// this does not check type - we can, but that is hard to maintain, maybe I'll change later 
-	// 这不会检查类型 - 我们可以，但这很难维护，也许我稍后会更改
+ // 这不会检查类型 - 我们可以，但这很难维护，也许我稍后会更改
 	template <typename T>	
 	T* GetTypedConstraint() const
 	{
@@ -682,22 +709,30 @@ public:
 		return false;
 	}
 
+	/** 约束说明 */
 	bool DoesAffectTransform() const
 	{
 		if (ConstraintDescription)
+	/** 约束权重 */
 		{
 			return ConstraintDescription->DoesAffectTransform();
 		}
+	/** 第一次应用约束时，保持距目标节点的偏移量 */
 		return false;
+	/** 约束说明 */
 	}
+	/** 如果使用 bMaintainOffset 则约束偏移 */
 
 	void ApplyConstraintTransform(const FTransform& TargetTransform, const FTransform& CurrentTransform, const FTransform& CurrentParentTransform, float Weight, FMultiTransformBlendHelper& BlendHelperInLocalSpace) const
+	/** 约束权重 */
 	{
 		if (ConstraintDescription)
 		{
+	/** 第一次应用约束时，保持距目标节点的偏移量 */
 			return ConstraintDescription->AccumulateConstraintTransform(TargetTransform, CurrentTransform, CurrentParentTransform, Weight, BlendHelperInLocalSpace);
 		}
 	}
+	/** 如果使用 bMaintainOffset 则约束偏移 */
 };
 
 /** 

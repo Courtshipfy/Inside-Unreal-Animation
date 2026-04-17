@@ -42,14 +42,14 @@ public:
 	}
 
 	// FAnimNode_Base interface
-	// FAnimNode_Base接口
+ // FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
-	// FAnimNode_Base接口结束
+ // FAnimNode_Base接口结束
 
 	int32 AddPose()
 	{
@@ -88,7 +88,7 @@ public:
 
 private:
 	// process new weights and then return out
-	// 处理新的权重然后返回
+ // 处理新的权重然后返回
 	ANIMGRAPHRUNTIME_API void UpdateCachedAlphas();
 
 	friend class UAnimGraphNode_MultiWayBlend;

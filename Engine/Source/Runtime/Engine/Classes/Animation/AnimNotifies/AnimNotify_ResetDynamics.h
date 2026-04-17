@@ -16,13 +16,13 @@ public:
 	ENGINE_API UAnimNotify_ResetDynamics();
 
 	// Begin UAnimNotify interface
-	// 开始UAnimNotify接口
+ // 开始UAnimNotify接口
 	ENGINE_API virtual FString GetNotifyName_Implementation() const override;
 	UE_DEPRECATED(5.0, "Please use the other Notify function instead")
 	ENGINE_API virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 	ENGINE_API virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 	// End UAnimNotify interface
-	// 结束UAnimNotify接口
+ // 结束UAnimNotify接口
 
 };
 

@@ -31,20 +31,20 @@ class FAnimBankBuildAsyncCacheTask;
 struct FSkinnedAssetMapping
 {
 	// Bone transforms in global pose.
-	// 骨骼在整体姿势中发生变化。
+ // 骨骼在整体姿势中发生变化。
 	TArray<FTransform> MeshGlobalRefPose;
 	TArray<FTransform> AnimGlobalRefPose;
 
 	// A map to go from the mesh skeleton bone index to anim skeleton bone index.
-	// 从网格骨架骨骼索引到动画骨架骨骼索引的映射。
+ // 从网格骨架骨骼索引到动画骨架骨骼索引的映射。
 	TArray<int32> MeshToAnimIndexMap;
 
 	// Retargeting table to go from the anim skeleton to the mesh skeleton.
-	// 重定向表从动画骨架到网格骨架。
+ // 重定向表从动画骨架到网格骨架。
 	TArray<TTuple<FQuat, FQuat>> RetargetingTable;
 
 	// Inverse global space transforms
-	// 逆全局空间变换
+ // 逆全局空间变换
 	TArray<FVector3f> PositionKeys;
 	TArray<FQuat4f> RotationKeys;
 
@@ -223,16 +223,20 @@ public:
 	virtual bool IsCachedCookedPlatformDataLoaded(const ITargetPlatform* TargetPlatform) override;
 	virtual void ClearAllCachedCookedPlatformData() override;
 
+	/** 返回资产当前是否正在编译 */
 	virtual bool GetAllAnimationSequencesReferred(TArray<UAnimationAsset*>& AnimationAssets, bool bRecursive = true) override;
 	virtual void ReplaceReferredAnimations(const TMap<UAnimationAsset*, UAnimationAsset*>& ReplacementMap) override;
 
+	/** 返回资产当前是否正在编译 */
 	/** Returns whether or not the asset is currently being compiled */
 	/** 返回资产当前是否正在编译 */
 	bool IsCompiling() const override;
 
 	/** Try to cancel any pending async tasks.
+	/** 如果当前有异步任务正在运行，则返回 false */
 	*  Returns true if there is no more async tasks pending, false otherwise.
 	*/
+	/** 如果当前有异步任务正在运行，则返回 false */
 	bool TryCancelAsyncTasks();
 
 	/** Returns false if there is currently an async task running */
@@ -240,7 +244,9 @@ public:
 	bool IsAsyncTaskComplete() const;
 
 	/**
+	/** 返回之前确保所有异步任务都已完成 */
 	* Wait until all async tasks are complete, up to a time limit
+	/** 返回之前确保所有异步任务都已完成 */
 	* Returns true if all tasks are completed
 	**/
 	bool WaitForAsyncTasks(float TimeLimitSeconds);
@@ -260,6 +266,8 @@ private:
 #if WITH_EDITOR
 	friend class FAnimBankCompilingManager;
 	void Reschedule(FQueuedThreadPool* InThreadPool, EQueuedWorkPriority InPriority);
+	/** 同步缓存并返回目标平台的派生数据。 */
+	/** 同步缓存并返回目标平台的派生数据。 */
 
 	FIoHash CreateDerivedDataKeyHash(const ITargetPlatform* TargetPlatform);
 	FIoHash BeginCacheDerivedData(const ITargetPlatform* TargetPlatform);
@@ -587,14 +595,14 @@ struct FAnimBankRecord
 	int32 ReferenceCount = 0;
 
 	// TODO: De-dup using USkinnedAsset*
-	// TODO：使用 USkinnedAsset 进行重复数据删除*
+ // TODO：使用 USkinnedAsset 进行重复数据删除*
 	FSkinnedAssetMapping AssetMapping;
 
 	TArray<FVector3f>	PositionKeys;
 	TArray<FQuat4f>		RotationKeys;
 
 	// Playback
-	// 回放
+ // 回放
 	uint8				Playing : 1 = 0;
 	float				CurrentTime = 0.0f;
 	float				PreviousTime = 0.0f;

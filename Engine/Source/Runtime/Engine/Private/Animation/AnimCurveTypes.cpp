@@ -54,7 +54,7 @@ bool FAnimCurveBase::Serialize(FArchive& Ar)
 	Ar.UsingCustomVersion(FUE5MainStreamObjectVersion::GUID);
 
 	// Return false to defer to regular serialization 
-	// 返回 false 以推迟常规序列化
+ // 返回 false 以推迟常规序列化
 	return false;
 }
 
@@ -66,11 +66,11 @@ void FAnimCurveBase::PostSerialize(const FArchive& Ar)
 		if (Ar.CustomVer(FFrameworkObjectVersion::GUID) < FFrameworkObjectVersion::SmartNameRefactor)
 		{
 			// Between CLs 3002109 (SmartNameRefactor) and 3026802 (PoseAssetSupportPerBoneMask), PoseAssets had no custom version serialized into their archive, so we
-			// 在 CL 3002109 (SmartNameRefactor) 和 3026802 (PoseAssetSupportPerBoneMask) 之间，PoseAssets 没有序列化到其存档中的自定义版本，因此我们
+   // 在 CL 3002109 (SmartNameRefactor) 和 3026802 (PoseAssetSupportPerBoneMask) 之间，PoseAssets 没有序列化到其存档中的自定义版本，因此我们
 			// cant properly upgrade curves stored there. We instead assume that if LastObservedName_DEPRECATED is not
-			// 无法正确升级存储在那里的曲线。相反，我们假设如果 LastObservedName_DEPRECATED 不是
+   // 无法正确升级存储在那里的曲线。相反，我们假设如果 LastObservedName_DEPRECATED 不是
 			// NAME_None, we can use it
-			// NAME_None，我们可以使用它
+   // NAME_None，我们可以使用它
 			if(LastObservedName_DEPRECATED != NAME_None)
 			{
 				Name_DEPRECATED.DisplayName = LastObservedName_DEPRECATED;
@@ -80,7 +80,7 @@ void FAnimCurveBase::PostSerialize(const FArchive& Ar)
 		if(Ar.CustomVer(FAnimObjectVersion::GUID) < FAnimObjectVersion::AnimSequenceCurveColors)
 		{
 			// Need to set the curve name before we generate a new color
-			// 在生成新颜色之前需要设置曲线名称
+   // 在生成新颜色之前需要设置曲线名称
 			CurveName = Name_DEPRECATED.DisplayName;
 			Color = MakeColor(CurveName);
 		}
@@ -131,7 +131,7 @@ int32 FAnimCurveBase::GetCurveTypeFlags() const
 FLinearColor FAnimCurveBase::MakeColor(const FName& CurveName)
 {
 	// Create a color based on the hash of the name
-	// 根据名称的哈希值创建颜色
+ // 根据名称的哈希值创建颜色
 	FRandomStream Stream(GetTypeHash(CurveName));
 	const uint8 Hue = (uint8)(Stream.FRand() * 255.0f);
 	return FLinearColor::MakeFromHSV8(Hue, 196, 196);
@@ -140,7 +140,7 @@ FLinearColor FAnimCurveBase::MakeColor(const FName& CurveName)
 
 ////////////////////////////////////////////////////
 //  FFloatCurve
-//  F浮动曲线
+// F浮动曲线
 
 // we don't want to have = operator. This only copies curves, but leaving naming and everything else intact. 
 // 我们不想有 = 运算符。这只会复制曲线，但命名和其他所有内容都保持不变。
@@ -181,7 +181,7 @@ void FFloatCurve::Resize(float NewLength, bool bInsert/* whether insert or remov
 }
 ////////////////////////////////////////////////////
 //  FVectorCurve
-//  F向量曲线
+// F向量曲线
 
 // we don't want to have = operator. This only copies curves, but leaving naming and everything else intact. 
 // 我们不想有 = 运算符。这只会复制曲线，但命名和其他所有内容都保持不变。
@@ -213,7 +213,7 @@ void FVectorCurve::UpdateOrAddKey(const FVector& NewKey, float CurrentTime)
 void FVectorCurve::GetKeys(TArray<float>& OutTimes, TArray<FVector>& OutValues) const
 {
 	// Determine curve with most keys
-	// 用最多的键确定曲线
+ // 用最多的键确定曲线
 	int32 MaxNumKeys = 0;
 	int32 UsedCurveIndex = INDEX_NONE;
 	for (int32 CurveIndex = 0; CurveIndex < 3; ++CurveIndex)
@@ -263,7 +263,7 @@ int32 FVectorCurve::GetNumKeys() const
 
 ////////////////////////////////////////////////////
 //  FTransformCurve
-//  F变换曲线
+// F变换曲线
 
 // we don't want to have = operator. This only copies curves, but leaving naming and everything else intact. 
 // 我们不想有 = 运算符。这只会复制曲线，但命名和其他所有内容都保持不变。
@@ -288,10 +288,10 @@ FTransform FTransformCurve::Evaluate(float CurrentTime, float BlendWeight) const
 	}
 
 	// blend rotation float curve
-	// 混合旋转浮动曲线
+ // 混合旋转浮动曲线
 	FVector RotationAsVector = RotationCurve.Evaluate(CurrentTime, BlendWeight);
 	// pitch, yaw, roll order - please check AddKey function
-	// 俯仰、偏航、横滚顺序 - 请检查 AddKey 功能
+ // 俯仰、偏航、横滚顺序 - 请检查 AddKey 功能
 	FRotator Rotator(RotationAsVector.Y, RotationAsVector.Z, RotationAsVector.X);
 	Value.SetRotation(FQuat(Rotator));
 
@@ -302,7 +302,7 @@ void FTransformCurve::UpdateOrAddKey(const FTransform& NewKey, float CurrentTime
 {
 	TranslationCurve.UpdateOrAddKey(NewKey.GetTranslation(), CurrentTime);
 	// pitch, yaw, roll order - please check Evaluate function
-	// 俯仰、偏航、横滚顺序 - 请检查评估功能
+ // 俯仰、偏航、横滚顺序 - 请检查评估功能
 	FVector RotationAsVector;
 	FRotator Rotator = NewKey.GetRotation().Rotator();
 	RotationAsVector.X = Rotator.Roll;
@@ -397,6 +397,8 @@ FVectorCurve* FTransformCurve::GetVectorCurveByIndex(int32 Index)
 	FVectorCurve* Curve = nullptr;
 
 	if (Index == 0)
+//  FCachedFloatCurve
+// FCachedFloatCurve
 	{
 		Curve = &TranslationCurve;
 	}
@@ -412,9 +414,15 @@ FVectorCurve* FTransformCurve::GetVectorCurveByIndex(int32 Index)
 	return Curve;
 }
 
+ // FCachedFloatCurve
+ // FCachedFloatCurve
+ // FCachedFloatCurve
+ // FCachedFloatCurve
 ////////////////////////////////////////////////////
 //  FCachedFloatCurve
-//  [翻译失败: FCachedFloatCurve]
+// FCachedFloatCurve
+//  FCachedFloatCurve
+// FCachedFloatCurve
 
 bool FCachedFloatCurve::IsValid(const UAnimSequenceBase* InAnimSequence) const
 {
@@ -438,7 +446,7 @@ const FFloatCurve* FCachedFloatCurve::GetFloatCurve(const UAnimSequenceBase* InA
 
 /////////////////////////////////////////////////////
 // FRawCurveTracks
-// [翻译失败: FRawCurveTracks]
+// 粗曲线轨迹
 
 void FRawCurveTracks::EvaluateCurveData( FBlendedCurve& Curves, float CurrentTime ) const
 {
@@ -455,7 +463,7 @@ void FRawCurveTracks::EvaluateCurveData( FBlendedCurve& Curves, float CurrentTim
 	};
 	
 	// evaluate the curve data at the CurrentTime and add to Instance
-	// [翻译失败: evaluate the curve data at the CurrentTime and add to Instance]
+ // 评估当前时间的曲线数据并添加到实例
 	UE::Anim::FCurveUtils::BuildUnsorted(Curves, FloatCurves.Num(), GetNameFromIndex, GetValueFromIndex, Curves.GetFilter());
 }
 
@@ -468,24 +476,24 @@ void FRawCurveTracks::EvaluateTransformCurveData(USkeleton * Skeleton, TMap<FNam
 {
 	check (Skeleton);
 	// evaluate the curve data at the CurrentTime and add to Instance
-	// 评估当前时间的曲线数据并添加到实例
+ // 评估当前时间的曲线数据并添加到实例
 	for(auto CurveIter = TransformCurves.CreateConstIterator(); CurveIter; ++CurveIter)
 	{
 		const FTransformCurve& Curve = *CurveIter;
 
 		// if disabled, do not handle
-		// 如果禁用，则不处理
+  // 如果禁用，则不处理
 		if (Curve.GetCurveTypeFlag(AACF_Disabled))
 		{
 			continue;
 		}
 
 		// Add or retrieve curve
-		// 添加或检索曲线
+  // 添加或检索曲线
 		FName CurveName = Curve.GetName();
 		
 		// note we're not checking Curve.GetCurveTypeFlags() yet
-		// 请注意，我们还没有检查 Curve.GetCurveTypeFlags()
+  // 请注意，我们还没有检查 Curve.GetCurveTypeFlags()
 		FTransform & Value = OutCurves.FindOrAdd(CurveName);
 		Value = Curve.Evaluate(CurrentTime, BlendWeight);
 	}
@@ -626,7 +634,7 @@ void FRawCurveTracks::Resize(float TotalLength, bool bInsert/* whether insert or
 void FRawCurveTracks::PostSerializeFixup(FArchive& Ar)
 {
 	// @TODO: If we're about to serialize vector curve, add here
-	// [翻译失败: @TODO: If we're about to serialize vector curve, add here]
+ // @TODO：如果我们要序列化向量曲线，请在此处添加
 	for(FFloatCurve& Curve : FloatCurves)
 	{
 		Curve.PostSerializeFixup(Ar);
@@ -663,7 +671,7 @@ bool FRawCurveTracks::DuplicateCurveData(const FName& CurveToCopy, const FName& 
 
 ///////////////////////////////////
 // @TODO: REFACTOR THIS IF WE'RE SERIALIZING VECTOR CURVES
-// [翻译失败: @TODO: REFACTOR THIS IF WE'RE SERIALIZING VECTOR CURVES]
+// @TODO：如果我们要序列化向量曲线，请重构这一点
 //
 // implementation template functions to accomodate FloatCurve and VectorCurve
 // 实现模板函数以适应 FloatCurve 和 VectorCurve
@@ -739,7 +747,7 @@ bool FRawCurveTracks::DuplicateCurveDataImpl(TArray<DataType> & Curves, const FN
 	if(ExistingCurve && GetCurveDataImpl<DataType>(Curves, NewCurve) == NULL)
 	{
 		// Add the curve to the track and set its data to the existing curve
-		// 将曲线添加到轨迹并将其数据设置为现有曲线
+  // 将曲线添加到轨迹并将其数据设置为现有曲线
 		Curves.Add(DataType(NewCurve, ExistingCurve->GetCurveTypeFlags()));
 		Curves.Last().CopyCurve(*ExistingCurve);
 
@@ -753,7 +761,7 @@ FArchive& operator<<(FArchive& Ar, FRawCurveTracks& D)
 	UScriptStruct* StaticStruct = FRawCurveTracks::StaticStruct();
 	StaticStruct->SerializeTaggedProperties(Ar, (uint8*)&D, StaticStruct, nullptr);
 	// do not call custom serialize that relies on version number. The Archive version doesn't exists on this. 
-	// 不要调用依赖于版本号的自定义序列化。存档版本不存在于此。
+ // 不要调用依赖于版本号的自定义序列化。存档版本不存在于此。
 	return Ar;
 }
 

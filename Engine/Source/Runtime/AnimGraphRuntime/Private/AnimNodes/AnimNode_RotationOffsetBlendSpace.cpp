@@ -11,6 +11,16 @@
 /////////////////////////////////////////////////////
 // FAnimNode_RotationOffsetBlendSpace
 // FAnimNode_RotationOffsetBlendSpace
+// FAnimNode_RotationOffsetBlendSpace
+// FAnimNode_RotationOffsetBlendSpace
+// FAnimNode_RotationOffsetBlendSpace
+// FAnimNode_RotationOffsetBlendSpace
+// FAnimNode_RotationOffsetBlendSpace
+// FAnimNode_RotationOffsetBlendSpace
+// FAnimNode_RotationOffsetBlendSpace
+// FAnimNode_RotationOffsetBlendSpace
+// FAnimNode_RotationOffsetBlendSpace
+// FAnimNode_RotationOffsetBlendSpace
 
 FAnimNode_RotationOffsetBlendSpace::FAnimNode_RotationOffsetBlendSpace()
 	: LODThreshold(INDEX_NONE)
@@ -46,7 +56,7 @@ void FAnimNode_RotationOffsetBlendSpace::UpdateAssetPlayer(const FAnimationUpdat
 		GetEvaluateGraphExposedInputs().Execute(Context);
 
 		// Determine Actual Alpha.
-		// 确定实际阿尔法。
+  // 确定实际阿尔法。
 		switch (AlphaInputType)
 		{
 		case EAnimAlphaInputType::Float:
@@ -64,7 +74,7 @@ void FAnimNode_RotationOffsetBlendSpace::UpdateAssetPlayer(const FAnimationUpdat
 		};
 
 		// Make sure Alpha is clamped between 0 and 1.
-		// 确保 Alpha 限制在 0 和 1 之间。
+  // 确保 Alpha 限制在 0 和 1 之间。
 		ActualAlpha = FMath::Clamp<float>(ActualAlpha, 0.f, 1.f);
 
 		if (FAnimWeight::IsRelevant(ActualAlpha))
@@ -82,24 +92,24 @@ void FAnimNode_RotationOffsetBlendSpace::UpdateAssetPlayer(const FAnimationUpdat
 void FAnimNode_RotationOffsetBlendSpace::Evaluate_AnyThread(FPoseContext& Context)
 {
 	// Evaluate base pose
-	// 评估基本姿势
+ // 评估基本姿势
 	BasePose.Evaluate(Context);
 
 	if (bIsLODEnabled && FAnimWeight::IsRelevant(ActualAlpha) && GetBlendSpace())
 	{
 		// Evaluate MeshSpaceRotation additive blendspace
-		// 评估 MeshSpaceRotation 附加混合空间
+  // 评估 MeshSpaceRotation 附加混合空间
 		FPoseContext MeshSpaceRotationAdditivePoseContext(Context);
 		FAnimNode_BlendSpacePlayer::Evaluate_AnyThread(MeshSpaceRotationAdditivePoseContext);
 
 		// Accumulate poses together
-		// 一起积累姿势
+  // 一起积累姿势
 		FAnimationPoseData BaseAnimationPoseData(Context);
 		const FAnimationPoseData AdditiveAnimationPoseData(MeshSpaceRotationAdditivePoseContext);
 		FAnimationRuntime::AccumulateMeshSpaceRotationAdditiveToLocalPose(BaseAnimationPoseData, AdditiveAnimationPoseData, ActualAlpha);
 
 		// Resulting rotations are not normalized, so normalize here.
-		// 生成的旋转未标准化，因此请在此处标准化。
+  // 生成的旋转未标准化，因此请在此处标准化。
 		Context.Pose.NormalizeRotations();
 	}
 }

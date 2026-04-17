@@ -19,11 +19,17 @@ struct FPerTrackCachedInfo
 {
 	/** Used as a sanity check to validate the cache */
 	/** 用作健全性检查来验证缓存 */
+	/** 用作健全性检查来验证缓存 */
+	/** 用作健全性检查来验证缓存 */
 	const FAnimSetMeshLinkup* AnimLinkup;
+	/** 包含整个骨架中探针扰动产生的最大末端执行器误差 */
 
+	/** 包含整个骨架中探针扰动产生的最大末端执行器误差 */
 	/** Contains the maximum end effector errors from probe perturbations throughout the skeleton */
+	/** 包含骨架内每个轨道的高度 */
 	/** 包含整个骨架中探针扰动产生的最大末端执行器误差 */
 	TArray<FAnimPerturbationError> PerTrackErrors;
+	/** 包含骨架内每个轨道的高度 */
 
 	/** Contains the height of each track within the skeleton */
 	/** 包含骨架内每个轨道的高度 */
@@ -52,16 +58,20 @@ class FPerTrackCompressor
 {
 public:
 	// Used during compression
-	// [翻译失败: Used during compression]
+ // 压缩时使用
 	float MaxError;
 	double SumError;
 
+	/** 压缩方案是否需要密钥->帧表（如果密钥在时间上间隔不均匀则需要） */
 	// Results of compression
-	// [翻译失败: Results of compression]
+ // 压缩结果
+	/** 压缩方案是否需要密钥->帧表（如果密钥在时间上间隔不均匀则需要） */
 	TArray<uint8> CompressedBytes;
 	AnimationCompressionFormat ActualCompressionMode;
+	/** 将压缩缓冲区重置为默认值（无数据） */
 	int32 ActualKeyFlags;
 
+	/** 将压缩缓冲区重置为默认值（无数据） */
 	/** Does the compression scheme need a key->frame table (needed if the keys are spaced non-uniformly in time) */
 	/** 压缩方案是否需要密钥->帧表（如果密钥在时间上间隔不均匀则需要） */
 	bool bReallyNeedsFrameTable;
@@ -86,9 +96,11 @@ protected:
 	 *   bReallyNeedsFrameTable is a single bit (position 27)
 	 *   KeyFormat can be no more than 4 bits (positions 31..28)
 	 *
+	/** 确保 CompressedBytes 输出流的长度是 4 字节的倍数 */
 	 *   Also updates the ActualCompressionMode field
 	 */
 	int32 MakeHeader(const int32 NumKeys, const AnimationCompressionFormat KeyFormat, const int32 KeyFlags)
+	/** 确保 CompressedBytes 输出流的长度是 4 字节的倍数 */
 	{
 		ActualCompressionMode = KeyFormat;
 		ActualKeyFlags = KeyFlags;
@@ -97,10 +109,12 @@ protected:
 
 	/** Ensures that the CompressedBytes output stream is a multiple of 4 bytes long */
 	/** 确保 CompressedBytes 输出流的长度是 4 字节的倍数 */
+	/** 将 Data 中的 Length 字节写入输出流 */
 	void PadOutputStream()
 	{
 		const uint8 PadSentinel = 85; //(1<<1)+(1<<3)+(1<<5)+(1<<7)
 
+	/** 将 Data 中的 Length 字节写入输出流 */
 		const int32 PadLength = Align(CompressedBytes.Num(), 4) - CompressedBytes.Num();
 		for (int32 i = 0; i < PadLength; ++i)
 		{
@@ -119,7 +133,7 @@ protected:
 	void CompressTranslation_Identity(const FTranslationTrack& TranslationData)
 	{
 		// Compute the error when using this compression type (how far off from (0,0,0) are they?)
-		// 计算使用此压缩类型时的误差（它们距离 (0,0,0) 有多远？）
+  // 计算使用此压缩类型时的误差（它们距离 (0,0,0) 有多远？）
 		const int32 NumKeys = TranslationData.PosKeys.Num();
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
@@ -130,7 +144,7 @@ protected:
 		ActualCompressionMode = ACF_Identity;
 
 		// Add nothing to compressed bytes; this type gets flagged extra-special, back at the offset table
-		// [翻译失败: Add nothing to compressed bytes; this type gets flagged extra-special, back at the offset table]
+  // 不向压缩字节添加任何内容；这种类型在偏移量表中被标记为特殊类型
 	}
 
 	void CompressTranslation_16_16_16(const FTranslationTrack& TranslationData, float ZeroingThreshold)
@@ -138,7 +152,7 @@ protected:
 		const int32 NumKeys = TranslationData.PosKeys.Num();
 
 		// Determine the bounds
-		// 确定界限
+  // 确定界限
 		const FBox3f KeyBounds(TranslationData.PosKeys.GetData(), NumKeys);
 		const bool bHasX = (FMath::Abs(KeyBounds.Max.X) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.X) >= ZeroingThreshold);
 		const bool bHasY = (FMath::Abs(KeyBounds.Max.Y) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.Y) >= ZeroingThreshold);
@@ -147,18 +161,18 @@ protected:
 		if (!bHasX && !bHasY && !bHasZ)
 		{
 			// No point in using this over the identity encoding
-			// 在身份编码上使用它没有意义
+   // 在身份编码上使用它没有意义
 			CompressTranslation_Identity(TranslationData);
 			return;
 		}
 
 		// Write the header out
-		// [翻译失败: Write the header out]
+  // 写出标题
 		const int32 Header = MakeHeader(NumKeys, ACF_Fixed48NoW, (bHasX ? 1 : 0) | ((bHasY ? 1 : 0)<<1) | ((bHasZ ? 1 : 0)<<2));
 		AppendBytes(&Header, sizeof(Header));
 
 		// Write the keys for the non-zero components
-		// [翻译失败: Write the keys for the non-zero components]
+  // 写入非零分量的键
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
 			const FVector3f& V = TranslationData.PosKeys[i];
@@ -199,7 +213,7 @@ protected:
 		const int32 NumKeys = TranslationData.PosKeys.Num();
 
 		// Determine the bounds
-		// [翻译失败: Determine the bounds]
+  // 确定界限
 		const FBox3f KeyBounds(TranslationData.PosKeys.GetData(), NumKeys);
 		const bool bHasX = (FMath::Abs(KeyBounds.Max.X) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.X) >= ZeroingThreshold);
 		const bool bHasY = (FMath::Abs(KeyBounds.Max.Y) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.Y) >= ZeroingThreshold);
@@ -208,18 +222,18 @@ protected:
 		if( !bHasX && !bHasY && !bHasZ )
 		{
 			// No point in using this over the identity encoding
-			// 在身份编码上使用它没有意义
+   // 在身份编码上使用它没有意义
 			CompressTranslation_Identity(TranslationData);
 			return;
 		}
 
 		// Write the header out
-		// 写出标题
+  // 写出标题
 		const int32 Header = MakeHeader(NumKeys, ACF_Float96NoW, (bHasX ? 1 : 0) | ((bHasY ? 1 : 0)<<1) | ((bHasZ ? 1 : 0)<<2));
 		AppendBytes(&Header, sizeof(Header));
 
 		// Write the keys out
-		// [翻译失败: Write the keys out]
+  // 写出密钥
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
 			const FVector3f& V = TranslationData.PosKeys[i];
@@ -238,21 +252,21 @@ protected:
 		}
 
 		// No error, it's a perfect encoding
-		// 没有错误，这是一个完美的编码
+  // 没有错误，这是一个完美的编码
 		MaxError = 0.0f;
 		SumError = 0.0;
 	}
 
 	// Encode a 0..1 interval in 10:11:11 (X and Z swizzled in the 11:11:10 source because Z is more important in most animations)
-	// [翻译失败: Encode a 0..1 interval in 10:11:11 (X and Z swizzled in the 11:11:10 source because Z is more important in most animations)]
+ // 在 10:11:11 中编码 0..1 间隔（X 和 Z 在 11:11:10 源中混合，因为 Z 在大多数动画中更重要）
 	// and store an uncompressed bounding box at the start of the track to scale that 0..1 back up
-	// [翻译失败: and store an uncompressed bounding box at the start of the track to scale that 0..1 back up]
+ // 并在轨道开始处存储一个未压缩的边界框，以缩放 0..1 备份
 	void CompressTranslation_10_11_11(const FTranslationTrack& TranslationData, float ZeroingThreshold)
 	{
 		const int32 NumKeys = TranslationData.PosKeys.Num();
 
 		// Determine the bounds
-		// 确定界限
+  // 确定界限
 		const FBox3f KeyBounds(TranslationData.PosKeys.GetData(), NumKeys);
 		const bool bHasX = (FMath::Abs(KeyBounds.Max.X) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.X) >= ZeroingThreshold);
 		const bool bHasY = (FMath::Abs(KeyBounds.Max.Y) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.Y) >= ZeroingThreshold);
@@ -261,18 +275,18 @@ protected:
 		if (!bHasX && !bHasY && !bHasZ)
 		{
 			// No point in using this over the identity encoding
-			// 在身份编码上使用它没有意义
+   // 在身份编码上使用它没有意义
 			CompressTranslation_Identity(TranslationData);
 			return;
 		}
 
 		// Write the header out
-		// [翻译失败: Write the header out]
+  // 写出标题
 		const int32 Header = MakeHeader(NumKeys, ACF_IntervalFixed32NoW, (bHasX ? 1 : 0) | ((bHasY ? 1 : 0)<<1) | ((bHasZ ? 1 : 0)<<2));
 		AppendBytes(&Header, sizeof(Header));
 
 		// Write the bounds out
-		// 写出界限
+  // 写出界限
 		float Mins[3];
 		float Ranges[3];
 		FVector3f Range(KeyBounds.Max - KeyBounds.Min);
@@ -313,7 +327,7 @@ protected:
 		}
 
 		// Write the keys out
-		// 写出密钥
+  // 写出密钥
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
 			const FVector3f& V = TranslationData.PosKeys[i];
@@ -321,7 +335,7 @@ protected:
 			AppendBytes(&Compressor, sizeof(Compressor));
 
 			// Decompress and update the error stats
-			// [翻译失败: Decompress and update the error stats]
+   // 解压并更新错误统计信息
 			FVector3f DecompressedV;
 			Compressor.ToVector(DecompressedV, Mins, Ranges);
 
@@ -350,7 +364,7 @@ protected:
 	void CompressRotation_Identity(const FRotationTrack& RotationData)
 	{
 		// Compute the error when using this compression type (how far off from identity are they?)
-		// [翻译失败: Compute the error when using this compression type (how far off from identity are they?)]
+  // 计算使用这种压缩类型时的误差（它们离同一性有多远？）
 		const int32 NumKeys = RotationData.RotKeys.Num();
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
@@ -361,14 +375,14 @@ protected:
 		ActualCompressionMode = ACF_Identity;
 
 		// Add nothing to compressed bytes; this type gets flagged extra-special, back at the offset table
-		// [翻译失败: Add nothing to compressed bytes; this type gets flagged extra-special, back at the offset table]
+  // 不向压缩字节添加任何内容；这种类型在偏移量表中被标记为特殊类型
 	}
 
 	template <typename CompressorType>
 	void InnerCompressRotation(const FRotationTrack& RotationData)
 	{
 		// Write the keys out
-		// [翻译失败: Write the keys out]
+  // 写出密钥
 		const int32 NumKeys = RotationData.RotKeys.Num();
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
@@ -376,12 +390,12 @@ protected:
 			check(Q.IsNormalized());
 
 			// Compress and write out the quaternion
-			// [翻译失败: Compress and write out the quaternion]
+   // 压缩并写出四元数
 			const CompressorType Compressor(Q);
 			AppendBytes(&Compressor, sizeof(Compressor));
 
 			// Decompress and check the error caused by the compression
-			// [翻译失败: Decompress and check the error caused by the compression]
+   // 解压并检查压缩引起的错误
 			FQuat4f DecompressedQ;
 			Compressor.ToQuat(DecompressedQ);
 
@@ -393,18 +407,18 @@ protected:
 	}
 
 	// Uncompressed packing still drops the W component, storing a rotation in 3 floats (ACF_Float96NoW)
-	// [翻译失败: Uncompressed packing still drops the W component, storing a rotation in 3 floats (ACF_Float96NoW)]
+ // 未压缩的打包仍然会丢弃 W 分量，将旋转存储在 3 个浮点中 (ACF_Float96NoW)
 	void CompressRotation_Uncompressed(const FRotationTrack& RotationData)
 	{
 		const int32 NumKeys = RotationData.RotKeys.Num();
 
 		// Write the header out
-		// [翻译失败: Write the header out]
+  // 写出标题
 		int32 Header = MakeHeader(NumKeys, ACF_Float96NoW, 7);
 		AppendBytes(&Header, sizeof(Header));
 
 		// Write the keys out
-		// [翻译失败: Write the keys out]
+  // 写出密钥
 		InnerCompressRotation<FQuatFloat96NoW>(RotationData);
 	}
 
@@ -413,7 +427,7 @@ protected:
 		const int32 NumKeys = RotationData.RotKeys.Num();
 
 		// Determine the bounds
-		// [翻译失败: Determine the bounds]
+  // 确定界限
 		const FBox KeyBounds = CalculateQuatACF96Bounds(RotationData.RotKeys.GetData(), NumKeys);
 		const bool bHasX = (FMath::Abs(KeyBounds.Max.X) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.X) >= ZeroingThreshold);
 		const bool bHasY = (FMath::Abs(KeyBounds.Max.Y) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.Y) >= ZeroingThreshold);
@@ -422,19 +436,19 @@ protected:
 		if (!bHasX && !bHasY && !bHasZ)
 		{
 			// No point in using this over the identity encoding
-			// 在身份编码上使用它没有意义
+   // 在身份编码上使用它没有意义
 			CompressRotation_Identity(RotationData);
 			return;
 		}
 
 
 		// Write the header out
-		// 写出标题
+  // 写出标题
 		const int32 Header = MakeHeader(NumKeys, ACF_Fixed48NoW, (bHasX ? 1 : 0) | ((bHasY ? 1 : 0)<<1) | ((bHasZ ? 1 : 0)<<2));
 		AppendBytes(&Header, sizeof(Header));
 
 		// Write the keys for the non-zero components
-		// 写入非零分量的键
+  // 写入非零分量的键
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
 			const FQuat4f& Q = RotationData.RotKeys[i];
@@ -505,7 +519,7 @@ protected:
 		const int32 NumKeys = RotationData.RotKeys.Num();
 
 		// Determine the bounds
-		// 确定界限
+  // 确定界限
 		const FBox KeyBounds = CalculateQuatACF96Bounds(RotationData.RotKeys.GetData(), NumKeys);
 		FVector3f Range(KeyBounds.Max - KeyBounds.Min);
 
@@ -516,20 +530,20 @@ protected:
 		if ((!bHasX && !bHasY && !bHasZ) || (Range.SizeSquared() > 16.0f))
 		{
 			// If there are no components, then there is no point in using this over the identity encoding
-			// [翻译失败: If there are no components, then there is no point in using this over the identity encoding]
+   // 如果没有组件，那么在身份编码上使用它是没有意义的
 			// If the range is insane, error out early (error metric will be high)
-			// [翻译失败: If the range is insane, error out early (error metric will be high)]
+   // 如果范围太疯狂，请尽早出错（错误指标会很高）
 			CompressRotation_Identity(RotationData);
 			return;
 		}
 
 		// Write the header out
-		// 写出标题
+  // 写出标题
 		const int32 Header = MakeHeader(NumKeys, ACF_IntervalFixed32NoW, (bHasX ? 1 : 0) | ((bHasY ? 1 : 0)<<1) | ((bHasZ ? 1 : 0)<<2));
 		AppendBytes(&Header, sizeof(Header));
 
 		// Write the bounds out
-		// 写出界限
+  // 写出界限
 		float Mins[3];
 		float Ranges[3];
 		Mins[0] = KeyBounds.Min.X;
@@ -569,7 +583,7 @@ protected:
 		}
 
 		// Write the keys out
-		// 写出密钥
+  // 写出密钥
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
 			const FQuat4f& Q = RotationData.RotKeys[i];
@@ -591,12 +605,12 @@ protected:
 
 
 			// Compress and write out the quaternion
-			// 压缩并写出四元数
+   // 压缩并写出四元数
 			const FQuatIntervalFixed32NoW Compressor(QRenorm, Mins, Ranges);
 			AppendBytes(&Compressor, sizeof(Compressor));
 
 			// Decompress and check the error caused by the compression
-			// 解压并检查压缩引起的错误
+   // 解压并检查压缩引起的错误
 			FQuat4f DecompressedQ;
 			Compressor.ToQuat(DecompressedQ, Mins, Ranges);
 
@@ -619,33 +633,33 @@ protected:
 	void CompressRotation_Fixed32(const FRotationTrack& RotationData)
 	{
 		// Write the header out
-		// 写出标题
+  // 写出标题
 		const int32 NumKeys = RotationData.RotKeys.Num();
 		const int32 Header = MakeHeader(NumKeys, ACF_Fixed32NoW, 7);
 		AppendBytes(&Header, sizeof(Header));
 
 		// Write the keys out
-		// 写出密钥
+  // 写出密钥
 		InnerCompressRotation<FQuatFixed32NoW>(RotationData);
 	}
 
 	void CompressRotation_Float32(const FRotationTrack& RotationData)
 	{
 		// Write the header out
-		// 写出标题
+  // 写出标题
 		const int32 NumKeys = RotationData.RotKeys.Num();
 		const int32 Header = MakeHeader(NumKeys, ACF_Float32NoW, 7);
 		AppendBytes(&Header, sizeof(Header));
 
 		// Write the keys out
-		// 写出密钥
+  // 写出密钥
 		InnerCompressRotation<FQuatFloat32NoW>(RotationData);
 	}
 
 	void CompressScale_Identity(const FScaleTrack& ScaleData)
 	{
 		// Compute the error when using this compression type (how far off from (0,0,0) are they?)
-		// 计算使用此压缩类型时的误差（它们距离 (0,0,0) 有多远？）
+  // 计算使用此压缩类型时的误差（它们距离 (0,0,0) 有多远？）
 		const int32 NumKeys = ScaleData.ScaleKeys.Num();
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
@@ -656,7 +670,7 @@ protected:
 		ActualCompressionMode = ACF_Identity;
 
 		// Add nothing to compressed bytes; this type gets flagged extra-special, back at the offset table
-		// 不向压缩字节添加任何内容；这种类型在偏移量表中被标记为特殊类型
+  // 不向压缩字节添加任何内容；这种类型在偏移量表中被标记为特殊类型
 	}
 
 	void CompressScale_16_16_16(const FScaleTrack& ScaleData, float ZeroingThreshold)
@@ -664,7 +678,7 @@ protected:
 		const int32 NumKeys = ScaleData.ScaleKeys.Num();
 
 		// Determine the bounds
-		// 确定界限
+  // 确定界限
 		const FBox3f KeyBounds(ScaleData.ScaleKeys.GetData(), NumKeys);
 		const bool bHasX = (FMath::Abs(KeyBounds.Max.X) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.X) >= ZeroingThreshold);
 		const bool bHasY = (FMath::Abs(KeyBounds.Max.Y) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.Y) >= ZeroingThreshold);
@@ -673,18 +687,18 @@ protected:
 		if (!bHasX && !bHasY && !bHasZ)
 		{
 			// No point in using this over the identity encoding
-			// 在身份编码上使用它没有意义
+   // 在身份编码上使用它没有意义
 			CompressScale_Identity(ScaleData);
 			return;
 		}
 
 		// Write the header out
-		// 写出标题
+  // 写出标题
 		const int32 Header = MakeHeader(NumKeys, ACF_Fixed48NoW, (bHasX ? 1 : 0) | ((bHasY ? 1 : 0)<<1) | ((bHasZ ? 1 : 0)<<2));
 		AppendBytes(&Header, sizeof(Header));
 
 		// Write the keys for the non-zero components
-		// [翻译失败: Write the keys for the non-zero components]
+  // 写入非零分量的键
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
 			const FVector3f& V = ScaleData.ScaleKeys[i];
@@ -725,7 +739,7 @@ protected:
 		const int32 NumKeys = ScaleData.ScaleKeys.Num();
 
 		// Determine the bounds
-		// [翻译失败: Determine the bounds]
+  // 确定界限
 		const FBox3f KeyBounds(ScaleData.ScaleKeys.GetData(), NumKeys);
 		const bool bHasX = (FMath::Abs(KeyBounds.Max.X) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.X) >= ZeroingThreshold);
 		const bool bHasY = (FMath::Abs(KeyBounds.Max.Y) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.Y) >= ZeroingThreshold);
@@ -734,18 +748,18 @@ protected:
 		if( !bHasX && !bHasY && !bHasZ )
 		{
 			// No point in using this over the identity encoding
-			// 在身份编码上使用它没有意义
+   // 在身份编码上使用它没有意义
 			CompressScale_Identity(ScaleData);
 			return;
 		}
 
 		// Write the header out
-		// 写出标题
+  // 写出标题
 		const int32 Header = MakeHeader(NumKeys, ACF_Float96NoW, (bHasX ? 1 : 0) | ((bHasY ? 1 : 0)<<1) | ((bHasZ ? 1 : 0)<<2));
 		AppendBytes(&Header, sizeof(Header));
 
 		// Write the keys out
-		// 写出密钥
+  // 写出密钥
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
 			const FVector3f& V = ScaleData.ScaleKeys[i];
@@ -764,21 +778,21 @@ protected:
 		}
 
 		// No error, it's a perfect encoding
-		// 没有错误，这是一个完美的编码
+  // 没有错误，这是一个完美的编码
 		MaxError = 0.0f;
 		SumError = 0.0;
 	}
 
 	// Encode a 0..1 interval in 10:11:11 (X and Z swizzled in the 11:11:10 source because Z is more important in most animations)
-	// [翻译失败: Encode a 0..1 interval in 10:11:11 (X and Z swizzled in the 11:11:10 source because Z is more important in most animations)]
+ // 在 10:11:11 中编码 0..1 间隔（X 和 Z 在 11:11:10 源中混合，因为 Z 在大多数动画中更重要）
 	// and store an uncompressed bounding box at the start of the track to scale that 0..1 back up
-	// [翻译失败: and store an uncompressed bounding box at the start of the track to scale that 0..1 back up]
+ // 并在轨道开始处存储一个未压缩的边界框，以缩放 0..1 备份
 	void CompressScale_10_11_11(const FScaleTrack& ScaleData, float ZeroingThreshold)
 	{
 		const int32 NumKeys = ScaleData.ScaleKeys.Num();
 
 		// Determine the bounds
-		// [翻译失败: Determine the bounds]
+  // 确定界限
 		const FBox3f KeyBounds(ScaleData.ScaleKeys.GetData(), NumKeys);
 		const bool bHasX = (FMath::Abs(KeyBounds.Max.X) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.X) >= ZeroingThreshold);
 		const bool bHasY = (FMath::Abs(KeyBounds.Max.Y) >= ZeroingThreshold) || (FMath::Abs(KeyBounds.Min.Y) >= ZeroingThreshold);
@@ -787,24 +801,26 @@ protected:
 		if (!bHasX && !bHasY && !bHasZ)
 		{
 			// No point in using this over the identity encoding
-			// [翻译失败: No point in using this over the identity encoding]
+   // 在身份编码上使用它没有意义
+	/** 用于写出具有给定索引类型的关键帧映射表的辅助方法 */
 			CompressScale_Identity(ScaleData);
 			return;
 		}
 
 		// Write the header out
-		// [翻译失败: Write the header out]
+  // 写出标题
 		const int32 Header = MakeHeader(NumKeys, ACF_IntervalFixed32NoW, (bHasX ? 1 : 0) | ((bHasY ? 1 : 0)<<1) | ((bHasZ ? 1 : 0)<<2));
 		AppendBytes(&Header, sizeof(Header));
 
 		// Write the bounds out
-		// 写出界限
+  // 写出界限
 		float Mins[3];
 		float Ranges[3];
 		FVector3f Range(KeyBounds.Max - KeyBounds.Min);
 		Mins[0] = KeyBounds.Min.X;
 		Mins[1] = KeyBounds.Min.Y;
 		Mins[2] = KeyBounds.Min.Z;
+	/** 如果当前压缩类型需要，则写出关键帧映射表 */
 		Ranges[0] = Range.X;
 		Ranges[1] = Range.Y;
 		Ranges[2] = Range.Z;
@@ -826,6 +842,7 @@ protected:
 		else
 		{
 			Ranges[1] = Mins[1] = 0.0f;
+	/** 构建翻译数据的压缩轨道 */
 		}
 
 		if (bHasZ)
@@ -839,7 +856,8 @@ protected:
 		}
 
 		// Write the keys out
-		// 写出密钥
+  // 写出密钥
+	/** 用于写出具有给定索引类型的关键帧映射表的辅助方法 */
 		for (int32 i = 0; i < NumKeys; ++i)
 		{
 			const FVector3f& V = ScaleData.ScaleKeys[i];
@@ -847,7 +865,7 @@ protected:
 			AppendBytes(&Compressor, sizeof(Compressor));
 
 			// Decompress and update the error stats
-			// 解压并更新错误统计信息
+   // 解压并更新错误统计信息
 			FVector3f DecompressedV;
 			Compressor.ToVector(DecompressedV, Mins, Ranges);
 
@@ -859,18 +877,20 @@ protected:
 
 	/** Helper method for writing out the key->frame mapping table with a given index type */
 	/** 用于写出具有给定索引类型的关键帧映射表的辅助方法 */
+	/** 如果当前压缩类型需要，则写出关键帧映射表 */
 	template <typename FrameIndexType>
 	void EmitKeyToFrameTable(int32 NumFrames, float FramesPerSecond, const TArray<float>& Times)
 	{
 		PadOutputStream();
+	/** 构建旋转数据的压缩轨道 */
 
 		// write the key table
-		// 写入密钥表
+  // 写入密钥表
 		const int32 NumKeys = Times.Num();
 		for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 		{
 			// Convert the frame time into a frame index and write it out
-			// 将帧时间转换为帧索引并写出
+   // 将帧时间转换为帧索引并写出
 			FrameIndexType FrameIndex = (FrameIndexType)FMath::Clamp(FMath::TruncToInt((Times[KeyIndex] * FramesPerSecond) + 0.5f), 0, NumFrames - 1);
 			AppendBytes(&FrameIndex, sizeof(FrameIndexType));
 		}
@@ -881,6 +901,7 @@ protected:
 	/** Writes out the key->frame mapping table if it is needed for the current compression type */
 	/** 如果当前压缩类型需要，则写出关键帧映射表 */
 	void ProcessKeyToFrameTable(const FPerTrackParams& Params, const TArray<float>& FrameTimes)
+	/** 构建翻译数据的压缩轨道 */
 	{
 		if (bReallyNeedsFrameTable && (CompressedBytes.Num() > 0))
 		{
@@ -903,6 +924,7 @@ public:
 	/** Constructs a compressed track of translation data */
 	/** 构建翻译数据的压缩轨道 */
 	FPerTrackCompressor(int32 InCompressionType, const FTranslationTrack& TranslationData, const FPerTrackParams& Params)
+	/** 构建 Scale 数据的压缩轨道 */
 	{
 		Reset();
 		bReallyNeedsFrameTable = Params.bIncludeKeyTable && (TranslationData.PosKeys.Num() > 1) && (TranslationData.PosKeys.Num() < Params.NumberOfKeys);
@@ -917,6 +939,7 @@ public:
 			break;
 		case ACF_None:
 		case ACF_Float96NoW:
+	/** 构建旋转数据的压缩轨道 */
 			CompressTranslation_Uncompressed(TranslationData, Params.MaxZeroingThreshold);
 			break;
 		case ACF_Fixed48NoW:
@@ -926,11 +949,11 @@ public:
 			CompressTranslation_10_11_11(TranslationData, Params.MaxZeroingThreshold);
 			break;
 			// The following two formats don't work well for translation (fixed range & low precision)
-			// 以下两种格式不适用于翻译（固定范围和低精度）
+   // 以下两种格式不适用于翻译（固定范围和低精度）
 			//case ACF_Fixed32NoW:
-			//案例 ACF_Fixed32NoW：
+   // 案例 ACF_Fixed32NoW：
 			//case ACF_Float32NoW:
-			//案例 ACF_Float32NoW：
+   // 案例 ACF_Float32NoW：
 		default:
 			UE_LOG(LogAnimationCompression, Fatal,TEXT("Unsupported translation compression format"));
 			break;
@@ -960,6 +983,7 @@ public:
 		case ACF_Float96NoW:
 			CompressRotation_Uncompressed(RotationData);
 			break;
+	/** 构建 Scale 数据的压缩轨道 */
 		case ACF_Fixed48NoW:
 			CompressRotation_16_16_16(RotationData, Params.MaxZeroingThreshold);
 			break;
@@ -1005,11 +1029,11 @@ public:
 			CompressScale_10_11_11(ScaleData, Params.MaxZeroingThreshold);
 			break;
 			// The following two formats don't work well for Scale (fixed range & low precision)
-			// 以下两种格式不适用于 Scale（固定范围和低精度）
+   // 以下两种格式不适用于 Scale（固定范围和低精度）
 			//case ACF_Fixed32NoW:
-			//案例 ACF_Fixed32NoW：
+   // 案例 ACF_Fixed32NoW：
 			//case ACF_Float32NoW:
-			//案例 ACF_Float32NoW：
+   // 案例 ACF_Float32NoW：
 		default:
 			UE_LOG(LogAnimationCompression, Fatal,TEXT("Unsupported Scale compression format"));
 			break;
@@ -1068,9 +1092,9 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 	const bool bFinalPass)
 {
 	// If not doing final pass, then do the RemoveLinearKey version that is less destructive.
-	// [翻译失败: If not doing final pass, then do the RemoveLinearKey version that is less destructive.]
+ // 如果不执行最终传递，则执行破坏性较小的RemoveLinearKey 版本。
 	// We're potentially removing whole tracks here, and that doesn't work well with LinearKeyRemoval algorithm.
-	// 我们可能会在这里删除整个轨道，这对于 LinearKeyRemoval 算法来说效果不佳。
+ // 我们可能会在这里删除整个轨道，这对于 LinearKeyRemoval 算法来说效果不佳。
 	if( !bFinalPass )
 	{
 		UAnimCompress_RemoveLinearKeys::CompressUsingUnderlyingCompressor(
@@ -1084,12 +1108,12 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 	}
 
 	// Grab the cache
-	// [翻译失败: Grab the cache]
+ // 抓取缓存
 	check(OutCompressedData.CompressionUserData);
 	FPerTrackCachedInfo* Cache = (FPerTrackCachedInfo*)OutCompressedData.CompressionUserData;
 
 	// record the proper runtime decompressor to use
-	// [翻译失败: record the proper runtime decompressor to use]
+ // 记录要使用的正确运行时解压缩器
 	FUECompressedAnimDataMutable& AnimData = static_cast<FUECompressedAnimDataMutable&>(*OutCompressedData.AnimData);
 	AnimData.KeyEncodingFormat = AKF_PerTrackCompression;
 	AnimData.RotationCompressionFormat = ACF_Identity;
@@ -1098,7 +1122,7 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 	AnimationFormat_SetInterfaceLinks(AnimData);
 
 	// Prime the compression buffers
-	// [翻译失败: Prime the compression buffers]
+ // 准备压缩缓冲区
 	check(TranslationData.Num() == RotationData.Num());
 	const int32 NumTracks = TranslationData.Num();
 	const bool bHasScale = ScaleData.Num() > 0;
@@ -1116,22 +1140,26 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 	AnimData.CompressedByteStream.Empty();
 
 	// Compress each track independently
-	// [翻译失败: Compress each track independently]
+ // 独立压缩每个轨道
+		//bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+  // bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
 	for (int32 TrackIndex = 0; TrackIndex < NumTracks; ++TrackIndex)
 	{
+		//if (!bLeaveRotationUncompressed)
+  // if (!bLeaveRotationUncompressed)
 		if (CompressibleAnimData.IsCancelled())
 		{
 			return;
 		}
 		// Compression parameters / thresholds
-		// [翻译失败: Compression parameters / thresholds]
+  // 压缩参数/阈值
 		FPerTrackParams Params;
 		Params.NumberOfKeys = CompressibleAnimData.NumberOfKeys;
 		Params.SequenceLength = CompressibleAnimData.SequenceLength;
 		Params.MaxZeroingThreshold = MaxZeroingThreshold;
 
 		// Determine the local-space error cutoffs
-		// [翻译失败: Determine the local-space error cutoffs]
+  // 确定局部空间误差截止值
 		float MaxPositionErrorCutoff = MaxPosDiffBitwise;
 		float MaxAngleErrorCutoff = MaxAngleDiffBitwise;
 		float MaxScaleErrorCutoff = MaxScaleDiffBitwise;
@@ -1139,16 +1167,20 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 		if (bUseAdaptiveError)
 		{
 			// The height of the track is the distance from an end effector.  It's used to reduce the acceptable error the
-			// [翻译失败: The height of the track is the distance from an end effector.  It's used to reduce the acceptable error the]
+   // 轨道的高度是距末端执行器的距离。  它用于减少可接受的误差
 			// higher in the skeleton we get, since a higher bone will cause cascading errors everywhere.
-			// [翻译失败: higher in the skeleton we get, since a higher bone will cause cascading errors everywhere.]
+   // 我们得到的骨骼较高，因为较高的骨骼会在各处导致级联错误。
 			const int32 PureTrackHeight = Cache->TrackHeights[TrackIndex];
 			const int32 EffectiveTrackHeight = FMath::Max(0, PureTrackHeight + TrackHeightBias);
 
 			const float Scaler = 1.0f / FMath::Pow(FMath::Max(ParentingDivisor, 1.0f), EffectiveTrackHeight * FMath::Max(0.0f, ParentingDivisorExponent));
 
+			//bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+   // bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
 			MaxPositionErrorCutoff = FMath::Max<float>(MaxZeroingThreshold, MaxPosDiff * Scaler);
 			MaxAngleErrorCutoff = FMath::Max<float>(MaxZeroingThreshold, MaxAngleDiff * Scaler);
+			//if (!bLeaveScaleUncompressed)
+   // if (!bLeaveScaleUncompressed)
 			MaxScaleErrorCutoff = FMath::Max<float>(MaxZeroingThreshold, MaxScaleDiff * Scaler);
 
 			if (bUseOverrideForEndEffectors && (PureTrackHeight == 0))
@@ -1165,36 +1197,48 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 			float ThresholdT_DueS = (TrackError.MaxErrorInTransDueToScale > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInTransDueToScale) : 1.0f;
 
 			//@TODO: Mixing spaces (target angle error is in radians, perturbation is in quaternion component units)
-			//@TODO：混合空间（目标角度误差以弧度为单位，扰动以四元数分量单位为单位）
+   // @TODO：混合空间（目标角度误差以弧度为单位，扰动以四元数分量单位为单位）
 			float ThresholdR_DueR = (TrackError.MaxErrorInRotDueToRot > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInRotDueToRot) : 1.0f;
 			float ThresholdR_DueT = (TrackError.MaxErrorInRotDueToTrans > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInRotDueToTrans) : 1.0f;
 			float ThresholdR_DueS = (TrackError.MaxErrorInRotDueToScale > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInRotDueToScale) : 1.0f;
 
 			// these values are not used, so I don't think we should calculate?
-			// 这些值没有被使用，所以我认为我们不应该计算？
+   // 这些值没有被使用，所以我认为我们不应该计算？
+   // bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+   // bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+   // bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+   // bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
 // 			float ThresholdS_DueR = (TrackError.MaxErrorInScaleDueToRot > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInScaleDueToRot) : 1.0f;
-// 			浮动阈值S_DueR = (TrackError.MaxErrorInScaleDueToRot > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInScaleDueToRot) : 1.0f;
+// 浮动阈值S_DueR = (TrackError.MaxErrorInScaleDueToRot > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInScaleDueToRot) : 1.0f;
+// if (!bLeaveRotationUncompressed)
+// if (!bLeaveRotationUncompressed)
 // 			float ThresholdS_DueT = (TrackError.MaxErrorInScaleDueToTrans > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInScaleDueToTrans) : 1.0f;
-// 			浮动 ThresholdS_DueT = (TrackError.MaxErrorInScaleDueToTrans > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInScaleDueToTrans) : 1.0f;
+// 浮动 ThresholdS_DueT = (TrackError.MaxErrorInScaleDueToTrans > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInScaleDueToTrans) : 1.0f;
+// if (!bLeaveRotationUncompressed)
+// if (!bLeaveRotationUncompressed)
 // 			float ThresholdS_DueS = (TrackError.MaxErrorInScaleDueToScale > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInScaleDueToScale) : 1.0f;
-// 			浮动 ThresholdS_DueS = (TrackError.MaxErrorInScaleDueToScale > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInScaleDueToScale) : 1.0f;
+// 浮动 ThresholdS_DueS = (TrackError.MaxErrorInScaleDueToScale > UE_SMALL_NUMBER) ? (PerturbationProbeSize / TrackError.MaxErrorInScaleDueToScale) : 1.0f;
 
 			// @Todo fix the error - this doesn't make sense
-			// @Todo 修复错误 - 这没有意义
+   // @Todo 修复错误 - 这没有意义
 			MaxAngleErrorCutoff = FMath::Min(MaxAngleDiffBitwise, MaxErrorPerTrackRatio * MaxAngleDiff * FMath::Lerp(ThresholdR_DueR, ThresholdT_DueR, RotationErrorSourceRatio));
 			MaxPositionErrorCutoff = FMath::Min(MaxPosDiffBitwise, MaxErrorPerTrackRatio * MaxPosDiff * FMath::Lerp(ThresholdR_DueT, ThresholdT_DueT, TranslationErrorSourceRatio));
 			MaxScaleErrorCutoff = FMath::Min(MaxScaleDiffBitwise, MaxErrorPerTrackRatio * MaxScaleDiff * FMath::Lerp(ThresholdR_DueS, ThresholdT_DueS, ScaleErrorSourceRatio));
 		}
 
 		// Start compressing translation using a totally lossless float32x3
-		// 开始使用完全无损的 float32x3 压缩翻译
+  // 开始使用完全无损的 float32x3 压缩翻译
 		const FTranslationTrack& TranslationTrack = TranslationData[TrackIndex];
 
+		//bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+  // bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
 		Params.bIncludeKeyTable = bActuallyFilterLinearKeys && !FAnimationUtils::HasUniformKeySpacing(CompressibleAnimData.NumberOfKeys, TranslationTrack.Times);
 		FPerTrackCompressor BestTranslation(ACF_Float96NoW, TranslationTrack, Params);
+		//if (!bLeaveRotationUncompressed)
+  // if (!bLeaveRotationUncompressed)
 
 		// Try the other translation formats
-		// 尝试其他翻译格式
+  // 尝试其他翻译格式
 		for (int32 FormatIndex = 0; FormatIndex < AllowedTranslationFormats.Num(); ++FormatIndex)
 		{
 			FPerTrackCompressor TrialCompression(AllowedTranslationFormats[FormatIndex], TranslationTrack, Params);
@@ -1202,30 +1246,45 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 			if (TrialCompression.MaxError <= MaxPositionErrorCutoff)
 			{
 				// Swap if it's smaller or equal-sized but lower-max-error
-				// 如果它更小或大小相等但最大误差更低，则交换
+    // 如果它更小或大小相等但最大误差更低，则交换
 				const int32 BytesSaved = BestTranslation.CompressedBytes.Num() - TrialCompression.CompressedBytes.Num();
 				const bool bIsImprovement = (BytesSaved > 0) || ((BytesSaved == 0) && (TrialCompression.MaxError < BestTranslation.MaxError));
+    // bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+    // bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
 
 				if (bIsImprovement)
+    // if (!bLeaveScaleUncompressed)
+    // if (!bLeaveScaleUncompressed)
+    // bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+    // bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
 				{
 					BestTranslation = TrialCompression;
+     // if (!bLeaveScaleUncompressed)
+     // if (!bLeaveScaleUncompressed)
 				}
 			}
 		}
 
 		// Start compressing rotation, first using lossless float32x3
-		// 开始压缩旋转，首先使用无损float32x3
+  // 开始压缩旋转，首先使用无损float32x3
 		const FRotationTrack& RotationTrack = RotationData[TrackIndex];
 
 		Params.bIncludeKeyTable = bActuallyFilterLinearKeys && !FAnimationUtils::HasUniformKeySpacing(CompressibleAnimData.NumberOfKeys, RotationTrack.Times);
+/** 对位置键轨道重新采样 */
 		FPerTrackCompressor BestRotation(ACF_Float96NoW, RotationTrack, Params);
 
 		//bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+  // bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
 		//bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+  // bool bLeaveRotationUncompressed = (RotationTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+			//bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+   // bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
 		// Try the other rotation formats
-		// [翻译失败: Try the other rotation formats]
+  // 尝试其他旋转格式
 		//if (!bLeaveRotationUncompressed)
-		//[翻译失败: if (!bLeaveRotationUncompressed)]
+  // if (!bLeaveRotationUncompressed)
+			//if (!bLeaveScaleUncompressed)
+   // if (!bLeaveScaleUncompressed)
 		{
 			for (int32 FormatIndex = 0; FormatIndex < AllowedRotationFormats.Num(); ++FormatIndex)
 			{
@@ -1234,7 +1293,7 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 				if (TrialCompression.MaxError <= MaxAngleErrorCutoff)
 				{
 					// Swap if it's smaller or equal-sized but lower-max-error
-					// [翻译失败: Swap if it's smaller or equal-sized but lower-max-error]
+     // 如果它更小或大小相等但最大误差更低，则交换
 					const int32 BytesSaved = BestRotation.CompressedBytes.Num() - TrialCompression.CompressedBytes.Num();
 					const bool bIsImprovement = (BytesSaved > 0) || ((BytesSaved == 0) && (TrialCompression.MaxError < BestRotation.MaxError));
 
@@ -1247,7 +1306,7 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 		}
 
 		// Start compressing Scale, first using lossless float32x3
-		// 开始压缩Scale，首先使用无损float32x3
+  // 开始压缩Scale，首先使用无损float32x3
 		if (bHasScale)
 		{
 			const FScaleTrack& ScaleTrack = ScaleData[TrackIndex];
@@ -1256,11 +1315,13 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 			FPerTrackCompressor BestScale(ACF_Float96NoW, ScaleTrack, Params);
 
 			//bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+   // bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
 			//bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
+   // bool bLeaveScaleUncompressed = (ScaleTrack.Times.Num() <= 1) && (GHighQualityEmptyTracks != 0);
 			// Try the other Scale formats
-			// 尝试其他音阶格式
+   // 尝试其他音阶格式
 			//if (!bLeaveScaleUncompressed)
-			//[翻译失败: if (!bLeaveScaleUncompressed)]
+   // if (!bLeaveScaleUncompressed)
 			{
 				for (int32 FormatIndex = 0; FormatIndex < AllowedScaleFormats.Num(); ++FormatIndex)
 				{
@@ -1269,7 +1330,7 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 					if (TrialCompression.MaxError <= MaxAngleErrorCutoff)
 					{
 						// Swap if it's smaller or equal-sized but lower-max-error
-						// [翻译失败: Swap if it's smaller or equal-sized but lower-max-error]
+      // 如果它更小或大小相等但最大误差更低，则交换
 						const int32 BytesSaved = BestScale.CompressedBytes.Num() - TrialCompression.CompressedBytes.Num();
 						const bool bIsImprovement = (BytesSaved > 0) || ((BytesSaved == 0) && (TrialCompression.MaxError < BestScale.MaxError));
 
@@ -1289,10 +1350,11 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 				AnimData.CompressedByteStream.Append(BestScale.CompressedBytes);
 			}
 			AnimData.CompressedScaleOffsets.SetOffsetData(TrackIndex, 0, ScaleOffset);
+/** 对音阶键的轨道重新采样 */
 		}
 
 		// Now write out compression and translation frames into the stream
-		// 现在将压缩和转换帧写入流中
+  // 现在将压缩和转换帧写入流中
 		int32 TranslationOffset = INDEX_NONE;
 		if (BestTranslation.CompressedBytes.Num() > 0 )
 		{
@@ -1300,6 +1362,7 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 			TranslationOffset = AnimData.CompressedByteStream.Num();
 			AnimData.CompressedByteStream.Append(BestTranslation.CompressedBytes);
 		}
+/** 对位置键轨道重新采样 */
 		AnimData.CompressedTrackOffsets[TrackIndex*2 + 0] = TranslationOffset;
 
 		int32 RotationOffset = INDEX_NONE;
@@ -1313,7 +1376,7 @@ void UAnimCompress_PerTrackCompression::CompressUsingUnderlyingCompressor(
 	
 #if 0
 		// This block outputs information about each individual track during compression, which is useful for debugging the compressors
-		// 该块在压缩期间输出有关每个单独轨道的信息，这对于调试压缩器非常有用
+  // 该块在压缩期间输出有关每个单独轨道的信息，这对于调试压缩器非常有用
 		UE_LOG(LogAnimationCompression, Warning, TEXT("   Compressed track %i, Trans=%s_%i (#keys=%i, err=%f), Rot=%s_%i (#keys=%i, err=%f)  (height=%i max pos=%f, angle=%f)"), 
 			TrackIndex,
 			*FAnimationUtils::GetAnimationCompressionFormatString(static_cast<AnimationCompressionFormat>(BestTranslation.ActualCompressionMode)),
@@ -1342,9 +1405,9 @@ void ResamplePositionKeys(
 	const int32 KeyCount = Track.Times.Num();
 
 	// Oddness about the original data: 30 keys will have times from 0..1 *inclusive*, and 30 Hz isn't
-	// 原始数据的奇怪之处：30 个键的时间从 0..1 *包含*，而 30 Hz 则不是
+ // 原始数据的奇怪之处：30 个键的时间从 0..1 *包含*，而 30 Hz 则不是
 	// This means the key spacing needs a boost
-	// 这意味着按键间距需要增加
+ // 这意味着按键间距需要增加
 	if (KeyCount > 1)
 	{
 		IntervalTime = IntervalTime * (KeyCount / (float)(KeyCount - 1));
@@ -1361,14 +1424,14 @@ void ResamplePositionKeys(
 	float FinalTime = Track.Times[KeyCount - 1];
 
 	// step through and retain the desired interval
-	// [翻译失败: step through and retain the desired interval]
+ // 逐步执行并保留所需的间隔
 	int32 CachedIndex = 0;
 
 	float Time = StartTime;
 	while (Time <= FinalTime)
 	{
 		// Find the bracketing current keys
-		// 查找当前包围键
+  // 查找当前包围键
 		if (CachedIndex < KeyCount - 1)
 		{
 			while ((CachedIndex < KeyCount - 1) && (Track.Times[CachedIndex+1] < Time))
@@ -1376,6 +1439,7 @@ void ResamplePositionKeys(
 				CachedIndex++;
 			}
 		}
+/** 对音阶键的轨道重新采样 */
 
 		FVector3f Value;
 
@@ -1418,9 +1482,9 @@ void ResampleScaleKeys(
 	const int32 KeyCount = Track.Times.Num();
 
 	// Oddness about the original data: 30 keys will have times from 0..1 *inclusive*, and 30 Hz isn't
-	// [翻译失败: Oddness about the original data: 30 keys will have times from 0..1 *inclusive*, and 30 Hz isn't]
+ // 原始数据的奇怪之处：30 个键的时间从 0..1 *包含*，而 30 Hz 则不是
 	// This means the key spacing needs a boost
-	// 这意味着按键间距需要增加
+ // 这意味着按键间距需要增加
 	if (KeyCount > 1)
 	{
 		IntervalTime = IntervalTime * (KeyCount / (float)(KeyCount - 1));
@@ -1437,14 +1501,14 @@ void ResampleScaleKeys(
 	float FinalTime = Track.Times[KeyCount - 1];
 
 	// step through and retain the desired interval
-	// 逐步执行并保留所需的间隔
+ // 逐步执行并保留所需的间隔
 	int32 CachedIndex = 0;
 
 	float Time = StartTime;
 	while (Time <= FinalTime)
 	{
 		// Find the bracketing current keys
-		// 查找当前包围键
+  // 查找当前包围键
 		if (CachedIndex < KeyCount - 1)
 		{
 			while ((CachedIndex < KeyCount - 1) && (Track.Times[CachedIndex+1] < Time))
@@ -1495,9 +1559,9 @@ void ResampleRotationKeys(
 	check(Track.Times.Num() == Track.RotKeys.Num());
 
 	// Oddness about the original data: 30 keys will have times from 0..1 *inclusive*, and 30 Hz isn't
-	// [翻译失败: Oddness about the original data: 30 keys will have times from 0..1 *inclusive*, and 30 Hz isn't]
+ // 原始数据的奇怪之处：30 个键的时间从 0..1 *包含*，而 30 Hz 则不是
 	// This means the key spacing needs a boost
-	// 这意味着按键间距需要增加
+ // 这意味着按键间距需要增加
 	if (KeyCount > 1)
 	{
 		IntervalTime = IntervalTime * (KeyCount / (float)(KeyCount - 1));
@@ -1512,14 +1576,14 @@ void ResampleRotationKeys(
 	float FinalTime = Track.Times[KeyCount - 1];
 
 	// step through and retain the desired interval
-	// 逐步执行并保留所需的间隔
+ // 逐步执行并保留所需的间隔
 	int32 CachedIndex = 0;
 
 	float Time = StartTime;
 	while (Time <= FinalTime)
 	{
 		// Find the bracketing current keys
-		// [翻译失败: Find the bracketing current keys]
+  // 查找当前包围键
 		if (CachedIndex < KeyCount - 1)
 		{
 			while ((CachedIndex < KeyCount - 1) && (Track.Times[CachedIndex+1] < Time))
@@ -1597,13 +1661,13 @@ void* UAnimCompress_PerTrackCompression::FilterBeforeMainKeyRemoval(
 	const int32 NumTracks = TranslationData.Num();
 
 	// Downsample the keys if enabled
-	// [翻译失败: Downsample the keys if enabled]
+ // 如果启用，则对键进行下采样
 	if ((CompressibleAnimData.NumberOfKeys >= MinKeysForResampling) && bResampleAnimation)
 	{
 		if(CompressibleAnimData.SequenceLength > 0)
 		{
 			//Make sure we aren't going to oversample the original animation
-			//[翻译失败: Make sure we aren't going to oversample the original animation]
+   // 确保我们不会对原始动画进行过度采样
 			const float CurrentFramerate = (CompressibleAnimData.NumberOfKeys - 1) / CompressibleAnimData.SequenceLength;
 			if (CurrentFramerate > ResampledFramerate)
 			{
@@ -1613,19 +1677,19 @@ void* UAnimCompress_PerTrackCompression::FilterBeforeMainKeyRemoval(
 	}
 
 	// Create the cache
-	// 创建缓存
+ // 创建缓存
 
 	FPerTrackCachedInfo* Cache = new FPerTrackCachedInfo();
 	
 	// Calculate how far each track is from controlling an end effector
-	// [翻译失败: Calculate how far each track is from controlling an end effector]
+ // 计算每个轨道距离控制末端执行器有多远
 	if (bUseAdaptiveError)
 	{
 		FAnimationUtils::CalculateTrackHeights(CompressibleAnimData, NumTracks, /*OUT*/ Cache->TrackHeights);
 	}
 
 	// Find out how a small change affects the maximum error in the end effectors
-	// [翻译失败: Find out how a small change affects the maximum error in the end effectors]
+ // 了解微小的变化如何影响末端执行器的最大误差
 	if (bUseAdaptiveError2)
 	{
 		FVector TranslationProbe(PerturbationProbeSize, PerturbationProbeSize, PerturbationProbeSize);
@@ -1642,7 +1706,7 @@ void* UAnimCompress_PerTrackCompression::FilterBeforeMainKeyRemoval(
 	}
 
 	// remove obviously redundant keys from the source data
-	// 从源数据中删除明显冗余的键
+ // 从源数据中删除明显冗余的键
 	FilterTrivialKeys(TranslationData, RotationData, ScaleData, TRANSLATION_ZEROING_THRESHOLD, QUATERNION_ZEROING_THRESHOLD, SCALE_ZEROING_THRESHOLD);
 
 	return Cache;
@@ -1658,24 +1722,24 @@ void UAnimCompress_PerTrackCompression::PostEditChangeProperty(struct FPropertyC
 
 
 		// It is an error to set both bUseAdaptiveError and bUseAdaptiveError2 to true at the same time so make sure if 
-		// 同时将 bUseAdaptiveError 和 bUseAdaptiveError2 设置为 true 是错误的，因此请确保是否
+  // 同时将 bUseAdaptiveError 和 bUseAdaptiveError2 设置为 true 是错误的，因此请确保是否
 		// we are enabling one the other is not enabled.
-		// 我们正在启用其中一个，而另一个则未启用。
+  // 我们正在启用其中一个，而另一个则未启用。
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(UAnimCompress_PerTrackCompression, bUseAdaptiveError))
 		{
 			// We have changed bUseAdaptiveError, bUseAdaptiveError2 can only be true if it was already true
-			// 我们更改了 bUseAdaptiveError，bUseAdaptiveError2 仅当它已经为 true 时才为 true
+   // 我们更改了 bUseAdaptiveError，bUseAdaptiveError2 仅当它已经为 true 时才为 true
 			// and bUseAdaptiveError is false
-			// 并且 bUseAdaptiveError 为 false
+   // 并且 bUseAdaptiveError 为 false
 			bUseAdaptiveError2 = (!bUseAdaptiveError) && bUseAdaptiveError2;
 		}
 
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(UAnimCompress_PerTrackCompression, bUseAdaptiveError2))
 		{
 			// We have changed bUseAdaptiveError2, bUseAdaptiveError can only be true if it was already true
-			// 我们更改了 bUseAdaptiveError2，bUseAdaptiveError 仅当它已经为 true 时才为 true
+   // 我们更改了 bUseAdaptiveError2，bUseAdaptiveError 仅当它已经为 true 时才为 true
 			// and bUseAdaptiveError2 is not true
-			// 并且 bUseAdaptiveError2 不正确
+   // 并且 bUseAdaptiveError2 不正确
 			bUseAdaptiveError = (!bUseAdaptiveError2) && bUseAdaptiveError;
 		}
 
@@ -1683,7 +1747,7 @@ void UAnimCompress_PerTrackCompression::PostEditChangeProperty(struct FPropertyC
 			|| PropertyName == GET_MEMBER_NAME_CHECKED(UAnimCompress_PerTrackCompression, MaxPosDiffBitwise))
 		{
 			//MaxZeroingThreshold needs to stay below MaxPosDiffBitwise
-			//MaxZeroingThreshold 需要保持低于 MaxPosDiffBitwise
+   // MaxZeroingThreshold 需要保持低于 MaxPosDiffBitwise
 			if (MaxZeroingThreshold > MaxPosDiffBitwise)
 			{
 				MaxZeroingThreshold = MaxPosDiffBitwise;
@@ -1715,11 +1779,11 @@ bool UAnimCompress_PerTrackCompression::DoReduction(const FCompressibleAnimData&
 	ensure(!(bUseAdaptiveError2 && bUseAdaptiveError));
 
 	// Compress
-	// 压缩
+ // 压缩
 	bool bSuccess = UAnimCompress_RemoveLinearKeys::DoReduction(CompressibleAnimData, OutResult);
 
 	// Delete the cache
-	// 删除缓存
+ // 删除缓存
 	if (OutResult.CompressionUserData != nullptr)
 	{
 		delete (FPerTrackCachedInfo*)OutResult.CompressionUserData;
@@ -1779,30 +1843,30 @@ void UAnimCompress_PerTrackCompression::DecompressBone(FAnimSequenceDecompressio
 	if (AnimData.KeyEncodingFormat == AKF_VariableKeyLerp)
 	{
 		// While we compress, we also use the decompression code path before our per track data is populated
-		// 在压缩时，我们还在填充每个轨道数据之前使用解压缩代码路径
+  // 在压缩时，我们还在填充每个轨道数据之前使用解压缩代码路径
 		Super::DecompressBone(DecompContext, TrackIndex, OutAtom);
 		return;
 	}
 #endif
 
 	// Initialize to identity to set the scale and in case of a missing rotation or translation codec
-	// 初始化身份以设置比例以及缺少旋转或平移编解码器的情况
+ // 初始化身份以设置比例以及缺少旋转或平移编解码器的情况
 	OutAtom.SetIdentity();
 
 	// decompress the translation component
-	// 解压翻译组件
+ // 解压翻译组件
 	AEFPerTrackCompressionCodec::GetBoneAtomTranslation(OutAtom, DecompContext, TrackIndex);
 
 	// decompress the rotation component
-	// 解压缩旋转分量
+ // 解压缩旋转分量
 	AEFPerTrackCompressionCodec::GetBoneAtomRotation(OutAtom, DecompContext, TrackIndex);
 
 	// we assume scale keys can be empty, so only extract if we have valid keys
-	// [翻译失败: we assume scale keys can be empty, so only extract if we have valid keys]
+ // 我们假设比例键可以为空，因此仅在有有效键时才提取
 	if (AnimData.CompressedScaleOffsets.IsValid())
 	{
 		// decompress the rotation component
-		// [翻译失败: decompress the rotation component]
+  // 解压缩旋转分量
 		AEFPerTrackCompressionCodec::GetBoneAtomScale(OutAtom, DecompContext, TrackIndex);
 	}
 }

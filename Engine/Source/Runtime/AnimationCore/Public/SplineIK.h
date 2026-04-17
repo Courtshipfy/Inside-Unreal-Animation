@@ -16,6 +16,8 @@ struct FInterpCurveVector;
 
 /** Outputs a float given a float input */
 /** 给定浮点输入，输出浮点 */
+/** 给定浮点输入，输出浮点 */
+/** 给定浮点输入，输出浮点 */
 DECLARE_DELEGATE_RetVal_OneParam(float, FFloatMapping, float);
 
 /**

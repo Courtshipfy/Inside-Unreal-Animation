@@ -29,18 +29,26 @@ class UAnimBoneCompressionCodec : public UObject
 
 	/** Description for this codec. */
 	/** 该编解码器的说明。 */
+	/** 该编解码器的说明。 */
+	/** 该编解码器的说明。 */
 	UPROPERTY(Category = Compression, EditAnywhere)
 	FString Description;
 
 	//////////////////////////////////////////////////////////////////////////
 
+	/** 返回我们是否可以使用此编解码器进行压缩。 */
 #if WITH_EDITORONLY_DATA
+	/** 返回我们是否可以使用此编解码器进行压缩。 */
 	/** Returns whether or not we can use this codec to compress. */
+	/** 返回此编解码器是否为高保真度。高保真编解码器需要原始数据，而无需引擎进行任何清理。 */
 	/** 返回我们是否可以使用此编解码器进行压缩。 */
 	virtual bool IsCodecValid() const { return true; }
+	/** 返回此编解码器是否为高保真度。高保真编解码器需要原始数据，而无需引擎进行任何清理。 */
+	/** 压缩动画序列中的曲线数据。 */
 
 	/** Returns whether or not this codec is high fidelity. High fidelity codecs requires the original raw data without any sanitizing by the engine. */
 	/** 返回此编解码器是否为高保真度。高保真编解码器需要原始数据，而无需引擎进行任何清理。 */
+	/** 压缩动画序列中的曲线数据。 */
 	virtual bool IsHighFidelity(const FCompressibleAnimData& CompressibleAnimData) const { return false; }
 
 	/** Compresses the curve data from an animation sequence. */
@@ -74,16 +82,22 @@ class UAnimBoneCompressionCodec : public UObject
 	ENGINE_API virtual void PopulateDDCKey(const UAnimSequenceBase& AnimSeq, FArchive& Ar);
 
 	/*
+	/** 允许我们将 DDC 序列化路径转换回编解码器对象 */
 	 * Called to generate a unique DDC key for this codec instance.
 	 * A suitable key should be generated from: the InstanceGuid, a codec version, and all relevant properties that drive the behavior.
 	 */
+	/** 返回相对于父设置资源的唯一路径 */
 	UE_DEPRECATED(5.1, "This function has been deprecated. Override the one above instead.")
+	/** 允许我们将 DDC 序列化路径转换回编解码器对象 */
 	ENGINE_API virtual void PopulateDDCKey(FArchive& Ar);
+	/** 分配用于解压缩的必要动画数据结构。引擎将序列化数据输入/输出并绑定它。 */
 #endif
 
+	/** 返回相对于父设置资源的唯一路径 */
 	/** Allow us to convert DDC serialized path back into codec object */
 	/** 允许我们将 DDC 序列化路径转换回编解码器对象 */
 	ENGINE_API virtual UAnimBoneCompressionCodec* GetCodec(const FString& DDCHandle);
+	/** 分配用于解压缩的必要动画数据结构。引擎将序列化数据输入/输出并绑定它。 */
 
 	/** Returns a unique path relative to the parent settings asset */
 	/** 返回相对于父设置资源的唯一路径 */
@@ -105,6 +119,7 @@ class UAnimBoneCompressionCodec : public UObject
 	/**
 	 * Handles Byte-swapping outgoing animation data to an array of BYTEs
 	 *
+	/** 减压单个骨头。 */
 	 * @param	Seq					An Animation Sequence to write.
 	 * @param	SerializedData		The output buffer.
 	 * @param	bForceByteSwapping	true is byte swapping is not optional.
@@ -112,6 +127,7 @@ class UAnimBoneCompressionCodec : public UObject
 	virtual void ByteSwapOut(ICompressedAnimData& AnimData, TArrayView<uint8> CompressedData, FMemoryWriter& MemoryStream) const PURE_VIRTUAL(UAnimCurveCompressionCodec::ByteSwapOut, );
 
 	/**
+	/** 减压单个骨头。 */
 	 * Decompresses all the specified bone tracks.
 	 * The caller is responsible for pre-filling the output pose with sensible values (e.g. reference/bind/additive identity pose) as
 	 * the codec will only decompress and write out tracks that are contained in the compressed data.

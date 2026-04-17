@@ -15,7 +15,7 @@ FAnimationAttributeIdentifier UAnimationAttributeIdentifierExtensions::CreateAtt
 	FAnimationAttributeIdentifier Identifier;
 
 	// Ensure the type is valid and registered with the attributes system
-	// [翻译失败: Ensure the type is valid and registered with the attributes system]
+ // 确保类型有效并已在属性系统中注册
 	if (AttributeType)
 	{
 		if (UE::Anim::AttributeTypes::IsTypeRegistered(AttributeType))
@@ -26,7 +26,7 @@ FAnimationAttributeIdentifier UAnimationAttributeIdentifierExtensions::CreateAtt
 				if (Skeleton)
 				{
 					// Ensure that the request bone exists on the target asset its skeleton
-					// 确保请求骨骼存在于目标资产及其骨架上
+     // 确保请求骨骼存在于目标资产及其骨架上
 					const int32 BoneIndex = Skeleton->GetReferenceSkeleton().FindBoneIndex(BoneName);
 					if (BoneIndex != INDEX_NONE)
 					{
@@ -37,7 +37,7 @@ FAnimationAttributeIdentifier UAnimationAttributeIdentifierExtensions::CreateAtt
 						Identifier.ScriptStructPath = AttributeType;
 
 						// If the user requested so, make sure the attribute exists on the asset, and if not reset the identifier to be invalid
-						// 如果用户请求这样做，请确保资产上存在该属性，如果不存在，则将标识符重置为无效
+      // 如果用户请求这样做，请确保资产上存在该属性，如果不存在，则将标识符重置为无效
 						if (bValidateExistsOnAsset)
 						{
 							UAnimSequence* AnimSequence = Cast<UAnimSequence>(AnimationAsset);

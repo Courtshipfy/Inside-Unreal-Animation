@@ -25,31 +25,43 @@ struct FAnimNode_HandIKRetargeting : public FAnimNode_SkeletalControlBase
 
 	/** Bone for Right Hand FK */
 	/** 右手 FK 骨头 */
+	/** 右手 FK 骨头 */
+	/** 右手 FK 骨头 */
 	UPROPERTY(EditAnywhere, Category = "HandIKRetargeting")
 	FBoneReference RightHandFK;
+	/** 左手 FK 骨头 */
 
+	/** 左手 FK 骨头 */
 	/** Bone for Left Hand FK */
 	/** 左手 FK 骨头 */
+	/** 右手 IK 骨骼 */
 	UPROPERTY(EditAnywhere, Category = "HandIKRetargeting")
 	FBoneReference LeftHandFK;
+	/** 右手 IK 骨骼 */
 
+	/** 左手 IK 骨骼 */
 	/** Bone for Right Hand IK */
 	/** 右手 IK 骨骼 */
 	UPROPERTY(EditAnywhere, Category = "HandIKRetargeting")
+	/** 左手 IK 骨骼 */
+	/** IK 骨骼移动。 */
 	FBoneReference RightHandIK;
 
 	/** Bone for Left Hand IK */
 	/** 左手 IK 骨骼 */
+	/** IK 骨骼移动。 */
 	UPROPERTY(EditAnywhere, Category = "HandIKRetargeting")
 	FBoneReference LeftHandIK;
 
+	/** 偏向哪只手。 0.5 表示双手权重相等，1 = 右手，0 = 左手。 */
 	/** IK Bones to move. */
 	/** IK 骨骼移动。 */
 	UPROPERTY(EditAnywhere, Category = "HandIKRetargeting")
 	TArray<FBoneReference> IKBonesToMove;
 
+	/** 偏向哪只手。 0.5 表示双手权重相等，1 = 右手，0 = 左手。 */
 	// Alpha values per axis to apply on the resulting retargeting translation
-	// 每个轴的 Alpha 值应用于生成的重定向翻译
+ // 每个轴的 Alpha 值应用于生成的重定向翻译
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HandIKRetargeting", meta = (PinHiddenByDefault))
 	FVector PerAxisAlpha;
 
@@ -61,22 +73,22 @@ struct FAnimNode_HandIKRetargeting : public FAnimNode_SkeletalControlBase
 	ANIMGRAPHRUNTIME_API FAnimNode_HandIKRetargeting();
 
 	// FAnimNode_Base interface
-	// FAnimNode_Base接口
+ // FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
-	// FAnimNode_Base接口结束
+ // FAnimNode_Base接口结束
 
 	// FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口
+ // FAnimNode_SkeletalControlBase接口
 	ANIMGRAPHRUNTIME_API virtual void EvaluateSkeletalControl_AnyThread(FComponentSpacePoseContext& Output, TArray<FBoneTransform>& OutBoneTransforms) override;
 	ANIMGRAPHRUNTIME_API virtual bool IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) override;
 	// End of FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口结束
+ // FAnimNode_SkeletalControlBase接口结束
 
 private:
 	// FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口
+ // FAnimNode_SkeletalControlBase接口
 	ANIMGRAPHRUNTIME_API virtual void InitializeBoneReferences(const FBoneContainer& RequiredBones) override;
 	// End of FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口结束
+ // FAnimNode_SkeletalControlBase接口结束
 };

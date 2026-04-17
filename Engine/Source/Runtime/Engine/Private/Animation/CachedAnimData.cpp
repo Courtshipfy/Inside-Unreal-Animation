@@ -74,7 +74,7 @@ bool FCachedAnimStateData::WasAnimNotifyStateActive(UAnimInstance& InAnimInstanc
 bool FCachedAnimStateArray::IsValid(UAnimInstance& InAnimInstance) const
 {
 	// Make sure the setup validates our assumptions.
-	// 确保设置验证我们的假设。
+ // 确保设置验证我们的假设。
 	if (!bCheckedValidity)
 	{
 		bCheckedValidity = true;
@@ -94,7 +94,7 @@ bool FCachedAnimStateArray::IsValid(UAnimInstance& InAnimInstance) const
 				else if ((State.StateMachineName != NAME_None) && (State.StateMachineName != StateMachineName))
 				{
 					// Array has states from different state machines
-					// 数组具有来自不同状态机的状态
+     // 数组具有来自不同状态机的状态
 					bHasMultipleStateMachineEntries = true;
 				}
 				
@@ -125,7 +125,7 @@ float FCachedAnimStateArray::GetTotalWeight(UAnimInstance& InAnimInstance) const
 			TotalWeight += State.GetWeight(InAnimInstance);
 		}
 		// Don't clamp to 1 if total is composed from multiple state machines since it can be larger than that
-		// 如果总计由多个状态机组成，则不要限制为 1，因为它可能大于该值
+  // 如果总计由多个状态机组成，则不要限制为 1，因为它可能大于该值
 		if (bHasMultipleStateMachineEntries)
 		{
 			return TotalWeight;
@@ -143,7 +143,7 @@ bool FCachedAnimStateArray::IsFullWeight(UAnimInstance& InAnimInstance) const
 	if (bHasMultipleStateMachineEntries)
 	{
 		// Array has multiple state machines, return true if one machine has a weight of 1.
-		// 数组有多个状态机，如果一台机器的权重为1，则返回true。
+  // 数组有多个状态机，如果一台机器的权重为1，则返回true。
 		if (IsValid(InAnimInstance))
 		{
 			TMap<FName, float> TotalWeights;

@@ -20,11 +20,17 @@ class UAnimDataModel : public UObject, public IAnimationDataModel
 public:
 	/** Begin UObject overrides */
 	/** 开始 UObject 覆盖 */
+	/** 开始 UObject 覆盖 */
+	/** 开始 UObject 覆盖 */
 	ENGINE_API virtual void PostLoad() override;
 	ENGINE_API virtual void PostDuplicate(bool bDuplicateForPIE) override;
+	/** 结束 UObject 覆盖 */
 	virtual bool IsEditorOnly() const override { return true; }
+	/** 结束 UObject 覆盖 */
+	/** 开始 IAnimationDataModel 覆盖 */
 	/** End UObject overrides */
 	/** 结束 UObject 覆盖 */
+	/** 开始 IAnimationDataModel 覆盖 */
 	
 	/** Begin IAnimationDataModel overrides */
 	/** 开始 IAnimationDataModel 覆盖 */
@@ -87,12 +93,16 @@ protected:
 	virtual void OnNotify(const EAnimDataModelNotifyType& NotifyType, const FAnimDataModelNotifPayload& Payload) override {}
 	virtual void LockEvaluationAndModification() const override final {}
 	virtual bool TryLockEvaluationAndModification() const override final { return true; }
+	/** 结束 IAnimationDataModel 覆盖 */
 	virtual void UnlockEvaluationAndModification() const override final {}	
 	virtual bool& GetPopulationFlag() override final
 	{
+	/** UAnimDataController 使用辅助功能来检索可变数据 */
+	/** 结束 IAnimationDataModel 覆盖 */
 		return bPopulated;
 	}
 	/** End IAnimationDataModel overrides */
+	/** UAnimDataController 使用辅助功能来检索可变数据 */
 	/** 结束 IAnimationDataModel 覆盖 */
 
 private:
@@ -104,43 +114,61 @@ private:
 	ENGINE_API FFloatCurve* FindMutableFloatCurveById(const FAnimationCurveIdentifier& CurveIdentifier);
 	ENGINE_API FAnimCurveBase* FindMutableCurveById(const FAnimationCurveIdentifier& CurveIdentifier);	   
 	ENGINE_API FRichCurve* GetMutableRichCurve(const FAnimationCurveIdentifier& CurveIdentifier);
+	/** 动态委托事件允许脚本注册到任何广播的通知。 */
 
 	ENGINE_API USkeleton* GetSkeleton() const;
 	template <typename HasherType>
 	void GenerateStateHash(HasherType& Hasher, const FGuidGenerationSettings& InSettings) const;
+	/** 本机委托事件允许注册任何广播通知。 */
 
+	/** 动态委托事件允许脚本注册到任何广播的通知。 */
 private:
+	/** 所有单独的骨骼动画轨道 */
 	UPROPERTY(Transient)
 	int32 BracketCounter = 0;
 
+	/** 本机委托事件允许注册任何广播通知。 */
+	/** 包含的动画数据的总可播放长度 */
 	/** Dynamic delegate event allows scripting to register to any broadcasted notify. */
 	/** 动态委托事件允许脚本注册到任何广播的通知。 */
 	UPROPERTY(BlueprintAssignable, Transient, Category = AnimationDataModel, meta = (ScriptName = "ModifiedEvent", AllowPrivateAccess = "true"))
+	/** 所有单独的骨骼动画轨道 */
 	FAnimDataModelModifiedDynamicEvent ModifiedEventDynamic;
+	/** 动画数据的采样率 */
 	
 	/** Native delegate event allows for registerings to any broadcasted notify. */
 	/** 本机委托事件允许注册任何广播通知。 */
+	/** 包含的动画数据的总可播放长度 */
+	/** 采样的动画帧总数 */
 	FAnimDataModelModifiedEvent ModifiedEvent;
 
 	/** All individual bone animation tracks */
 	/** 所有单独的骨骼动画轨道 */
+	/** 采样动画按键总数 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Animation Data Model", meta = (AllowPrivateAccess = "true"))
+	/** 动画数据的采样率 */
 	TArray<FBoneAnimationTrack> BoneAnimationTracks;
 
+	/** 包含所有动画曲线数据的容器 */
 	/** Total playable length of the contained animation data */
 	/** 包含的动画数据的总可播放长度 */
+	/** 采样的动画帧总数 */
 	UE_DEPRECATED(5.1, "PlayLength is deprecated use GetPlayLength instead, as it is now calculated with Number of Frames * FrameRate instead of stored as a value")
+	/** 包含所有动画（骨骼）属性数据的容器 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation Data Model", meta = (AllowPrivateAccess = "true"))
 	float PlayLength;
 	
+	/** 采样动画按键总数 */
 	/** Rate at which the animated data is sampled */
 	/** 动画数据的采样率 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation Data Model", meta = (AllowPrivateAccess = "true"))
 	FFrameRate FrameRate;
+	/** 包含所有动画曲线数据的容器 */
 
 	/** Total number of sampled animated frames */
 	/** 采样的动画帧总数 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation Data Model", meta = (AllowPrivateAccess = "true"))
+	/** 包含所有动画（骨骼）属性数据的容器 */
 	int32 NumberOfFrames;
 
 	/** Total number of sampled animated keys */

@@ -7,11 +7,21 @@
 /////////////////////////////////////////////////////
 // FAnimNode_BlendListByBool
 // FAnimNode_BlendListByBool
+// FAnimNode_BlendListByBool
+// FAnimNode_BlendListByBool
+// FAnimNode_BlendListByBool
+// FAnimNode_BlendListByBool
+// FAnimNode_BlendListByBool
+// FAnimNode_BlendListByBool
+// FAnimNode_BlendListByBool
+// FAnimNode_BlendListByBool
+// FAnimNode_BlendListByBool
+// FAnimNode_BlendListByBool
 
 int32 FAnimNode_BlendListByBool::GetActiveChildIndex()
 {
 	// Note: Intentionally flipped boolean sense (the true input is #0, and the false input is #1)
-	// 注意：故意翻转布尔值（真输入为#0，假输入为#1）
+ // 注意：故意翻转布尔值（真输入为#0，假输入为#1）
 	return GetActiveValue() ? 0 : 1;
 }
 
@@ -33,7 +43,7 @@ UBlendProfile* FAnimNode_BlendListByBool::GetBlendProfileForFalse() const
 UBlendProfile* FAnimNode_BlendListByBool::GetBlendProfile() const
 {
 	// If the option is ticked, we have a seperate profile for the false branch
-	// 如果选中该选项，我们将为错误分支提供单独的配置文件
+ // 如果选中该选项，我们将为错误分支提供单独的配置文件
 	if (GetUseSeperateBlendProfiles() && GetActiveValue() == false)
 	{
 		return GetBlendProfileForFalse();

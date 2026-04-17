@@ -19,7 +19,11 @@ enum class ECustomAttributeBlendType : uint8
 {
 	/** Overrides Custom attributes according to highest weighted pose */
 	/** 根据最高权重姿势覆盖自定义属性 */
+	/** 根据最高权重姿势覆盖自定义属性 */
+	/** 根据最高权重姿势覆盖自定义属性 */
+	/** 根据每个姿势的权重混合自定义属性 */
 	Override,
+	/** 根据每个姿势的权重混合自定义属性 */
 	/** Blends Custom attributes according to weights per pose */
 	/** 根据每个姿势的权重混合自定义属性 */
 	Blend
@@ -27,12 +31,16 @@ enum class ECustomAttributeBlendType : uint8
 
 USTRUCT()
 struct FCustomAttributeSetting
+	/** 自定义属性的名称 */
 {
 	GENERATED_BODY()
+	/** 自定义属性的名称 */
 
+	/** 可选属性描述自定义属性的含义（或角色），允许向属性添加上下文 */
 	/** Name of the custom attribute */
 	/** 自定义属性的名称 */
 	UPROPERTY(EditAnywhere, Category = CustomAttributeSetting)
+	/** 可选属性描述自定义属性的含义（或角色），允许向属性添加上下文 */
 	FString Name;
 
 	/** Optional property describing the meaning (or role) of the custom attribute, allowing to add context to an attribute */
@@ -42,22 +50,30 @@ struct FCustomAttributeSetting
 };
 
 /**
+	/** 表示时间码的小时部分的自定义属性的名称。 */
  * Settings that identify the names of custom attributes that represent the individual components of a timecode and a subframe along with a take name.
  */
 USTRUCT()
 struct FTimecodeCustomAttributeNameSettings
+	/** 表示时间码分钟部分的自定义属性的名称。 */
+	/** 表示时间码的小时部分的自定义属性的名称。 */
 {
 	GENERATED_BODY()
 
+	/** 表示时间码第二个组成部分的自定义属性的名称。 */
 	/** Name of the custom attribute representing the hour component of a timecode. */
+	/** 表示时间码分钟部分的自定义属性的名称。 */
 	/** 表示时间码的小时部分的自定义属性的名称。 */
 	UPROPERTY(EditAnywhere, Category = TimecodeCustomAttributeNameSettings)
+	/** 表示时间码的帧组件的自定义属性的名称。 */
 	FName HourAttributeName;
 
+	/** 表示时间码第二个组成部分的自定义属性的名称。 */
 	/** Name of the custom attribute representing the minute component of a timecode. */
 	/** 表示时间码分钟部分的自定义属性的名称。 */
 	UPROPERTY(EditAnywhere, Category = TimecodeCustomAttributeNameSettings)
 	FName MinuteAttributeName;
+	/** 表示时间码的帧组件的自定义属性的名称。 */
 
 	/** Name of the custom attribute representing the second component of a timecode. */
 	/** 表示时间码第二个组成部分的自定义属性的名称。 */
@@ -65,6 +81,7 @@ struct FTimecodeCustomAttributeNameSettings
 	FName SecondAttributeName;
 
 	/** Name of the custom attribute representing the frame component of a timecode. */
+	/** 代表镜头名称的自定义属性的名称。 */
 	/** 表示时间码的帧组件的自定义属性的名称。 */
 	UPROPERTY(EditAnywhere, Category = TimecodeCustomAttributeNameSettings)
 	FName FrameAttributeName;
@@ -73,30 +90,39 @@ struct FTimecodeCustomAttributeNameSettings
 		of a timecode, this attribute can be authored to identify samples in between timecodes. */
 	UPROPERTY(EditAnywhere, Category = TimecodeCustomAttributeNameSettings)
 	FName SubframeAttributeName;
+	/** 代表镜头名称的自定义属性的名称。 */
 
 	/** Name of the custom attribute representing the timecode rate. This may be different from
 	    the animation or capture frame rate, for example when capturing "high" frame rate data
+	/** 该属性的名称 */
 		at 120 frames per second but recording SMPTE timecode at 30 frames per second. */
 	UPROPERTY(EditAnywhere, Category = TimecodeCustomAttributeNameSettings)
 	FName RateAttributeName;
 
+	/** Values 数组包含的 (FVariant) 类型 */
 	/** Name of the custom attribute representing the name of a take. */
 	/** 代表镜头名称的自定义属性的名称。 */
 	UPROPERTY(EditAnywhere, Category = TimecodeCustomAttributeNameSettings)
 	FName TakenameAttributeName;
+	/** 时间键（应与值条目的数量匹配） */
 };
+	/** 该属性的名称 */
 
 struct UE_DEPRECATED(5.0, "FCustomAttribute has been deprecated") FCustomAttribute;
+	/** 值键（应与 Times 条目的数量匹配） */
 USTRUCT(Experimental)
 struct FCustomAttribute
+	/** Values 数组包含的 (FVariant) 类型 */
 {
 	GENERATED_BODY()
 
 #if WITH_EDITORONLY_DATA
+	/** 时间键（应与值条目的数量匹配） */
 	/** Name of this attribute */
 	/** 该属性的名称 */
 	UPROPERTY(VisibleAnywhere, Category = CustomAttribute)
 	FName Name;
+	/** 值键（应与 Times 条目的数量匹配） */
 
 	/** (FVariant) type contained by Values array */
 	/** Values 数组包含的 (FVariant) 类型 */
@@ -113,6 +139,7 @@ struct FCustomAttribute
 	TArray<FVariant> Values;
 
 	bool Serialize(FArchive& Ar)
+/** 描述单个骨骼的自定义属性的结构（索引） */
 	{
 		Ar << Name;
 		Ar << VariantType;
@@ -126,12 +153,14 @@ struct FCustomAttribute
 
 #if WITH_EDITORONLY_DATA
 PRAGMA_DISABLE_DEPRECATION_WARNINGS
+/** 描述单个骨骼的自定义属性的结构（索引） */
 // Custom serializer required for FVariant array
 // FVariant 数组需要自定义序列化器
 template<>
 struct TStructOpsTypeTraits<FCustomAttribute> : public TStructOpsTypeTraitsBase2<FCustomAttribute>
 {
 	enum
+/** （烘焙）字符串自定义属性，使用 FStringCurve 代替 FVariant 数组进行评估 */
 	{
 		WithSerializer = true
 	};
@@ -145,9 +174,11 @@ struct UE_DEPRECATED(5.0, "FCustomAttributePerBoneData has been deprecated") FCu
 
 USTRUCT(Experimental)
 struct FCustomAttributePerBoneData
+/** （烘焙）字符串自定义属性，使用 FStringCurve 代替 FVariant 数组进行评估 */
 {
 	GENERATED_BODY()
 
+/** （烘焙）int32 自定义属性，使用 FIntegralCurve 代替 FVariant 数组进行评估 */
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(VisibleAnywhere, Category = CustomAttributeBoneData)
 	int32 BoneTreeIndex = 0;
@@ -162,8 +193,10 @@ struct FCustomAttributePerBoneData
 /** (Baked) string custom attribute, uses FStringCurve for evaluation instead of FVariant array */
 /** （烘焙）字符串自定义属性，使用 FStringCurve 代替 FVariant 数组进行评估 */
 struct UE_DEPRECATED(5.0, "FBakedStringCustomAttribute has been deprecated") FBakedStringCustomAttribute;
+/** （烘焙）int32 自定义属性，使用 FIntegralCurve 代替 FVariant 数组进行评估 */
 
 USTRUCT(Experimental)
+/** （烘焙）浮动自定义属性，使用 FSimpleCurve 进行评估而不是 FVariant 数组 */
 struct FBakedStringCustomAttribute
 {
 	GENERATED_BODY()
@@ -179,7 +212,9 @@ struct FBakedStringCustomAttribute
 
 /** (Baked) int32 custom attribute, uses FIntegralCurve for evaluation instead of FVariant array */
 /** （烘焙）int32 自定义属性，使用 FIntegralCurve 代替 FVariant 数组进行评估 */
+/** （烘焙）浮动自定义属性，使用 FSimpleCurve 进行评估而不是 FVariant 数组 */
 struct UE_DEPRECATED(5.0, "FBakedIntegerCustomAttribute has been deprecated") FBakedIntegerCustomAttribute;
+/** 描述单个骨骼的烘焙自定义属性的结构（索引） */
 
 USTRUCT(Experimental)
 struct FBakedIntegerCustomAttribute
@@ -196,6 +231,7 @@ struct FBakedIntegerCustomAttribute
 };
 
 /** (Baked) float custom attribute, uses FSimpleCurve for evaluation instead of FVariant array */
+/** 描述单个骨骼的烘焙自定义属性的结构（索引） */
 /** （烘焙）浮动自定义属性，使用 FSimpleCurve 进行评估而不是 FVariant 数组 */
 struct UE_DEPRECATED(5.0, "FBakedFloatCustomAttribute has been deprecated") FBakedFloatCustomAttribute;
 

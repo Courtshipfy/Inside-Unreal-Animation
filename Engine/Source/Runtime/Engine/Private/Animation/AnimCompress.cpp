@@ -248,9 +248,9 @@ void UAnimCompress::PrecalculateShortestQuaternionRoutes(
 			if( (R0 | R1) < 0.f )
 			{
 				// invert R1 so that R0|R1 will always be >=0.f
-				// 反转 R1，使 R0|R1 始终 >=0.f
+    // 反转 R1，使 R0|R1 始终 >=0.f
 				// making the delta between them the shortest possible route
-				// [翻译失败: making the delta between them the shortest possible route]
+    // 使它们之间的三角洲成为最短路线
 				R1 = (R1 * -1);
 			}
 		}
@@ -273,7 +273,7 @@ namespace UE::Anim::Compression::Private
 		if (CompressibleAnimData.bIsValidAdditive)
 		{
 			// We always compress scale with additive sequences
-			// [翻译失败: We always compress scale with additive sequences]
+   // 我们总是用加性序列来压缩规模
 			return true;
 		}
 
@@ -283,9 +283,9 @@ namespace UE::Anim::Compression::Private
 			if (ScaleTrack.ScaleKeys.Num() != 1)
 			{
 				// If we have 0 keys or more than 1 key, we aren't a trivial track with a value equal to the bind pose
-				// 如果我们有 0 个关键点或多于 1 个关键点，那么我们就不是一个值等于绑定姿势的简单轨迹
+    // 如果我们有 0 个关键点或多于 1 个关键点，那么我们就不是一个值等于绑定姿势的简单轨迹
 				// We thus need to compress scale
-				// 因此我们需要压缩规模
+    // 因此我们需要压缩规模
 				return true;
 			}
 
@@ -293,7 +293,7 @@ namespace UE::Anim::Compression::Private
 			if (!CompressibleAnimData.RefSkeleton.IsValidIndex(BoneIndex))
 			{
 				// This track isn't mapped to a bone, ignore it
-				// 该轨道未映射到骨骼，请忽略它
+    // 该轨道未映射到骨骼，请忽略它
 				continue;
 			}
 
@@ -301,17 +301,17 @@ namespace UE::Anim::Compression::Private
 			if (!RefScale.Equals(ScaleTrack.ScaleKeys[0]))
 			{
 				// This trivial track isn't equal to the bind pose scale, we need to retain it
-				// 这个简单的轨迹不等于绑定姿势比例，我们需要保留它
+    // 这个简单的轨迹不等于绑定姿势比例，我们需要保留它
 				return true;
 			}
 		}
 
 		// We don't need to retain any scale, it can safely be stripped and ignored
-		// 我们不需要保留任何比例，可以安全地剥离和忽略它
+  // 我们不需要保留任何比例，可以安全地剥离和忽略它
 		// At runtime, when we decompress we'll skip missing scale entries, leaving the
-		// 在运行时，当我们解压缩时，我们将跳过丢失的比例条目，留下
+  // 在运行时，当我们解压缩时，我们将跳过丢失的比例条目，留下
 		// bind pose value untouched in the output buffer
-		// 绑定姿势值在输出缓冲区中保持不变
+  // 绑定姿势值在输出缓冲区中保持不变
 		return false;
 	}
 }
@@ -330,7 +330,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 	FUECompressedAnimDataMutable& AnimData = static_cast<FUECompressedAnimDataMutable&>(*OutCompressedData.AnimData);
 
 	// Ensure supported compression formats.
-	// 确保支持的压缩格式。
+ // 确保支持的压缩格式。
 	bool bInvalidCompressionFormat = false;
 	if (!(TargetTranslationFormat == ACF_None) && !(TargetTranslationFormat == ACF_IntervalFixed32NoW) && !(TargetTranslationFormat == ACF_Float96NoW))
 	{
@@ -374,10 +374,10 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 		AnimData.CompressedTrackOffsets.SetNumUninitialized(NumTracks * 4);
 
 		// just empty it since there is chance this can be 0
-		// 清空它，因为有可能为 0
+  // 清空它，因为有可能为 0
 		AnimData.CompressedScaleOffsets.Empty();
 		// only do this if Scale exists;
-		// 仅当 Scale 存在时才执行此操作；
+  // 仅当 Scale 存在时才执行此操作；
 		if (bHasScale)
 		{
 			AnimData.CompressedScaleOffsets.SetStripSize(2);
@@ -390,14 +390,14 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 		for (int32 TrackIndex = 0; TrackIndex < NumTracks; ++TrackIndex)
 		{
 			// Translation data.
-			// 翻译数据。
+   // 翻译数据。
 			const FTranslationTrack& SrcTrans = TranslationData[TrackIndex];
 
 			const int32 OffsetTrans = AnimData.CompressedByteStream.Num();
 			const int32 NumKeysTrans = SrcTrans.PosKeys.Num();
 
 			// Warn on empty data.
-			// 对空数据发出警告。
+   // 对空数据发出警告。
 			if (NumKeysTrans == 0)
 			{
 				UE_LOG(LogAnimationCompression, Warning, TEXT("When compressing %s track %i: no translation keys"), *CompressibleAnimData.Name, TrackIndex);
@@ -408,7 +408,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 			AnimData.CompressedTrackOffsets[TrackIndex * 4 + 1] = NumKeysTrans;
 
 			// Calculate the bounding box of the translation keys
-			// 计算平移键的边界框
+   // 计算平移键的边界框
 			FBox3f PositionBounds(SrcTrans.PosKeys);
 
 			float TransMins[3] = { (float)PositionBounds.Min.X, (float)PositionBounds.Min.Y, (float)PositionBounds.Min.Z };
@@ -420,7 +420,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 			if (NumKeysTrans > 1)
 			{
 				// Write the mins and ranges if they'll be used on the other side
-				// 如果要在另一侧使用，请写下分钟和范围
+    // 如果要在另一侧使用，请写下分钟和范围
 				if (TargetTranslationFormat == ACF_IntervalFixed32NoW)
 				{
 					UnalignedWriteToStream(AnimData.CompressedByteStream, TransMins, sizeof(float) * 3);
@@ -428,7 +428,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 				}
 
 				// Pack the positions into the stream
-				// [翻译失败: Pack the positions into the stream]
+    // 将位置打包到流中
 				for (int32 KeyIndex = 0; KeyIndex < NumKeysTrans; ++KeyIndex)
 				{
 					const FVector3f& Vec = SrcTrans.PosKeys[KeyIndex];
@@ -438,11 +438,11 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 				if (IncludeKeyTable)
 				{
 					// Align to four bytes.
-					// 对齐到四个字节。
+     // 对齐到四个字节。
 					PadByteStream(AnimData.CompressedByteStream, 4, AnimationPadSentinel);
 
 					// write the key table
-					// 写入密钥表
+     // 写入密钥表
 					const int32 NumKeys = CompressibleAnimData.NumberOfKeys;
 					const int32 LastFrame = NumKeys-1;
 					const size_t FrameSize = NumKeys > 0xff ? sizeof(uint16) : sizeof(uint8);
@@ -455,7 +455,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 					for (int32 KeyIndex = 0; KeyIndex < NumKeysTrans; ++KeyIndex)
 					{
 						// write the frame values for each key
-						// 写入每个键的帧值
+      // 写入每个键的帧值
 						float KeyTime = SrcTrans.Times[KeyIndex];
 						float FrameTime = KeyTime * FrameRate;
 						int32 FrameIndex = FMath::Clamp(FMath::TruncToInt(FrameTime + 0.5f), 0, LastFrame);
@@ -463,7 +463,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 					}
 
 					// Align to four bytes. Padding with 0's to round out the key table
-					// 对齐到四个字节。用 0 填充以完善密钥表
+     // 对齐到四个字节。用 0 填充以完善密钥表
 					PadByteStream(AnimData.CompressedByteStream, 4, 0);
 
 					const int32 EndingOffset = AnimData.CompressedByteStream.Num();
@@ -473,7 +473,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 			else if (NumKeysTrans == 1)
 			{
 				// A single translation key gets written out a single uncompressed float[3].
-				// 单个翻译密钥被写出单个未压缩的浮点[3]。
+    // 单个翻译密钥被写出单个未压缩的浮点[3]。
 				UnalignedWriteToStream(AnimData.CompressedByteStream, &(SrcTrans.PosKeys[0]), sizeof(FVector3f));
 			}
 			else
@@ -482,11 +482,11 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 			}
 
 			// Align to four bytes.
-			// 对齐到四个字节。
+   // 对齐到四个字节。
 			PadByteStream(AnimData.CompressedByteStream, 4, AnimationPadSentinel);
 
 			// Compress rotation data.
-			// 压缩旋转数据。
+   // 压缩旋转数据。
 			const FRotationTrack& SrcRot = RotationData[TrackIndex];
 			const int32 OffsetRot = AnimData.CompressedByteStream.Num();
 			const int32 NumKeysRot = SrcRot.RotKeys.Num();
@@ -498,7 +498,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 			if (NumKeysRot > 1)
 			{
 				// Calculate the min/max of the XYZ components of the quaternion
-				// 计算四元数 XYZ 分量的最小值/最大值
+    // 计算四元数 XYZ 分量的最小值/最大值
 				float MinX = 1.f;
 				float MinY = 1.f;
 				float MinZ = 1.f;
@@ -531,7 +531,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 				if (Ranges[2] == 0.f) { Ranges[2] = 1.f; }
 
 				// Write the mins and ranges if they'll be used on the other side
-				// 如果要在另一侧使用，请写下分钟和范围
+    // 如果要在另一侧使用，请写下分钟和范围
 				if (TargetRotationFormat == ACF_IntervalFixed32NoW)
 				{
 					UnalignedWriteToStream(AnimData.CompressedByteStream, Mins, sizeof(float) * 3);
@@ -539,7 +539,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 				}
 
 				// n elements of the compressed type.
-				// n 个压缩类型的元素。
+    // n 个压缩类型的元素。
 				for (int32 KeyIndex = 0; KeyIndex < SrcRot.RotKeys.Num(); ++KeyIndex)
 				{
 					const FQuat4f& Quat = SrcRot.RotKeys[KeyIndex];
@@ -547,15 +547,15 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 				}
 
 				// n elements of frame indices
-				// 帧索引的 n 个元素
+    // 帧索引的 n 个元素
 				if (IncludeKeyTable)
 				{
 					// Align to four bytes.
-					// 对齐到四个字节。
+     // 对齐到四个字节。
 					PadByteStream(AnimData.CompressedByteStream, 4, AnimationPadSentinel);
 
 					// write the key table
-					// 写入密钥表
+     // 写入密钥表
 					const int32 NumKeys = CompressibleAnimData.NumberOfKeys;
 					const int32 LastFrame= NumKeys-1;
 					const size_t FrameSize= NumKeys > 0xff ? sizeof(uint16) : sizeof(uint8);
@@ -568,7 +568,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 					for (int32 KeyIndex = 0; KeyIndex < NumKeysRot; ++KeyIndex)
 					{
 						// write the frame values for each key
-						// 写入每个键的帧值
+      // 写入每个键的帧值
 						float KeyTime = SrcRot.Times[KeyIndex];
 						float FrameTime = KeyTime * FrameRate;
 						int32 FrameIndex = FMath::Clamp(FMath::TruncToInt(FrameTime + 0.5f), 0, LastFrame);
@@ -576,7 +576,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 					}
 
 					// Align to four bytes. Padding with 0's to round out the key table
-					// 对齐到四个字节。用 0 填充以完善密钥表
+     // 对齐到四个字节。用 0 填充以完善密钥表
 					PadByteStream(AnimData.CompressedByteStream, 4, 0);
 
 					const int32 EndingOffset = AnimData.CompressedByteStream.Num();
@@ -584,10 +584,16 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 
 				}
 			}
+				// 			if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
+    // if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
 			else if (NumKeysRot == 1)
+				// 			if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
+    // if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
 			{
+				// 			if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
+    // if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
 				// For a rotation track of n=1 keys, the single key is packed as an FQuatFloat96NoW.
-				// 对于 n=1 个密钥的旋转轨迹，单个密钥被打包为 FQuatFloat96NoW。
+    // 对于 n=1 个密钥的旋转轨迹，单个密钥被打包为 FQuatFloat96NoW。
 				const FQuat4f& Quat = SrcRot.RotKeys[0];
 				const FQuatFloat96NoW QuatFloat96NoW(Quat);
 				UnalignedWriteToStream(AnimData.CompressedByteStream, &QuatFloat96NoW, sizeof(FQuatFloat96NoW));
@@ -599,11 +605,11 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 
 
 			// Align to four bytes.
-			// 对齐到四个字节。
+   // 对齐到四个字节。
 			PadByteStream(AnimData.CompressedByteStream, 4, AnimationPadSentinel);
 
 			// we also should do this only when scale exists. 
-			// 我们也应该只有在规模存在的情况下才这样做。
+   // 我们也应该只有在规模存在的情况下才这样做。
 			if (bHasScale)
 			{
 				const FScaleTrack& SrcScale = ScaleData[TrackIndex];
@@ -616,24 +622,48 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 				AnimData.CompressedScaleOffsets.SetOffsetData(TrackIndex, 1, NumKeysScale);
 
 				// Calculate the bounding box of the Scalelation keys
-				// 计算缩放键的边界框
+    // 计算缩放键的边界框
 				FBox3f ScaleBoundsBounds(SrcScale.ScaleKeys);
 
+ // if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
+ // if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
+ // if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
+ // if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
+ // if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
+ // if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
 				float ScaleMins[3] = { (float)ScaleBoundsBounds.Min.X, (float)ScaleBoundsBounds.Min.Y, (float)ScaleBoundsBounds.Min.Z };
+    // if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
+    // if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
+    // if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
+    // if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
+				// 			if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
+    // if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
+    // if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
+    // if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
 				float ScaleRanges[3] = { float(ScaleBoundsBounds.Max.X - ScaleBoundsBounds.Min.X), float(ScaleBoundsBounds.Max.Y - ScaleBoundsBounds.Min.Y), float(ScaleBoundsBounds.Max.Z - ScaleBoundsBounds.Min.Z) };
+				// 			if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
+    // if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
 				// @todo - this isn't good for scale 
-				// @todo - 这不利于规模化
-				// 			if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
-				// 			if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
-				// 			if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
-				// 			if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
+    // @todo - 这不利于规模化
 				// 			if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
+    // if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
+				// 			if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
+    // if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
+				// 			if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
+    // if ( ScaleRanges[0] == 0.f ) { ScaleRanges[0] = 1.f; }
+				// 			if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
+    // if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
+				// 			if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
+    // if ( ScaleRanges[1] == 0.f ) { ScaleRanges[1] = 1.f; }
 				// 			if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
+    // if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
+				// 			if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
+    // if ( ScaleRanges[2] == 0.f ) { ScaleRanges[2] = 1.f; }
 
 				if (NumKeysScale > 1)
 				{
 					// Write the mins and ranges if they'll be used on the other side
-					// 如果要在另一侧使用，请写下分钟和范围
+     // 如果要在另一侧使用，请写下分钟和范围
 					if (TargetScaleFormat == ACF_IntervalFixed32NoW)
 					{
 						UnalignedWriteToStream(AnimData.CompressedByteStream, ScaleMins, sizeof(float) * 3);
@@ -641,7 +671,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 					}
 
 					// Pack the positions into the stream
-					// 将位置打包到流中
+     // 将位置打包到流中
 					for (int32 KeyIndex = 0; KeyIndex < NumKeysScale; ++KeyIndex)
 					{
 						const FVector3f& Vec = SrcScale.ScaleKeys[KeyIndex];
@@ -651,11 +681,11 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 					if (IncludeKeyTable)
 					{
 						// Align to four bytes.
-						// 对齐到四个字节。
+      // 对齐到四个字节。
 						PadByteStream(AnimData.CompressedByteStream, 4, AnimationPadSentinel);
 
 						// write the key table
-						// 写入密钥表
+      // 写入密钥表
 						const int32 NumKeys = CompressibleAnimData.NumberOfKeys;
 						const int32 LastFrame = NumKeys-1;
 						const size_t FrameSize = NumKeys > 0xff ? sizeof(uint16) : sizeof(uint8);
@@ -668,7 +698,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 						for (int32 KeyIndex = 0; KeyIndex < NumKeysScale; ++KeyIndex)
 						{
 							// write the frame values for each key
-							// 写入每个键的帧值
+       // 写入每个键的帧值
 							float KeyTime = SrcScale.Times[KeyIndex];
 							float FrameTime = KeyTime * FrameRate;
 							int32 FrameIndex = FMath::Clamp(FMath::TruncToInt(FrameTime + 0.5f), 0, LastFrame);
@@ -676,7 +706,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 						}
 
 						// Align to four bytes. Padding with 0's to round out the key table
-						// 对齐到四个字节。用 0 填充以完善密钥表
+      // 对齐到四个字节。用 0 填充以完善密钥表
 						PadByteStream(AnimData.CompressedByteStream, 4, 0);
 
 						const int32 EndingOffset = AnimData.CompressedByteStream.Num();
@@ -686,7 +716,7 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 				else if (NumKeysScale == 1)
 				{
 					// A single Scalelation key gets written out a single uncompressed float[3].
-					// 单个缩放键被写出单个未压缩的浮点[3]。
+     // 单个缩放键被写出单个未压缩的浮点[3]。
 					UnalignedWriteToStream(AnimData.CompressedByteStream, &(SrcScale.ScaleKeys[0]), sizeof(FVector3f));
 				}
 				else
@@ -695,13 +725,13 @@ void UAnimCompress::BitwiseCompressAnimationTracks(
 				}
 
 				// Align to four bytes.
-				// 对齐到四个字节。
+    // 对齐到四个字节。
 				PadByteStream(AnimData.CompressedByteStream, 4, AnimationPadSentinel);
 			}
 		}
 
 		// Trim unused memory.
-		// 修剪未使用的内存。
+  // 修剪未使用的内存。
 		AnimData.CompressedByteStream.Shrink();
 	}
 }
@@ -720,21 +750,21 @@ bool UAnimCompress::Compress(const FCompressibleAnimData& CompressibleAnimData, 
 	const bool bSuccess = DoReduction(CompressibleAnimData, OutResult);
 
 	// Clear without free since we were on the stack
-	// [翻译失败: Clear without free since we were on the stack]
+ // 由于我们在堆栈上，所以没有 free 就清除
 	(void)OutResult.AnimData.Release();
 
 	if (bSuccess)
 	{
 		// Finished compressing, coalesce the buffers
-		// [翻译失败: Finished compressing, coalesce the buffers]
+  // 完成压缩，合并缓冲区
 		AnimDataMutable.BuildFinalBuffer(OutResult.CompressedByteStream);
 
 		// Build our read-only version from the mutable source
-		// [翻译失败: Build our read-only version from the mutable source]
+  // 从可变源构建我们的只读版本
 		TUniquePtr<FUECompressedAnimData> AnimData = MakeUnique<FUECompressedAnimData>(AnimDataMutable);
 
 		// The buffers will point to the mutable data, bind to the byte stream instead
-		// [翻译失败: The buffers will point to the mutable data, bind to the byte stream instead]
+  // 缓冲区将指向可变数据，而是绑定到字节流
 		AnimData->InitViewsFromBuffer(OutResult.CompressedByteStream);
 
 		OutResult.AnimData = MoveTemp(AnimData);
@@ -768,9 +798,9 @@ void UAnimCompress::DecompressPose(FAnimSequenceDecompressionContext& DecompCont
 	AnimData.RotationCodec->GetPoseRotations(OutAtoms, RotationPairs, DecompContext);
 
 	// Scale can be stripped when it is trivial and equal to the bind pose
-	// [翻译失败: Scale can be stripped when it is trivial and equal to the bind pose]
+ // 当比例很小并且等于绑定姿势时可以剥离
 	// When this is the case, we assume that the output pose has already been populated with the bind pose
-	// [翻译失败: When this is the case, we assume that the output pose has already been populated with the bind pose]
+ // 在这种情况下，我们假设输出姿势已经填充了绑定姿势
 	if (AnimData.CompressedScaleOffsets.IsValid())
 	{
 		AnimData.ScaleCodec->GetPoseScales(OutAtoms, ScalePairs, DecompContext);
@@ -780,35 +810,35 @@ void UAnimCompress::DecompressPose(FAnimSequenceDecompressionContext& DecompCont
 void UAnimCompress::DecompressBone(FAnimSequenceDecompressionContext& DecompContext, int32 TrackIndex, FTransform& OutAtom) const
 {
 	// Initialize to identity to set the scale and in case of a missing rotation or translation codec
-	// [翻译失败: Initialize to identity to set the scale and in case of a missing rotation or translation codec]
+ // 初始化身份以设置比例以及缺少旋转或平移编解码器的情况
 	OutAtom.SetIdentity();
 
 	const FUECompressedAnimData& AnimData = static_cast<const FUECompressedAnimData&>(DecompContext.CompressedAnimData);
 
 	// decompress the translation component using the proper method
-	// [翻译失败: decompress the translation component using the proper method]
+ // 使用正确的方法解压缩翻译组件
 	((AnimEncodingLegacyBase*)AnimData.TranslationCodec)->GetBoneAtomTranslation(OutAtom, DecompContext, TrackIndex);
 
 	// decompress the rotation component using the proper method
-	// [翻译失败: decompress the rotation component using the proper method]
+ // 使用正确的方法解压缩旋转分量
 	((AnimEncodingLegacyBase*)AnimData.RotationCodec)->GetBoneAtomRotation(OutAtom, DecompContext, TrackIndex);
 
 	// we assume scale keys can be empty, so only extract if we have valid keys
-	// [翻译失败: we assume scale keys can be empty, so only extract if we have valid keys]
+ // 我们假设比例键可以为空，因此仅在有有效键时才提取
 	if (AnimData.CompressedScaleOffsets.IsValid())
 	{
 		// decompress the rotation component using the proper method
-		// 使用正确的方法解压缩旋转分量
+  // 使用正确的方法解压缩旋转分量
 		((AnimEncodingLegacyBase*)AnimData.ScaleCodec)->GetBoneAtomScale(OutAtom, DecompContext, TrackIndex);
 	}
 	else
 	{
 		// If scale is stripped, we must output the bind pose value since it's been stripped
-		// 如果比例被剥离，我们必须输出绑定姿势值，因为它已被剥离
+  // 如果比例被剥离，我们必须输出绑定姿势值，因为它已被剥离
 		if (DecompContext.IsAdditiveAnimation())
 		{
 			// Additive animations use the additive identity
-			// 附加动画使用附加标识
+   // 附加动画使用附加标识
 			OutAtom.SetScale3D(FVector::ZeroVector);
 		}
 		else
@@ -838,24 +868,24 @@ void UAnimCompress::PopulateDDCKey(const UE::Anim::Compression::FAnimDDCKeyArgs&
 	Ar << TCF << RCF << SCF;
 
 	// Additive sequences use the additive identity as their bind pose, scale is never stripped
-	// 加法序列使用加法身份作为它们的绑定姿势，尺度永远不会被剥离
+ // 加法序列使用加法身份作为它们的绑定姿势，尺度永远不会被剥离
 	if (!KeyArgs.AnimSequence.IsValidAdditive())
 	{
 		// We have to include the bind pose in the DDC key.
-		// 我们必须将绑定姿势包含在 DDC 密钥中。
+  // 我们必须将绑定姿势包含在 DDC 密钥中。
 		// If a sequence is compressed with bind pose A, and we strip a few bones and later modify the bind pose,
-		// 如果使用绑定姿势 A 压缩序列，并且我们剥离一些骨骼，然后修改绑定姿势，
+  // 如果使用绑定姿势 A 压缩序列，并且我们剥离一些骨骼，然后修改绑定姿势，
 		// bind pose B might now contain values that would not be stripped in our sequence.
-		// 绑定姿势 B 现在可能包含不会在我们的序列中删除的值。
+  // 绑定姿势 B 现在可能包含不会在我们的序列中删除的值。
 		// To avoid data being stale, the DDC must reflect this.
-		// 为了避免数据过时，DDC 必须反映这一点。
+  // 为了避免数据过时，DDC 必须反映这一点。
 
 		const USkeleton* Skeleton = KeyArgs.AnimSequence.GetSkeleton();
 		const TArray<FTransform>& BindPose = Skeleton->GetRefLocalPoses();
 		for (const FTransform& BoneBindTransform : BindPose)
 		{
 			// We only strip scale
-			// 我们只剥离规模
+   // 我们只剥离规模
 
 			FVector Scale = BoneBindTransform.GetScale3D();
 			Ar << Scale;
@@ -871,7 +901,7 @@ void UAnimCompress::FilterTrivialPositionKeys(
 	check( Track.PosKeys.Num() == Track.Times.Num() );
 
 	// Only bother doing anything if we have some keys!
-	// 只有当我们有钥匙的时候才去做任何事情！
+ // 只有当我们有钥匙的时候才去做任何事情！
 	if( KeyCount > 1 )
 	{
 		const FVector3f& FirstPos = Track.PosKeys[0];
@@ -891,7 +921,7 @@ void UAnimCompress::FilterTrivialPositionKeys(
 		}
 
 		// If all keys are the same, remove all but first frame
-		// 如果所有关键帧都相同，则删除除第一帧之外的所有帧
+  // 如果所有关键帧都相同，则删除除第一帧之外的所有帧
 		if( bFramesIdentical )
 		{
 			Track.PosKeys.RemoveAt(1, Track.PosKeys.Num()- 1);
@@ -924,7 +954,7 @@ void UAnimCompress::FilterTrivialScaleKeys(
 	check( Track.ScaleKeys.Num() == Track.Times.Num() );
 
 	// Only bother doing anything if we have some keys!
-	// 只有当我们有钥匙的时候才去做任何事情！
+ // 只有当我们有钥匙的时候才去做任何事情！
 	if( KeyCount > 1 )
 	{
 		const FVector3f& FirstPos = Track.ScaleKeys[0];
@@ -944,7 +974,7 @@ void UAnimCompress::FilterTrivialScaleKeys(
 		}
 
 		// If all keys are the same, remove all but first frame
-		// 如果所有关键帧都相同，则删除除第一帧之外的所有帧
+  // 如果所有关键帧都相同，则删除除第一帧之外的所有帧
 		if( bFramesIdentical )
 		{
 			Track.ScaleKeys.RemoveAt(1, Track.ScaleKeys.Num()- 1);
@@ -976,7 +1006,7 @@ void UAnimCompress::FilterTrivialRotationKeys(
 	check( Track.RotKeys.Num() == Track.Times.Num() );
 
 	// Only bother doing anything if we have some keys!
-	// 只有当我们有钥匙的时候才去做任何事情！
+ // 只有当我们有钥匙的时候才去做任何事情！
 	if(KeyCount > 1)
 	{
 		const FQuat4f& FirstRot = Track.RotKeys[0];
@@ -1047,7 +1077,7 @@ void UAnimCompress::FilterIntermittentPositionKeys(
 	NewPosKeys.Empty(KeyCount);
 
 	// step through and retain the desired interval
-	// 逐步执行并保留所需的间隔
+ // 逐步执行并保留所需的间隔
 	for (int32 KeyIndex = StartIndex; KeyIndex < KeyCount; KeyIndex += Interval )
 	{
 		NewTimes.Add( Track.Times[KeyIndex] );
@@ -1070,7 +1100,7 @@ void UAnimCompress::FilterIntermittentPositionKeys(
 	const int32 NumPosTracks = PositionTracks.Num();
 
 	// copy intermittent position keys
-	// 复制间歇位置键
+ // 复制间歇位置键
 	for( int32 TrackIndex = 0; TrackIndex < NumPosTracks; ++TrackIndex )
 	{
 		FTranslationTrack& OldTrack	= PositionTracks[TrackIndex];
@@ -1097,7 +1127,7 @@ void UAnimCompress::FilterIntermittentRotationKeys(
 	NewRotKeys.Empty(KeyCount);
 
 	// step through and retain the desired interval
-	// 逐步执行并保留所需的间隔
+ // 逐步执行并保留所需的间隔
 	for (int32 KeyIndex = StartIndex; KeyIndex < KeyCount; KeyIndex += Interval )
 	{
 		NewTimes.Add( Track.Times[KeyIndex] );
@@ -1119,7 +1149,7 @@ void UAnimCompress::FilterIntermittentRotationKeys(
 	const int32 NumRotTracks = RotationTracks.Num();
 
 	// copy intermittent position keys
-	// 复制间歇位置键
+ // 复制间歇位置键
 	for( int32 TrackIndex = 0; TrackIndex < NumRotTracks; ++TrackIndex )
 	{
 		FRotationTrack& OldTrack = RotationTracks[TrackIndex];
@@ -1156,7 +1186,7 @@ void UAnimCompress::SeparateRawDataIntoTracks(
 	OutScaleData.SetNumZeroed( NumTracks );
 
 	// only compress scale if it has valid scale keys
-	// 仅当具有有效的比例键时才压缩比例
+ // 仅当具有有效的比例键时才压缩比例
 	bool bCompressScaleKeys = false;
 
 	for ( int32 TrackIndex = 0; TrackIndex < NumTracks; ++TrackIndex )
@@ -1172,22 +1202,22 @@ void UAnimCompress::SeparateRawDataIntoTracks(
 		bCompressScaleKeys |= bHasScale;
 
 		// Do nothing if the data for this track is empty.
-		// 如果该轨道的数据为空，则不执行任何操作。
+  // 如果该轨道的数据为空，则不执行任何操作。
 		if( PrevNumPosKeys == 0 || PrevNumRotKeys == 0 )
 		{
 			continue;
 		}
 
 		// Copy over position keys.
-		// 复制位置键。
+  // 复制位置键。
 		TranslationTrack.PosKeys = RawTrack.PosKeys;
 
 		// Copy over rotation keys.
-		// 复制旋转键。
+  // 复制旋转键。
 		RotationTrack.RotKeys = RawTrack.RotKeys;
 
 		// Set times for the translation track.
-		// 设置翻译轨道的时间。
+  // 设置翻译轨道的时间。
 		const int32 NumPosKeys = TranslationTrack.PosKeys.Num();
 		TranslationTrack.Times.SetNumUninitialized(NumPosKeys);
 		if ( NumPosKeys > 1 )
@@ -1204,13 +1234,13 @@ void UAnimCompress::SeparateRawDataIntoTracks(
 		}
 
 		// Set times for the rotation track.
-		// 设置旋转轨道的时间。
+  // 设置旋转轨道的时间。
 		const int32 NumRotKeys = RotationTrack.RotKeys.Num();
 		RotationTrack.Times.SetNumUninitialized(NumRotKeys);
 		if ( NumRotKeys > 1 )
 		{
 			// If # of keys match between translation and rotation, re-use the timing values
-			// 如果平移和旋转之间的键数匹配，则重新使用计时值
+   // 如果平移和旋转之间的键数匹配，则重新使用计时值
 			if (NumRotKeys == NumPosKeys)
 			{
 				RotationTrack.Times = TranslationTrack.Times;
@@ -1233,16 +1263,16 @@ void UAnimCompress::SeparateRawDataIntoTracks(
 		if (bHasScale)
 		{
 			// Copy over scalekeys.
-			// 复制比例键。
+   // 复制比例键。
 			ScaleTrack.ScaleKeys = RawTrack.ScaleKeys;
 			// Set times for the rotation track.
-			// 设置旋转轨道的时间。
+   // 设置旋转轨道的时间。
 			const int32 NumScaleKeys = ScaleTrack.ScaleKeys.Num();
 			ScaleTrack.Times.SetNumUninitialized(NumScaleKeys);
 			if ( NumScaleKeys > 1 )
 			{
 				// If # of keys match between translation and scale, re-use the timing values
-				// 如果平移和缩放之间的键数匹配，则重新使用计时值
+    // 如果平移和缩放之间的键数匹配，则重新使用计时值
 				if (NumScaleKeys == NumPosKeys)
 				{
 					ScaleTrack.Times = TranslationTrack.Times;
@@ -1263,7 +1293,7 @@ void UAnimCompress::SeparateRawDataIntoTracks(
 		}
 
 		// Trim unused memory.
-		// 修剪未使用的内存。
+  // 修剪未使用的内存。
 		TranslationTrack.PosKeys.Shrink();
 		TranslationTrack.Times.Shrink();
 		RotationTrack.RotKeys.Shrink();
@@ -1273,9 +1303,9 @@ void UAnimCompress::SeparateRawDataIntoTracks(
 	}
 
 	// if nothing to compress, empty the ScaleData
-	// 如果没有要压缩的内容，则清空 ScaleData
+ // 如果没有要压缩的内容，则清空 ScaleData
 	// that way we don't have to worry about compressing scale data. 
-	// 这样我们就不必担心压缩比例数据。
+ // 这样我们就不必担心压缩比例数据。
 	if (!bCompressScaleKeys)
 	{
 		OutScaleData.Empty();

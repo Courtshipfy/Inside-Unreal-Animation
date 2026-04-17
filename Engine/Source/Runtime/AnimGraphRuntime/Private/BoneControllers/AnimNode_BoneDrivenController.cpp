@@ -13,6 +13,16 @@
 /////////////////////////////////////////////////////
 // FAnimNode_BoneDrivenController
 // FAnimNode_BoneDrivenController
+// FAnimNode_BoneDrivenController
+// FAnimNode_BoneDrivenController
+// FAnimNode_BoneDrivenController
+// FAnimNode_BoneDrivenController
+// FAnimNode_BoneDrivenController
+// FAnimNode_BoneDrivenController
+// FAnimNode_BoneDrivenController
+// FAnimNode_BoneDrivenController
+// FAnimNode_BoneDrivenController
+// FAnimNode_BoneDrivenController
 
 FAnimNode_BoneDrivenController::FAnimNode_BoneDrivenController()
 	: DrivingCurve(nullptr)
@@ -68,14 +78,14 @@ void FAnimNode_BoneDrivenController::EvaluateSkeletalControl_AnyThread(FComponen
 	check(OutBoneTransforms.Num() == 0);
 
 	// Early out if we're not driving from or to anything
-	// 如果我们不开车去任何地方，就早点出发
+ // 如果我们不开车去任何地方，就早点出发
 	if (SourceComponent == EComponentType::None || DestinationMode != EDrivenDestinationMode::Bone)
 	{
 		return;
 	}
 
 	// Get the Local space transform and the ref pose transform to see how the transform for the source bone has changed
-	// 获取局部空间变换和参考姿势变换以查看源骨骼的变换如何变化
+ // 获取局部空间变换和参考姿势变换以查看源骨骼的变换如何变化
 	const FBoneContainer& BoneContainer = Output.Pose.GetPose().GetBoneContainer();
 	const FTransform& SourceRefPoseBoneTransform = BoneContainer.GetRefPoseArray()[SourceBone.BoneIndex];
 	const FTransform SourceCurrentBoneTransform = Output.Pose.GetLocalSpaceTransform(SourceBone.GetCompactPoseIndex(BoneContainer));
@@ -84,7 +94,7 @@ void FAnimNode_BoneDrivenController::EvaluateSkeletalControl_AnyThread(FComponen
 	
 	
 	// Calculate a new local-space bone position by adding or replacing target components in the current local space position
-	// 通过在当前局部空间位置添加或替换目标组件来计算新的局部空间骨骼位置
+ // 通过在当前局部空间位置添加或替换目标组件来计算新的局部空间骨骼位置
 	const FCompactPoseBoneIndex TargetBoneIndex = TargetBone.GetCompactPoseIndex(BoneContainer);
 
 	const FTransform OriginalLocalTM = Output.Pose.GetLocalSpaceTransform(TargetBoneIndex);
@@ -95,7 +105,7 @@ void FAnimNode_BoneDrivenController::EvaluateSkeletalControl_AnyThread(FComponen
 	if (ModificationMode == EDrivenBoneModificationMode::AddToInput)
 	{
 		// Add the mapped value to the target components
-		// 将映射值添加到目标组件
+  // 将映射值添加到目标组件
 		if (bAffectTargetTranslationX) { NewTrans.X += FinalDriverValue; }
 		if (bAffectTargetTranslationY) { NewTrans.Y += FinalDriverValue; }
 		if (bAffectTargetTranslationZ) { NewTrans.Z += FinalDriverValue; }
@@ -116,7 +126,7 @@ void FAnimNode_BoneDrivenController::EvaluateSkeletalControl_AnyThread(FComponen
 	else if (ModificationMode == EDrivenBoneModificationMode::ReplaceComponent)
 	{
 		// Replace the target components with the mapped value
-		// 将目标组件替换为映射值
+  // 将目标组件替换为映射值
 		if (bAffectTargetTranslationX) { NewTrans.X = FinalDriverValue; }
 		if (bAffectTargetTranslationY) { NewTrans.Y = FinalDriverValue; }
 		if (bAffectTargetTranslationZ) { NewTrans.Z = FinalDriverValue; }
@@ -139,7 +149,7 @@ void FAnimNode_BoneDrivenController::EvaluateSkeletalControl_AnyThread(FComponen
 		const FTransform RefPoseTransform = Output.Pose.GetPose().GetRefPose(TargetBoneIndex);
 
 		// Add the mapped value to the ref pose components
-		// 将映射值添加到参考姿势组件
+  // 将映射值添加到参考姿势组件
 		if (bAffectTargetTranslationX) { NewTrans.X = RefPoseTransform.GetTranslation().X + FinalDriverValue; }
 		if (bAffectTargetTranslationY) { NewTrans.Y = RefPoseTransform.GetTranslation().Y + FinalDriverValue; }
 		if (bAffectTargetTranslationZ) { NewTrans.Z = RefPoseTransform.GetTranslation().Z + FinalDriverValue; }
@@ -149,7 +159,7 @@ void FAnimNode_BoneDrivenController::EvaluateSkeletalControl_AnyThread(FComponen
 			const FVector RefPoseRotEuler(RefPoseTransform.GetRotation().Euler());
 
 			// Replace any components that are being driven with their ref pose value first and create a delta rotation as well
-			// 首先用其参考位姿值替换正在驱动的任何组件，并创建增量旋转
+   // 首先用其参考位姿值替换正在驱动的任何组件，并创建增量旋转
 			FVector SourceRotationEuler(NewRot.Euler());
 			FVector NewRotDeltaEuler(ForceInitToZero);
 			if (bAffectTargetRotationX) { SourceRotationEuler.X = RefPoseRotEuler.X; NewRotDeltaEuler.X = FinalDriverValue; }
@@ -157,7 +167,7 @@ void FAnimNode_BoneDrivenController::EvaluateSkeletalControl_AnyThread(FComponen
 			if (bAffectTargetRotationZ) { SourceRotationEuler.Z = RefPoseRotEuler.Z; NewRotDeltaEuler.Z = FinalDriverValue; }
 
 			// Combine the (modified) source and the delta rotation
-			// 组合（修改后的）源和增量旋转
+   // 组合（修改后的）源和增量旋转
 			NewRot = FQuat::MakeFromEuler(SourceRotationEuler) * FQuat::MakeFromEuler(NewRotDeltaEuler);
 		}
 
@@ -173,7 +183,7 @@ void FAnimNode_BoneDrivenController::EvaluateSkeletalControl_AnyThread(FComponen
 	const FTransform ModifiedLocalTM(NewRot, NewTrans, NewScale);
 
 	// If we have a parent, concatenate the transform, otherwise just take the new transform
-	// 如果我们有父级，则连接变换，否则只采用新的变换
+ // 如果我们有父级，则连接变换，否则只采用新的变换
 	const FCompactPoseBoneIndex ParentIndex = Output.Pose.GetPose().GetParentBoneIndex(TargetBoneIndex);
 
 	if (ParentIndex != INDEX_NONE)
@@ -204,14 +214,14 @@ void FAnimNode_BoneDrivenController::EvaluateComponentSpaceInternal(FComponentSp
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(EvaluateComponentSpaceInternal)
 	// Early out if we're not driving from or to anything
-	// 如果我们不开车去任何地方，就早点出发
+ // 如果我们不开车去任何地方，就早点出发
 	if (SourceComponent == EComponentType::None || DestinationMode == EDrivenDestinationMode::Bone)
 	{
 		return;
 	}
 
 	// Get the Local space transform and the ref pose transform to see how the transform for the source bone has changed
-	// 获取局部空间变换和参考姿势变换以查看源骨骼的变换如何变化
+ // 获取局部空间变换和参考姿势变换以查看源骨骼的变换如何变化
 	const FBoneContainer& BoneContainer = Context.Pose.GetPose().GetBoneContainer();
 	const FTransform& SourceRefPoseBoneTransform = BoneContainer.GetRefPoseArray()[SourceBone.BoneIndex];
 	const FTransform SourceCurrentBoneTransform = Context.Pose.GetLocalSpaceTransform(SourceBone.GetCompactPoseIndex(BoneContainer));
@@ -221,7 +231,7 @@ void FAnimNode_BoneDrivenController::EvaluateComponentSpaceInternal(FComponentSp
 		const double FinalDriverValue = ExtractSourceValue(SourceCurrentBoneTransform, SourceRefPoseBoneTransform);
 		
 		//	Morph target and Material parameter curves
-		//	变形目标和材质参数曲线
+  // 变形目标和材质参数曲线
 		Context.Curve.Set(ParameterName, static_cast<float>(FinalDriverValue));
 	}
 }
@@ -229,7 +239,7 @@ void FAnimNode_BoneDrivenController::EvaluateComponentSpaceInternal(FComponentSp
 const double FAnimNode_BoneDrivenController::ExtractSourceValue(const FTransform &InCurrentBoneTransform, const FTransform &InRefPoseBoneTransform)
 {
 	// Resolve source value
-	// 解析源值
+ // 解析源值
 	double SourceValue = 0.0;
 	if (SourceComponent < EComponentType::RotationX)
 	{
@@ -255,18 +265,18 @@ const double FAnimNode_BoneDrivenController::ExtractSourceValue(const FTransform
 	}
 
 	// Determine the resulting value
-	// 确定结果值
+ // 确定结果值
 	double FinalDriverValue = SourceValue;
 	if (DrivingCurve != nullptr)
 	{
 		// Remap thru the curve if set
-		// 如果设置则通过曲线重新映射
+  // 如果设置则通过曲线重新映射
 		FinalDriverValue = DrivingCurve->GetFloatValue(static_cast<float>(FinalDriverValue));
 	}
 	else
 	{
 		// Apply the fixed function remapping/clamping
-		// 应用固定功能重映射/钳位
+  // 应用固定功能重映射/钳位
 		if (bUseRange)
 		{
 			const double ClampedAlpha = FMath::Clamp(FMath::GetRangePct(RangeMin, RangeMax, FinalDriverValue), 0.0, 1.0);

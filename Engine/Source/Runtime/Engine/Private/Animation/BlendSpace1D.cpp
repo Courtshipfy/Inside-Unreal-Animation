@@ -37,7 +37,7 @@ void UBlendSpace1D::SnapSamplesToClosestGridPoint()
 	ClosestSampleToGridPoint.Init(INDEX_NONE, NumGridPoints);
 
 	// Find closest sample to grid point
-	// [翻译失败: Find closest sample to grid point]
+ // 找到距离网格点最近的样本
 	for (int32 PointIndex = 0; PointIndex < NumGridPoints; ++PointIndex)
 	{
 		const float GridPoint = GetGridPosition(PointIndex)[0];
@@ -59,13 +59,13 @@ void UBlendSpace1D::SnapSamplesToClosestGridPoint()
 	}
 
 	// Find closest grid point to sample
-	// 找到离样本最近的网格点
+ // 找到离样本最近的网格点
 	for (int32 SampleIndex = 0; SampleIndex < SampleData.Num(); ++SampleIndex)
 	{
 		FBlendSample& BlendSample = SampleData[SampleIndex];
 
 		// Find closest grid point
-		// [翻译失败: Find closest grid point]
+  // 找到最近的网格点
 		float SmallestDistance = FLT_MAX;
 		int32 Index = INDEX_NONE;
 		for (int32 PointIndex = 0; PointIndex < NumGridPoints; ++PointIndex)
@@ -79,7 +79,7 @@ void UBlendSpace1D::SnapSamplesToClosestGridPoint()
 		}
 
 		// Only move the sample if it is also closest to the grid point
-		// [翻译失败: Only move the sample if it is also closest to the grid point]
+  // 仅当样本也最接近网格点时才移动样本
 		if (Index != INDEX_NONE && ClosestSampleToGridPoint[Index] == SampleIndex)
 		{
 			BlendSample.SampleValue[0] = GetGridPosition(Index)[0];

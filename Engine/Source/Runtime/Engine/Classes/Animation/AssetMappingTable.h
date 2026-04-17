@@ -18,15 +18,21 @@ class UAnimationAsset;
 
  /** This defines one asset mapping */
  /** 这定义了一个资产映射 */
+ /** 这定义了一个资产映射 */
+ /** 这定义了一个资产映射 */
 USTRUCT()
 struct FAssetMapping
 {
 	GENERATED_USTRUCT_BODY()
+	/** 源资产 **/
 
+	/** 源资产 **/
 	/** source asset **/
+	/** 源资产 **/
 	/** 源资产 **/
 	UPROPERTY(EditAnywhere, Category = "FAssetMapping")
 	TObjectPtr<class UAnimationAsset>			SourceAsset;
+	/** 源资产 **/
 
 	/** source asset **/
 	/** 源资产 **/
@@ -60,14 +66,18 @@ private:
  *		- support to share different animations
  */
 UCLASS(hidecategories=Object, MinimalAPI)
+	/** 源和目标之间资产的映射 **/
 class UAssetMappingTable : public UObject
 {
 	GENERATED_UCLASS_BODY()
+	/** 源和目标之间资产的映射 **/
 
+	/** 查找映射资产 */
 private:
 	/** Mappin of asset between source and target **/
 	/** 源和目标之间资产的映射 **/
 	UPROPERTY(VisibleAnywhere, Category = AssetMappingTable, EditFixedSize)
+	/** 查找映射资产 */
 	TArray<FAssetMapping> MappedAssets;
 
 public:

@@ -14,14 +14,20 @@
 
 /* A collection of distance metrics between two values of the same type */
 /* 相同类型的两个值之间的距离度量的集合 */
+/* 相同类型的两个值之间的距离度量的集合 */
+/* 相同类型的两个值之间的距离度量的集合 */
 namespace RBFDistanceMetric
+	/* 返回两个坐标向量之间的欧几里得 (L2) 距离。 */
 {
+	/* 返回两个坐标向量之间的欧几里得 (L2) 距离。 */
 	/* Returns the Euclidean (L2) distance between two coordinate vectors. */
 	/* 返回两个坐标向量之间的欧几里得 (L2) 距离。 */
 	static inline double Euclidean(const FVector& A, const FVector& B)
 	{
+	/* 返回曼哈顿 (L1) 或两个坐标向量之间的出租车距离。 */
 		return FVector::Distance(A, B);
 	}
+	/* 返回曼哈顿 (L1) 或两个坐标向量之间的出租车距离。 */
 
 	/* Returns the Manhattan (L1), or Taxi-cab distance between two coordinate vectors. */
 	/* 返回曼哈顿 (L1) 或两个坐标向量之间的出租车距离。 */
@@ -95,21 +101,27 @@ namespace RBFDistanceMetric
 
 
 /* A collection of smoothing kernels, all of which map the input of zero to 1.0 and 
+	/* 简单的线性衰减，当 Value 的范数超过 Sigma 时钳位为零 */
    all values on either side as monotonically decreasing as they move away from zero.
    The width of the falloff can be specified using the Sigma parameter.
    */
+	/* 简单的线性衰减，当 Value 的范数超过 Sigma 时钳位为零 */
 namespace RBFKernel
 {
+	/* 高斯衰减 */
 	/* A simple linear falloff, clamping at zero out when the norm of Value exceeds Sigma */
 	/* 简单的线性衰减，当 Value 的范数超过 Sigma 时钳位为零 */
 	static inline float Linear(float Value, float Sigma)
 	{
+	/* 高斯衰减 */
 		return (Sigma - FMath::Clamp(Value, 0.0f, Sigma)) / Sigma;
+	/* 呈指数下降并出现尖锐峰值 */
 	}
 
 	/* A gaussian falloff */
 	/* 高斯衰减 */
 	static inline float Gaussian(float Value, float Sigma)
+	/* 呈指数下降并出现尖锐峰值 */
 	{
 		return FMath::Exp(-Value * FMath::Square(1.0f / Sigma));
 	}
@@ -149,7 +161,7 @@ protected:
 	ANIMGRAPHRUNTIME_API bool SetUpperKernel(const TArrayView<float>& UpperKernel, int32 Size);
 
 	// A square matrix of the solved coefficients.
-	// 已求解系数的方阵。
+ // 已求解系数的方阵。
 public:
 	TArray<float> Coeffs;
 	bool bIsValid = false;
@@ -229,13 +241,13 @@ public:
 			if (bNormalize)
 			{
 				// Clip here behaves differently than it does when no normalization
-				// 此处剪辑的行为与未标准化时不同
+    // 此处剪辑的行为与未标准化时不同
 				// is taking place. Instead of clipping blindly, we rescale the values based
-				// 正在发生。我们不是盲目地裁剪，而是根据
+    // 正在发生。我们不是盲目地裁剪，而是根据
 				// on the minimum value and then use the normalization to bring the values
-				// 求最小值，然后使用归一化得到值
+    // 求最小值，然后使用归一化得到值
 				// within the 0-1 range.
-				// 在0-1范围内。
+    // 在0-1范围内。
 				if (bClip)
 				{
 					float MaxNegative = 0.0f;
@@ -258,18 +270,18 @@ public:
 				for (int32 i = 0; i < NumNodes; i++)
 				{
 					// Clamp to clear up any precision issues. This may make the weights not
-					// 夹紧以解决任何精度问题。这可能会使权重不
+     // 夹紧以解决任何精度问题。这可能会使权重不
 					// quite add up to 1.0, but that should be sufficient for our needs.
-					// 相当加起来为 1.0，但这应该足以满足我们的需求。
+     // 相当加起来为 1.0，但这应该足以满足我们的需求。
 					OutWeights[i] = FMath::Clamp(OutWeights[i] / TotalWeight, 0.0f, 1.0f);
 				}
 			}
 			else if (bClip)
 			{
 				// This can easily happen when the value being interpolated is outside of the
-				// 当插值的值超出范围时，很容易发生这种情况
+    // 当插值的值超出范围时，很容易发生这种情况
 				// convex hull bounded by the nodes, resulting in an extrapolation.
-				// 由节点界定的凸包，从而产生外推。
+    // 由节点界定的凸包，从而产生外推。
 				for (int32 i = 0; i < NumNodes; i++)
 				{
 					OutWeights[i] = FMath::Clamp(OutWeights[i], 0.0f, 1.0f);
@@ -288,13 +300,13 @@ public:
 	}
 
 	// Returns a list of integer pairs indicating which distinct pair of nodes have the same
-	// 返回一个整数对列表，指示哪对不同的节点具有相同的值
+ // 返回一个整数对列表，指示哪对不同的节点具有相同的值
 	// weight as a pair of the same node. These result in an ill-formed coefficient matrix
-	// 权重作为一对相同的节点。这会导致系数矩阵格式错误
+ // 权重作为一对相同的节点。这会导致系数矩阵格式错误
 	// which kills the interpolation. The user can then either simply remove one of the pairs
-	// 这会杀死插值。然后，用户可以简单地删除其中一对
+ // 这会杀死插值。然后，用户可以简单地删除其中一对
 	// and retry, or warn the user that they have an invalid setup.
-	// 并重试，或警告用户他们的设置无效。
+ // 并重试，或警告用户他们的设置无效。
 	static bool GetIdenticalNodePairs(
 		const TArrayView<T>& InNodes,
 		WeightFuncT InWeightFunc,
@@ -308,11 +320,11 @@ public:
 		}
 
 		// One of the assumptions we make, is that the smoothing function is symmetric, 
-		// 我们做出的假设之一是平滑函数是对称的，
+  // 我们做出的假设之一是平滑函数是对称的，
 		// hence we can use the weight between the same node as the functional equivalent
-		// 因此我们可以使用同一节点之间的权重作为功能等价物
+  // 因此我们可以使用同一节点之间的权重作为功能等价物
 		// of the identity weight between any two nodes.
-		// 任意两个节点之间的身份权重。
+  // 任意两个节点之间的身份权重。
 		float IdentityWeight = InWeightFunc(InNodes[0], InNodes[0]);
 
 		OutInvalidPairs.Empty();
@@ -323,9 +335,9 @@ public:
 				float Weight = InWeightFunc(InNodes[i], InNodes[j]);
 
 				// Don't use the default ULP, but be a little more cautious, since a matrix
-				// 不要使用默认的 ULP，但要更加谨慎，因为矩阵
+    // 不要使用默认的 ULP，但要更加谨慎，因为矩阵
 				// inversion can lose a chunk of float precision.
-				// 反转可能会丢失大量浮点精度。
+    // 反转可能会丢失大量浮点精度。
 				if (FMath::IsNearlyEqualByULP(Weight, IdentityWeight, 32))
 				{
 					OutInvalidPairs.Add(MakeTuple(i, j));
@@ -339,9 +351,9 @@ private:
 	void MakeUpperKernel()
 	{
 		// If there are less than two nodes, nothing to do, since the interpolated value
-		// 如果节点少于两个，则无需执行任何操作，因为插值
+  // 如果节点少于两个，则无需执行任何操作，因为插值
 		// will be the same across the entire space. This is handled in Interpolate().
-		// 整个空间都是一样的。 This is handled in Interpolate().
+  // 整个空间都是一样的。 This is handled in Interpolate().
 		int32 NumNodes = Nodes.Num();
 		if (NumNodes < 2)
 		{
@@ -350,18 +362,18 @@ private:
 		}
 
 		// Compute the upper diagonal of the target kernel for solving the weight coefficients.
-		// 计算目标核的上对角线以求解权重系数。
+  // 计算目标核的上对角线以求解权重系数。
 		TArray<float, TMemStackAllocator<> > UpperKernel;
 		UpperKernel.Reserve(NumNodes * (NumNodes - 1) / 2);
 
 		// We need to include the diagonal itself, since we can't guarantee that the weight
-		// 我们需要包括对角线本身，因为我们不能保证权重
+  // 我们需要包括对角线本身，因为我们不能保证权重
 		// function returns 1.0 for nodes of the same coordinates.
-		// 对于相同坐标的节点，函数返回 1.0。
+  // 对于相同坐标的节点，函数返回 1.0。
 		for (int32 i = 0; i < NumNodes; i++)
 		{
 			// PVS thinks the use of 'j = i' might be an bug. It is not.
-			// PVS 认为使用“j = i”可能是一个错误。它不是。
+   // PVS 认为使用“j = i”可能是一个错误。它不是。
 			for (int32 j = i; j < NumNodes; j++) //-V791 
 			{
 				UpperKernel.Add(WeightFunc(Nodes[i], Nodes[j]));

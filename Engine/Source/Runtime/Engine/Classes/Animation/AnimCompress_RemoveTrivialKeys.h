@@ -30,13 +30,13 @@ class UAnimCompress_RemoveTrivialKeys : public UAnimCompress
 
 protected:
 	//~ Begin UAnimCompress Interface
-	//[翻译失败: ~ Begin UAnimCompress Interface]
+ // ~ 开始 UAnimCompress 界面
 #if WITH_EDITOR
 	virtual bool DoReduction(const FCompressibleAnimData& CompressibleAnimData, FCompressibleAnimDataResult& OutResult) override;
 	virtual void PopulateDDCKey(const UE::Anim::Compression::FAnimDDCKeyArgs& KeyArgs, FArchive& Ar) override;
 #endif // WITH_EDITOR
 	//~ Begin UAnimCompress Interface
-	//[翻译失败: ~ Begin UAnimCompress Interface]
+ // ~ 开始 UAnimCompress 界面
 };
 
 

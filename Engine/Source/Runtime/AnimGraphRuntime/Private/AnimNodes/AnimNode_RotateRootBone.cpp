@@ -10,6 +10,16 @@
 /////////////////////////////////////////////////////
 // FAnimNode_RotateRootBone
 // FAnimNode_RotateRootBone
+// FAnimNode_RotateRootBone
+// FAnimNode_RotateRootBone
+// FAnimNode_RotateRootBone
+// FAnimNode_RotateRootBone
+// FAnimNode_RotateRootBone
+// FAnimNode_RotateRootBone
+// FAnimNode_RotateRootBone
+// FAnimNode_RotateRootBone
+// FAnimNode_RotateRootBone
+// FAnimNode_RotateRootBone
 
 void FAnimNode_RotateRootBone::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -47,7 +57,7 @@ void FAnimNode_RotateRootBone::Evaluate_AnyThread(FPoseContext& Output)
 	ANIM_MT_SCOPE_CYCLE_COUNTER_VERBOSE(RotateRootBone, !IsInGameThread());
 
 	// Evaluate the input
-	// 评估输入
+ // 评估输入
 	BasePose.Evaluate(Output);
 
 	checkSlow(!FMath::IsNaN(ActualYaw) && FMath::IsFinite(ActualYaw));
@@ -56,17 +66,17 @@ void FAnimNode_RotateRootBone::Evaluate_AnyThread(FPoseContext& Output)
 	if (!FMath::IsNearlyZero(ActualPitch, KINDA_SMALL_NUMBER) || !FMath::IsNearlyZero(ActualYaw, KINDA_SMALL_NUMBER))
 	{
 		// Build our desired rotation
-		// 建立我们想要的轮换
+  // 建立我们想要的轮换
 		const FRotator DeltaRotation(ActualPitch, ActualYaw, 0.f);
 		const FQuat DeltaQuat(DeltaRotation);
 		const FQuat MeshToComponentQuat(MeshToComponent);
 
 		// Convert our rotation from Component Space to Mesh Space.
-		// 将我们的旋转从组件空间转换为网格空间。
+  // 将我们的旋转从组件空间转换为网格空间。
 		const FQuat MeshSpaceDeltaQuat = MeshToComponentQuat.Inverse() * DeltaQuat * MeshToComponentQuat;
 
 		// Apply rotation to root bone.
-		// 对根骨骼应用旋转。
+  // 对根骨骼应用旋转。
 		FCompactPoseBoneIndex RootBoneIndex(0);
 		Output.Pose[RootBoneIndex].SetRotation(Output.Pose[RootBoneIndex].GetRotation() * MeshSpaceDeltaQuat);
 		Output.Pose[RootBoneIndex].NormalizeRotation();
@@ -74,7 +84,7 @@ void FAnimNode_RotateRootBone::Evaluate_AnyThread(FPoseContext& Output)
 		if (bRotateRootMotionAttribute)
 		{
 			// Rotate our root motion attribute by the same rotation we apply to the root
-			// 通过我们应用于根的相同旋转来旋转我们的根运动属性
+   // 通过我们应用于根的相同旋转来旋转我们的根运动属性
 			const UE::Anim::IAnimRootMotionProvider* RootMotionProvider = UE::Anim::IAnimRootMotionProvider::Get();
 			if (RootMotionProvider && RootMotionProvider->HasRootMotion(Output.CustomAttributes))
 			{

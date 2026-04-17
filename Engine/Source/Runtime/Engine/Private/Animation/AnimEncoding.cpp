@@ -11,6 +11,8 @@
 #include "AnimEncoding_VariableKeyLerp.h"
 #include "AnimEncoding_PerTrackCompression.h"
 
+/** 每个 CompresedTranslationData 轨道的 ByteStream 都将以该大小的块进行字节交换。 */
+/** 每个 CompresedTranslationData 轨道的 ByteStream 都将以该大小的块进行字节交换。 */
 /** Each CompresedTranslationData track's ByteStream will be byte swapped in chunks of this size. */
 /** 每个 CompresedTranslationData 轨道的 ByteStream 都将以该大小的块进行字节交换。 */
 const int32 CompressedTranslationStrides[ACF_MAX] =
@@ -23,6 +25,8 @@ const int32 CompressedTranslationStrides[ACF_MAX] =
 	sizeof(float),						// ACF_Float32NoW			(Illegal value for translation)
 	0									// ACF_Identity
 };
+/** 每个元素的交换块数。 */
+/** 每个元素的交换块数。 */
 
 /** Number of swapped chunks per element. */
 /** 每个元素的交换块数。 */
@@ -34,7 +38,9 @@ const int32 CompressedTranslationNum[ACF_MAX] =
 	1,	// ACF_IntervalFixed32NoW	(compressed to 11-11-10 per-component interval fixed point)
 	3,	// ACF_Fixed32NoW			(Illegal value for translation)
 	3,	// ACF_Float32NoW			(Illegal value for translation)
+/** 每个 CompresedRotationData 轨道的 ByteStream 都将以该大小的块进行字节交换。 */
 	0	// ACF_Identity
+/** 每个 CompresedRotationData 轨道的 ByteStream 都将以该大小的块进行字节交换。 */
 };
 
 /** Each CompresedRotationData track's ByteStream will be byte swapped in chunks of this size. */
@@ -45,8 +51,10 @@ const int32 CompressedRotationStrides[ACF_MAX] =
 	sizeof(float),						// ACF_Float96NoW			(FQuats with one component dropped and the remaining three uncompressed at 32bit floating point each
 	sizeof(uint16),						// ACF_Fixed48NoW			(FQuats with one component dropped and the remaining three compressed to 16-16-16 fixed point.
 	sizeof(FQuatIntervalFixed32NoW),	// ACF_IntervalFixed32NoW	(FQuats with one component dropped and the remaining three compressed to 11-11-10 per-component interval fixed point.
+/** 每个元素的交换块数。 */
 	sizeof(FQuatFixed32NoW),			// ACF_Fixed32NoW			(FQuats with one component dropped and the remaining three compressed to 11-11-10 fixed point.
 	sizeof(FQuatFloat32NoW),			// ACF_Float32NoW			(FQuats with one component dropped and the remaining three compressed to 11-11-10 floating point.
+/** 每个元素的交换块数。 */
 	0	// ACF_Identity
 };
 
@@ -71,9 +79,11 @@ const uint8 PerTrackNumComponentTable[ACF_MAX * 8] =
 {
 	4,4,4,4,4,4,4,4,	// ACF_None
 	3,1,1,2,1,2,2,3,	// ACF_Float96NoW (0 is special, as uncompressed rotation gets 'mis'encoded with 0 instead of 7, so it's treated as a 3; a genuine 0 would use ACF_Identity)
+/** 每个 CompresedScaleData 轨道的 ByteStream 将以该大小的块进行字节交换。 */
 	3,1,1,2,1,2,2,3,	// ACF_Fixed48NoW (ditto)
 	6,2,2,4,2,4,4,6,	// ACF_IntervalFixed32NoW (special, indicates number of interval pairs stored in the fixed track)
 	1,1,1,1,1,1,1,1,	// ACF_Fixed32NoW
+/** 每个 CompresedScaleData 轨道的 ByteStream 将以该大小的块进行字节交换。 */
 	1,1,1,1,1,1,1,1,	// ACF_Float32NoW
 	0,0,0,0,0,0,0,0		// ACF_Identity
 };
@@ -82,10 +92,12 @@ const uint8 PerTrackNumComponentTable[ACF_MAX * 8] =
 /** 每个 CompresedScaleData 轨道的 ByteStream 将以该大小的块进行字节交换。 */
 const int32 CompressedScaleStrides[ACF_MAX] =
 {
+/** 每个元素的交换块数。 */
 	sizeof(float),						// ACF_None					(float X, float Y, float Z)
 	sizeof(float),						// ACF_Float96NoW			(float X, float Y, float Z)
 	sizeof(float),						// ACF_Fixed48NoW			(Illegal value for Scale)
 	sizeof(FVectorIntervalFixed32NoW),	// ACF_IntervalFixed32NoW	(compressed to 11-11-10 per-component interval fixed point)
+/** 每个元素的交换块数。 */
 	sizeof(float),						// ACF_Fixed32NoW			(Illegal value for Scale)
 	sizeof(float),						// ACF_Float32NoW			(Illegal value for Scale)
 	0									// ACF_Identity
@@ -125,7 +137,7 @@ inline int32 GetCompressedRotationStride(AnimationCompressionFormat RotationComp
 inline int32 GetCompressedScaleStride(AnimationCompressionFormat ScaleCompressionFormat)
 {
 	// @todo fixme change this?
-	// @todo fixme 改变这个吗？
+ // @todo fixme 改变这个吗？
 	return CompressedScaleStrides[ScaleCompressionFormat];
 }
 
@@ -151,7 +163,7 @@ inline int32 GetCompressedRotationStride(const FUECompressedAnimData& Compressed
 inline int32 GetCompressedScaleStride(const FUECompressedAnimData& CompressedData)
 {
 	// @todo fixme change this?
-	// @todo fixme 改变这个吗？
+ // @todo fixme 改变这个吗？
 	return CompressedScaleStrides[static_cast<AnimationCompressionFormat>(CompressedData.ScaleCompressionFormat)];
 }
 
@@ -201,7 +213,7 @@ void AnimEncodingLegacyBase::ByteSwapIn(
 	check(CompressedData.CompressedByteStream.Num() == OriginalNumBytes);
 
 	// Read and swap
-	// 阅读并交换
+ // 阅读并交换
 	uint8* StreamBase = CompressedData.CompressedByteStream.GetData();
 	bool bHasValidScale = CompressedData.CompressedScaleOffsets.IsValid();
 
@@ -213,29 +225,29 @@ void AnimEncodingLegacyBase::ByteSwapIn(
 		const int32 NumKeysRot	= CompressedData.CompressedTrackOffsets[TrackIndex*4+3];
 
 		// Translation data.
-		// 翻译数据。
+  // 翻译数据。
 		checkSlow( (OffsetTrans % 4) == 0 && "CompressedByteStream not aligned to four bytes" );
 		uint8* TransTrackData = StreamBase + OffsetTrans;
 		checkSlow(CompressedData.TranslationCodec != NULL);
 		((AnimEncodingLegacyBase*)CompressedData.TranslationCodec)->ByteSwapTranslationIn(CompressedData, MemoryReader, TransTrackData, NumKeysTrans);
 
 		// Like the compressed byte stream, pad the serialization stream to four bytes.
-		// [翻译失败: Like the compressed byte stream, pad the serialization stream to four bytes.]
+  // 与压缩字节流一样，将序列化流填充到四个字节。
 		// As a sanity check, each pad byte can be checked to be the PadSentinel.
-		// [翻译失败: As a sanity check, each pad byte can be checked to be the PadSentinel.]
+  // 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
 		PadMemoryReader(&MemoryReader, TransTrackData, 4); 
 
 		// Rotation data.
-		// [翻译失败: Rotation data.]
+  // 旋转数据。
 		checkSlow( (OffsetRot % 4) == 0 && "CompressedByteStream not aligned to four bytes" );
 		uint8* RotTrackData = StreamBase + OffsetRot;
 		checkSlow(CompressedData.RotationCodec != NULL);
 		((AnimEncodingLegacyBase*)CompressedData.RotationCodec)->ByteSwapRotationIn(CompressedData, MemoryReader, RotTrackData, NumKeysRot);
 
 		// Like the compressed byte stream, pad the serialization stream to four bytes.
-		// 与压缩字节流一样，将序列化流填充到四个字节。
+  // 与压缩字节流一样，将序列化流填充到四个字节。
 		// As a sanity check, each pad byte can be checked to be the PadSentinel.
-		// 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
+  // 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
 		PadMemoryReader(&MemoryReader, RotTrackData, 4); 
 
 		if (bHasValidScale)
@@ -244,16 +256,16 @@ void AnimEncodingLegacyBase::ByteSwapIn(
 			const int32 NumKeysScale		= CompressedData.CompressedScaleOffsets.GetOffsetData(TrackIndex, 1);
 
 			// Scale data.
-			// 规模数据。
+   // 规模数据。
 			checkSlow( (OffsetScale % 4) == 0 && "CompressedByteStream not aligned to four bytes" );
 			uint8* ScaleTrackData = StreamBase + OffsetScale;
 			checkSlow(CompressedData.ScaleCodec != NULL);
 			((AnimEncodingLegacyBase*)CompressedData.ScaleCodec)->ByteSwapScaleIn(CompressedData, MemoryReader, ScaleTrackData, NumKeysScale);
 
 			// Like the compressed byte stream, pad the serialization stream to four bytes.
-			// 与压缩字节流一样，将序列化流填充到四个字节。
+   // 与压缩字节流一样，将序列化流填充到四个字节。
 			// As a sanity check, each pad byte can be checked to be the PadSentinel.
-			// [翻译失败: As a sanity check, each pad byte can be checked to be the PadSentinel.]
+   // 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
 			PadMemoryReader(&MemoryReader, ScaleTrackData, 4); 
 		}
 	}
@@ -287,7 +299,7 @@ void AnimEncodingLegacyBase::ByteSwapOut(
 		MemoryWriter.Seek(BufferStart + OffsetTrans);
 
 		// Translation data.
-		// [翻译失败: Translation data.]
+  // 翻译数据。
 		checkSlow( (OffsetTrans % 4) == 0 && "CompressedByteStream not aligned to four bytes" );
 		uint8* TransTrackData = StreamBase + OffsetTrans;
 		if (CompressedData.TranslationCodec != NULL)
@@ -300,20 +312,20 @@ void AnimEncodingLegacyBase::ByteSwapOut(
 		};
 
 		// Like the compressed byte stream, pad the serialization stream to four bytes.
-		// 与压缩字节流一样，将序列化流填充到四个字节。
+  // 与压缩字节流一样，将序列化流填充到四个字节。
 		PadMemoryWriter(&MemoryWriter, TransTrackData, 4);
 
 		MemoryWriter.Seek(BufferStart + OffsetRot);
 
 		// Rotation data.
-		// 旋转数据。
+  // 旋转数据。
 		checkSlow( (OffsetRot % 4) == 0 && "CompressedByteStream not aligned to four bytes" );
 		uint8* RotTrackData = StreamBase + OffsetRot;
 		checkSlow(CompressedData.RotationCodec != NULL);
 		((AnimEncodingLegacyBase*)CompressedData.RotationCodec)->ByteSwapRotationOut(CompressedData, MemoryWriter, RotTrackData, NumKeysRot);
 
 		// Like the compressed byte stream, pad the serialization stream to four bytes.
-		// 与压缩字节流一样，将序列化流填充到四个字节。
+  // 与压缩字节流一样，将序列化流填充到四个字节。
 		PadMemoryWriter(&MemoryWriter, RotTrackData, 4);
 
 		if (bHasValidScale)
@@ -324,7 +336,7 @@ void AnimEncodingLegacyBase::ByteSwapOut(
 			MemoryWriter.Seek(BufferStart + OffsetScale);
 
 			// Scale data.
-			// [翻译失败: Scale data.]
+   // 规模数据。
 			checkSlow( (OffsetScale % 4) == 0 && "CompressedByteStream not aligned to four bytes" );
 			uint8* ScaleTrackData = StreamBase + OffsetScale;
 			if (CompressedData.ScaleCodec != NULL)
@@ -337,7 +349,7 @@ void AnimEncodingLegacyBase::ByteSwapOut(
 			};
 
 			// Like the compressed byte stream, pad the serialization stream to four bytes.
-			// [翻译失败: Like the compressed byte stream, pad the serialization stream to four bytes.]
+   // 与压缩字节流一样，将序列化流填充到四个字节。
 			PadMemoryWriter(&MemoryWriter, ScaleTrackData, 4);
 		}
 	}
@@ -390,25 +402,25 @@ void AnimationFormat_GetStats(
 		ScaleKeySize = ScaleStride * ScaleNum;
 
 		// Track number of tracks.
-		// [翻译失败: Track number of tracks.]
+  // 轨道数量。
 		NumTransTracks	= CompressedData.CompressedTrackOffsets.Num()/4;
 		NumRotTracks	= CompressedData.CompressedTrackOffsets.Num()/4;
 		NumScaleTracks	= CompressedData.CompressedScaleOffsets.GetNumTracks();
 
 		// Track total number of keys.
-		// [翻译失败: Track total number of keys.]
+  // 跟踪密钥总数。
 		TotalNumTransKeys = 0;
 		TotalNumRotKeys = 0;
 		TotalNumScaleKeys = 0;
 
 		// Track number of tracks with a single key.
-		// [翻译失败: Track number of tracks with a single key.]
+  // 使用单个键跟踪曲目数量。
 		NumTransTracksWithOneKey = 0;
 		NumRotTracksWithOneKey = 0;
 		NumScaleTracksWithOneKey = 0;
 
 		// Translation.
-		// [翻译失败: Translation.]
+  // 翻译。
 		for ( int32 TrackIndex = 0; TrackIndex < NumTransTracks; ++TrackIndex )
 		{
 			const int32 NumKeys = CompressedData.CompressedTrackOffsets[TrackIndex*4+1];
@@ -424,7 +436,7 @@ void AnimationFormat_GetStats(
 		}
 
 		// Rotation.
-		// [翻译失败: Rotation.]
+  // 旋转。
 		for ( int32 TrackIndex = 0; TrackIndex < NumRotTracks; ++TrackIndex )
 		{
 			const int32 NumKeys = CompressedData.CompressedTrackOffsets[TrackIndex*4+3];
@@ -440,7 +452,7 @@ void AnimationFormat_GetStats(
 		}
 
 		// Scale.
-		// 规模。
+  // 规模。
 		for ( int32 ScaleIndex = 0; ScaleIndex < NumScaleTracks; ++ScaleIndex )
 		{
 			const int32 NumKeys = CompressedData.CompressedScaleOffsets.GetOffsetData(ScaleIndex, 1);
@@ -456,7 +468,7 @@ void AnimationFormat_GetStats(
 		}
 
 		// Add in scaling values (min+range for interval encoding)
-		// 添加缩放值（间隔编码的最小值+范围）
+  // 添加缩放值（间隔编码的最小值+范围）
 		OverheadSize += (CompressedData.RotationCompressionFormat == ACF_IntervalFixed32NoW) ? (NumRotTracks - NumRotTracksWithOneKey) * sizeof(float) * 6 : 0;
 		OverheadSize += (CompressedData.TranslationCompressionFormat == ACF_IntervalFixed32NoW) ? (NumTransTracks - NumTransTracksWithOneKey) * sizeof(float) * 6 : 0;
 		OverheadSize += (CompressedData.ScaleCompressionFormat == ACF_IntervalFixed32NoW) ? (NumScaleTracks - NumScaleTracksWithOneKey) * sizeof(float) * 6 : 0;
@@ -472,27 +484,27 @@ void AnimationFormat_GetStats(
 		ScaleKeySize = 0;
 
 		// Track number of tracks.
-		// 轨道数量。
+  // 轨道数量。
 		NumTransTracks = CompressedData.CompressedTrackOffsets.Num() / 2;
 		NumRotTracks = CompressedData.CompressedTrackOffsets.Num() / 2;
 		// should be without divided by 2
-		// 应该不被2除
+  // 应该不被2除
 		NumScaleTracks = CompressedData.CompressedScaleOffsets.GetNumTracks();
 
 		// Track total number of keys.
-		// 跟踪密钥总数。
+  // 跟踪密钥总数。
 		TotalNumTransKeys = 0;
 		TotalNumRotKeys = 0;
 		TotalNumScaleKeys = 0;
 
 		// Track number of tracks with a single key.
-		// 使用单个键跟踪曲目数量。
+  // 使用单个键跟踪曲目数量。
 		NumTransTracksWithOneKey = 0;
 		NumRotTracksWithOneKey = 0;
 		NumScaleTracksWithOneKey = 0;
 
 		// Translation.
-		// 翻译。
+  // 翻译。
 		for (int32 TrackIndex = 0; TrackIndex < NumTransTracks; ++TrackIndex)
 		{
 			const int32 TransOffset = CompressedData.CompressedTrackOffsets[TrackIndex*2+0];
@@ -526,7 +538,7 @@ void AnimationFormat_GetStats(
 		}
 
 		// Rotation.
-		// 旋转。
+  // 旋转。
 		for (int32 TrackIndex = 0; TrackIndex < NumRotTracks; ++TrackIndex)
 		{
 			const int32 RotOffset = CompressedData.CompressedTrackOffsets[TrackIndex*2+1];
@@ -560,7 +572,7 @@ void AnimationFormat_GetStats(
 		}
 
 		// Scale.
-		// 规模。
+  // 规模。
 		for (int32 TrackIndex = 0; TrackIndex < NumScaleTracks; ++TrackIndex)
 		{
 			const int32 ScaleOffset = CompressedData.CompressedScaleOffsets.GetOffsetData(TrackIndex, 0);
@@ -594,7 +606,7 @@ void AnimationFormat_GetStats(
 		}
 
 		// Average key sizes
-		// 平均密钥大小
+  // 平均密钥大小
 		if (TotalRotKeysThatContributedSize > 0)
 		{
 			RotationKeySize = RotationKeySize / TotalRotKeysThatContributedSize;
@@ -635,7 +647,7 @@ void AnimationFormat_SetInterfaceLinks(CompressedDataType& CompressedData)
 		static AEFConstantKeyLerp<ACF_Identity>				AEFConstantKeyLerp_Identity;
 
 		// setup translation codec
-		// [翻译失败: setup translation codec]
+  // 设置翻译编解码器
 		switch(CompressedData.TranslationCompressionFormat)
 		{
 			case ACF_None:
@@ -656,7 +668,7 @@ void AnimationFormat_SetInterfaceLinks(CompressedDataType& CompressedData)
 		};
 
 		// setup rotation codec
-		// [翻译失败: setup rotation codec]
+  // 设置旋转编解码器
 		switch(CompressedData.RotationCompressionFormat)
 		{
 			case ACF_None:
@@ -686,7 +698,7 @@ void AnimationFormat_SetInterfaceLinks(CompressedDataType& CompressedData)
 		};
 
 		// setup Scale codec
-		// [翻译失败: setup Scale codec]
+  // 设置比例编解码器
 		switch(CompressedData.ScaleCompressionFormat)
 		{
 		case ACF_None:
@@ -717,7 +729,7 @@ void AnimationFormat_SetInterfaceLinks(CompressedDataType& CompressedData)
 		static AEFVariableKeyLerp<ACF_Identity>				AEFVariableKeyLerp_Identity;
 
 		// setup translation codec
-		// 设置翻译编解码器
+  // 设置翻译编解码器
 		switch(CompressedData.TranslationCompressionFormat)
 		{
 			case ACF_None:
@@ -738,7 +750,7 @@ void AnimationFormat_SetInterfaceLinks(CompressedDataType& CompressedData)
 		};
 
 		// setup rotation codec
-		// 设置旋转编解码器
+  // 设置旋转编解码器
 		switch(CompressedData.RotationCompressionFormat)
 		{
 			case ACF_None:
@@ -756,6 +768,8 @@ void AnimationFormat_SetInterfaceLinks(CompressedDataType& CompressedData)
 			case ACF_Fixed32NoW:
 				CompressedData.RotationCodec = &AEFVariableKeyLerp_Fixed32NoW;
 				break;
+		//checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
+  // checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
 			case ACF_Float32NoW:
 				CompressedData.RotationCodec = &AEFVariableKeyLerp_Float32NoW;
 				break;
@@ -768,7 +782,7 @@ void AnimationFormat_SetInterfaceLinks(CompressedDataType& CompressedData)
 		};
 
 		// setup Scale codec
-		// 设置比例编解码器
+  // 设置比例编解码器
 		switch(CompressedData.ScaleCompressionFormat)
 		{
 		case ACF_None:
@@ -782,6 +796,10 @@ void AnimationFormat_SetInterfaceLinks(CompressedDataType& CompressedData)
 			break;
 		case ACF_Identity:
 			CompressedData.ScaleCodec = &AEFVariableKeyLerp_Identity;
+   // checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
+   // checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
+   // checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
+   // checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
 			break;
 
 		default:
@@ -789,6 +807,8 @@ void AnimationFormat_SetInterfaceLinks(CompressedDataType& CompressedData)
 		};
 	}
 	else if (CompressedData.KeyEncodingFormat == AKF_PerTrackCompression)
+		//checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
+  // checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
 	{
 		static AEFPerTrackCompressionCodec StaticCodec;
 
@@ -799,13 +819,15 @@ void AnimationFormat_SetInterfaceLinks(CompressedDataType& CompressedData)
 		check(CompressedData.RotationCompressionFormat == ACF_Identity);
 		check(CompressedData.TranslationCompressionFormat == ACF_Identity);
 		// commenting out scale check because the older versions won't have this set correctly
-		// 注释掉比例检查，因为旧版本不会正确设置此设置
+  // 注释掉比例检查，因为旧版本不会正确设置此设置
 		// and I can't get the version VER_UE4_ANIM_SUPPORT_NONUNIFORM_SCALE_ANIMATION here because this function
-		// 我在这里无法获取版本 VER_UE4_ANIM_SUPPORT_NONUNIFORM_SCALE_ANIMATION 因为这个函数
+  // 我在这里无法获取版本 VER_UE4_ANIM_SUPPORT_NONUNIFORM_SCALE_ANIMATION 因为这个函数
 		// is called in Serialize where GetLinker is too early to call
-		// 在 Serialize 中调用，其中 GetLinker 调用还为时过早
+  // 在 Serialize 中调用，其中 GetLinker 调用还为时过早
 		//checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
+  // checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
 		//checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
+  // checkf(CompressedData.ScaleCompressionFormat == ACF_Identity);
 	}
 	else
 	{

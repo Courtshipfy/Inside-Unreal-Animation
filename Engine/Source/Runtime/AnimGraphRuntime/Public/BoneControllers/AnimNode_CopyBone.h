@@ -22,25 +22,37 @@ struct FAnimNode_CopyBone : public FAnimNode_SkeletalControlBase
 
 	/** Source Bone Name to get transform from */
 	/** 从中获取变换的源骨骼名称 */
+	/** 从中获取变换的源骨骼名称 */
+	/** 从中获取变换的源骨骼名称 */
 	UPROPERTY(EditAnywhere, Category = Copy)
 	FBoneReference SourceBone;
+	/** 要控制的骨骼的名称。这是要修改的主骨骼链。 **/
 
+	/** 要控制的骨骼的名称。这是要修改的主骨骼链。 **/
 	/** Name of bone to control. This is the main bone chain to modify from. **/
 	/** 要控制的骨骼的名称。这是要修改的主骨骼链。 **/
+	/** 如果翻译应该被复制 */
 	UPROPERTY(EditAnywhere, Category=Copy) 
 	FBoneReference TargetBone;
+	/** 如果翻译应该被复制 */
 
+	/** 是否应复制旋转 */
 	/** If Translation should be copied */
 	/** 如果翻译应该被复制 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Copy, meta=(PinShownByDefault))
+	/** 是否应复制旋转 */
+	/** 如果应复制比例 */
 	bool bCopyTranslation;
 
 	/** If Rotation should be copied */
 	/** 是否应复制旋转 */
+	/** 在复制组件之前将变换转换为的空间 */
+	/** 如果应复制比例 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Copy, meta=(PinShownByDefault))
 	bool bCopyRotation;
 
 	/** If Scale should be copied */
+	/** 在复制组件之前将变换转换为的空间 */
 	/** 如果应复制比例 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Copy, meta=(PinShownByDefault))
 	bool bCopyScale;
@@ -53,22 +65,22 @@ struct FAnimNode_CopyBone : public FAnimNode_SkeletalControlBase
 	ANIMGRAPHRUNTIME_API FAnimNode_CopyBone();
 
 	// FAnimNode_Base interface
-	// FAnimNode_Base接口
+ // FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
-	// FAnimNode_Base接口结束
+ // FAnimNode_Base接口结束
 
 	// FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口
+ // FAnimNode_SkeletalControlBase接口
 	ANIMGRAPHRUNTIME_API virtual void EvaluateSkeletalControl_AnyThread(FComponentSpacePoseContext& Output, TArray<FBoneTransform>& OutBoneTransforms) override;
 	ANIMGRAPHRUNTIME_API virtual bool IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) override;
 	// End of FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口结束
+ // FAnimNode_SkeletalControlBase接口结束
 
 private:
 	// FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口
+ // FAnimNode_SkeletalControlBase接口
 	ANIMGRAPHRUNTIME_API virtual void InitializeBoneReferences(const FBoneContainer& RequiredBones) override;
 	// End of FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口结束
+ // FAnimNode_SkeletalControlBase接口结束
 };

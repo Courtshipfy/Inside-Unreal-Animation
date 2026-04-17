@@ -19,9 +19,29 @@
 // 大卫·博罗
 // Game Developer Conference 2018
 // 2018年游戏开发者大会
+// https://www.gdcvault.com/play/1025165/Inertialization
+// https://www.gdcvault.com/play/1025165/Inertialization
+// https://www.gdcvault.com/play/1025165/Inertialization
+// https://www.gdcvault.com/play/1025165/Inertialization
+// https://www.gdcvault.com/play/1025165/Inertialization
+// https://www.gdcvault.com/play/1025165/Inertialization
+// https://www.gdcvault.com/play/1025331/Inertialization
+// https://www.gdcvault.com/play/1025331/Inertialization
+// https://www.gdcvault.com/play/1025331/Inertialization
+// https://www.gdcvault.com/play/1025331/Inertialization
+// https://www.gdcvault.com/play/1025331/Inertialization
+// https://www.gdcvault.com/play/1025331/Inertialization
+// https://www.gdcvault.com/play/1025165/Inertialization
+// https://www.gdcvault.com/play/1025165/Inertialization
 //
+// https://www.gdcvault.com/play/1025331/Inertialization
+// https://www.gdcvault.com/play/1025331/Inertialization
 // https://www.gdcvault.com/play/1025165/Inertialization
 // https://www.gdcvault.com/play/1025165/Inertialization
+// https://www.gdcvault.com/play/1025165/Inertialization
+// https://www.gdcvault.com/play/1025165/Inertialization
+// https://www.gdcvault.com/play/1025331/Inertialization
+// https://www.gdcvault.com/play/1025331/Inertialization
 // https://www.gdcvault.com/play/1025331/Inertialization
 // https://www.gdcvault.com/play/1025331/Inertialization
 
@@ -39,19 +59,19 @@ public:
 	static ENGINE_API const FName Attribute;
 
 	// Request to activate inertialization for a duration.
-	// [翻译失败: Request to activate inertialization for a duration.]
+ // 请求激活惯性一段时间。
 	// If multiple requests are made on the same inertialization node, the minimum requested time will be used.
-	// 如果在同一惯性节点上发出多个请求，则将使用最小请求时间。
+ // 如果在同一惯性节点上发出多个请求，则将使用最小请求时间。
 	virtual void RequestInertialization(float InRequestedDuration, const UBlendProfile* InBlendProfile = nullptr) = 0;
 
 	// Request to activate inertialization.
-	// 请求激活惯性化。
+ // 请求激活惯性化。
 	// If multiple requests are made on the same inertialization node, the minimum requested time will be used.
-	// 如果在同一惯性节点上发出多个请求，则将使用最小请求时间。
+ // 如果在同一惯性节点上发出多个请求，则将使用最小请求时间。
 	ENGINE_API virtual void RequestInertialization(const FInertializationRequest& InInertializationRequest);
 
 	// Add a record of this request
-	// 添加本次请求的记录
+ // 添加本次请求的记录
 	virtual void AddDebugRecord(const FAnimInstanceProxy& InSourceProxy, int32 InSourceNodeId) = 0;
 
 	virtual FName GetTag() const = 0;
@@ -170,33 +190,33 @@ struct FInertializationSparsePose
 private:
 
 	// Transform of the component at the point of the snapshot
-	// 快照点处组件的变换
+ // 快照点处组件的变换
 	FTransform ComponentTransform;
 	
 	// Has Root Motion
-	// 有根运动
+ // 有根运动
 	bool bHasRootMotion = false;
 
 	// Root Motion Delta at the point of the snapshot
-	// 快照点处的根运动增量
+ // 快照点处的根运动增量
 	FTransform RootMotionDelta;
 
 	// For each SkeletonPoseBoneIndex this array stores the index into the BoneTranslations, BoneRotations, and 
-	// 对于每个 SkeletonPoseBoneIndex，此数组将索引存储到 BoneTranslations、BoneRotations 和
+ // 对于每个 SkeletonPoseBoneIndex，此数组将索引存储到 BoneTranslations、BoneRotations 和
 	// BoneScales arrays which contains that bone's data. Or INDEX_NONE if this bone's data is not in the snapshot.
-	// 包含该骨骼数据的 BoneScales 数组。如果该骨骼的数据不在快照中，则为 INDEX_NONE。
+ // 包含该骨骼数据的 BoneScales 数组。如果该骨骼的数据不在快照中，则为 INDEX_NONE。
 	TArray<int32> BoneIndices;
 	
 	// Bone translation Data
-	// 骨翻译数据
+ // 骨翻译数据
 	TArray<FVector> BoneTranslations;
 	
 	// Bone Rotation Data
-	// 骨骼旋转数据
+ // 骨骼旋转数据
 	TArray<FQuat> BoneRotations;
 	
 	// Bone Scale Data
-	// 骨量数据
+ // 骨量数据
 	TArray<FVector> BoneScales;
 
     // Curve Data
@@ -204,11 +224,11 @@ private:
 	FInertializationCurve Curves;
 
 	// Attached Parent object Name
-	// 附加父对象名称
+ // 附加父对象名称
 	FName AttachParentName = NAME_None;
 	
 	// Delta Time since last snapshot
-	// 自上次快照以来的增量时间
+ // 自上次快照以来的增量时间
 	float DeltaTime = 0.0f;
 
 	void InitFrom(
@@ -338,17 +358,17 @@ struct FAnimNode_Inertialization : public FAnimNode_Base
 private:
 
 	// Optional default blend profile to use when no blend profile is supplied with the inertialization request
-	// 当惯性化请求未提供混合配置文件时要使用的可选默认混合配置文件
+ // 当惯性化请求未提供混合配置文件时要使用的可选默认混合配置文件
 	UPROPERTY(EditAnywhere, Category = BlendProfile, meta = (UseAsBlendProfile = true))
 	TObjectPtr<UBlendProfile> DefaultBlendProfile = nullptr;
 
 	// List of curves that should not use inertial blending. These curves will instantly change when inertialization begins.
-	// 不应使用惯性混合的曲线列表。当惯性化开始时，这些曲线将立即改变。
+ // 不应使用惯性混合的曲线列表。当惯性化开始时，这些曲线将立即改变。
 	UPROPERTY(EditAnywhere, Category = Filter)
 	TArray<FName> FilteredCurves;
 
 	// List of bones that should not use inertial blending. These bones will change instantly when the animation switches.
-	// 不应使用惯性混合的骨骼列表。当动画切换时这些骨骼会立即发生变化。
+ // 不应使用惯性混合的骨骼列表。当动画切换时这些骨骼会立即发生变化。
 	UPROPERTY(EditAnywhere, Category = Filter)
 	TArray<FBoneReference> FilteredBones;
 
@@ -379,7 +399,7 @@ private:
 public: // FAnimNode_Inertialization
 
 	// Note: We need to explicitly disable warnings on these constructors/operators for clang to be happy with deprecated variables
-	// 注意：我们需要显式禁用这些构造函数/运算符的警告，以便 clang 对已弃用的变量感到满意
+ // 注意：我们需要显式禁用这些构造函数/运算符的警告，以便 clang 对已弃用的变量感到满意
 	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	FAnimNode_Inertialization() = default;
 	~FAnimNode_Inertialization() = default;
@@ -390,21 +410,21 @@ public: // FAnimNode_Inertialization
 	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	
 	// Request to activate inertialization for a duration.
-	// 请求激活惯性一段时间。
+ // 请求激活惯性一段时间。
 	// If multiple requests are made on the same inertialization node, the minimum requested time will be used.
-	// 如果在同一惯性节点上发出多个请求，则将使用最小请求时间。
+ // 如果在同一惯性节点上发出多个请求，则将使用最小请求时间。
 	//
 	ENGINE_API virtual void RequestInertialization(float Duration, const UBlendProfile* BlendProfile);
 
 	// Request to activate inertialization.
-	// 请求激活惯性化。
+ // 请求激活惯性化。
 	// If multiple requests are made on the same inertialization node, the minimum requested time will be used.
-	// 如果在同一惯性节点上发出多个请求，则将使用最小请求时间。
+ // 如果在同一惯性节点上发出多个请求，则将使用最小请求时间。
 	//
 	ENGINE_API virtual void RequestInertialization(const FInertializationRequest& InertializationRequest);
 
 	// Log an error when a node wants to inertialize but no inertialization ancestor node exists
-	// 当节点想要惯性化但不存在惯性化祖先节点时记录错误
+ // 当节点想要惯性化但不存在惯性化祖先节点时记录错误
 	//
 	static ENGINE_API void LogRequestError(const FAnimationUpdateContext& Context, const int32 NodePropertyIndex);
 	static ENGINE_API void LogRequestError(const FAnimationUpdateContext& Context, const FPoseLinkBase& RequesterPoseLink);
@@ -469,53 +489,55 @@ private:
 	void ApplyTo(FCompactPose& InOutPose, FBlendedCurve& InOutCurves, UE::Anim::FStackAttributeContainer& InOutAttributes);
 
 	// Snapshots of the actor pose generated as output.
-	// 演员姿势的快照作为输出生成。
+ // 演员姿势的快照作为输出生成。
 	FInertializationSparsePose PrevPoseSnapshot;
 	FInertializationSparsePose CurrPoseSnapshot;
 
 	// Elapsed delta time between calls to evaluate
-	// 评估调用之间经过的增量时间
+ // 评估调用之间经过的增量时间
 	float DeltaTime = 0.0f;
 
 	// Pending inertialization requests
-	// 待处理的惯性化请求
+ // 待处理的惯性化请求
 	UPROPERTY(Transient)
 	TArray<FInertializationRequest> RequestQueue;
 
 	// Update Counter for detecting being relevant
-	// 更新计数器以检测相关性
+ // 更新计数器以检测相关性
 	FGraphTraversalCounter UpdateCounter;
 
 	// Inertialization state
-	// 惯性化状态
+ // 惯性化状态
 	EInertializationState InertializationState = EInertializationState::Inactive;
 
 	// Amount of time elapsed during the Inertialization
-	// 惯性化期间经过的时间量
+ // 惯性化期间经过的时间量
 	float InertializationElapsedTime = 0.0f;
 
 	// Inertialization duration for the main inertialization request (used for curve blending and deficit tracking)
-	// 主惯性化请求的惯性持续时间（用于曲线混合和赤字跟踪）
+ // 主惯性化请求的惯性持续时间（用于曲线混合和赤字跟踪）
 	float InertializationDuration = 0.0f;
 
 	// Inertialization durations indexed by skeleton bone index (used for per-bone blending)
-	// 按骨骼索引索引的惯性持续时间（用于每骨骼混合）
+ // 按骨骼索引索引的惯性持续时间（用于每骨骼混合）
 	TCustomBoneIndexArray<float, FSkeletonPoseBoneIndex> InertializationDurationPerBone;
 
 	// Maximum of InertializationDuration and all entries in InertializationDurationPerBone (used for knowing when to shutdown the inertialization)
-	// InertializationDuration 的最大值以及 InertializationDurationPerBone 中的所有条目（用于了解何时关闭惯性化）
+ // InertializationDuration 的最大值以及 InertializationDurationPerBone 中的所有条目（用于了解何时关闭惯性化）
 	float InertializationMaxDuration = 0.0f;
 
 	// Inertialization deficit (for tracking and reducing 'pose melting' when thrashing inertialization requests)
-	// 惯性不足（用于在冲击惯性请求时跟踪和减少“姿势融化”）
+ // 惯性不足（用于在冲击惯性请求时跟踪和减少“姿势融化”）
 	float InertializationDeficit = 0.0f;
 
 	// Inertialization pose differences
-	// 惯性化构成差异
+ // 惯性化构成差异
 	TArray<int32> BoneIndices;
 	TArray<FVector3f> BoneTranslationDiffDirection;
 	TArray<float> BoneTranslationDiffMagnitude;
 	TArray<float> BoneTranslationDiffSpeed;
+// endif ANIM_TRACE_ENABLED
+// endif ANIM_TRACE_ENABLED
 	TArray<FVector3f> BoneRotationDiffAxis;
 	TArray<float> BoneRotationDiffAngle;
 	TArray<float> BoneRotationDiffSpeed;
@@ -530,11 +552,11 @@ private:
 	float RootScaleVelocityDiffMagnitude;
 
 	// Curve differences
-	// 曲线差异
+ // 曲线差异
 	TBaseBlendedCurve<FDefaultAllocator, FInertializationCurveDiffElement> CurveDiffs;
 
 	// Temporary storage for curve data of the Destination Pose
-	// 临时存储目标位姿的曲线数据
+ // 临时存储目标位姿的曲线数据
 	TBaseBlendedCurve<TInlineAllocator<8>, UE::Anim::FCurveElement> PoseCurveData;
 
 public: // IBoneReferenceSkeletonProvider
@@ -543,29 +565,37 @@ public: // IBoneReferenceSkeletonProvider
 private:
 
 	// Cached curve filter built from FilteredCurves
-	// 从 FilteredCurves 构建的缓存曲线过滤器
+ // 从 FilteredCurves 构建的缓存曲线过滤器
 	UE::Anim::FCurveFilter CurveFilter;
 
 	// Cache compact pose bone index for FilteredBones
-	// 缓存 FilteredBones 的紧凑姿势骨骼索引
+ // 缓存 FilteredBones 的紧凑姿势骨骼索引
 	TArray<FCompactPoseBoneIndex, TInlineAllocator<8>> BoneFilter;
 
 // if ANIM_TRACE_ENABLED - these properties are only used for debugging when ANIM_TRACE_ENABLED == 1
 // if ANIM_TRACE_ENABLED - 这些属性仅在 ANIM_TRACE_ENABLED == 1 时用于调试
 
 	// Description for the current inertialization request
-	// 当前惯性化请求的描述
+ // 当前惯性化请求的描述
+ // endif ANIM_TRACE_ENABLED
+ // endif ANIM_TRACE_ENABLED
 	FString InertializationRequestDescription;
 
+ // endif ANIM_TRACE_ENABLED
+ // endif ANIM_TRACE_ENABLED
 	// Node Id for the current inertialization request
-	// 当前惯性化请求的节点Id
+ // 当前惯性化请求的节点Id
 	int32 InertializationRequestNodeId = INDEX_NONE;
 
+// endif ANIM_TRACE_ENABLED
+// endif ANIM_TRACE_ENABLED
 	// Anim Instance for the current inertialization request
-	// 当前惯性化请求的动画实例
+ // 当前惯性化请求的动画实例
 	UPROPERTY(Transient)
 	TObjectPtr<UObject> InertializationRequestAnimInstance = nullptr;
 
+// endif ANIM_TRACE_ENABLED
+// endif ANIM_TRACE_ENABLED
 // endif ANIM_TRACE_ENABLED
 // endif ANIM_TRACE_ENABLED
 

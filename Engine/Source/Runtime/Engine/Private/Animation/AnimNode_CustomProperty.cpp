@@ -28,7 +28,7 @@ void FAnimNode_CustomProperty::PropagateInputProperties(const UObject* InSourceI
 	if(TargetInstance)
 	{
 		// First copy properties
-		// 首先复制属性
+  // 首先复制属性
 		check(SourceProperties.Num() == DestProperties.Num());
 		for(int32 PropIdx = 0; PropIdx < SourceProperties.Num(); ++PropIdx)
 		{
@@ -49,11 +49,11 @@ void FAnimNode_CustomProperty::PropagateInputProperties(const UObject* InSourceI
 					if (CallerBoolProperty && SubBoolProperty)
 					{
 						// Bools may be native bitfields, in which case we cant call CopyCompleteValue as 
-						// 布尔值可能是本机位域，在这种情况下我们不能将 CopyCompleteValue 称为
+      // 布尔值可能是本机位域，在这种情况下我们不能将 CopyCompleteValue 称为
 						// there is insufficent information to correctly copy the relevant bits. Calling CopyCompleteValue
-						// 没有足够的信息来正确复制相关位。调用 CopyCompleteValue
+      // 没有足够的信息来正确复制相关位。调用 CopyCompleteValue
 						// in this case can potentially overwrite adjacent memory.
-						// [翻译失败: in this case can potentially overwrite adjacent memory.]
+      // 在这种情况下可能会覆盖相邻的内存。
 						const bool bValue = CallerBoolProperty->GetPropertyValue_InContainer(InSourceInstance);
 						SubBoolProperty->SetPropertyValue_InContainer(TargetInstance, bValue);
 					}
@@ -74,7 +74,7 @@ void FAnimNode_CustomProperty::InitializeProperties(const UObject* InSourceInsta
 		UClass* SourceClass = InSourceInstance->GetClass();
 
 		// Build property lists
-		// 建立财产清单
+  // 建立财产清单
 		SourceProperties.Reset(SourcePropertyNames.Num());
 		DestProperties.Reset(SourcePropertyNames.Num());
 
@@ -92,7 +92,7 @@ void FAnimNode_CustomProperty::InitializeProperties(const UObject* InSourceInsta
 				if (SourceProperty
 #if WITH_EDITOR
 					// This type check can fail when anim blueprints are in an error state:
-					// 当动画蓝图处于错误状态时，此类型检查可能会失败：
+     // 当动画蓝图处于错误状态时，此类型检查可能会失败：
 					&& SourceProperty->SameType(DestProperty)
 #endif
 					)

@@ -45,7 +45,7 @@ void FAttributeCurve::SetKeyTime(FKeyHandle KeyHandle, float NewTime)
 		AddKey(NewTime, (void*)OldKey.Value.GetPtr<void>(), KeyHandle);
 		
 		// Copy all properties from old key, but then fix time to be the new time
-		// 复制旧密钥中的所有属性，然后将时间修复为新时间
+  // 复制旧密钥中的所有属性，然后将时间修复为新时间
 		FAttributeKey& NewKey = GetKey(KeyHandle);
 		NewKey = OldKey;
 		NewKey.Time = NewTime;
@@ -75,7 +75,7 @@ void FAttributeCurve::EvaluateToPtr(const UScriptStruct* InScriptStruct, float T
 			{
 				ensure(false);
 				// If no keys in curve, return the Default value.
-				// 如果曲线中没有关键点，则返回默认值。
+    // 如果曲线中没有关键点，则返回默认值。
 			}
 			else if (NumKeys < 2 || (Time <= Keys[0].Time))
 			{
@@ -84,7 +84,7 @@ void FAttributeCurve::EvaluateToPtr(const UScriptStruct* InScriptStruct, float T
 			else if (Time < Keys[NumKeys - 1].Time)
 			{
 				// perform a lower bound to get the second of the interpolation nodes
-				// 执行下界以获得第二个插值节点
+    // 执行下界以获得第二个插值节点
 				int32 first = 1;
 				int32 last = NumKeys - 1;
 				int32 count = last - first;
@@ -123,7 +123,7 @@ void FAttributeCurve::EvaluateToPtr(const UScriptStruct* InScriptStruct, float T
 			else
 			{
 				// Key is beyon the last point in the curve.  Return it's value
-				// 关键点超出了曲线的最后一个点。  返回它的值
+    // 关键点超出了曲线的最后一个点。  返回它的值
 				DataPtr = Keys[Keys.Num() - 1].Value.GetPtr<void>();
 			}
 		}
@@ -132,18 +132,18 @@ void FAttributeCurve::EvaluateToPtr(const UScriptStruct* InScriptStruct, float T
 			if (Keys.Num() == 0 || (Time < Keys[0].Time))
 			{
 				// If no keys in curve, or bUseDefaultValueBeforeFirstKey is set and the time is before the first key, return the Default value.
-				// 如果曲线中没有关键点，或者设置了 bUseDefaultValueBeforeFirstKey 并且时间在第一个关键点之前，则返回默认值。
+    // 如果曲线中没有关键点，或者设置了 bUseDefaultValueBeforeFirstKey 并且时间在第一个关键点之前，则返回默认值。
 			}
 			else if (Keys.Num() < 2 || Time < Keys[0].Time)
 			{
 				// There is only one key or the time is before the first value. Return the first value
-				// 只有一个键或者时间早于第一个值。返回第一个值
+    // 只有一个键或者时间早于第一个值。返回第一个值
 				DataPtr = Keys[0].Value.GetPtr<void>();
 			}
 			else if (Time < Keys[Keys.Num() - 1].Time)
 			{
 				// The key is in the range of Key[0] to Keys[Keys.Num()-1].  Find it by searching
-				// 密钥的范围是Key[0]到Keys[Keys.Num()-1]。  通过搜索找到它
+    // 密钥的范围是Key[0]到Keys[Keys.Num()-1]。  通过搜索找到它
 				for (int32 i = 0; i < Keys.Num(); ++i)
 				{
 					if (Time < Keys[i].Time)
@@ -156,7 +156,7 @@ void FAttributeCurve::EvaluateToPtr(const UScriptStruct* InScriptStruct, float T
 			else
 			{
 				// Key is beyon the last point in the curve.  Return it's value
-				// 关键点超出了曲线的最后一个点。  返回它的值
+    // 关键点超出了曲线的最后一个点。  返回它的值
 				DataPtr = Keys[Keys.Num() - 1].Value.GetPtr<void>();
 			}
 		}
@@ -214,15 +214,15 @@ FKeyHandle FAttributeCurve::UpdateOrAddKey(float InTime, const void* InValue, fl
 		if (KeyTime > InTime)
 		{
 			// All the rest of the keys exist after the key we want to add
-			// 所有其余的键都存在于我们要添加的键之后
+   // 所有其余的键都存在于我们要添加的键之后
 			// so there is no point in searching
-			// 所以没有必要去寻找
+   // 所以没有必要去寻找
 			break;
 		}
 	}
 
 	// A key wasnt found, add it now
-	// 未找到密钥，请立即添加
+ // 未找到密钥，请立即添加
 	return AddKey(InTime, InValue);
 }
 
@@ -244,7 +244,7 @@ FKeyHandle FAttributeCurve::FindKey(float KeyTime, float KeyTimeTolerance) const
 	int32 End = Keys.Num() - 1;
 
 	// Binary search since the keys are in sorted order
-	// 由于键是按排序顺序进行二分搜索
+ // 由于键是按排序顺序进行二分搜索
 	while (Start <= End)
 	{
 		int32 TestPos = Start + (End - Start) / 2;
@@ -270,21 +270,21 @@ FKeyHandle FAttributeCurve::FindKey(float KeyTime, float KeyTimeTolerance) const
 FKeyHandle FAttributeCurve::FindKeyBeforeOrAt(float KeyTime) const
 {
 	// If there are no keys or the time is before the first key return an invalid handle.
-	// 如果没有键或者时间早于第一个键，则返回无效句柄。
+ // 如果没有键或者时间早于第一个键，则返回无效句柄。
 	if (Keys.Num() == 0 || KeyTime < Keys[0].Time)
 	{
 		return FKeyHandle();
 	}
 
 	// If the time is after or at the last key return the last key.
-	// 如果时间在最后一个键之后或之前，则返回最后一个键。
+ // 如果时间在最后一个键之后或之前，则返回最后一个键。
 	if (KeyTime >= Keys[Keys.Num() - 1].Time)
 	{
 		return GetKeyHandle(Keys.Num() - 1);
 	}
 
 	// Otherwise binary search to find the handle of the nearest key at or before the time.
-	// 否则，二分查找查找该时间或之前最近的键的句柄。
+ // 否则，二分查找查找该时间或之前最近的键的句柄。
 	int32 Start = 0;
 	int32 End = Keys.Num() - 1;
 	int32 FoundIndex = -1;
@@ -349,7 +349,7 @@ void FAttributeCurve::RemoveRedundantKeys()
 	}
 
 	// If only two keys left and they are identical as well, remove the 2nd one.
-	// 如果只剩下两把钥匙并且它们也相同，则删除第二把。
+ // 如果只剩下两把钥匙并且它们也相同，则删除第二把。
 	if (Keys.Num() == 2 && ScriptStruct->CompareScriptStruct(Keys[0].Value.GetPtr<void>(), Keys[1].Value.GetPtr<void>(), 0))
 	{
 		DeleteKey(GetKeyHandle(1));
@@ -420,7 +420,7 @@ void FAttributeCurve::ReadjustTimeRange(float NewMinTimeRange, float NewMaxTimeR
 	EnsureAllIndicesHaveHandles();
 
 	// first readjust modified time keys
-	// 首先重新调整修改时间键
+ // 首先重新调整修改时间键
 	float ModifiedDuration = OldEndTime - OldStartTime;
 
 	if (bInsert)
@@ -437,9 +437,9 @@ void FAttributeCurve::ReadjustTimeRange(float NewMinTimeRange, float NewMaxTimeR
 	else
 	{
 		// since we only allow one key at a given time, we will just cache the value that needs to be saved
-		// 由于我们在给定时间只允许一个键，因此我们将只缓存需要保存的值
+  // 由于我们在给定时间只允许一个键，因此我们将只缓存需要保存的值
 		// this is the key to be replaced when this section is gone
-		// 这是当该部分消失时要替换的关键
+  // 这是当该部分消失时要替换的关键
 		bool bAddNewKey = false;
 		FWrappedAttribute NewValue;
 		NewValue.Allocate(ScriptStruct);
@@ -450,29 +450,29 @@ void FAttributeCurve::ReadjustTimeRange(float NewMinTimeRange, float NewMaxTimeR
 		{
 			float& CurrentTime = Keys[KeyIndex].Time;
 			// if this key exists between range of deleted
-			// 如果该键存在于删除范围之间
+   // 如果该键存在于删除范围之间
 			// we'll evaluate the value at the "OldStartTime"
-			// 我们将评估“OldStartTime”的值
+   // 我们将评估“OldStartTime”的值
 			// and re-add key, so that it keeps the previous value at the
-			// 并重新添加密钥，以便将之前的值保留在
+   // 并重新添加密钥，以便将之前的值保留在
 			// start time
-			// 开始时间
+   // 开始时间
 			// But that means if there are multiple keys, 
-			// 但这意味着如果有多个键，
+   // 但这意味着如果有多个键，
 			// since we don't want multiple values in the same time
-			// 因为我们不希望同时有多个值
+   // 因为我们不希望同时有多个值
 			// the last one will override the value
-			// 最后一个将覆盖该值
+   // 最后一个将覆盖该值
 			if (CurrentTime >= OldStartTime && CurrentTime <= OldEndTime)
 			{
 				// get new value and add new key on one of OldStartTime, OldEndTime;
-				// 获取新值并在 OldStartTime、OldEndTime 之一上添加新键；
+    // 获取新值并在 OldStartTime、OldEndTime 之一上添加新键；
 				// this is a bit complicated problem since we don't know if OldStartTime or OldEndTime is preferred. 
-				// 这是一个有点复杂的问题，因为我们不知道 OldStartTime 还是 OldEndTime 是首选。
+    // 这是一个有点复杂的问题，因为我们不知道 OldStartTime 还是 OldEndTime 是首选。
 				// generall we use OldEndTime unless OldStartTime == 0.f
-				// 一般我们使用 OldEndTime 除非 OldStartTime == 0.f
+    // 一般我们使用 OldEndTime 除非 OldStartTime == 0.f
 				// which means it's cut in the beginning. Otherwise it will always use the end time. 
-				// 这意味着它从一开始就被削减了。否则它将始终使用结束时间。
+    // 这意味着它从一开始就被削减了。否则它将始终使用结束时间。
 				bAddNewKey = true;
 				if (OldStartTime != 0.f)
 				{	
@@ -485,7 +485,7 @@ void FAttributeCurve::ReadjustTimeRange(float NewMinTimeRange, float NewMaxTimeR
 					EvaluateToPtr(ScriptStruct, OldEndTime, NewValue.GetPtr<uint8>());
 				}
 				// remove this key, but later because it might change eval result
-				// 删除此键，但稍后删除，因为它可能会更改评估结果
+    // 删除此键，但稍后删除，因为它可能会更改评估结果
 				KeysToDelete.Add(KeyIndex);
 			}
 			else if (CurrentTime > OldEndTime)
@@ -511,11 +511,11 @@ void FAttributeCurve::ReadjustTimeRange(float NewMinTimeRange, float NewMaxTimeR
 	}
 
 	// now remove all redundant key
-	// 现在删除所有多余的键
+ // 现在删除所有多余的键
 	RemoveRedundantKeys();
 
 	// now cull out all out of range 
-	// 现在剔除所有超出范围的
+ // 现在剔除所有超出范围的
 	float MinTime, MaxTime;
 
 	if (Keys.Num() == 0)
@@ -532,7 +532,7 @@ void FAttributeCurve::ReadjustTimeRange(float NewMinTimeRange, float NewMaxTimeR
 	bool bNeedToDeleteKey = false;
 
 	// if there is key below min time, just add key at new min range, 
-	// 如果有低于最小时间的密钥，只需在新的最小范围内添加密钥，
+ // 如果有低于最小时间的密钥，只需在新的最小范围内添加密钥，
 	if (MinTime < NewMinTimeRange)
 	{
 		FWrappedAttribute NewValue;
@@ -545,7 +545,7 @@ void FAttributeCurve::ReadjustTimeRange(float NewMinTimeRange, float NewMaxTimeR
 	}
 
 	// if there is key after max time, just add key at new max range, 
-	// 如果在最大时间之后还有密钥，只需在新的最大范围内添加密钥，
+ // 如果在最大时间之后还有密钥，只需在新的最大范围内添加密钥，
 	if (MaxTime > NewMaxTimeRange)
 	{
 		FWrappedAttribute NewValue;
@@ -558,7 +558,7 @@ void FAttributeCurve::ReadjustTimeRange(float NewMinTimeRange, float NewMaxTimeR
 	}
 
 	// delete the keys outside of range
-	// 删除超出范围的键
+ // 删除超出范围的键
 	if (bNeedToDeleteKey)
 	{
 		for (int32 KeyIndex = 0; KeyIndex < Keys.Num(); ++KeyIndex)

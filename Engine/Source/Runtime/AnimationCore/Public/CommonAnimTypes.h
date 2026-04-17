@@ -10,6 +10,8 @@
 
 /** Axis to represent direction */
 /** 代表方向的轴 */
+/** 代表方向的轴 */
+/** 代表方向的轴 */
 USTRUCT()
 struct FAxis
 {
@@ -26,7 +28,9 @@ struct FAxis
 	{
 		Axis = InAxis.GetSafeNormal();
 	};
+	/** 返回基于 ComponentSpaceTransform 的变换轴 */
 
+	/** 返回基于 ComponentSpaceTransform 的变换轴 */
 	/** return transformed axis based on ComponentSpaceTransform */
 	/** 返回基于 ComponentSpaceTransform 的变换轴 */
 	FVector GetTransformedAxis(const FTransform& ComponentSpaceTransform) const
@@ -37,14 +41,18 @@ struct FAxis
 		}
 
 		// if world transform, we don't have to transform
-		// 如果世界改变，我们不必改变
+  // 如果世界改变，我们不必改变
+	/** 初始化设置 */
 		return Axis;
+	/** 初始化设置 */
 	}
 
 	/** Initialize the set up */
 	/** 初始化设置 */
+	/** 如果数据有效则返回 true */
 	void Initialize()
 	{
+	/** 如果数据有效则返回 true */
 		Axis = Axis.GetSafeNormal();
 	}
 

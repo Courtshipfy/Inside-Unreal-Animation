@@ -45,18 +45,18 @@ public:
 	ANIMGRAPHRUNTIME_API FAnimNode_BlendSpaceEvaluator();
 
 	// FAnimNode_Base interface
-	// FAnimNode_Base接口
+ // FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void UpdateAssetPlayer(const FAnimationUpdateContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
-	// FAnimNode_Base接口结束
+ // FAnimNode_Base接口结束
 
 	// FAnimNode_BlendSpacePlayer interface
-	// FAnimNode_BlendSpacePlayer接口
+ // FAnimNode_BlendSpacePlayer接口
 	ANIMGRAPHRUNTIME_API virtual float GetPlayRate() const override;
 	virtual bool ShouldTeleportToTime() const override { return bTeleportToNormalizedTime; }
 	virtual bool IsEvaluator() const override { return true; }
 	// End of FAnimNode_BlendSpacePlayer
-	// FAnimNode_BlendSpacePlayer 结束
+ // FAnimNode_BlendSpacePlayer 结束
 
 };

@@ -29,7 +29,7 @@ struct FAnimExecutionContext
 
 public:
 	// Internal data, weakly referenced
-	// 内部数据，弱引用
+ // 内部数据，弱引用
 	struct FData
 	{
 	public:
@@ -61,11 +61,11 @@ public:
 		};
 	
 		// The context used when executing this node, e.g. FAnimationUpdateContext, FPoseContext etc.
-		// 执行该节点时使用的上下文，例如FAnimationUpdateContext、FPoseContext 等
+  // 执行该节点时使用的上下文，例如FAnimationUpdateContext、FPoseContext 等
 		FAnimationBaseContext* Context = nullptr;
 
 		// The phase we are in
-		// 我们所处的阶段
+  // 我们所处的阶段
 		EContextType ContextType = EContextType::None;	
 	};
 	
@@ -78,14 +78,14 @@ public:
 	{}
 
 	// Is this a valid context? 
-	// 这是一个有效的上下文吗？
+ // 这是一个有效的上下文吗？
 	bool IsValid() const
 	{
 		return Data.IsValid();
 	}
 
 	// Convert to a derived type
-	// 转换为派生类型
+ // 转换为派生类型
 	template<typename OtherContextType>
 	static OtherContextType ConvertToType(const FAnimExecutionContext& InContext, EAnimExecutionContextConversionResult& OutResult)
 	{
@@ -109,7 +109,7 @@ public:
 	}
 
 	// Access internal context. Will return nullptr if invalid
-	// 访问内部上下文。如果无效则返回 nullptr
+ // 访问内部上下文。如果无效则返回 nullptr
 	FAnimationBaseContext* GetBaseContext() const
 	{
 		if(TSharedPtr<FData> PinnedData = Data.Pin())
@@ -122,7 +122,7 @@ public:
 
 protected:
 	// Access internal context. Will return nullptr if invalid or an incorrect type is requested
-	// 访问内部上下文。如果请求的类型无效或不正确，将返回 nullptr
+ // 访问内部上下文。如果请求的类型无效或不正确，将返回 nullptr
 	template<typename OtherContextType, typename InternalContextType>
 	InternalContextType* GetInternalContext() const
 	{
@@ -139,7 +139,7 @@ protected:
 	
 protected:
 	// Internal data
-	// 内部数据
+ // 内部数据
 	TWeakPtr<FData> Data; 
 };
 

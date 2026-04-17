@@ -20,14 +20,14 @@ const FName FAnimNode_LinkedInputPose::DefaultInputPoseName("InPose");
 void FAnimNode_LinkedInputPose::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
 	// Make sure to sync input pose debug counters as we still use this pose link in Update/Evaluate etc.
-	// [翻译失败: Make sure to sync input pose debug counters as we still use this pose link in Update/Evaluate etc.]
+ // 确保同步输入姿势调试计数器，因为我们仍然在更新/评估等中使用此姿势链接。
 	InputPose.InitializationCounter.SynchronizeWith(Context.AnimInstanceProxy->GetInitializationCounter());
 }
 
 void FAnimNode_LinkedInputPose::CacheBones_AnyThread(const FAnimationCacheBonesContext& Context)
 {
 	// Make sure to sync input pose debug counters as we still use this pose link in Update/Evaluate etc.
-	// [翻译失败: Make sure to sync input pose debug counters as we still use this pose link in Update/Evaluate etc.]
+ // 确保同步输入姿势调试计数器，因为我们仍然在更新/评估等中使用此姿势链接。
 	InputPose.CachedBonesCounter.SynchronizeWith(Context.AnimInstanceProxy->GetCachedBonesCounter());
 }
 #endif
@@ -47,7 +47,7 @@ void FAnimNode_LinkedInputPose::Evaluate_AnyThread(FPoseContext& Output)
 	if(InputProxy)
 	{
 		// Stash current proxy for restoration after recursion
-		// 存储当前代理以在递归后恢复
+  // 存储当前代理以在递归后恢复
 		FAnimInstanceProxy& OldProxy = *Output.AnimInstanceProxy;
 
 		Output.AnimInstanceProxy = InputProxy;
@@ -57,7 +57,7 @@ void FAnimNode_LinkedInputPose::Evaluate_AnyThread(FPoseContext& Output)
 		InputPose.Evaluate(Output);
 
 		// Restore proxy & required bones after evaluation
-		// 评估后恢复代理和所需的骨骼
+  // 评估后恢复代理和所需的骨骼
 		Output.AnimInstanceProxy = &OldProxy;
 		Output.Pose.SetBoneContainer(&OldProxy.GetRequiredBones());
 	}

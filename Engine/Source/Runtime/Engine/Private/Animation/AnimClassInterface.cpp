@@ -118,7 +118,7 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 const FPropertyAccessLibrary& IAnimClassInterface::GetPropertyAccessLibrary_Direct() const
 {
 	// Legacy support
-	// 旧版支持
+ // 旧版支持
 	const FAnimSubsystem_PropertyAccess& PropertyAccessSubsystem = GetSubsystem<FAnimSubsystem_PropertyAccess>();
 	return PropertyAccessSubsystem.GetLibrary();
 }
@@ -139,7 +139,7 @@ static const UObject* ValuePtrToContainerUObjectPtr(FProperty* Property, const v
 	check(Property->GetOwner<UClass>()); // Check that the outer of this property is a UClass (not another property)
 
 	// Check that the object we are accessing is of the class that contains this property
-	// 检查我们正在访问的对象是否属于包含此属性的类
+ // 检查我们正在访问的对象是否属于包含此属性的类
 	checkf(((const UObject*)ContainerPtr)->IsA(Property->GetOwner<UClass>()), TEXT("'%s' is of class '%s' however property '%s' belongs to class '%s'")
 		, *((const UObject*)ContainerPtr)->GetName()
 		, *((const UObject*)ContainerPtr)->GetClass()->GetName()

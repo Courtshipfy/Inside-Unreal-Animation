@@ -75,7 +75,6 @@ static void OnDefaultProfileCVarsChanged(IConsoleVariable* Variable)
 		if (bClearBuffer || bSetBuffer)
 		{
 			// Make sure no pending skeletal mesh LOD updates
-			// [翻译失败: Make sure no pending skeletal mesh LOD updates]
 			if (IStreamingManager::Get_Concurrent() && IStreamingManager::Get().IsRenderAssetStreamingEnabled(EStreamableRenderAssetType::SkeletalMesh))
 			{
 				IStreamingManager::Get().GetRenderAssetStreamingManager().BlockTillAllRequestsFinished();
@@ -258,30 +257,29 @@ void FSkinWeightProfilesData::OverrideBaseBufferSkinWeightData(USkeletalMesh* Me
 	{
 		const TArray<FSkinWeightProfileInfo>& Profiles = Mesh->GetSkinWeightProfiles();
 		// Try and find a default buffer and whether it is set for this LOD index 
-		// [翻译失败: Try and find a default buffer and whether it is set for this LOD index]
 		int32 DefaultProfileIndex = INDEX_NONE;
 
 		// Setup to not apply any skin weight profiles at this LOD level
-		// 设置为在此 LOD 级别不应用任何蒙皮权重配置文件
+  // 设置为在此 LOD 级别不应用任何蒙皮权重配置文件
 		if (LODIndex >= GSkinWeightProfilesAllowedFromLOD)
 		{
 			DefaultProfileIndex = OnPickOverrideSkinWeightProfile.IsBound() ? OnPickOverrideSkinWeightProfile.Execute(Mesh, MakeArrayView(Profiles), LODIndex) : Profiles.IndexOfByPredicate([LODIndex](FSkinWeightProfileInfo ProfileInfo)
 			{
 				// In case the default LOD index has been overridden check against that
-				// 如果默认 LOD 索引已被覆盖，请检查该索引
+    // 如果默认 LOD 索引已被覆盖，请检查该索引
 				if (GSkinWeightProfilesDefaultLODOverride >= 0)
 				{
 					return (ProfileInfo.DefaultProfile.Default && LODIndex >= GSkinWeightProfilesDefaultLODOverride);
 				}
 
 				// Otherwise check if this profile is set as default and the current LOD index is applicable
-				// 否则检查此配置文件是否设置为默认值以及当前的 LOD 索引是否适用
+    // 否则检查此配置文件是否设置为默认值以及当前的 LOD 索引是否适用
 				return (ProfileInfo.DefaultProfile.Default && LODIndex >= ProfileInfo.DefaultProfileFromLODIndex.Default);
 			});
 		}
 
 		// If we found a profile try and find the override skin weights and apply if found
-		// 如果我们找到一个配置文件，请尝试找到覆盖皮肤权重，如果找到则应用
+  // 如果我们找到一个配置文件，请尝试找到覆盖皮肤权重，如果找到则应用
 		if (DefaultProfileIndex != INDEX_NONE)
 		{
 			const FName ProfileName = Profiles[DefaultProfileIndex].Name;
@@ -310,30 +308,30 @@ void FSkinWeightProfilesData::SetDynamicDefaultSkinWeightProfile(USkeletalMesh* 
 	{
 		const TArray<FSkinWeightProfileInfo>& Profiles = Mesh->GetSkinWeightProfiles();
 		// Try and find a default buffer and whether or not it is set for this LOD index 
-		// 尝试找到一个默认缓冲区以及是否为此 LOD 索引设置了它
+  // 尝试找到一个默认缓冲区以及是否为此 LOD 索引设置了它
 		const int32 DefaultProfileIndex = Profiles.IndexOfByPredicate([LODIndex](FSkinWeightProfileInfo ProfileInfo)
 		{
 			// Setup to not apply any skin weight profiles at this LOD level
-			// 设置为在此 LOD 级别不应用任何蒙皮权重配置文件
+   // 设置为在此 LOD 级别不应用任何蒙皮权重配置文件
 			if (LODIndex < GSkinWeightProfilesAllowedFromLOD)
 			{
 				return false;
 			}
 
 			// In case the default LOD index has been overridden check against that
-			// 如果默认 LOD 索引已被覆盖，请检查该索引
+   // 如果默认 LOD 索引已被覆盖，请检查该索引
 			if (GSkinWeightProfilesDefaultLODOverride >= 0)
 			{
 				return (ProfileInfo.DefaultProfile.Default && LODIndex >= GSkinWeightProfilesDefaultLODOverride);
 			}
 
 			// Otherwise check if this profile is set as default and the current LOD index is applicable
-			// 否则检查此配置文件是否设置为默认值以及当前的 LOD 索引是否适用
+   // 否则检查此配置文件是否设置为默认值以及当前的 LOD 索引是否适用
 			return (ProfileInfo.DefaultProfile.Default && LODIndex >= ProfileInfo.DefaultProfileFromLODIndex.Default);
 		});
 
 		// If we found a profile try and find the override skin weights and apply if found
-		// 如果我们找到一个配置文件，请尝试找到覆盖皮肤权重，如果找到则应用
+  // 如果我们找到一个配置文件，请尝试找到覆盖皮肤权重，如果找到则应用
 		if (DefaultProfileIndex != INDEX_NONE)
 		{
 			const FName& ProfileName = Profiles[DefaultProfileIndex].Name;
@@ -348,7 +346,7 @@ void FSkinWeightProfilesData::SetDynamicDefaultSkinWeightProfile(USkeletalMesh* 
 					if (bSerialization)
 					{
 						// During serialization the CPU copy of the weight should still be available
-						// 在序列化期间，权重的 CPU 副本应该仍然可用
+      // 在序列化期间，权重的 CPU 副本应该仍然可用
 						const uint8* BaseBufferData = BaseBuffer->GetDataVertexBuffer()->GetWeightData();
 						
 						if (ensure(BaseBufferData))
@@ -434,7 +432,7 @@ void FSkinWeightProfilesData::ClearDynamicDefaultSkinWeightProfile(USkeletalMesh
 		{
 #if !WITH_EDITOR
 			// Only release when not in Editor, as any other viewport / editor could be relying on this buffer
-			// 仅在不在编辑器中时释放，因为任何其他视口/编辑器都可能依赖此缓冲区
+   // 仅在不在编辑器中时释放，因为任何其他视口/编辑器都可能依赖此缓冲区
 			ReleaseBuffer(DefaultProfileStack, true);
 #endif // !WITH_EDITOR
 			DefaultOverrideSkinWeightBuffer = nullptr;
@@ -465,7 +463,7 @@ FSkinWeightVertexBuffer* FSkinWeightProfilesData::GetOverrideBuffer(const FSkinW
 	FSkinWeightProfileStack ProfileStack{InProfileStack.Normalized()};
 	
 	// In case we have overridden the default skin weight buffer we do not need to create an override buffer, if it was statically overridden we cannot load any other profile
-	// 如果我们覆盖了默认的皮肤权重缓冲区，我们不需要创建覆盖缓冲区，如果它是静态覆盖的，我们无法加载任何其他配置文件
+ // 如果我们覆盖了默认的皮肤权重缓冲区，我们不需要创建覆盖缓冲区，如果它是静态覆盖的，我们无法加载任何其他配置文件
 	if (bDefaultOverridden && (ProfileStack == DefaultProfileStack || bStaticOverridden))
 	{	
 		if (bStaticOverridden && ProfileStack != DefaultProfileStack)
@@ -537,7 +535,7 @@ void FSkinWeightProfilesData::ReleaseResources()
 	ProfileStackToBuffer.Empty();
 
 	// Never release a default _dynamic_ buffer
-	// 永远不要释放默认的_dynamic_缓冲区
+ // 永远不要释放默认的_dynamic_缓冲区
 	if (bDefaultOverridden && !bStaticOverridden)
 	{
 		ensure(DefaultOverrideSkinWeightBuffer != nullptr);
@@ -655,9 +653,9 @@ void FSkinWeightProfilesData::EnqueueGPUReadback()
 				if (SkinWeightBuffer->GetDataVertexBuffer()->VertexBufferRHI->GetSize())
 				{
 					// Only set up the readback buffer if we have a vertex buffer to read from. It's possible we're still waiting for
-					// 仅当我们有可供读取的顶点缓冲区时才设置读回缓冲区。可能我们还在等待
+     // 仅当我们有可供读取的顶点缓冲区时才设置读回缓冲区。可能我们还在等待
 					// the mesh to be streamed in.
-					// 要流入的网格。
+     // 要流入的网格。
 					Data.BufferReadback.Reset(new FRHIGPUBufferReadback(ReadbackName));
 					Data.BufferReadback->EnqueueCopy(RHICmdList, SkinWeightBuffer->GetDataVertexBuffer()->VertexBufferRHI);
 				}
@@ -754,7 +752,7 @@ void FSkinWeightProfilesData::InitialiseProfileBuffer(const FSkinWeightProfileSt
 	LLM_SCOPE(ELLMTag::SkeletalMesh);
 
 	// Have we already constructed this particular profile stack?
-	// 我们是否已经构建了这个特定的配置文件堆栈？
+ // 我们是否已经构建了这个特定的配置文件堆栈？
 	if (HasProfileStack(InProfileStack))
 	{
 		return;
@@ -769,9 +767,9 @@ void FSkinWeightProfilesData::InitialiseProfileBuffer(const FSkinWeightProfileSt
 			(!FSkinWeightProfileManager::HandleDelayedLoads() && BaseBuffer->GetNeedsCPUAccess());  
 
 		// If we have the weight data, then just use that directly. Otherwise, assume that we've been called as a result of a successful
-		// 如果我们有重量数据，那么就直接使用它。否则，假设我们因成功而被呼叫
+  // 如果我们有重量数据，那么就直接使用它。否则，假设我们因成功而被呼叫
 		// GPU readback.
-		// GPU 读回。
+  // GPU 读回。
 		if (bIsCPUData)
 		{
 			BaseBufferData = BaseBuffer->GetDataVertexBuffer()->GetWeightData();
@@ -779,7 +777,7 @@ void FSkinWeightProfilesData::InitialiseProfileBuffer(const FSkinWeightProfileSt
 		else
 		{
 			// Make sure we have a lock on the readback data, in case ResetGPUReadback is called while trying to access the data.
-			// 确保我们锁定读回数据，以防在尝试访问数据时调用 ResetGPUReadback。
+   // 确保我们锁定读回数据，以防在尝试访问数据时调用 ResetGPUReadback。
 			ReadbackData.Mutex.Lock();
 			ensure(IsDataReadbackFinished());
 			BaseBufferData = ReadbackData.ReadbackData.GetData();
@@ -797,7 +795,7 @@ void FSkinWeightProfilesData::InitialiseProfileBuffer(const FSkinWeightProfileSt
 			if (!bIsCPUData)
 			{
 				// Unlock the readback data as soon as we're done with it.
-				// 一旦我们完成读回数据，就解锁它。
+    // 一旦我们完成读回数据，就解锁它。
 				ReadbackData.Mutex.Unlock();
 			}
 			
@@ -810,7 +808,7 @@ void FSkinWeightProfilesData::InitialiseProfileBuffer(const FSkinWeightProfileSt
 		else if (!bIsCPUData)
 		{
 			// Unlock the readback data immediately in case of failure.
-			// 一旦失败立即解锁回读数据。
+   // 一旦失败立即解锁回读数据。
 			ReadbackData.Mutex.Unlock();
 		}
 
@@ -839,7 +837,7 @@ void FSkinWeightProfilesData::ApplyOverrideProfileStack(
 			if (const FRuntimeSkinWeightProfileData* ProfilePtr = OverrideData.Find(ProfileName))
 			{
 				// Only copy the base buffer's weights when applying the first layer.
-				// 仅在应用第一层时复制基础缓冲区的权重。
+    // 仅在应用第一层时复制基础缓冲区的权重。
 				ProfilePtr->ApplyOverrides(OverrideBuffer);
 			}	
 		}
@@ -878,7 +876,7 @@ void FRuntimeSkinWeightProfileData::ApplyOverrides(FSkinWeightVertexBuffer* Over
 		const uint8 WeightDataOffset = OverrideBuffer->GetBoneIndexByteSize() * OverrideBuffer->GetMaxBoneInfluences();
 
 		// Apply overrides
-		// 应用覆盖
+  // 应用覆盖
 		for (auto VertexIndexOverridePair : VertexIndexToInfluenceOffset)
 		{
 			const uint32 VertexIndex = VertexIndexOverridePair.Key;
@@ -896,7 +894,7 @@ void FRuntimeSkinWeightProfileData::ApplyOverrides(FSkinWeightVertexBuffer* Over
 			check(b16BitBoneIndices == OverrideBuffer->Use16BitBoneIndex());
 #endif
 			// BoneIDs either contains FBoneIndexType entries spanning (2) uint8 values, or single uint8 bone indices (1)
-			// BoneID 包含跨越 (2) 个 uint8 值的 FBoneIndexType 条目，或包含单个 uint8 骨骼索引 (1)
+   // BoneID 包含跨越 (2) 个 uint8 值的 FBoneIndexType 条目，或包含单个 uint8 骨骼索引 (1)
 			const uint32 BoneIndexByteSize = OverrideBuffer->GetBoneIndexByteSize();
 			const uint32 BoneWeightByteSize = OverrideBuffer->GetBoneWeightByteSize();
 			FMemory::Memcpy(BoneData, &BoneIDs[InfluenceOffset * NumWeightsPerVertex * BoneIndexByteSize], BoneIndexByteSize * NumWeightsPerVertex);
@@ -934,7 +932,7 @@ void FRuntimeSkinWeightProfileData::ApplyDefaultOverride(FSkinWeightVertexBuffer
 				check(b16BitBoneIndices == Buffer->Use16BitBoneIndex());
 #endif
 				// BoneIDs either contains FBoneIndexType entries spanning (2) uint8 values, or single uint8 bone indices (1)
-				// BoneID 包含跨越 (2) 个 uint8 值的 FBoneIndexType 条目，或包含单个 uint8 骨骼索引 (1)
+    // BoneID 包含跨越 (2) 个 uint8 值的 FBoneIndexType 条目，或包含单个 uint8 骨骼索引 (1)
 				FMemory::Memcpy((void*)BoneData, &BoneIDs[InfluenceOffset * NumWeightsPerVertex * Buffer->GetBoneIndexByteSize()], Buffer->GetBoneIndexByteSize() * NumWeightsPerVertex);
 				FMemory::Memcpy((void*)WeightData, &BoneWeights[InfluenceOffset * NumWeightsPerVertex], sizeof(uint8) * NumWeightsPerVertex);
 			}

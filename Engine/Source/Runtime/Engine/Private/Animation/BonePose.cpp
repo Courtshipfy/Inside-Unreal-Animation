@@ -217,7 +217,7 @@ void BuildPoseFromRawDataInternal(const TArray<FRawAnimSequenceTrack>& InAnimati
 	{
 		const int32 SkeletonBoneIndex = TrackToSkeletonMapTable[TrackIndex].BoneTreeIndex;
 		// not sure it's safe to assume that SkeletonBoneIndex can never be INDEX_NONE
-		// 不确定假设 SkeletonBoneIndex 永远不会是 INDEX_NONE 是否安全
+  // 不确定假设 SkeletonBoneIndex 永远不会是 INDEX_NONE 是否安全
 		if ((SkeletonBoneIndex != INDEX_NONE) && (SkeletonBoneIndex < MAX_BONES))
 		{
 			const FCompactPoseBoneIndex PoseBoneIndex = RequiredBones.GetCompactPoseIndexFromSkeletonIndex(SkeletonBoneIndex);
@@ -229,20 +229,20 @@ void BuildPoseFromRawDataInternal(const TArray<FRawAnimSequenceTrack>& InAnimati
 					if (PoseBoneIndex == VB.VBIndex)
 					{
 						// Remove this bone as we have written data for it
-						// 删除这根骨头，因为我们已经为其写入了数据
+      // 删除这根骨头，因为我们已经为其写入了数据
 						VBCompactPoseData.RemoveAtSwap(Idx, EAllowShrinking::No);
 						break; //Modified TArray so must break here
 					}
 				}
 				// extract animation
-				// 提取动画
+    // 提取动画
 
 				const FRawAnimSequenceTrack& TrackToExtract = InAnimationData[TrackIndex];
 
 				const FTransformCurve* const * AdditiveBoneTransformCurve = AdditiveBoneTransformCurves ? AdditiveBoneTransformCurves->Find(SkeletonBoneIndex) : nullptr;
 
 				// Bail out (with rather wacky data) if data is empty for some reason.
-				// 如果由于某种原因数据为空，则退出（使用相当古怪的数据）。
+    // 如果由于某种原因数据为空，则退出（使用相当古怪的数据）。
 				if (TrackToExtract.PosKeys.Num() == 0 || TrackToExtract.RotKeys.Num() == 0)
 				{
 					InOutPose[PoseBoneIndex].SetIdentity();
@@ -287,7 +287,7 @@ void BuildPoseFromRawDataInternal(const TArray<FRawAnimSequenceTrack>& InAnimati
 	}
 
 	//Build Virtual Bones
-	//构建虚拟骨骼
+ // 构建虚拟骨骼
 	if (VBCompactPoseData.Num() > 0)
 	{
 		FCSPose<FCompactPose> CSPose1;

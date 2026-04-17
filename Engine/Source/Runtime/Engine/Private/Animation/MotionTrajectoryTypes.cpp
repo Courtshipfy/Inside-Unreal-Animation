@@ -58,7 +58,7 @@ namespace
 bool FTrajectorySample::IsZeroSample() const
 {
 	// AccumulatedTime is specifically omitted here to allow for the zero sample semantic across an entire trajectory range
-	// 这里特别省略了 AccumulatedTime，以允许整个轨迹范围内的零样本语义
+ // 这里特别省略了 AccumulatedTime，以允许整个轨迹范围内的零样本语义
 	return LinearVelocity.IsNearlyZero()
 		&& Transform.GetTranslation().IsNearlyZero()
 		&& Transform.GetRotation().IsIdentity();

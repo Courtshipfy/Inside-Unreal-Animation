@@ -38,7 +38,7 @@ FTransform UKismetAnimationLibrary::K2_LookAt(const FTransform& CurrentTransform
 	if (AimVector.IsNearlyZero())
 	{
 		// aim vector should be normalized
-		// 目标向量应该标准化
+  // 目标向量应该标准化
 		FFrame::KismetExecutionMessage(*FString::Printf(TEXT("AimVector should not be zero. Please specify which direction.")), ELogVerbosity::Warning, AnimationLibraryWarning);
 		return FTransform::Identity;
 	}
@@ -46,7 +46,7 @@ FTransform UKismetAnimationLibrary::K2_LookAt(const FTransform& CurrentTransform
 	if (bUseUpVector && UpVector.IsNearlyZero())
 	{
 		// upvector has to be normalized
-		// 上向量必须标准化
+  // 上向量必须标准化
 		FFrame::KismetExecutionMessage(*FString::Printf(TEXT("LookUpVector should not be zero. Please specify which direction.")), ELogVerbosity::Warning, AnimationLibraryWarning);
 		bUseUpVector = false;
 	}
@@ -54,7 +54,7 @@ FTransform UKismetAnimationLibrary::K2_LookAt(const FTransform& CurrentTransform
 	if (ClampConeInDegree < 0.f || ClampConeInDegree > 180.f)
 	{
 		// ClampCone is out of range, it will be clamped to (0.f, 180.f)
-		// ClampCone 超出范围，它将被钳位到 (0.f, 180.f)
+  // ClampCone 超出范围，它将被钳位到 (0.f, 180.f)
 		FFrame::KismetExecutionMessage(*FString::Printf(TEXT("ClampConeInDegree should range from (0, 180). ")), ELogVerbosity::Warning, AnimationLibraryWarning);
 	}
 
@@ -111,7 +111,7 @@ FVector UKismetAnimationLibrary::K2_MakePerlinNoiseVectorAndRemap(float X, float
 float UKismetAnimationLibrary::K2_MakePerlinNoiseAndRemap(float Value, float RangeOutMin, float RangeOutMax)
 {
 	// perlin noise output is always from [-1, 1]
-	// perlin 噪声输出始终来自 [-1, 1]
+ // perlin 噪声输出始终来自 [-1, 1]
 	return FMath::GetMappedRangeValueClamped(FVector2f(-1.f, 1.f), FVector2f(RangeOutMin, RangeOutMax), FMath::PerlinNoise1D(Value));
 }
 
@@ -130,7 +130,7 @@ float UKismetAnimationLibrary::K2_CalculateVelocityFromPositionHistory(
 	}
 
 	// if the number of samples changes down clear the history
-	// 如果样本数量减少则清除历史记录
+ // 如果样本数量减少则清除历史记录
 	if (History.Positions.Num() > NumberOfSamples)
 	{
 		History.Positions.Reset();
@@ -145,9 +145,9 @@ float UKismetAnimationLibrary::K2_CalculateVelocityFromPositionHistory(
 	}
 
 	// append to the history until it's full and then loop around when filling it 
-	// 追加到历史记录直到满，然后在填充时循环
+ // 追加到历史记录直到满，然后在填充时循环
 	// to reuse the memory
-	// 重用内存
+ // 重用内存
 	if (History.Positions.Num() == 0)
 	{
 		History.Positions.Reserve(NumberOfSamples);
@@ -181,7 +181,7 @@ float UKismetAnimationLibrary::K2_CalculateVelocityFromPositionHistory(
 	}
 
 	// compute average velocity
-	// 计算平均速度
+ // 计算平均速度
 	float LengthOfV = 0.0f;
 	for (int32 i = 0; i < History.Velocities.Num(); i++)
 	{
@@ -189,7 +189,7 @@ float UKismetAnimationLibrary::K2_CalculateVelocityFromPositionHistory(
 	}
 
 	// Avoids NaN due to the FMath::Max instruction above.
-	// 由于上面的 FMath::Max 指令，避免了 NaN。
+ // 由于上面的 FMath::Max 指令，避免了 NaN。
 	LengthOfV /= float(History.Velocities.Num());
 
 	if (VelocityMin < 0.0f || VelocityMax < 0.0f || VelocityMax <= VelocityMin)
@@ -198,7 +198,7 @@ float UKismetAnimationLibrary::K2_CalculateVelocityFromPositionHistory(
 	}
 
 	// Avoids NaN due to the condition above.
-	// 由于上述条件而避免 NaN。
+ // 由于上述条件而避免 NaN。
 	return FMath::Clamp((LengthOfV - VelocityMin) / (VelocityMax - VelocityMin), 0.f, 1.f);
 }
 
@@ -222,7 +222,7 @@ float UKismetAnimationLibrary::K2_CalculateVelocityFromSockets(
 		if (FrameOfReference != NAME_None)
 		{
 			// make the bone's / socket's transform relative to the frame of reference.
-			// 使骨骼/插槽相对于参考系进行变换。
+   // 使骨骼/插槽相对于参考系进行变换。
 			FTransform FrameOfReferenceTransform = Component->GetSocketTransform(FrameOfReference, SocketSpace);
 			SocketTransform = SocketTransform.GetRelativeTransform(FrameOfReferenceTransform);
 		}
@@ -295,14 +295,14 @@ float UKismetAnimationLibrary::CalculateDirection(const FVector& Velocity, const
 		const FVector NormalizedVel = Velocity.GetSafeNormal2D();
 
 		// get a cos(alpha) of forward vector vs velocity
-		// 获取前向矢量与速度的 cos(alpha)
+  // 获取前向矢量与速度的 cos(alpha)
 		const float ForwardCosAngle = static_cast<float>(FVector::DotProduct(ForwardVector, NormalizedVel));
 		// now get the alpha and convert to degree
-		// 现在获取 alpha 并转换为度数
+  // 现在获取 alpha 并转换为度数
 		float ForwardDeltaDegree = FMath::RadiansToDegrees(FMath::Acos(ForwardCosAngle));
 
 		// depending on where right vector is, flip it
-		// 根据正确向量的位置，翻转它
+  // 根据正确向量的位置，翻转它
 		const float RightCosAngle = static_cast<float>(FVector::DotProduct(RightVector, NormalizedVel));
 		if (RightCosAngle < 0.f)
 		{

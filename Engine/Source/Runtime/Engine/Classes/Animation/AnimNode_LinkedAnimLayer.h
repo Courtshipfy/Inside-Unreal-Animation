@@ -32,20 +32,30 @@ public:
 
 	/** The layer in the interface to use */
 	/** 界面中要使用的层 */
+	/** 界面中要使用的层 */
+	/** 界面中要使用的层 */
 	UPROPERTY(EditAnywhere, Category = Settings)
 	FName Layer;
+	/** 设置图层的“覆盖”外部管理链接实例。 */
 
+	/** 设置图层的“覆盖”外部管理链接实例。 */
 	/** Set the layer's 'overlay' externally managed linked instance. */
+	/** FAnimNode_Base接口 */
 	/** 设置图层的“覆盖”外部管理链接实例。 */
 	ENGINE_API void SetLinkedLayerInstance(const UAnimInstance* InOwningAnimInstance, UAnimInstance* InNewLinkedInstance);
+	/** FAnimNode_Base接口 */
 
 	/** FAnimNode_Base interface */
+	/** FAnimNode_CustomProperty接口 */
 	/** FAnimNode_Base接口 */
 	ENGINE_API virtual void OnInitializeAnimInstance(const FAnimInstanceProxy* InProxy, const UAnimInstance* InAnimInstance) override;
 	virtual bool NeedsOnInitializeAnimInstance() const override { return true; }
+	/** FAnimNode_LinkedAnimGraph接口 */
+	/** FAnimNode_CustomProperty接口 */
 	ENGINE_API void OnUninitializeAnimInstance(UAnimInstance* InAnimInstance);
 
 	/** FAnimNode_CustomProperty interface */
+	/** FAnimNode_LinkedAnimGraph接口 */
 	/** FAnimNode_CustomProperty接口 */
 	ENGINE_API virtual void InitializeProperties(const UObject* InSourceInstance, UClass* InTargetClass) override;
 	
@@ -60,7 +70,7 @@ public:
 
 #if WITH_EDITOR
 	// Event fired when the instance we are running has changed
-	// 当我们正在运行的实例发生更改时触发事件
+ // 当我们正在运行的实例发生更改时触发事件
 	FSimpleMulticastDelegate& OnInstanceChanged() { return OnInstanceChangedEvent; }
 	ENGINE_API virtual void HandleObjectsReinstanced_Impl(UObject* InSourceObject, UObject* InTargetObject, const TMap<UObject*, UObject*>& OldToNewInstanceMap) override;
 #endif
@@ -69,18 +79,18 @@ protected:
 	ENGINE_API void InitializeSelfLayer(const UAnimInstance* SelfAnimInstance);
 
 	// Initialize the source properties to copy from
-	// 初始化要复制的源属性
+ // 初始化要复制的源属性
 	ENGINE_API void InitializeSourceProperties(const UAnimInstance* InAnimInstance);
 
 	ENGINE_API virtual bool CanTeardownLinkedInstance(const UAnimInstance* LinkedInstance) const override;
 
 	// Cleanup Shared LinkedLayers Data associated with InPreviousTargetInstance
-	// 清理与 InPreviousTargetInstance 关联的共享 LinkedLayers 数据
+ // 清理与 InPreviousTargetInstance 关联的共享 LinkedLayers 数据
 	ENGINE_API void CleanupSharedLinkedLayersData(const UAnimInstance* InOwningAnimInstance, UAnimInstance* InPreviousTargetInstance);
 	
 #if WITH_EDITOR
 	// Event fired when the instance we are running has changed
-	// 当我们正在运行的实例发生更改时触发事件
+ // 当我们正在运行的实例发生更改时触发事件
 	FSimpleMulticastDelegate OnInstanceChangedEvent;
 #endif
 

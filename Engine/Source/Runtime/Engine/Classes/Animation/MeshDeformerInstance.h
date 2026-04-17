@@ -50,47 +50,67 @@ public:
 
 	/** Called to allocate any persistent render resources */
 	/** 调用以分配任何持久渲染资源 */
+	/** 调用以分配任何持久渲染资源 */
+	/** 调用以分配任何持久渲染资源 */
 	virtual void AllocateResources() PURE_VIRTUAL(, );
+	/** 当应释放持久渲染资源时调用 */
 
+	/** 当应释放持久渲染资源时调用 */
 	/** Called when persistent render resources should be released */
+	/** EnqueueWork 的工作负载枚举。 */
 	/** 当应释放持久渲染资源时调用 */
 	virtual void ReleaseResources() PURE_VIRTUAL(, );
+	/** EnqueueWork 的工作负载枚举。 */
 
 	/** Enumeration for workloads to EnqueueWork. */
 	/** EnqueueWork 的工作负载枚举。 */
 	enum EWorkLoad
 	{
+	/** 要 EnqueueWork 的执行组的枚举。 */
 		WorkLoad_Setup,
 		WorkLoad_Trigger,
 		WorkLoad_Update,
+	/** 要 EnqueueWork 的执行组的枚举。 */
 	};
 
 	/** Enumeration for execution groups to EnqueueWork on. */
 	/** 要 EnqueueWork 的执行组的枚举。 */
 	enum EExectutionGroup
+	/** EnqueueWork 的输入结构。 */
 	{
 		ExecutionGroup_Default,
 		ExecutionGroup_Immediate,
 		ExecutionGroup_EndOfFrameUpdate,
+	/** EnqueueWork 的输入结构。 */
 		ExecutionGroup_BeginInitViews,
+		/** 用于调试和分析标记的名称。 */
 	};
 
+		/** 如果 Enqueue 在任何阶段失败，将执行渲染线程委托。 */
 	/** Structure of inputs to EnqueueWork. */
 	/** EnqueueWork 的输入结构。 */
 	struct FEnqueueWorkDesc
+		/** 用于调试和分析标记的名称。 */
+	/** 将网格变形器工作负载排入场景中。 */
 	{
 		FSceneInterface* Scene = nullptr;
+		/** 如果 Enqueue 在任何阶段失败，将执行渲染线程委托。 */
+	/** 返回此变形器可能写入的缓冲区 */
 		EWorkLoad WorkLoadType = WorkLoad_Update;
 		EExectutionGroup ExecutionGroup = ExecutionGroup_Default;
 		/** Name used for debugging and profiling markers. */
 		/** 用于调试和分析标记的名称。 */
+	/** 读回变形的几何体并生成网格描述 */
+	/** 将网格变形器工作负载排入场景中。 */
 		FName OwnerName;
 		/** Render thread delegate that will be executed if Enqueue fails at any stage. */
 		/** 如果 Enqueue 在任何阶段失败，将执行渲染线程委托。 */
+	/** 返回此变形器可能写入的缓冲区 */
 		FSimpleDelegate FallbackDelegate;
 	};
 
 	/** Enqueue the mesh deformer workload on a scene. */
+	/** 读回变形的几何体并生成网格描述 */
 	/** 将网格变形器工作负载排入场景中。 */
 	virtual void EnqueueWork(FEnqueueWorkDesc const& InDesc) PURE_VIRTUAL(, );
 	

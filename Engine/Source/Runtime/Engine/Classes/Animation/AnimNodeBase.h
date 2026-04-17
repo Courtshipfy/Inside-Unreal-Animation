@@ -103,6 +103,8 @@ struct FAnimNodeTracker
 
 /** DEPRECATED - This system is now supplanted by UE::Anim::FMessageStack - Helper RAII object to cleanup a node added to the node tracker */
 /** 已弃用 - 该系统现已被 UE::Anim::FMessageStack 取代 - Helper RAII 对象，用于清理添加到节点跟踪器的节点 */
+/** 已弃用 - 该系统现已被 UE::Anim::FMessageStack 取代 - Helper RAII 对象，用于清理添加到节点跟踪器的节点 */
+/** 已弃用 - 该系统现已被 UE::Anim::FMessageStack 取代 - Helper RAII 对象，用于清理添加到节点跟踪器的节点 */
 class FScopedAnimNodeTracker
 {
 public:
@@ -126,7 +128,9 @@ private:
 	FAnimNodeTracker::FKey TrackedKey;
 };
 
+/** 动画树更新期间共享的持久状态  */
 
+/** 动画树更新期间共享的持久状态  */
 /** Persistent state shared during animation tree update  */
 /** 动画树更新期间共享的持久状态  */
 struct FAnimationUpdateSharedContext
@@ -134,7 +138,7 @@ struct FAnimationUpdateSharedContext
 	FAnimationUpdateSharedContext() = default;
 
 	// Non-copyable
-	// 不可复制
+ // 不可复制
 	FAnimationUpdateSharedContext(FAnimationUpdateSharedContext& ) = delete;
 	FAnimationUpdateSharedContext& operator=(const FAnimationUpdateSharedContext&) = delete;
 
@@ -144,7 +148,7 @@ struct FAnimationUpdateSharedContext
 #endif
 
 	// Message stack used for storing scoped messages and tags during execution
-	// 消息堆栈用于在执行期间存储作用域消息和标记
+ // 消息堆栈用于在执行期间存储作用域消息和标记
 	UE::Anim::FMessageStack MessageStack;
 
 	void CopyForCachedUpdate(FAnimationUpdateSharedContext& Source)
@@ -155,6 +159,8 @@ PRAGMA_DISABLE_DEPRECATION_WARNINGS
 PRAGMA_ENABLE_DEPRECATION_WARNINGS
 #endif
 		MessageStack.CopyForCachedUpdate(Source.MessageStack);
+/** 更新/评估上下文的基类 */
+/** 更新/评估上下文的基类 */
 	}
 };
 
@@ -171,7 +177,7 @@ public:
 
 protected:
 	// DEPRECATED - Please use constructor that uses an FAnimInstanceProxy*
-	// 已弃用 - 请使用使用 FAnimInstanceProxy* 的构造函数
+ // 已弃用 - 请使用使用 FAnimInstanceProxy* 的构造函数
 	ENGINE_API FAnimationBaseContext(UAnimInstance* InAnimInstance);
 
 	ENGINE_API FAnimationBaseContext(FAnimInstanceProxy* InAnimInstanceProxy, FAnimationUpdateSharedContext* InSharedContext = nullptr);
@@ -186,20 +192,20 @@ public:
 
 public:
 	// Get the Blueprint IAnimClassInterface associated with this context, if there is one.
-	// 获取与此上下文关联的蓝图 IAnimClassInterface（如果有）。
+ // 获取与此上下文关联的蓝图 IAnimClassInterface（如果有）。
 	// Note: This can return NULL, so check the result.
-	// 注意：这可能会返回 NULL，因此请检查结果。
+ // 注意：这可能会返回 NULL，因此请检查结果。
 	ENGINE_API IAnimClassInterface* GetAnimClass() const;
 
 	// Get the anim instance associated with the current proxy
-	// 获取与当前代理关联的动画实例
+ // 获取与当前代理关联的动画实例
 	ENGINE_API UObject* GetAnimInstanceObject() const;
 
 #if WITH_EDITORONLY_DATA
 	// Get the AnimBlueprint associated with this context, if there is one.
-	// 获取与此上下文关联的 AnimBlueprint（如果有）。
+ // 获取与此上下文关联的 AnimBlueprint（如果有）。
 	// Note: This can return NULL, so check the result.
-	// 注意：这可能会返回 NULL，因此请检查结果。
+ // 注意：这可能会返回 NULL，因此请检查结果。
 	ENGINE_API UAnimBlueprint* GetAnimBlueprint() const;
 #endif //WITH_EDITORONLY_DATA
 
@@ -232,7 +238,7 @@ public:
 #endif
 
 	// Get the innermost scoped message of the specified type
-	// 获取指定类型的最内层作用域消息
+ // 获取指定类型的最内层作用域消息
 	template<typename TGraphMessageType>
 	TGraphMessageType* GetMessage() const
 	{
@@ -252,7 +258,7 @@ public:
 	}
 
 	// Find the innermost scoped message of the specified type matching the condition of InFunction
-	// 查找与 InFunction 的条件匹配的指定类型的最内层作用域消息
+ // 查找与 InFunction 的条件匹配的指定类型的最内层作用域消息
 	template<typename TGraphMessageType>
 	TGraphMessageType* FindMessage(TFunctionRef<bool(TGraphMessageType&)> InFunction) const
 	{
@@ -276,7 +282,7 @@ public:
 	}
 
 	// Get the innermost scoped message of the specified type
-	// 获取指定类型的最内层作用域消息
+ // 获取指定类型的最内层作用域消息
 	template<typename TGraphMessageType>
 	TGraphMessageType& GetMessageChecked() const
 	{
@@ -307,31 +313,35 @@ public:
 	}
 
 	// Get the current node Id, set when we recurse into graph traversal functions from pose links
-	// 获取当前节点Id，当我们从位姿链接递归到图遍历函数时设置
+ // 获取当前节点Id，当我们从位姿链接递归到图遍历函数时设置
 	int32 GetCurrentNodeId() const { return CurrentNodeId; }
 
 	// Get the previous node Id, set when we recurse into graph traversal functions from pose links
-	// 获取前一个节点Id，当我们从位姿链接递归到图遍历函数时设置
+ // 获取前一个节点Id，当我们从位姿链接递归到图遍历函数时设置
 	int32 GetPreviousNodeId() const { return PreviousNodeId; }
 
 	// Get whether the graph branch of this context is active (i.e. NOT blending out). 
-	// 获取此上下文的图形分支是否处于活动状态（即不混合）。
+ // 获取此上下文的图形分支是否处于活动状态（即不混合）。
+	/** 节点上下文向代理注册日志消息的接口 */
 	bool IsActive() const { return bIsActive; }
 
 protected:
 	
+/** 动画树初始化期间传递的初始化上下文 */
 	// Whether this context belongs to graph branch (i.e. NOT blending out).
-	// 此上下文是否属于图分支（即不混合）。
+ // 此上下文是否属于图分支（即不混合）。
 	bool bIsActive = true;
 
 	// The current node ID, set when we recurse into graph traversal functions from pose links
-	// 当前节点 ID，当我们从位姿链接递归到图遍历函数时设置
+ // 当前节点 ID，当我们从位姿链接递归到图遍历函数时设置
+	/** 节点上下文向代理注册日志消息的接口 */
 	int32 CurrentNodeId;
 
 	// The previous node ID, set when we recurse into graph traversal functions from pose links
-	// 前一个节点 ID，当我们从位姿链接递归到图遍历函数时设置
+ // 前一个节点 ID，当我们从位姿链接递归到图遍历函数时设置
 	int32 PreviousNodeId;
 
+/** 动画树初始化期间传递的初始化上下文 */
 protected:
 
 	/** Interface for node contexts to register log messages with the proxy */
@@ -350,6 +360,7 @@ public:
 	{
 	}
 };
+/** 更新动画树更新期间传递的上下文 */
 
 /**
  * Context passed around when RequiredBones array changed and cached bones indices have to be refreshed.
@@ -361,6 +372,7 @@ public:
 	FAnimationCacheBonesContext(FAnimInstanceProxy* InAnimInstanceProxy)
 		: FAnimationBaseContext(InAnimInstanceProxy)
 	{
+/** 更新动画树更新期间传递的上下文 */
 	}
 
 	FAnimationCacheBonesContext WithNodeId(int32 InNodeId) const
@@ -421,9 +433,9 @@ public:
 		Result.SharedContext = InSharedContext;
 
 		// This is currently only used in the case of cached poses, where we dont want to preserve the previous node, so clear it here
-		// 目前仅在缓存姿势的情况下使用，我们不想保留前一个节点，所以在这里清除它
+  // 目前仅在缓存姿势的情况下使用，我们不想保留前一个节点，所以在这里清除它
 	//	Result.PreviousNodeId = INDEX_NONE;
-	//	结果.PreviousNodeId = INDEX_NONE;
+ // 结果.PreviousNodeId = INDEX_NONE;
 
 		return Result;
 	}
@@ -475,30 +487,34 @@ public:
 	{ 
 		FAnimationUpdateContext Result(*this);
 		Result.SetNodeId(InNodeId);
+/** 动画树评估期间传递的评估上下文 */
 		return Result; 
 	}
 
 	// Returns persistent state that is tracked through animation tree update
-	// 返回通过动画树更新跟踪的持久状态
+ // 返回通过动画树更新跟踪的持久状态
+	/* 这些姿势/曲线/属性是使用 MemStack 分配的。您不应该在堆栈之外使用它。 */
 	FAnimationUpdateSharedContext* GetSharedContext() const
 	{
 		return SharedContext;
 	}
 
 	// Returns the final blend weight contribution for this stage
-	// 返回此阶段的最终混合权重贡献
+ // 返回此阶段的最终混合权重贡献
 	float GetFinalBlendWeight() const { return CurrentWeight; }
+/** 动画树评估期间传递的评估上下文 */
 
 	// Returns the weight modifier for root motion (as root motion weight wont always match blend weight)
-	// 返回根运动的权重修改器（因为根运动权重并不总是与混合权重匹配）
+ // 返回根运动的权重修改器（因为根运动权重并不总是与混合权重匹配）
 	float GetRootMotionWeightModifier() const { return RootMotionWeightModifier; }
 
+	/* 这些姿势/曲线/属性是使用 MemStack 分配的。您不应该在堆栈之外使用它。 */
 	// Returns the delta time for this update, in seconds
-	// 返回此更新的增量时间（以秒为单位）
+ // 返回此更新的增量时间（以秒为单位）
 	float GetDeltaTime() const { return DeltaTime; }
 
 	// Log update message
-	// 记录更新消息
+ // 记录更新消息
 	void LogMessage(const TSharedRef<FTokenizedMessage>& InMessage) const { LogMessageInternal("Update", InMessage); }
 	void LogMessage(EMessageSeverity::Type InSeverity, FText InMessage) const { LogMessage(FTokenizedMessage::Create(InSeverity, InMessage)); }
 };
@@ -519,7 +535,7 @@ public:
 	friend class FScopedExpectsAdditiveOverride;
 	
 	// This constructor allocates a new uninitialized pose for the specified anim instance
-	// 此构造函数为指定的动画实例分配一个新的未初始化姿势
+ // 此构造函数为指定的动画实例分配一个新的未初始化姿势
 	FPoseContext(FAnimInstanceProxy* InAnimInstanceProxy, bool bInExpectsAdditivePose = false)
 		: FAnimationBaseContext(InAnimInstanceProxy)
 		, bExpectsAdditivePose(bInExpectsAdditivePose)
@@ -528,7 +544,7 @@ public:
 	}
 
 	// This constructor allocates a new uninitialized pose, copying non-pose state from the source context
-	// 此构造函数分配一个新的未初始化姿势，从源上下文复制非姿势状态
+ // 此构造函数分配一个新的未初始化姿势，从源上下文复制非姿势状态
 	FPoseContext(const FPoseContext& SourceContext, bool bInOverrideExpectsAdditivePose = false)
 		: FAnimationBaseContext(SourceContext.AnimInstanceProxy)
 		, bExpectsAdditivePose(SourceContext.bExpectsAdditivePose || bInOverrideExpectsAdditivePose)
@@ -540,7 +556,7 @@ public:
 	}
 
 	// This constructor allocates a new uninitialized pose, using the provided BoneContainer (when there is no AnimInstanceProxy available)
-	// 此构造函数使用提供的 BoneContainer 分配一个新的未初始化姿势（当没有可用的 AnimInstanceProxy 时）
+ // 此构造函数使用提供的 BoneContainer 分配一个新的未初始化姿势（当没有可用的 AnimInstanceProxy 时）
 	FPoseContext(const FBoneContainer& InRequiredBones, bool bInExpectsAdditivePose = false)
 		: FAnimationBaseContext()
 		, bExpectsAdditivePose(bInExpectsAdditivePose)
@@ -554,7 +570,7 @@ public:
 	void Initialize(FAnimInstanceProxy* InAnimInstanceProxy) { InitializeImpl(InAnimInstanceProxy); }
 
 	// Log evaluation message
-	// 记录评估消息
+ // 记录评估消息
 	void LogMessage(const TSharedRef<FTokenizedMessage>& InMessage) const { LogMessageInternal("Evaluate", InMessage); }
 	void LogMessage(EMessageSeverity::Type InSeverity, FText InMessage) const { LogMessage(FTokenizedMessage::Create(InSeverity, InMessage)); }
 
@@ -596,18 +612,19 @@ public:
 		Curve = Other.Curve;
 		CustomAttributes = Other.CustomAttributes;
 		bExpectsAdditivePose = Other.bExpectsAdditivePose;
+/** 动画树评估期间传递的评估上下文 */
 		return *this;
 	}
 
 	// Is this pose expected to be additive
-	// 这个姿势预计会是累加的吗
+ // 这个姿势预计会是累加的吗
 	bool ExpectsAdditivePose() const { return bExpectsAdditivePose; }
 
 private:
 	ENGINE_API void InitializeImpl(FAnimInstanceProxy* InAnimInstanceProxy);
 
 	// Is this pose expected to be an additive pose
-	// 这个姿势预计是一个附加姿势吗
+ // 这个姿势预计是一个附加姿势吗
 	bool bExpectsAdditivePose;
 };
 
@@ -618,6 +635,7 @@ class FScopedExpectsAdditiveOverride
 public:
 	FScopedExpectsAdditiveOverride(FPoseContext& InContext, bool bInExpectsAdditive)
 		: Context(InContext)
+/** 动画树评估期间传递的评估上下文 */
 	{
 		bPreviousValue = Context.ExpectsAdditivePose();
 		Context.bExpectsAdditivePose = bInExpectsAdditive;
@@ -645,48 +663,64 @@ public:
 
 public:
 	// This constructor allocates a new uninitialized pose for the specified anim instance
-	// 此构造函数为指定的动画实例分配一个新的未初始化姿势
+ // 此构造函数为指定的动画实例分配一个新的未初始化姿势
+		/** 要显示的此节点项的调试文本。 */
 	FComponentSpacePoseContext(FAnimInstanceProxy* InAnimInstanceProxy)
 		: FAnimationBaseContext(InAnimInstanceProxy)
 	{
+		/** 我们是否提供一个姿势而不是修改一个姿势（例如播放动画）。 */
 		// No need to initialize, done through FA2CSPose::AllocateLocalPoses
-		// 无需初始化，通过FA2CSPose::AllocateLocalPoses完成
+  // 无需初始化，通过FA2CSPose::AllocateLocalPoses完成
 	}
+		/** 我们连接到的节点。 */
 
 	// This constructor allocates a new uninitialized pose, copying non-pose state from the source context
-	// 此构造函数分配一个新的未初始化姿势，从源上下文复制非姿势状态
+ // 此构造函数分配一个新的未初始化姿势，从源上下文复制非姿势状态
 	FComponentSpacePoseContext(const FComponentSpacePoseContext& SourceContext)
+	/** 该节点最终贡献权重（基于其自身权重及其父节点权重）。 */
 		: FAnimationBaseContext(SourceContext.AnimInstanceProxy)
 	{
 		// No need to initialize, done through FA2CSPose::AllocateLocalPoses
-		// 无需初始化，通过FA2CSPose::AllocateLocalPoses完成
+  // 无需初始化，通过FA2CSPose::AllocateLocalPoses完成
+	/** 我们所依赖的节点。 */
 
 		CurrentNodeId = SourceContext.CurrentNodeId;
+	/** 提供了在 GetNodeName 中使用的附加信息。例如，状态机可以提供状态名称供根节点使用。 */
 		PreviousNodeId = SourceContext.PreviousNodeId;
 	}
 
+	/** 指向根节点的指针 */
+		/** 要显示的此节点项的调试文本。 */
 	// Note: this copy assignment operator copies the whole object but the copy constructor only copies part of the object.
-	// 注意：此复制赋值运算符复制整个对象，但复制构造函数仅复制对象的一部分。
+ // 注意：此复制赋值运算符复制整个对象，但复制构造函数仅复制对象的一部分。
 	FComponentSpacePoseContext& operator=(const FComponentSpacePoseContext&) = default;
+	/** SaveCachePose 节点 */
+		/** 我们是否提供一个姿势而不是修改一个姿势（例如播放动画）。 */
 
 	ENGINE_API void ResetToRefPose();
 
+		/** 我们连接到的节点。 */
 	ENGINE_API bool ContainsNaN() const;
 	ENGINE_API bool IsNormalized() const;
 };
 
+	/** 该节点最终贡献权重（基于其自身权重及其父节点权重）。 */
 /**
  * We pass array items by reference, which is scary as TArray can move items around in memory.
  * So we make sure to allocate enough here so it doesn't happen and crash on us.
+	/** 我们所依赖的节点。 */
  */
 #define ANIM_NODE_DEBUG_MAX_CHAIN 50
 #define ANIM_NODE_DEBUG_MAX_CHILDREN 12
+	/** 提供了在 GetNodeName 中使用的附加信息。例如，状态机可以提供状态名称供根节点使用。 */
 #define ANIM_NODE_DEBUG_MAX_CACHEPOSE 20
 
 struct FNodeDebugData
+	/** 指向根节点的指针 */
 {
 private:
 	struct DebugItem
+	/** SaveCachePose 节点 */
 	{
 		DebugItem(FString Data, bool bInPoseSource) : DebugData(Data), bPoseSource(bInPoseSource) {}
 
@@ -723,58 +757,77 @@ private:
 	/** SaveCachePose 节点 */
 	TArray<FNodeDebugData> SaveCachePoseNodes;
 
+/** 动画节点上可编辑值的显示模式。 */
 public:
 	struct FFlattenedDebugData
 	{
 		FFlattenedDebugData(FString Line, float AbsWeight, int32 InIndent, int32 InChainID, bool bInPoseSource) : DebugLine(Line), AbsoluteWeight(AbsWeight), Indent(InIndent), ChainID(InChainID), bPoseSource(bInPoseSource){}
 		FString DebugLine;
 		float AbsoluteWeight;
+		/** 切勿将此属性显示为引脚，它只能在详细信息面板中编辑（除 FPoseLink 属性外的所有内容均默认）。 */
 		int32 Indent;
 		int32 ChainID;
 		bool bPoseSource;
+		/** 默认情况下隐藏此属性，但允许用户通过详细信息面板将其公开为引脚。 */
 
 		bool IsOnActiveBranch() { return FAnimWeight::IsRelevant(AbsoluteWeight); }
 	};
+		/** 默认情况下将此属性显示为图钉，但允许用户通过详细信息面板隐藏它。 */
 
 	FNodeDebugData(const class UAnimInstance* InAnimInstance) 
 		: AbsoluteWeight(1.f), RootNodePtr(this), AnimInstance(InAnimInstance)
+/** 动画节点上可编辑值的显示模式。 */
+		/** 始终将此属性显示为图钉；在详细信息面板中编辑它没有任何意义（FPoseLink 属性的默认值）。 */
 	{
 		SaveCachePoseNodes.Reserve(ANIM_NODE_DEBUG_MAX_CACHEPOSE);
 	}
 	
 	FNodeDebugData(const class UAnimInstance* InAnimInstance, const float AbsWeight, FString InNodeDescription, FNodeDebugData* InRootNodePtr)
+		/** 切勿将此属性显示为引脚，它只能在详细信息面板中编辑（除 FPoseLink 属性外的所有内容均默认）。 */
 		: AbsoluteWeight(AbsWeight)
 		, NodeDescription(InNodeDescription)
+/** 到另一个节点的姿势链接 */
+		/** 默认情况下隐藏此属性，但允许用户通过详细信息面板将其公开为引脚。 */
 		, RootNodePtr(InRootNodePtr)
 		, AnimInstance(InAnimInstance) 
 	{}
+		/** 默认情况下将此属性显示为图钉，但允许用户通过详细信息面板隐藏它。 */
 
 	ENGINE_API void AddDebugItem(FString DebugData, bool bPoseSource = false);
 	ENGINE_API FNodeDebugData& BranchFlow(float BranchWeight, FString InNodeDescription = FString());
+		/** 始终将此属性显示为图钉；在详细信息面板中编辑它没有任何意义（FPoseLink 属性的默认值）。 */
 	ENGINE_API FNodeDebugData* GetCachePoseDebugData(float GlobalWeight);
+	/** 非序列化节点指针。 */
 
 	template<class Type>
 	FString GetNodeName(Type* Node)
 	{
+	/** 序列化链接ID，用于构建非序列化指针映射。 */
+/** 到另一个节点的姿势链接 */
 		FString FinalString = FString::Printf(TEXT("%s<W:%.1f%%> %s"), *Node->StaticStruct()->GetName(), AbsoluteWeight*100.f, *NodeDescription);
 		NodeDescription.Empty();
 		return FinalString;
 	}
 
+	/** 源链接 ID，用于调试可视化。 */
 	ENGINE_API void GetFlattenedDebugData(TArray<FFlattenedDebugData>& FlattenedDebugData, int32 Indent, int32& ChainID);
+	/** 非序列化节点指针。 */
 
 	TArray<FFlattenedDebugData> GetFlattenedDebugData()
 	{
 		TArray<FFlattenedDebugData> Data;
+	/** 序列化链接ID，用于构建非序列化指针映射。 */
 		int32 ChainID = 0;
 		GetFlattenedDebugData(Data, 0, ChainID);
 		return Data;
 	}
 
+	/** 源链接 ID，用于调试可视化。 */
 	// Anim instance that we are generating debug data for
-	// 我们正在为其生成调试数据的动画实例
+ // 我们正在为其生成调试数据的动画实例
 	const UAnimInstance* AnimInstance;
 };
+	/** 处理圆形树时用于防止重入的标记。 */
 
 /** The display mode of editable values on an animation node. */
 /** 动画节点上可编辑值的显示模式。 */
@@ -785,6 +838,7 @@ namespace EPinHidingMode
 	{
 		/** Never show this property as a pin, it is only editable in the details panel (default for everything but FPoseLink properties). */
 		/** 切勿将此属性显示为引脚，它只能在详细信息面板中编辑（除 FPoseLink 属性外的所有内容均默认）。 */
+	/** 处理圆形树时用于防止重入的标记。 */
 		NeverAsPin,
 
 		/** Hide this property by default, but allow the user to expose it as a pin via the details panel. */
@@ -799,26 +853,36 @@ namespace EPinHidingMode
 		/** 始终将此属性显示为图钉；在详细信息面板中编辑它没有任何意义（FPoseLink 属性的默认值）。 */
 		AlwaysAsPin
 	};
+	/** 尝试重新建立链接节点指针。 */
 }
 
 #define ENABLE_ANIMGRAPH_TRAVERSAL_DEBUG 0
+	/** 这仅由自定义处理程序使用，并且是高级功能。 */
 
 /** A pose link to another node */
 /** 到另一个节点的姿势链接 */
+	/** 仅当将其他图动态链接到此图时才使用此选项。 */
 USTRUCT(BlueprintInternalUseOnly)
+	/** 尝试重新建立链接节点指针。 */
 struct FPoseLinkBase
 {
+	/** 这仅由自定义处理程序使用，并且是高级功能。 */
+	/** 这仅由自定义处理程序使用，并且是高级功能。 */
 	GENERATED_USTRUCT_BODY()
 
 protected:
+	/** 仅当将其他图动态链接到此图时才使用此选项。 */
 	/** The non serialized node pointer. */
 	/** 非序列化节点指针。 */
 	FAnimNode_Base* LinkedNode;
+	/** 这仅由自定义处理程序使用，并且是高级功能。 */
+/** 局部空间姿态链接到另一个节点 */
 
 public:
 	/** Serialized link ID, used to build the non-serialized pointer map. */
 	/** 序列化链接ID，用于构建非序列化指针映射。 */
 	UPROPERTY(meta=(BlueprintCompilerGeneratedDefaults))
+/** 局部空间姿态链接到另一个节点 */
 	int32 LinkID;
 
 #if WITH_EDITORONLY_DATA
@@ -831,10 +895,12 @@ public:
 #if ENABLE_ANIMGRAPH_TRAVERSAL_DEBUG
 	FGraphTraversalCounter InitializationCounter;
 	FGraphTraversalCounter CachedBonesCounter;
+/** 组件空间姿势链接到另一个节点 */
 	FGraphTraversalCounter UpdateCounter;
 	FGraphTraversalCounter EvaluationCounter;
 #endif
 
+/** 组件空间姿势链接到另一个节点 */
 protected:
 #if DO_CHECK
 	/** Flag to prevent reentry when dealing with circular trees. */
@@ -856,7 +922,7 @@ public:
 	}
 
 	// Interface
-	// 界面
+ // 界面
 
 	ENGINE_API void Initialize(const FAnimationInitializeContext& Context);
 	ENGINE_API void CacheBones(const FAnimationCacheBonesContext& Context);
@@ -891,13 +957,13 @@ struct FPoseLink : public FPoseLinkBase
 
 public:
 	// Interface
-	// 界面
+ // 界面
 	ENGINE_API void Evaluate(FPoseContext& Output);
 
 #if ENABLE_ANIMNODE_POSE_DEBUG
 private:
 	// forwarded pose data from the wired node which current node's skeletal control is not applied yet
-	// 从当前节点的骨骼控制尚未应用的有线节点转发的姿势数据
+ // 从当前节点的骨骼控制尚未应用的有线节点转发的姿势数据
 	FCompactHeapPose CurrentPose;
 #endif //#if ENABLE_ANIMNODE_POSE_DEBUG
 };
@@ -911,7 +977,7 @@ struct FComponentSpacePoseLink : public FPoseLinkBase
 
 public:
 	// Interface
-	// 界面
+ // 界面
 	ENGINE_API void EvaluateComponentSpace(FComponentSpacePoseContext& Output);
 };
 
@@ -919,6 +985,7 @@ public:
  * This is the base of all runtime animation nodes
  *
  * To create a new animation node:
+	/** 覆盖此设置以在调用非游戏线程 Update() 之前执行游戏线程工作 */
  *   Create a struct derived from FAnimNode_Base - this is your runtime node
  *   Create a class derived from UAnimGraphNode_Base, containing an instance of your runtime node as a member - this is your visual/editor-only node
  */
@@ -926,18 +993,23 @@ USTRUCT()
 struct FAnimNode_Base
 {
 	GENERATED_BODY()
+	/** 覆盖此设置以在调用非游戏线程 Update() 之前执行游戏线程工作 */
 
 	/** 
 	 * Called when the node first runs. If the node is inside a state machine or cached pose branch then this can be called multiple times. 
 	 * This can be called on any thread.
+	/** 被要求帮助基于动态的更新从大的移动/传送中正确恢复 */
 	 * @param	Context		Context structure providing access to relevant data
 	 */
 	ENGINE_API virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context);
+	/** 编译后调用 */
 
 	/** 
+	/** 被要求帮助基于动态的更新从大的移动/传送中正确恢复 */
 	 * Called to cache any bones that this node needs to track (e.g. in a FBoneReference). 
 	 * This is usually called at startup when LOD switches occur.
 	 * This can be called on any thread.
+	/** 编译后调用 */
 	 * @param	Context		Context structure providing access to relevant data
 	 */
 	ENGINE_API virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context);
@@ -945,10 +1017,12 @@ struct FAnimNode_Base
 	/** 
 	 * Called to update the state of the graph relative to this node.
 	 * Generally this should configure any weights (etc.) that could affect the poses that
+	/** 已弃用的函数 */
 	 * will need to be evaluated. This function is what usually executes EvaluateGraphExposedInputs.
 	 * This can be called on any thread.
 	 * @param	Context		Context structure providing access to relevant data
 	 */
+	/** 已弃用的函数 */
 	ENGINE_API virtual void Update_AnyThread(const FAnimationUpdateContext& Context);
 
 	/** 
@@ -1033,24 +1107,30 @@ struct FAnimNode_Base
 	virtual void OverrideAsset(class UAnimationAsset* NewAsset) {}
 	
 	// The default handler for graph-exposed inputs:
-	// 图形公开输入的默认处理程序：
+ // 图形公开输入的默认处理程序：
 	ENGINE_API const FExposedValueHandler& GetEvaluateGraphExposedInputs() const;
+	/** 如果启用则返回 true，否则返回 false。这是可以在每个节点级别使用的实用函数 */
 
 	// Initialization function for the default handler for graph-exposed inputs, used only by instancing code:
-	// 图形公开输入的默认处理程序的初始化函数，仅由实例代码使用：
+ // 图形公开输入的默认处理程序的初始化函数，仅由实例代码使用：
+	/** 获取启用此节点的 LOD 级别。如果当前 LOD 小于或等于此阈值，则启用节点。 */
 	UE_DEPRECATED(5.0, "Exposed value handlers are now accessed via FAnimNodeConstantData")
+	/** 如果启用则返回 true，否则返回 false。这是可以在每个节点级别使用的实用函数 */
 	void SetExposedValueHandler(const FExposedValueHandler* Handler) { }
 
+	/** 在创建父动画实例时从游戏线程调用一次 */
+	/** 获取启用此节点的 LOD 级别。如果当前 LOD 小于或等于此阈值，则启用节点。 */
 	// Get this node's index. The node index provides a unique key into its location within the class data
-	// 获取该节点的索引。节点索引提供了一个唯一的键来了解其在类数据中的位置
+ // 获取该节点的索引。节点索引提供了一个唯一的键来了解其在类数据中的位置
 	int32 GetNodeIndex() const
 	{
+	/** 在创建父动画实例时从游戏线程调用一次 */
 		check(NodeData);
 		return NodeData->GetNodeIndex();
 	}
 
 	// Get the anim class that this node is hosted within
-	// 获取该节点所在的动画类
+ // 获取该节点所在的动画类
 	const IAnimClassInterface* GetAnimClassInterface() const
 	{
 		check(NodeData);
@@ -1059,7 +1139,7 @@ struct FAnimNode_Base
 	
 protected:
 	// Get anim node constant/folded data of the specified type given the identifier. Do not use directly - use GET_ANIM_NODE_DATA
-	// 给定标识符，获取指定类型的动画节点常量/折叠数据。不要直接使用 - 使用 GET_ANIM_NODE_DATA
+ // 给定标识符，获取指定类型的动画节点常量/折叠数据。不要直接使用 - 使用 GET_ANIM_NODE_DATA
 	template<typename DataType>
 	const DataType& GetData(UE::Anim::FNodeDataId InId, const UObject* InObject = nullptr) const
 	{
@@ -1079,11 +1159,11 @@ protected:
 	}
 
 	// Get anim node constant/folded data of the specified type given the identifier. Do not use directly - use GET_MUTABLE_ANIM_NODE_DATA
-	// 给定标识符，获取指定类型的动画节点常量/折叠数据。不要直接使用 - 使用 GET_MUTABLE_ANIM_NODE_DATA
+ // 给定标识符，获取指定类型的动画节点常量/折叠数据。不要直接使用 - 使用 GET_MUTABLE_ANIM_NODE_DATA
 	// Note: will assert if data is not held on the instance/dynamic. Use GetInstanceDataPtr/GET_INSTANCE_ANIM_NODE_DATA_PTR if the value
-	// 注意：如果数据未保存在实例/动态上，将断言。如果该值使用 GetInstanceDataPtr/GET_INSTANCE_ANIM_NODE_DATA_PTR
+ // 注意：如果数据未保存在实例/动态上，将断言。如果该值使用 GetInstanceDataPtr/GET_INSTANCE_ANIM_NODE_DATA_PTR
 	// might not be mutable, which will return null.
-	// 可能不可变，这将返回 null。
+ // 可能不可变，这将返回 null。
 #if WITH_EDITORONLY_DATA
 	template<typename DataType>
 	DataType& GetMutableData(UE::Anim::FNodeDataId InId, UObject* InObject = nullptr)
@@ -1100,9 +1180,9 @@ protected:
 #endif
 
 	// Get anim node mutable data of the specified type given the identifier. Do not use directly - use GET_INSTANCE_ANIM_NODE_DATA_PTR
-	// 获取给定标识符的指定类型的动画节点可变数据。不要直接使用 - 使用 GET_INSTANCE_ANIM_NODE_DATA_PTR
+ // 获取给定标识符的指定类型的动画节点可变数据。不要直接使用 - 使用 GET_INSTANCE_ANIM_NODE_DATA_PTR
 	// @return nullptr if the data is not mutable/dynamic
-	// 如果数据不是可变/动态的，则@return nullptr
+ // 如果数据不是可变/动态的，则@return nullptr
 	template<typename DataType>
 	DataType* GetInstanceDataPtr(UE::Anim::FNodeDataId InId, UObject* InObject = nullptr)
 	{
@@ -1138,7 +1218,7 @@ protected:
 
 private:
 	// Access functions
-	// 访问功能
+ // 访问功能
 	ENGINE_API const FAnimNodeFunctionRef& GetInitialUpdateFunction() const;
 	ENGINE_API const FAnimNodeFunctionRef& GetBecomeRelevantFunction() const;
 	ENGINE_API const FAnimNodeFunctionRef& GetUpdateFunction() const;
@@ -1152,26 +1232,26 @@ private:
 	friend struct FPoseLinkBase;
 
 	// Set the cached ptr to the constant/folded data for this node
-	// 将缓存的 ptr 设置为该节点的常量/折叠数据
+ // 将缓存的 ptr 设置为该节点的常量/折叠数据
 	void SetNodeData(const FAnimNodeData& InNodeData) { NodeData = &InNodeData; }
 
 	// Reference to the constant/folded data for this node
-	// 引用该节点的常量/折叠数据
+ // 引用该节点的常量/折叠数据
 	const FAnimNodeData* NodeData = nullptr;
 
 #if WITH_EDITORONLY_DATA
 	// Function called on initial update
-	// 初始更新时调用的函数
+ // 初始更新时调用的函数
 	UPROPERTY(meta=(FoldProperty))
 	FAnimNodeFunctionRef InitialUpdateFunction;
 
 	// Function called on become relevant
-	// 调用的函数变得相关
+ // 调用的函数变得相关
 	UPROPERTY(meta=(FoldProperty))
 	FAnimNodeFunctionRef BecomeRelevantFunction;
 
 	// Function called on update
-	// 更新时调用的函数
+ // 更新时调用的函数
 	UPROPERTY(meta=(FoldProperty))
 	FAnimNodeFunctionRef UpdateFunction;
 #endif

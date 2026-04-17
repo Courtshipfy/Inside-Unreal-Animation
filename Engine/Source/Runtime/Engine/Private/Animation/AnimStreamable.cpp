@@ -58,9 +58,9 @@ namespace AnimStreamableCookStats
 // This is a version string for the streaming anim chunk logic
 // 这是流动画块逻辑的版本字符串
 // If you want to bump this version, generate a new guid using VS->Tools->Create GUID and
-// [翻译失败: If you want to bump this version, generate a new guid using VS->Tools->Create GUID and]
+// 如果您想升级此版本，请使用 VS->Tools->Create GUID 生成新的 GUID 并
 // set it here
-// [翻译失败: set it here]
+// 放在这里
 const TCHAR* StreamingAnimChunkVersion = TEXT("1F1656B9E10142729AB16650D9821B1F");
 
 const float MINIMUM_CHUNK_SIZE = 4.0f;
@@ -89,7 +89,7 @@ void FAnimStreamableChunk::Serialize(FArchive& Ar, UAnimStreamable* Owner, int32
 		if (ChunkIndex == 0)
 		{
 			// Chunk 0 just serializes the compressed data directly
-			// Chunk 0 只是直接序列化压缩数据
+   // Chunk 0 只是直接序列化压缩数据
 			if (Ar.IsLoading())
 			{
 				check(!CompressedAnimSequence);
@@ -104,7 +104,7 @@ void FAnimStreamableChunk::Serialize(FArchive& Ar, UAnimStreamable* Owner, int32
 			if (Ar.IsSaving())
 			{
 				//Need to pack compressed data into BulkData
-				//需要将压缩数据打包成BulkData
+    // 需要将压缩数据打包成BulkData
 				TArray<uint8> TempBytes;
 				const int32 InitialSize = CompressedAnimSequence->CompressedDataStructure->GetApproxCompressedSize();
 				TempBytes.Reset(InitialSize);
@@ -120,7 +120,7 @@ void FAnimStreamableChunk::Serialize(FArchive& Ar, UAnimStreamable* Owner, int32
 			}
 
 			// streaming doesn't use memory mapped IO
-			// 流式传输不使用内存映射 IO
+   // 流式传输不使用内存映射 IO
 			BulkData.Serialize(Ar, Owner, ChunkIndex, false);
 		}
 	}
@@ -183,7 +183,7 @@ void UAnimStreamable::Serialize(FArchive& Ar)
 	if (Ar.IsLoading() && Ar.CustomVer(FUE5MainStreamObjectVersion::GUID) < FUE5MainStreamObjectVersion::ReintroduceAnimationDataModelInterface)
 	{
 		// Figure out correct SamplingFrameRate value 
-		// 找出正确的 SamplingFrameRate 值
+  // 找出正确的 SamplingFrameRate 值
 		if(SourceSequence && !SourceSequence->HasAnyFlags(RF_NeedPostLoad))
 		{
 			SamplingFrameRate = SourceSequence->GetSamplingFrameRate();
@@ -193,16 +193,16 @@ void UAnimStreamable::Serialize(FArchive& Ar)
 			const int32 NumberOfFrames = FMath::Max(NumberOfKeys - 1, 1);
 
 			// Generate the frame-rate according to the number of frames and sequence length
-			// 根据帧数和序列长度生成帧率
+   // 根据帧数和序列长度生成帧率
 			const double DecimalFrameRate = (double)NumberOfFrames / ((double)GetPlayLength() > 0.0 ? (double)GetPlayLength() : 1.0);
 
 			// Account for non-whole number frame rates using large denominator
-			// 使用大分母考虑非整数帧速率
+   // 使用大分母考虑非整数帧速率
 			const double Denominator = 1000000.0;
 			SamplingFrameRate = FFrameRate(DecimalFrameRate * Denominator, Denominator);	 
 
 			// Try to simplifiy the frame rate, in case it is a multiple of the commonly used frame rates e.g. 10000/300000 -> 1/30
-			// 尝试简化帧速率，以防它是常用帧速率的倍数，例如10000/300000 -> 1/30
+   // 尝试简化帧速率，以防它是常用帧速率的倍数，例如10000/300000 -> 1/30
 			TArrayView<const FCommonFrameRateInfo> CommonFrameRates = FModuleManager::LoadModulePtr<ITimeManagementModule>("TimeManagement")->GetAllCommonFrameRates();
 			for (const FCommonFrameRateInfo& Info : CommonFrameRates)
 			{
@@ -240,6 +240,8 @@ void UAnimStreamable::Serialize(FArchive& Ar)
 	}
 #endif // WITH_EDITORONLY_DATA
 }
+	//ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
+ // ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
 
 void UAnimStreamable::HandleAssetPlayerTickedInternal(FAnimAssetTickContext &Context, const float PreviousTime, const float MoveDelta, const FAnimTickRecord &Instance, struct FAnimNotifyQueue& NotifyQueue) const
 {
@@ -248,9 +250,17 @@ void UAnimStreamable::HandleAssetPlayerTickedInternal(FAnimAssetTickContext &Con
 	const int32 ChunkIndex = GetChunkIndexForTime(GetRunningPlatformData().Chunks, PreviousTime);
 	IAnimationStreamingManager& StreamingManager = IStreamingManager::Get().GetAnimationStreamingManager();
 	const FCompressedAnimSequence* CurveCompressedDataChunk = StreamingManager.GetLoadedChunk(this, ChunkIndex, true);
+ // ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
+ // ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
+ // ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
+ // ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
 	
 	//ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
+ // ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
 	//ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
+ // ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
+	//ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
+ // ExtractRootMotionFromTrack(AnimationTrack, PreviousTime, PreviousTime + MoveDelta, Context.RootMotionMovementParams);
 }
 
 FORCEINLINE int32 PreviousChunkIndex(int32 ChunkIndex, int32 NumChunks)
@@ -259,18 +269,28 @@ FORCEINLINE int32 PreviousChunkIndex(int32 ChunkIndex, int32 NumChunks)
 }
 
 void UAnimStreamable::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData, const FAnimExtractContext& ExtractionContext) const
+	//const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
+ // const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
 {
 	SCOPE_CYCLE_COUNTER(STAT_AnimStreamable_GetAnimationPose);
 	CSV_SCOPED_TIMING_STAT(Animation, AnimStreamable_GetAnimationPose);
 
 	FCompactPose& OutPose = OutAnimationPoseData.GetPose();
+ // const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
+ // const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
 	FBlendedCurve& OutCurve = OutAnimationPoseData.GetCurve();
+ // const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
+ // const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
 
 	OutPose.ResetToRefPose();
+	//const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
+ // const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
 
 	const FBoneContainer& RequiredBones = OutPose.GetBoneContainer();
 	//const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
+ // const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
 	//const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
+ // const bool bUseRawDataForPoseExtraction = bForceUseRawData || UseRawDataForPoseExtraction(RequiredBones);
 
 	const bool bIsBakedAdditive = false;//!bUseRawDataForPoseExtraction && IsValidAdditive();
 	const EAdditiveAnimationType AdditiveType = AAT_None;
@@ -292,17 +312,17 @@ void UAnimStreamable::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData,
 	const bool bDisableRetargeting = RequiredBones.GetDisableRetargeting();
 
 	// initialize with ref-pose
-	// 使用 ref-pose 进行初始化
+ // 使用 ref-pose 进行初始化
 	if (bIsBakedAdditive)
 	{
 		//When using baked additive ref pose is identity
-		//当使用烘焙添加剂时，参考姿势是同一性的
+  // 当使用烘焙添加剂时，参考姿势是同一性的
 		OutPose.ResetToAdditiveIdentity();
 	}
 	else
 	{
 		// if retargeting is disabled, we initialize pose with 'Retargeting Source' ref pose.
-		// 如果禁用重定向，我们将使用“重定向源”参考姿势初始化姿势。
+  // 如果禁用重定向，我们将使用“重定向源”参考姿势初始化姿势。
 		if (bDisableRetargeting)
 		{
 			TArray<FTransform> const& AuthoredOnRefSkeleton = MySkeleton->GetRefLocalPoses(RetargetSource);
@@ -310,23 +330,33 @@ void UAnimStreamable::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData,
 
 			int32 const NumRequiredBones = RequireBonesIndexArray.Num();
 			for (FCompactPoseBoneIndex PoseBoneIndex : OutPose.ForEachBoneIndex())
+	//FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
+ // FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
 			{
 				int32 const& SkeletonBoneIndex = RequiredBones.GetSkeletonIndex(PoseBoneIndex);
 
 				// Pose bone index should always exist in Skeleton
-				// 姿势骨骼索引应该始终存在于骨骼中
+    // 姿势骨骼索引应该始终存在于骨骼中
 				checkSlow(SkeletonBoneIndex != INDEX_NONE);
+    // FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
+    // FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
 				OutPose[PoseBoneIndex] = AuthoredOnRefSkeleton[SkeletonBoneIndex];
 			}
+   // FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
+   // FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
 		}
 		else
 		{
+	//FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
+ // FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
 			OutPose.ResetToRefPose();
 		}
 	}
 
 	//FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
+ // FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
 	//FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
+ // FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock, bForceRootLock, ExtractRootTrackTransform(0.f, &RequiredBones), IsValidAdditive());
 	FRootMotionReset RootMotionReset(bEnableRootMotion, RootMotionRootLock,
 #if WITH_EDITOR
 	!ExtractionContext.bIgnoreRootLock &&
@@ -338,7 +368,7 @@ void UAnimStreamable::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData,
 	if (IsDataModelValid() && (!HasRunningPlatformData() || RequiredBones.ShouldUseRawData()))
 	{
 		//Need to evaluate raw data
-		//需要评估原始数据
+  // 需要评估原始数据
 		ValidateModel();
 
 		const UE::Anim::DataModel::FEvaluationContext EvaluationContext(ExtractionContext.CurrentTime, DataModelInterface->GetFrameRate(), RetargetSource, MySkeleton->GetRefLocalPoses(RetargetSource), Interpolation);
@@ -393,7 +423,7 @@ void UAnimStreamable::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData,
 				if (FallbackChunkIndex == ChunkIndex)
 				{
 					//Cannot get fallback
-					//无法获得后备
+     // 无法获得后备
 					UE_LOG(LogAnimation, Warning, TEXT("Failed to get ANY streamed compressed data Time: %.2f, ChunkIndex:%i, Anim: %s"), ExtractionContext.CurrentTime, ChunkIndex, *GetFullName());
 					return;
 				}
@@ -416,7 +446,7 @@ void UAnimStreamable::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData,
 		ChunkExtractionContext.PoseCurves = ExtractionContext.PoseCurves;
 
 		//FPlatformMisc::LowLevelOutputDebugStringf(TEXT("Playing Streaming Anim %s Time: %.2f Chunk:%i\n"), *GetName(), ExtractionContext.CurrentTime, ChunkIndex);
-		//FPlatformMisc::LowLevelOutputDebugStringf(TEXT("播放流动画 %s 时间：%.2f 块：%i\n"), *GetName(), ExtractionContext.CurrentTime, ChunkIndex);
+  // FPlatformMisc::LowLevelOutputDebugStringf(TEXT("播放流动画 %s 时间：%.2f 块：%i\n"), *GetName(), ExtractionContext.CurrentTime, ChunkIndex);
 		FAnimSequenceDecompressionContext Context(SamplingFrameRate, CurrentChunk.NumFrames, Interpolation, GetFName(), *CompressedData->CompressedDataStructure.Get(), GetSkeleton()->GetRefLocalPoses(), CompressedData->CompressedTrackToSkeletonMapTable, GetSkeleton(), bIsBakedAdditive, AdditiveType);
 		UE::Anim::Decompression::DecompressPose(OutPose, *CompressedData, ChunkExtractionContext, Context, RetargetSource, RootMotionReset);
 	}
@@ -425,9 +455,9 @@ void UAnimStreamable::GetAnimationPose(FAnimationPoseData& OutAnimationPoseData,
 void UAnimStreamable::PostLoad()
 {
 	//Parent PostLoad will ensure that skeleton is fully loaded
-	//Parent PostLoad 将确保骨架完全加载
+ // Parent PostLoad 将确保骨架完全加载
 	//before we do anything further in PostLoad
-	//在我们在 PostLoad 中做进一步的事情之前
+ // 在我们在 PostLoad 中做进一步的事情之前
 	Super::PostLoad();
 
 #if WITH_EDITOR
@@ -502,7 +532,7 @@ void UAnimStreamable::InitFrom(const UAnimSequence* InSourceSequence)
 	VariableFrameStrippingSettings = InSourceSequence->VariableFrameStrippingSettings;
 
 	// Far from ideal (retrieving controller to ensure it matches the DataModelInterface type)
-	// 远非理想（检索控制器以确保其与 DataModelInterface 类型匹配）
+ // 远非理想（检索控制器以确保其与 DataModelInterface 类型匹配）
 	Controller = DataModelInterface->GetController();
 	Controller->SetModel(DataModelInterface);
 
@@ -643,9 +673,9 @@ void UAnimStreamable::RequestCompressedData(const ITargetPlatform* Platform)
 		IStreamingManager::Get().GetAnimationStreamingManager().AddStreamingAnim(this);
 	}
 	//PlatformData.SetSkeletonVirtualBoneGuid(GetSkeleton()->GetVirtualBoneGuid()); //MDW DO THIS
-	//PlatformData.SetSkeletonVirtualBoneGuid(GetSkeleton()->GetVirtualBoneGuid()); //MDW 这样做
+ // PlatformData.SetSkeletonVirtualBoneGuid(GetSkeleton()->GetVirtualBoneGuid()); //MDW 这样做
 	//PlatformData.bUseRawDataOnly = false; //MDW Need to do something with this?
-	//PlatformData.bUseRawDataOnly = false; //MDW 需要对此做些什么吗？
+ // PlatformData.bUseRawDataOnly = false; //MDW 需要对此做些什么吗？
 }
 
 float UAnimStreamable::GetChunkSizeSeconds(const ITargetPlatform* Platform) const
@@ -660,7 +690,7 @@ float UAnimStreamable::GetChunkSizeSeconds(const ITargetPlatform* Platform) cons
 	}
 	
 	//UE_LOG(LogAnimation, Log, TEXT("Anim Chunk Size for platform %s : %.2f\n"), *Platform->DisplayName().ToString(), CVarPlatformChunkSizeSeconds);
-	//UE_LOG(LogAnimation, Log, TEXT("平台 %s 的动画块大小：%.2f\n"), *Platform->DisplayName().ToString(), CVarPlatformChunkSizeSeconds);
+ // UE_LOG(LogAnimation, Log, TEXT("平台 %s 的动画块大小：%.2f\n"), *Platform->DisplayName().ToString(), CVarPlatformChunkSizeSeconds);
 	return CVarPlatformChunkSizeSeconds;
 }
 
@@ -690,7 +720,7 @@ void UAnimStreamable::RequestCompressedDataForChunk(const FString& ChunkDDCKey, 
 	const ITargetPlatform* Platform)
 {
 	// Need to unify with Anim Sequence!
-	// 需要与动画序列统一！
+ // 需要与动画序列统一！
 
 	TArray<uint8> OutData;
 	{
@@ -702,7 +732,7 @@ void UAnimStreamable::RequestCompressedDataForChunk(const FString& ChunkDDCKey, 
 		const FString FinalDDCKey = FDerivedDataCacheInterface::BuildCacheKey(AnimCompressor->GetPluginName(), AnimCompressor->GetVersionString(), *AnimCompressor->GetPluginSpecificCacheKeySuffix());
 
 		// For debugging DDC/Compression issues		
-		// 用于调试 DDC/压缩问题
+  // 用于调试 DDC/压缩问题
 		bool bSkipDDC = false;
 
 		const int32 ChunkNumFrames = FrameEnd - FrameStart;
@@ -757,12 +787,12 @@ void UAnimStreamable::RequestCompressedDataForChunk(const FString& ChunkDDCKey, 
 			if (FrameStart == 0)
 			{
 				//Crop curve logic broken, for the moment store curve data in always loaded chunk 0
-				//[翻译失败: Crop curve logic broken, for the moment store curve data in always loaded chunk 0]
+    // 裁剪曲线逻辑已损坏，目前将曲线数据存储在始终加载的块 0 中
 				CompressibleData->RawFloatCurves = DataModelInterface->GetFloatCurves();
 			}
 
 			// Data is manually populated above, so skip AnimationCompression builds/fetch data steps
-			// [翻译失败: Data is manually populated above, so skip AnimationCompression builds/fetch data steps]
+   // 上面的数据是手动填充的，因此跳过 AnimationCompression 构建/获取数据步骤
 			CompressibleData->bDataFetched = true;
 			AnimCompressor->SetCompressibleData(CompressibleData);
 
@@ -815,21 +845,21 @@ void UAnimStreamable::UpdateRawData()
 FString UAnimStreamable::GetBaseDDCKey(uint32 NumChunks, const ITargetPlatform* TargetPlatform) const
 {
 	//Make up our content key consisting of:
-	//[翻译失败: Make up our content key consisting of:]
+ // 组成我们的内容密钥，包括：
 	//  * Streaming Anim Chunk logic version
-	//  [翻译失败: * Streaming Anim Chunk logic version]
+ // * 流式动画块逻辑版本
 	//	* Our raw data GUID
-	//	[翻译失败: * Our raw data GUID]
+ // * 我们的原始数据 GUID
 	//	* Our skeleton GUID: If our skeleton changes our compressed data may now be stale
-	//	[翻译失败: * Our skeleton GUID: If our skeleton changes our compressed data may now be stale]
+ // * 我们的骨架 GUID：如果我们的骨架发生变化，我们的压缩数据现在可能会过时
 	//  * Our skeletons virtual bone guid
-	//  [翻译失败: * Our skeletons virtual bone guid]
+ // * 我们的骨骼虚拟骨骼指南
 	//	* Compression Settings
-	//	* 压缩设置
+ // * 压缩设置
 	//	* Curve compression settings
-	//	* 曲线压缩设置
+ // * 曲线压缩设置
 	//  * Variable frame stripping settings
-	//  * 可变帧剥离设置
+ // * 可变帧剥离设置
 
 	FArcToHexString ArcToHexString;
 

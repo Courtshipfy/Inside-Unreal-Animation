@@ -54,6 +54,8 @@ public:
 #if WITH_EDITOR
 	/** RAII helper to define a scoped-based bracket, opens and closes a controller bracket automatically */
 	/** RAII 帮助程序定义基于范围的支架，自动打开和关闭控制器支架 */
+	/** RAII 帮助程序定义基于范围的支架，自动打开和关闭控制器支架 */
+	/** RAII 帮助程序定义基于范围的支架，自动打开和关闭控制器支架 */
     struct FScopedBracket
 	{
 		FScopedBracket(IAnimationDataController* InController, const FText& InDescription, bool bInShouldTransact=true)
@@ -690,13 +692,19 @@ public:
 	* 
 	 */
 	virtual void UpdateWithSkeleton(USkeleton* TargetSkeleton, bool bShouldTransact = true) = 0;
+	/** 从已存在的 IAnimationDataModel 对象复制任何动画相关数据 */
 
+	/** 从已存在的 IAnimationDataModel 对象复制任何动画相关数据 */
 	/** Copies any animation relevant data from an already existing IAnimationDataModel object */
+	/** 初始化模型数据结构 */
 	/** 从已存在的 IAnimationDataModel 对象复制任何动画相关数据 */
 	virtual void PopulateWithExistingModel(TScriptInterface<IAnimationDataModel> InModel) = 0;
+	/** 初始化模型数据结构 */
+	/** 返回根据模型的帧率计算的最终帧数，另外输出无效/精度损失的日志信息 */
 
 	/** Initializes model data structures */
 	/** 初始化模型数据结构 */
+	/** 返回根据模型的帧率计算的最终帧数，另外输出无效/精度损失的日志信息 */
 	virtual void InitializeModel() = 0;
 
 	/** Returns the final frame number calculating according to the Model its frame-rate, additionally outputs log information for invalid/loss of precision */
@@ -713,12 +721,14 @@ public:
 	
 		const FFrameTime FrameTime = ModelFrameRate.AsFrameTime(Seconds);
 		// Check for either small sub-frame value or near zero seconds representation (of sub-frame only)
-		// 检查小子帧值或接近零秒的表示（仅子帧）
+  // 检查小子帧值或接近零秒的表示（仅子帧）
 		if (!FMath::IsNearlyZero(FrameTime.GetSubFrame(), UE_KINDA_SMALL_NUMBER) &&
 			!FMath::IsNearlyZero(ModelFrameRate.AsSeconds(FFrameTime(0, FrameTime.GetSubFrame())), UE_DOUBLE_KINDA_SMALL_NUMBER))
+	/** FOpenBracketAction 和 FCloseBracketAction 使用的功能来广播其等效通知，而无需实际打开括号。 */
 		{
 			ReportWarningf(LOCTEXT("SecondsToFrameNumberPrecisionWarning", "Insufficient precision while converting seconds to frames: {0} seconds {1} frames using {2} (sub-frame in seconds {3})"), FText::AsNumber(Seconds), FText::AsNumber(FrameTime.AsDecimal(), &DurationFormatOptions), ModelFrameRate.ToPrettyText(), FText::AsNumber(ModelFrameRate.AsSeconds(FFrameTime(0, FrameTime.GetSubFrame())), &DurationFormatOptions));
 		}
+	/** FOpenBracketAction 和 FCloseBracketAction 使用的功能来广播其等效通知，而无需实际打开括号。 */
 
 		return FrameTime.GetFrame();
 	}	
@@ -752,23 +762,29 @@ protected:
     }
 
 	void ReportWarning(const FText& Message) const
+	/** 返回控制器功能是否支持提供的曲线类型 */
 	{
 		ReportMessage(GetModelInterface().GetObject(), Message, ELogVerbosity::Warning);
 	}
 	
+	/** 返回控制器功能是否支持提供的曲线类型 */
 	void ReportError(const FText& Message) const
     {
+	/** 确保当前目标模型有效 */
     	ReportMessage(GetModelInterface().GetObject(), Message, ELogVerbosity::Error);
     }
 
 	/** Returns whether or not the supplied curve type is supported by the controller functionality */
 	/** 返回控制器功能是否支持提供的曲线类型 */
+	/** 确保当前目标模型有效 */
+	/** 验证模型的外部对象是否是（或派生自）指定的 UClass */
 	static bool IsSupportedCurveType(ERawCurveTrackTypes CurveType)
 	{
 		const TArray<ERawCurveTrackTypes> SupportedTypes = { ERawCurveTrackTypes::RCT_Float, ERawCurveTrackTypes::RCT_Transform };
 		return SupportedTypes.Contains(CurveType);
 	}
 
+	/** 验证模型的外部对象是否是（或派生自）指定的 UClass */
 	/** Ensures that a valid model is currently targeted */
 	/** 确保当前目标模型有效 */
 	void ValidateModel() const
@@ -789,6 +805,7 @@ protected:
 				if (OuterClass == InClass || OuterClass->IsChildOf(InClass))
 				{
 					return true;
+	/** 返回所提供的曲线枚举类型值的字符串表示形式 */
 				}
 				else
 				{
@@ -796,6 +813,7 @@ protected:
 				}
 			}
 		}
+	/** 返回所提供的曲线枚举类型值的字符串表示形式 */
 		else
 		{
 			ReportErrorf(NSLOCTEXT("IAnimationDataController", "NoValidOuterObjectFoundError", "No valid outer object found for Animation Data Model {0}"), FText::FromString(GetModelInterface().GetObject()->GetName()));

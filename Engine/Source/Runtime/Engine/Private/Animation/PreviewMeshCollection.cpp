@@ -14,13 +14,13 @@ void UPreviewMeshCollection::GetPreviewSkeletalMeshes(TArray<USkeletalMesh*>& Ou
 		const FPreviewMeshCollectionEntry& Entry = SkeletalMeshes[MeshIndex];
 
 		// Load up our valid skeletal meshes
-		// [翻译失败: Load up our valid skeletal meshes]
+  // 加载我们有效的骨架网格物体
 		if (Entry.SkeletalMesh.LoadSynchronous())
 		{
 			OutList.Add(Entry.SkeletalMesh.Get());
 			TSubclassOf<UAnimInstance> SubClass = nullptr;
 			// Load up our custom animation blueprints
-			// [翻译失败: Load up our custom animation blueprints]
+   // 加载我们的自定义动画蓝图
 			if (Entry.AnimBlueprint.LoadSynchronous())
 			{
 				const UAnimBlueprint* AnimBP = Entry.AnimBlueprint.Get();

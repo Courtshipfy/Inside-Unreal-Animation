@@ -114,6 +114,8 @@ struct TStructOpsTypeTraits<FAnimationAttributeIdentifier> : public TStructOpsTy
 
 /** Script-exposed functionality for wrapping native functionality and constructing valid FAnimationAttributeIdentifier instances */
 /** 脚本公开的功能，用于包装本机功能并构造有效的 FAnimationAttributeIdentifier 实例 */
+/** 脚本公开的功能，用于包装本机功能并构造有效的 FAnimationAttributeIdentifier 实例 */
+/** 脚本公开的功能，用于包装本机功能并构造有效的 FAnimationAttributeIdentifier 实例 */
 UCLASS(MinimalAPI)
 class UAnimationAttributeIdentifierExtensions : public UBlueprintFunctionLibrary
 {

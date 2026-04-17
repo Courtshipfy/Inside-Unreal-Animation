@@ -44,17 +44,17 @@ void AEFVariableKeyLerpShared::ByteSwapRotationIn(
 	AEFConstantKeyLerpShared::ByteSwapRotationIn(CompressedData, MemoryReader, TrackData, NumKeys);
 
 	// Load the track table if present
-	// 加载轨道表（如果存在）
+ // 加载轨道表（如果存在）
 	if (NumKeys > 1)
 	{
 		// Like the compressed byte stream, pad the serialization stream to four bytes.
-		// 与压缩字节流一样，将序列化流填充到四个字节。
+  // 与压缩字节流一样，将序列化流填充到四个字节。
 		// As a sanity check, each pad byte can be checked to be the PadSentinel.
-		// 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
+  // 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
 		PadMemoryReader(&MemoryReader, TrackData, 4); 
 
 		// swap the track table
-		// 交换轨道表
+  // 交换轨道表
 		const size_t EntryStride = (CompressedData.CompressedNumberOfKeys > 0xFF) ? sizeof(uint16) : sizeof(uint8);
 		for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 		{
@@ -80,17 +80,17 @@ void AEFVariableKeyLerpShared::ByteSwapTranslationIn(
 	AEFConstantKeyLerpShared::ByteSwapTranslationIn(CompressedData, MemoryReader, TrackData, NumKeys);
 
 	// Load the track table if present
-	// 加载轨道表（如果存在）
+ // 加载轨道表（如果存在）
 	if (NumKeys > 1)
 	{
 		// Like the compressed byte stream, pad the serialization stream to four bytes.
-		// 与压缩字节流一样，将序列化流填充到四个字节。
+  // 与压缩字节流一样，将序列化流填充到四个字节。
 		// As a sanity check, each pad byte can be checked to be the PadSentinel.
-		// 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
+  // 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
 		PadMemoryReader(&MemoryReader, TrackData, 4); 
 
 		// swap the track table
-		// 交换轨道表
+  // 交换轨道表
 		const size_t EntryStride = (CompressedData.CompressedNumberOfKeys > 0xFF) ? sizeof(uint16) : sizeof(uint8);
 		for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 		{
@@ -116,17 +116,17 @@ void AEFVariableKeyLerpShared::ByteSwapScaleIn(
 	AEFConstantKeyLerpShared::ByteSwapScaleIn(CompressedData, MemoryReader, TrackData, NumKeys);
 
 	// Load the track table if present
-	// 加载轨道表（如果存在）
+ // 加载轨道表（如果存在）
 	if (NumKeys > 1)
 	{
 		// Like the compressed byte stream, pad the serialization stream to four bytes.
-		// 与压缩字节流一样，将序列化流填充到四个字节。
+  // 与压缩字节流一样，将序列化流填充到四个字节。
 		// As a sanity check, each pad byte can be checked to be the PadSentinel.
-		// 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
+  // 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
 		PadMemoryReader(&MemoryReader, TrackData, 4); 
 
 		// swap the track table
-		// 交换轨道表
+  // 交换轨道表
 		const size_t EntryStride = (CompressedData.CompressedNumberOfKeys > 0xFF) ? sizeof(uint16) : sizeof(uint8);
 		for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 		{
@@ -151,17 +151,17 @@ void AEFVariableKeyLerpShared::ByteSwapRotationOut(
 	AEFConstantKeyLerpShared::ByteSwapRotationOut(CompressedData, MemoryWriter, TrackData, NumKeys);
 
 	// Store the track table if needed
-	// 如果需要，存储轨道表
+ // 如果需要，存储轨道表
 	if (NumKeys > 1)
 	{
 		// Like the compressed byte stream, pad the serialization stream to four bytes.
-		// 与压缩字节流一样，将序列化流填充到四个字节。
+  // 与压缩字节流一样，将序列化流填充到四个字节。
 		// As a sanity check, each pad byte can be checked to be the PadSentinel.
-		// 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
+  // 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
 		PadMemoryWriter(&MemoryWriter, TrackData, 4);
 
 		// swap the track table
-		// 交换轨道表
+  // 交换轨道表
 		const size_t EntryStride = (CompressedData.CompressedNumberOfKeys > 0xFF) ? sizeof(uint16) : sizeof(uint8);
 		for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 		{
@@ -187,17 +187,17 @@ void AEFVariableKeyLerpShared::ByteSwapTranslationOut(
 	AEFConstantKeyLerpShared::ByteSwapTranslationOut(CompressedData, MemoryWriter, TrackData, NumKeys);
 
 	// Store the track table if needed
-	// 如果需要，存储轨道表
+ // 如果需要，存储轨道表
 	if (NumKeys > 1)
 	{
 		// Like the compressed byte stream, pad the serialization stream to four bytes.
-		// 与压缩字节流一样，将序列化流填充到四个字节。
+  // 与压缩字节流一样，将序列化流填充到四个字节。
 		// As a sanity check, each pad byte can be checked to be the PadSentinel.
-		// 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
+  // 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
 		PadMemoryWriter(&MemoryWriter, TrackData, 4);
 
 		// swap the track table
-		// 交换轨道表
+  // 交换轨道表
 		const size_t EntryStride = (CompressedData.CompressedNumberOfKeys > 0xFF) ? sizeof(uint16) : sizeof(uint8);
 		for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 		{
@@ -224,17 +224,17 @@ void AEFVariableKeyLerpShared::ByteSwapScaleOut(
 	AEFConstantKeyLerpShared::ByteSwapScaleOut(CompressedData, MemoryWriter, TrackData, NumKeys);
 
 	// Store the track table if needed
-	// 如果需要，存储轨道表
+ // 如果需要，存储轨道表
 	if (NumKeys > 1)
 	{
 		// Like the compressed byte stream, pad the serialization stream to four bytes.
-		// 与压缩字节流一样，将序列化流填充到四个字节。
+  // 与压缩字节流一样，将序列化流填充到四个字节。
 		// As a sanity check, each pad byte can be checked to be the PadSentinel.
-		// 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
+  // 作为健全性检查，可以检查每个填充字节是否为 PadSentinel。
 		PadMemoryWriter(&MemoryWriter, TrackData, 4);
 
 		// swap the track table
-		// 交换轨道表
+  // 交换轨道表
 		const size_t EntryStride = (CompressedData.CompressedNumberOfKeys > 0xFF) ? sizeof(uint16) : sizeof(uint8);
 		for (int32 KeyIndex = 0; KeyIndex < NumKeys; ++KeyIndex)
 		{
@@ -298,7 +298,7 @@ void AEFVariableKeyLerp<FORMAT>::GetPoseRotations(
 			FTransform& BoneAtom = Atoms[AtomIndex];
 
 			// call the decoder directly (not through the vtable)
-			// 直接调用解码器（不通过vtable）
+   // 直接调用解码器（不通过vtable）
 			AEFVariableKeyLerp<FORMAT>::GetBoneAtomRotation(BoneAtom, DecompContext, TrackIndex);
 		}
 	}
@@ -357,7 +357,7 @@ void AEFVariableKeyLerp<FORMAT>::GetPoseTranslations(
 			FTransform& BoneAtom = Atoms[AtomIndex];
 	
 			// call the decoder directly (not through the vtable)
-			// 直接调用解码器（不通过vtable）
+   // 直接调用解码器（不通过vtable）
 			AEFVariableKeyLerp<FORMAT>::GetBoneAtomTranslation(BoneAtom, DecompContext, TrackIndex);
 		}
 	}
@@ -420,7 +420,7 @@ void AEFVariableKeyLerp<FORMAT>::GetPoseScales(
 			FTransform& BoneAtom = Atoms[AtomIndex];
 	
 			// call the decoder directly (not through the vtable)
-			// 直接调用解码器（不通过vtable）
+   // 直接调用解码器（不通过vtable）
 			AEFVariableKeyLerp<FORMAT>::GetBoneAtomScale(BoneAtom, DecompContext, TrackIndex);
 		}
 	}

@@ -15,7 +15,7 @@ bool FBoneWeightTestBasic::RunTest(const FString& Parameters)
 	using namespace UE::AnimationCore;
 
 	// Correct values (uint8)
-	// 正确值 (uint8)
+ // 正确值 (uint8)
 	{
 		FBoneWeight BWMin(FBoneIndexType(2), uint8(0));
 		UTEST_EQUAL(TEXT("FBoneWeight index (uint8)"), BWMin.GetBoneIndex(), 2);
@@ -23,11 +23,11 @@ bool FBoneWeightTestBasic::RunTest(const FString& Parameters)
 		UTEST_EQUAL(TEXT("FBoneWeight min raw value (uint8)"), BWMin.GetRawWeight(), uint16(0));
 
 		// Because we construct a uin16 value from uint8 by doubling (v | v << 8). The reason
-		// 因为我们通过加倍 (v | v << 8) 从 uint8 构造一个 uin16 值。原因
+  // 因为我们通过加倍 (v | v << 8) 从 uint8 构造一个 uin16 值。原因
 		// is so that we end up with a fully saturated value (0xFFFF) for uint8(0xFF), rather 
-		// 这样我们最终得到 uint8(0xFF) 的完全饱和值 (0xFFFF)，而不是
+  // 这样我们最终得到 uint8(0xFF) 的完全饱和值 (0xFFFF)，而不是
 		// than (0xFF00) which would not be a full weight.
-		// 大于 (0xFF00)，这不是完整的权重。
+  // 大于 (0xFF00)，这不是完整的权重。
 		FBoneWeight BWMid(FBoneIndexType(0), uint8(127));
 		UTEST_EQUAL(TEXT("FBoneWeight mid value (uint8)"), BWMid.GetWeight(), 0x7F7F / 65535.0f);
 		UTEST_EQUAL(TEXT("FBoneWeight mid raw value (uint8)"), BWMid.GetRawWeight(), 0x7F7FU);
@@ -38,7 +38,7 @@ bool FBoneWeightTestBasic::RunTest(const FString& Parameters)
 	}
 
 	// Correct values (uint16)
-	// 正确值 (uint16)
+ // 正确值 (uint16)
 	{
 		FBoneWeight BWMin(FBoneIndexType(2), uint16(0));
 		UTEST_EQUAL(TEXT("FBoneWeight index (uint8)"), BWMin.GetBoneIndex(), 2);
@@ -46,7 +46,7 @@ bool FBoneWeightTestBasic::RunTest(const FString& Parameters)
 		UTEST_EQUAL(TEXT("FBoneWeight min raw value (uint16)"), BWMin.GetRawWeight(), uint16(0));
 
 		// Since uint16::max / 2 -is equal to 32767.5
-		// 由于 uint16::max / 2 - 等于 32767.5
+  // 由于 uint16::max / 2 - 等于 32767.5
 		FBoneWeight BWMid(FBoneIndexType(0), uint16(0x7FFF));
 		UTEST_EQUAL(TEXT("FBoneWeight mid value (uint16)"), BWMid.GetWeight(), 0x7FFF / float(FBoneWeight::GetMaxRawWeight()));
 		UTEST_EQUAL(TEXT("FBoneWeight mid raw value (uint16)"), BWMid.GetRawWeight(), 0x7FFF);
@@ -57,7 +57,7 @@ bool FBoneWeightTestBasic::RunTest(const FString& Parameters)
 	}
 
 	// Copy constructor
-	// 复制构造函数
+ // 复制构造函数
 	{
 		FBoneWeight BWOrig(FBoneIndexType(2), uint16(0x8000));
 		FBoneWeight BWCopy(BWOrig);
@@ -66,7 +66,7 @@ bool FBoneWeightTestBasic::RunTest(const FString& Parameters)
 	}
 
 	// Archiving
-	// 归档
+ // 归档
 	{
 		FBufferArchive BA;
 		FBoneWeight BWOrig(FBoneIndexType(2), uint16(0x8000));
@@ -88,7 +88,7 @@ bool FBoneWeightsSettingsTest::RunTest(const FString& Parameters)
 	using namespace UE::AnimationCore;
 
 	// Ensure that no-one's tampered with the defaults.
-	// 确保没有人篡改默认设置。
+ // 确保没有人篡改默认设置。
 	FBoneWeightsSettings S;
 
 	UTEST_EQUAL(TEXT("FBoneWeightsSettings NormalizeType"), S.GetNormalizeType(), EBoneWeightNormalizeType::Always);
@@ -138,7 +138,7 @@ bool FBoneWeightsTestBasic::RunTest(const FString& Parameters)
 	}
 
 	// Check normalization works
-	// 检查标准化工作
+ // 检查标准化工作
 	{
 		const TCHAR* Name = TEXT("FBoneWeights::SetBoneWeight[MaxWNormalize=AboveOne]");
 
@@ -160,11 +160,11 @@ bool FBoneWeightsTestBasic::RunTest(const FString& Parameters)
 
 		FBoneWeights	A;
 		// Gets normalized to 1.0
-		// 标准化为 1.0
+  // 标准化为 1.0
 		A.SetBoneWeight(FBoneIndexType(0), 0.25f, S);
 
 		// Gets normalized to 0.25 / 1.25 = 0.2 leaving the first entry at 0.8
-		// 标准化为 0.25 / 1.25 = 0.2，将第一个条目保留为 0.8
+  // 标准化为 0.25 / 1.25 = 0.2，将第一个条目保留为 0.8
 		A.SetBoneWeight(FBoneIndexType(1), 0.25f, S);
 
 		UTEST_EQUAL(Name, A.Num(), 2);
@@ -185,7 +185,7 @@ bool FBoneWeightsTestBasic::RunTest(const FString& Parameters)
 	}
 
 	// Check overwrite same bone index works  (with renormalization)
-	// 检查覆盖相同的骨骼索引是否有效（通过重整化）
+ // 检查覆盖相同的骨骼索引是否有效（通过重整化）
 	{
 		const TCHAR* Name = TEXT("FBoneWeights::SetBoneWeight[Normalize=AboveOne, Overwrite]");
 
@@ -200,18 +200,18 @@ bool FBoneWeightsTestBasic::RunTest(const FString& Parameters)
 		UTEST_EQUAL(Name, A[0].GetWeight(), 0.25f);
 
 		// This should set the total weight to above 1.0 and hence trigger normalization.
-		// 这应该将总权重设置为高于 1.0，从而触发归一化。
+  // 这应该将总权重设置为高于 1.0，从而触发归一化。
 		A.SetBoneWeight(FBoneIndexType(1), 1.0f, S);
 		UTEST_EQUAL(Name, A[0].GetWeight(), 0.8f);
 	}
 
 	// Check normalization correctly distributes error.
-	// 检查标准化是否正确分布误差。
+ // 检查标准化是否正确分布误差。
 	{
 		const TCHAR* Name = TEXT("FBoneWeights::SetBoneWeight[Normalize=Always, Distribute]");
 
 		// Ensure that no weights get thrown out because they're too small.
-		// 确保不会因为重量太小而被扔掉。
+  // 确保不会因为重量太小而被扔掉。
 		FBoneWeightsSettings SN, SA;
 		SN.SetNormalizeType(EBoneWeightNormalizeType::None);
 		SN.SetWeightThreshold(0.0f);
@@ -229,11 +229,11 @@ bool FBoneWeightsTestBasic::RunTest(const FString& Parameters)
 		UTEST_EQUAL(Name, A.Num(), MaxInlineBoneWeightCount);
 		
 		// None of the small weights should not have changed in value, since the total scaling 
-		// 所有小权重的值都不应该改变，因为总缩放
+  // 所有小权重的值都不应该改变，因为总缩放
 		// (1.0 - 22/65535) is so close to 1.0 that it won't make a difference with 
-		// (1.0 - 22/65535) 非常接近 1.0，因此不会产生任何影响
+  // (1.0 - 22/65535) 非常接近 1.0，因此不会产生任何影响
 		// round-to-nearest.
-		// 舍入到最接近的值。
+  // 舍入到最接近的值。
 		int32 WeightSum = 0;
 		for (int32 Index = 0; Index < A.Num(); Index++)
 		{
@@ -250,7 +250,7 @@ bool FBoneWeightsTestBasic::RunTest(const FString& Parameters)
 	}
 
 	// Check ordering works
-	// 检查订购工作
+ // 检查订购工作
 	{
 		const TCHAR* Name = TEXT("FBoneWeights::SetBoneWeight[Ordering]");
 
@@ -266,7 +266,7 @@ bool FBoneWeightsTestBasic::RunTest(const FString& Parameters)
 	}
 
 	// Check max limit works
-	// 检查最大限制工作
+ // 检查最大限制工作
 	{
 		const TCHAR* Name = TEXT("FBoneWeights::SetBoneWeight[MaxWeights]");
 
@@ -285,14 +285,14 @@ bool FBoneWeightsTestBasic::RunTest(const FString& Parameters)
 		UTEST_EQUAL(Name, A[2].GetBoneIndex(), 2);
 
 		// Ensure it gets inserted just before the 2/0.15f value.
-		// 确保将其插入到 2/0.15f 值之前。
+  // 确保将其插入到 2/0.15f 值之前。
 		A.SetBoneWeight(FBoneIndexType(5), 0.17f, S);
 		UTEST_EQUAL(Name, A.Num(), 3);
 		UTEST_EQUAL(Name, A[2].GetBoneIndex(), 5);
 	}
 
 	// Check threshold works
-	// 检查阈值工作
+ // 检查阈值工作
 	{
 		const TCHAR* Name = TEXT("FBoneWeights::SetBoneWeight[Threshold, Normalize=None]");
 		FBoneWeightsSettings S;
@@ -316,7 +316,7 @@ bool FBoneWeightsTestBasic::RunTest(const FString& Parameters)
 		UTEST_EQUAL(Name, A[3].GetBoneIndex(), 4);
 
 		// Set an existing bone index to be below threshold. It should get removed.
-		// 将现有骨骼指数设置为低于阈值。它应该被删除。
+  // 将现有骨骼指数设置为低于阈值。它应该被删除。
 		A.SetBoneWeight(FBoneIndexType(1), 0.1f, S);
 		UTEST_EQUAL(Name, A.Num(), 3);
 		UTEST_EQUAL(Name, A[2].GetBoneIndex(), 4);
@@ -331,36 +331,36 @@ bool FBoneWeightsTestBasic::RunTest(const FString& Parameters)
 		FBoneWeights	A;
 		A.SetBoneWeight(FBoneIndexType(0), 1.00f, S);
 		// Weights = [1.0]
-		// 权重 = [1.0]
+  // 权重 = [1.0]
 		UTEST_EQUAL(Name, A.Num(), 1);
 		UTEST_EQUAL(Name, A[0].GetBoneIndex(), 0);
 
 
 		// Add one more, this should pass the threshold, both before and after normalization.
-		// 再添加一个，在标准化之前和之后都应该超过阈值。
+  // 再添加一个，在标准化之前和之后都应该超过阈值。
 		A.SetBoneWeight(FBoneIndexType(1), 0.5f, S);
 		// Weights = [0.666, 0.333]
-		// 权重 = [0.666, 0.333]
+  // 权重 = [0.666, 0.333]
 		UTEST_EQUAL(Name, A.Num(), 2);
 		UTEST_EQUAL(Name, A[1].GetBoneIndex(), 1);
 
 
 		// Add one more, this passes the early threshold check, but not after normalization.
-		// 再添加一个，这会通过早期阈值检查，但在标准化之后不会通过。
+  // 再添加一个，这会通过早期阈值检查，但在标准化之后不会通过。
 		A.SetBoneWeight(FBoneIndexType(2), 0.25f, S);
 		// Weights = [0.5328, 0.2664, 0.2] -> Last entry culled.
-		// 权重 = [0.5328, 0.2664, 0.2] -> 最后一个条目被剔除。
+  // 权重 = [0.5328, 0.2664, 0.2] -> 最后一个条目被剔除。
 		UTEST_EQUAL(Name, A.Num(), 2);
 		UTEST_EQUAL(Name, A[1].GetBoneIndex(), 1);
 	}
 
 	// Check removal works
-	// 检查拆除工程
+ // 检查拆除工程
 	{
 		const TCHAR* Name = TEXT("FBoneWeights::RemoveBoneWeight");
 
 		// Don't normalize at first.
-		// 一开始不要正常化。
+  // 一开始不要正常化。
 		FBoneWeights A;
 		A.SetBoneWeight(FBoneIndexType(0), 0.5f);
 		A.SetBoneWeight(FBoneIndexType(1), 0.5f);
@@ -371,7 +371,7 @@ bool FBoneWeightsTestBasic::RunTest(const FString& Parameters)
 		UTEST_EQUAL(Name, A.Num(), 2);
 
 		// Normalize on remove to see if the weight changes.
-		// 对移除进行归一化以查看重量是否发生变化。
+  // 对移除进行归一化以查看重量是否发生变化。
 		FBoneWeightsSettings S;
 		S.SetNormalizeType(EBoneWeightNormalizeType::Always);
 		A.RemoveBoneWeight(FBoneIndexType(0), S);
@@ -454,7 +454,7 @@ static UE::AnimationCore::FBoneWeights CreateWeights(
 	using namespace UE::AnimationCore;
 
 	// We only add raw values.
-	// 我们只添加原始值。
+ // 我们只添加原始值。
 	FBoneWeightsSettings S;
 	S.SetNormalizeType(EBoneWeightNormalizeType::None);
 
@@ -520,7 +520,7 @@ bool FBoneWeightsTestBlend::RunTest(const FString& Parameters)
 		auto BWN = FBoneWeights::Blend(BW1, BW2, 0.5f, SN);
 
 		// With no normalization, the blended value will be 0.5
-		// 如果没有标准化，混合值将为 0.5
+  // 如果没有标准化，混合值将为 0.5
 		UTEST_EQUAL(Name, BWN.Num(), 1);
 		UTEST_EQUAL(Name, BWN[0].GetWeight(), 0.5f);
 
@@ -529,7 +529,7 @@ bool FBoneWeightsTestBlend::RunTest(const FString& Parameters)
 		auto BWA = FBoneWeights::Blend(BW1, BW2, 0.5f, SA);
 
 		// With full normalization, the blended value will be 1.0
-		// 完全标准化后，混合值将为 1.0
+  // 完全标准化后，混合值将为 1.0
 		UTEST_EQUAL(Name, BWA.Num(), 1);
 		UTEST_EQUAL(Name, BWA[0].GetWeight(), 1.0f);
 	}

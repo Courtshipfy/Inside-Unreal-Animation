@@ -29,6 +29,8 @@ struct FConstraint
 
 	/** Target Bone this is constraint to */
 	/** 目标骨骼这是约束 */
+	/** 目标骨骼这是约束 */
+	/** 目标骨骼这是约束 */
 	UPROPERTY(EditAnywhere, Category = FConstraint)
 	FBoneReference TargetBone;
 
@@ -41,15 +43,21 @@ struct FConstraint
 	 */
 	UPROPERTY(EditAnywhere, Category = FConstraint)
 	EConstraintOffsetOption	OffsetOption;
+	/** 什么变换类型受到约束 - 平移、旋转、缩放或父级。父级覆盖所有组件 */
 
+	/** 什么变换类型受到约束 - 平移、旋转、缩放或父级。父级覆盖所有组件 */
 	/** What transform type is constraint to - Translation, Rotation, Scale OR Parent. Parent overrides all component */
 	/** 什么变换类型受到约束 - 平移、旋转、缩放或父级。父级覆盖所有组件 */
+	/** 每轴过滤器选项 - 应用于本地空间而不是世界空间 */
 	UPROPERTY(EditAnywhere, Category = FConstraint)
 	ETransformConstraintType TransformType;
+	/** 每轴过滤器选项 - 应用于本地空间而不是世界空间 */
 
+	/** 瞬态约束数据索引 */
 	/** Per axis filter options - applied in their local space not in world space */
 	/** 每轴过滤器选项 - 应用于本地空间而不是世界空间 */
 	UPROPERTY(EditAnywhere, Category = FConstraint)
+	/** 瞬态约束数据索引 */
 	FFilterOptionPerAxis PerAxis;
 	
 	/** transient constraint data index */
@@ -73,18 +81,24 @@ struct FConstraint
 	{}
 };
 /**
+	/** 要控制的骨骼的名称。这是要修改的主骨骼链。 **/
  *	Constraint node to parent or world transform for rotation/translation
  */
 USTRUCT()
 struct FAnimNode_Constraint : public FAnimNode_SkeletalControlBase
+	/** 约束条件列表 */
+	/** 要控制的骨骼的名称。这是要修改的主骨骼链。 **/
 {
 	GENERATED_USTRUCT_BODY()
 
+	/** 权重数据 - 后期编辑同步到 ConstraintSetups */
 	/** Name of bone to control. This is the main bone chain to modify from. **/
+	/** 约束条件列表 */
 	/** 要控制的骨骼的名称。这是要修改的主骨骼链。 **/
 	UPROPERTY(EditAnywhere, Category = SkeletalControl) 
 	FBoneReference BoneToModify;
 
+	/** 权重数据 - 后期编辑同步到 ConstraintSetups */
 	/** List of constraints */
 	/** 约束条件列表 */
 	UPROPERTY(EditAnywhere, Category = Constraints)
@@ -98,28 +112,30 @@ struct FAnimNode_Constraint : public FAnimNode_SkeletalControlBase
 	ANIMGRAPHRUNTIME_API FAnimNode_Constraint();
 
 	// FAnimNode_Base interface
-	// FAnimNode_Base接口
+ // FAnimNode_Base接口
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
-	// FAnimNode_Base接口结束
+ // FAnimNode_Base接口结束
 
 	// FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口
+ // FAnimNode_SkeletalControlBase接口
 	ANIMGRAPHRUNTIME_API virtual void EvaluateSkeletalControl_AnyThread(FComponentSpacePoseContext& Output, TArray<FBoneTransform>& OutBoneTransforms) override;
 	ANIMGRAPHRUNTIME_API virtual bool IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) override;
 	// End of FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口结束
+ // FAnimNode_SkeletalControlBase接口结束
+	/** 调试绘制缓存数据 */
 
 #if WITH_EDITOR
 	ANIMGRAPHRUNTIME_API void ConditionalDebugDraw(FPrimitiveDrawInterface* PDI, USkeletalMeshComponent* MeshComp) const;
+	/** 调试绘制缓存数据 */
 #endif // WITH_EDITOR
 
 private:
 	// FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口
+ // FAnimNode_SkeletalControlBase接口
 	ANIMGRAPHRUNTIME_API virtual void InitializeBoneReferences(const FBoneContainer& RequiredBones) override;
 	// End of FAnimNode_SkeletalControlBase interface
-	// FAnimNode_SkeletalControlBase接口结束
+ // FAnimNode_SkeletalControlBase接口结束
 
 	TArray<FConstraintData>	ConstraintData;
 

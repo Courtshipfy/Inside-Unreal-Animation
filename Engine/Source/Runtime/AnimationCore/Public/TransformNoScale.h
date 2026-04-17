@@ -53,19 +53,27 @@ struct FTransformNoScale
 
 	/** The translation of this transform */
 	/** 这个变换的翻译 */
+	/** 这个变换的翻译 */
+	/** 这个变换的翻译 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Transform")
 	FVector Location;
+	/** 这个变换的旋转 */
 
+	/** 这个变换的旋转 */
 	/** The rotation of this transform */
 	/** 这个变换的旋转 */
+	/** 转换为 FTransform */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Transform")
 	FQuat Rotation;
+	/** 转换为 FTransform */
 
 	/** Convert to an FTransform */
 	/** 转换为 FTransform */
+	/** 从 FTransform 转换 */
 	inline FTransform ToFTransform() const
 	{
 		return FTransform(Rotation, Location, FVector::OneVector);
+	/** 从 FTransform 转换 */
 	}
 
 	/** Convert from an FTransform */

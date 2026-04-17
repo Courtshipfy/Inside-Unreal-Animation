@@ -41,13 +41,15 @@
 #endif
 /** Anim stats */
 /** 动画统计 */
+/** 动画统计 */
+/** 动画统计 */
 
 DEFINE_STAT(STAT_CalcSkelMeshBounds);
 DEFINE_STAT(STAT_MeshObjectUpdate);
 DEFINE_STAT(STAT_BlendInPhysics);
 DEFINE_STAT(STAT_SkelCompUpdateTransform);
 //                         -->  Physics Engine here <--
-//                         --> 这里是物理引擎<--
+// --> 这里是物理引擎<--
 DEFINE_STAT(STAT_UpdateRBBones);
 DEFINE_STAT(STAT_UpdateRBJoints);
 DEFINE_STAT(STAT_FinalizeAnimationUpdate);
@@ -134,7 +136,7 @@ UAnimInstance::UAnimInstance(const FObjectInitializer& ObjectInitializer)
 	bNeedsUpdate = false;
 
 	// Default to using threaded animation update.
-	// 默认使用线程动画更新。
+ // 默认使用线程动画更新。
 	bUseMultiThreadedAnimationUpdate = true;
 	bCreatedByLinkedAnimGraph = false;
 	PendingDynamicResetTeleportType = ETeleportType::None;
@@ -266,7 +268,7 @@ UAnimInstance* UAnimInstance::Blueprint_GetMainAnimInstance() const
 UWorld* UAnimInstance::GetWorld() const
 {
 	// The CDO isn't owned by a SkelMeshComponent (and doesn't have a World)
-	// CDO 不属于 SkelMeshComponent（并且没有世界）
+ // CDO 不属于 SkelMeshComponent（并且没有世界）
 	return (HasAnyFlags(RF_ClassDefaultObject) ? nullptr : GetSkelMeshComponent()->GetWorld());
 }
 
@@ -282,9 +284,9 @@ void UAnimInstance::InitializeAnimation(bool bInDeferRootNodeInitialization)
 	TRACE_OBJECT_LIFETIME_BEGIN(this);
 
 	// make sure your skeleton is initialized
-	// 确保你的骨架已经初始化
+ // 确保你的骨架已经初始化
 	// you can overwrite different skeleton
-	// 你可以覆盖不同的骨架
+ // 你可以覆盖不同的骨架
 	USkeletalMeshComponent* OwnerComponent = GetSkelMeshComponent();
 	if (OwnerComponent->GetSkeletalMeshAsset() != NULL)
 	{
@@ -301,13 +303,12 @@ void UAnimInstance::InitializeAnimation(bool bInDeferRootNodeInitialization)
 		LifeTimer = 0.0;
 		CurrentLifeTimerScrubPosition = 0.0;
 
-		// 当动画实例初始化时，如果这个实例正在被编辑器调试，则清空之前记录的调试快照数据，准备记录新的调试信息。
 		if (UAnimBlueprint* Blueprint = Cast<UAnimBlueprint>(Cast<UAnimBlueprintGeneratedClass>(AnimBlueprintClass)->ClassGeneratedBy))
 		{
 			if (Blueprint->GetObjectBeingDebugged() == this)
 			{
 				// Reset the snapshot buffer
-				// 重置快照缓冲区
+    // 重置快照缓冲区
 				Cast<UAnimBlueprintGeneratedClass>(AnimBlueprintClass)->GetAnimBlueprintDebugData().ResetSnapshotBuffer();
 			}
 		}
@@ -315,8 +316,7 @@ void UAnimInstance::InitializeAnimation(bool bInDeferRootNodeInitialization)
 	}
 
 	// before initialize, need to recalculate required bone list
-	// 初始化之前，需要重新计算所需的骨骼列表
-	// 初始化之前，获得工作线程上的Animinstanceproxy，让其从USkeletalMeshComponent上获得骨骼信息并缓存下来
+ // 初始化之前，需要重新计算所需的骨骼列表
 	RecalcRequiredBones();
 
 	GetProxyOnGameThread<FAnimInstanceProxy>().Initialize(this);
@@ -324,7 +324,7 @@ void UAnimInstance::InitializeAnimation(bool bInDeferRootNodeInitialization)
 	{
 #if DO_CHECK
 		// Allow us to validate callbacks within user code
-		// 允许我们验证用户代码中的回调
+  // 允许我们验证用户代码中的回调
 		FGuardValue_Bitfield(bInitializing, true);
 #endif
 
@@ -335,7 +335,7 @@ void UAnimInstance::InitializeAnimation(bool bInDeferRootNodeInitialization)
 	GetProxyOnGameThread<FAnimInstanceProxy>().InitializeRootNode(bInDeferRootNodeInitialization);
 
 	// we can bind rules & events now the graph has been initialized
-	// 现在图表已经初始化，我们可以绑定规则和事件
+ // 现在图表已经初始化，我们可以绑定规则和事件
 	GetProxyOnGameThread<FAnimInstanceProxy>().BindNativeDelegates();
 
 	InitializeGroupedLayers(bInDeferRootNodeInitialization);
@@ -378,17 +378,16 @@ void UAnimInstance::UninitializeAnimation()
 	USkeletalMeshComponent* SkelMeshComp = GetSkelMeshComponent();
 
 	// Skip dispatching notify end messages during re-instancing. Various classes may be in an incomplete state so calling
-	// 在重新实例期间跳过调度通知结束消息。各种类可能处于不完整状态，因此调用
+ // 在重新实例期间跳过调度通知结束消息。各种类可能处于不完整状态，因此调用
 	// arbitrary script is dangerous.
-	// 任意脚本是危险的。
+ // 任意脚本是危险的。
 	//
-	// 处理动画实例（AnimInstance）或其所属组件在注销/重构时，强制“清场”未完成的动画通知
 	if(!GIsReinstancing) //热重载中 判断
 	{
 		if (SkelMeshComp)
 		{
 			// Tick currently active AnimNotifyState
-			// 勾选当前活动的 AnimNotifyState
+   // 勾选当前活动的 AnimNotifyState
 			for(int32 Index=0; Index<ActiveAnimNotifyState.Num(); Index++)
 			{
 				const FAnimNotifyEvent& AnimNotifyEvent = ActiveAnimNotifyState[Index];
@@ -397,7 +396,7 @@ void UAnimInstance::UninitializeAnimation()
 				{
 #if WITH_EDITOR
 					// Prevent firing notifies in animation editors if requested
-					// 如果需要，防止在动画编辑器中触发通知
+     // 如果需要，防止在动画编辑器中触发通知
 					if(!SkelMeshComp->IsA<UDebugSkelMeshComponent>() || AnimNotifyEvent.NotifyStateClass->ShouldFireInEditor())
 #endif
 					{
@@ -416,8 +415,7 @@ void UAnimInstance::UninitializeAnimation()
 	SlotGroupInertializationRequestDataMap.Reset();
 
 	// Cleanup layer nodes
-	// 清理层节点
-	// 循环卸载链接的子动画蓝图
+ // 清理层节点
 	if (IAnimClassInterface* AnimBlueprintClass = IAnimClassInterface::GetFromClass(GetClass()))
 	{
 		for (FStructProperty* LayerNodeProperty : AnimBlueprintClass->GetLinkedAnimLayerNodeProperties())
@@ -432,14 +430,13 @@ void UAnimInstance::UninitializeAnimation()
 	if (!GIsReinstancing)
 	{
 		// Cleanup shared layers data (we don't use FAnimSubsystem_SharedLinkedAnimLayers::GetFromMesh here as we only want the main instance to clean the shared layers)
-		// 清理共享图层数据（我们在这里不使用 FAnimSubsystem_SharedLinkedAnimLayers::GetFromMesh，因为我们只希望主实例清理共享图层）
+  // 清理共享图层数据（我们在这里不使用 FAnimSubsystem_SharedLinkedAnimLayers::GetFromMesh，因为我们只希望主实例清理共享图层）
 		if (FAnimSubsystem_SharedLinkedAnimLayers* SharedLinkedAnimLayers = FindSubsystem<FAnimSubsystem_SharedLinkedAnimLayers>())
 		{
 			// Reset shared linked instances when the main instance in uninitialized.
-			// 当主实例未初始化时重置共享链接实例。
+   // 当主实例未初始化时重置共享链接实例。
 			// This is required in part for SkeletalMeshComponent::OnUnregister so that the linked instances array isn't modified as we iterate on it to unitialize them. (see FAnimNode_LinkedLayer::CleanupSharedLinkedLayersData)
-			// 这对于 SkeletalMeshComponent::OnUnregister 来说是必需的，这样当我们迭代它以统一它们时，链接的实例数组就不会被修改。 （参见 FAnimNode_LinkedLayer::CleanupSharedLinkedLayersData）
-			// 通过让主实例在卸载时统一重置子系统，可以避免多个子实例在销毁过程中因同时修改共享数组而导致的迭代器失效（内存崩溃）问题
+   // 这对于 SkeletalMeshComponent::OnUnregister 来说是必需的，这样当我们迭代它以统一它们时，链接的实例数组就不会被修改。 （参见 FAnimNode_LinkedLayer::CleanupSharedLinkedLayersData）
 			SharedLinkedAnimLayers->Reset();
 		}
 	}
@@ -450,7 +447,7 @@ bool UAnimInstance::UpdateSnapshotAndSkipRemainingUpdate()
 {
 #if WITH_EDITOR
 	// Avoid updating the instance if we're replaying the past
-	// 如果我们重播过去，请避免更新实例
+ // 如果我们重播过去，请避免更新实例
 	if (UAnimBlueprintGeneratedClass* AnimBlueprintClass = Cast<UAnimBlueprintGeneratedClass>(GetClass()))
 	{
 		FAnimBlueprintDebugData& DebugData = AnimBlueprintClass->GetAnimBlueprintDebugData();
@@ -461,7 +458,7 @@ bool UAnimInstance::UpdateSnapshotAndSkipRemainingUpdate()
 				if (Blueprint->GetObjectBeingDebugged() == this)
 				{
 					// Find the correct frame
-					// 找到正确的框架
+     // 找到正确的框架
 					DebugData.SetSnapshotIndexByTime(this, CurrentLifeTimerScrubPosition);
 					return true;
 				}
@@ -476,7 +473,7 @@ bool UAnimInstance::UpdateSnapshotAndSkipRemainingUpdate()
 void UAnimInstance::UpdateMontage(float DeltaSeconds)
 {
 	// Don't update montages if we are using the main instance's montage eval data and we are not the main instance.
-	// 如果我们使用主实例的蒙太奇评估数据并且我们不是主实例，请不要更新蒙太奇。
+ // 如果我们使用主实例的蒙太奇评估数据并且我们不是主实例，请不要更新蒙太奇。
 	if (IsUsingMainInstanceMontageEvaluationData())
 	{
 		if (GetOwningComponent()->GetAnimInstance() != this)
@@ -486,15 +483,15 @@ void UAnimInstance::UpdateMontage(float DeltaSeconds)
 	}
 
 	// update montage weight
-	// 更新蒙太奇权重
+ // 更新蒙太奇权重
 	Montage_UpdateWeight(DeltaSeconds);
 
 	// update montage should run in game thread
-	// 更新蒙太奇应该在游戏线程中运行
+ // 更新蒙太奇应该在游戏线程中运行
 	// if we do multi threading, make sure this stays in game thread.
-	// 如果我们进行多线程，请确保它保留在游戏线程中。
+ // 如果我们进行多线程，请确保它保留在游戏线程中。
 	// This is because branch points need to execute arbitrary code inside this call.
-	// 这是因为分支点需要在此调用内执行任意代码。
+ // 这是因为分支点需要在此调用内执行任意代码。
 	Montage_Advance(DeltaSeconds);
 
 #if ANIM_TRACE_ENABLED
@@ -515,7 +512,7 @@ void UAnimInstance::UpdateMontageSyncGroup()
 			const FName GroupNameToUse = MontageInstance->GetSyncGroupName();
 
 			// that is public data, so if anybody decided to play with it
-			// 这是公共数据，所以如果有人决定使用它
+   // 这是公共数据，所以如果有人决定使用它
 			if (ensure(GroupNameToUse != NAME_None))
 			{
 				bRecordNeedsResetting = false;
@@ -570,11 +567,11 @@ void UAnimInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMoti
 	FScopeCycleCounterUObject AnimScope(this);
 
 	// acquire the proxy as we need to update
-	// 当我们需要更新时获取代理
+ // 当我们需要更新时获取代理
 	FAnimInstanceProxy& Proxy = GetProxyOnGameThread<FAnimInstanceProxy>();
 
 	// Apply any pending dynamics reset
-	// 应用任何待处理的动态重置
+ // 应用任何待处理的动态重置
 	if(PendingDynamicResetTeleportType != ETeleportType::None)
 	{
 		Proxy.ResetDynamics(PendingDynamicResetTeleportType);
@@ -632,7 +629,7 @@ void UAnimInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMoti
 	if (GIsEditor)
 	{
 		// Update the lifetimer and see if we should use the snapshot instead
-		// 更新生命周期并看看我们是否应该使用快照
+  // 更新生命周期并看看我们是否应该使用快照
 		CurrentLifeTimerScrubPosition += DeltaSeconds;
 		LifeTimer = FMath::Max<double>(CurrentLifeTimerScrubPosition, LifeTimer);
 
@@ -646,20 +643,20 @@ void UAnimInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMoti
 	PreUpdateAnimation(DeltaSeconds);
 
 	// need to update montage BEFORE node update or Native Update.
-	// 需要在节点更新或本机更新之前更新蒙太奇。
+ // 需要在节点更新或本机更新之前更新蒙太奇。
 	// so that node knows where montage is
-	// 这样节点就知道蒙太奇在哪里
+ // 这样节点就知道蒙太奇在哪里
 	{
 		UpdateMontage(DeltaSeconds);
 
 		// now we know all montage has advanced
-		// 现在我们知道所有蒙太奇都已经进步了
+  // 现在我们知道所有蒙太奇都已经进步了
 		// time to test sync groups
-		// 测试同步组的时间
+  // 测试同步组的时间
 		UpdateMontageSyncGroup();
 
 		// Update montage eval data, to be used by AnimGraph Update and Evaluate phases.
-		// 更新蒙太奇评估数据，供 AnimGraph 更新和评估阶段使用。
+  // 更新蒙太奇评估数据，供 AnimGraph 更新和评估阶段使用。
 		UpdateMontageEvaluationData();
 	}
 
@@ -695,11 +692,11 @@ void UAnimInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMoti
 	}
 
 	// Determine whether or not the animation should be immediately updated according to current state
-	// 根据当前状态判断是否立即更新动画
+ // 根据当前状态判断是否立即更新动画
 	const bool bWantsImmediateUpdate = NeedsImmediateUpdate(DeltaSeconds, bNeedsValidRootMotion);
 
 	// Determine whether or not we can or should actually immediately update the animation state
-	// 确定我们是否可以或应该立即更新动画状态
+ // 确定我们是否可以或应该立即更新动画状态
 	bool bShouldImmediateUpdate = bWantsImmediateUpdate;
 	switch (UpdateFlag)
 	{
@@ -713,7 +710,7 @@ void UAnimInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMoti
 	if(bShouldImmediateUpdate)
 	{
 		// cant use parallel update, so just do the work here (we call this function here to do the work on the game thread)
-		// 无法使用并行更新，所以只需在这里完成工作（我们在这里调用此函数来在游戏线程上完成工作）
+  // 无法使用并行更新，所以只需在这里完成工作（我们在这里调用此函数来在游戏线程上完成工作）
 		ParallelUpdateAnimation();
 		PostUpdateAnimation();
 	}
@@ -745,23 +742,23 @@ void UAnimInstance::PostUpdateAnimation()
 	check(!IsRunningParallelEvaluation());
 
 	// Call post-update on linked instances here rather than at a higher level in SkeletalMeshComponent,
-	// 在这里调用链接实例的更新后，而不是在 SkeletalMeshComponent 中的更高级别调用，
+ // 在这里调用链接实例的更新后，而不是在 SkeletalMeshComponent 中的更高级别调用，
 	// but only IF we are the primary anim instance. This is to cover all the cases in which PostUpdateAnimation can be called:
-	// 但前提是我们是主要动画实例。这是为了涵盖可以调用 PostUpdateAnimation 的所有情况：
+ // 但前提是我们是主要动画实例。这是为了涵盖可以调用 PostUpdateAnimation 的所有情况：
 	// - During a character movement tick to get animated root motion.
-	// - 在角色移动期间勾选以获得动画根运动。
+ // - 在角色移动期间勾选以获得动画根运动。
 	//    - In this case we need to PostUpdateAnimation linked instances immediately to make sure their notfies
-	//    - 在这种情况下，我们需要立即 PostUpdateAnimation 链接实例以确保它们的通知
+ // - 在这种情况下，我们需要立即 PostUpdateAnimation 链接实例以确保它们的通知
 	//      are dispatched (they are queued from the call to TickAssetPlayerInstances in ParallelUpdateAnimation that will
-	//      被分派（它们在 ParallelUpdateAnimation 中对 TickAssetPlayerInstances 的调用中排队，这将
+ // 被分派（它们在 ParallelUpdateAnimation 中对 TickAssetPlayerInstances 的调用中排队，这将
 	//      have been called on the game thread).
-	//      已在游戏线程上调用）。
+ // 已在游戏线程上调用）。
 	// - Post-parallel update/evaluate task.
-	// - 后并行更新/评估任务。
+ // - 后并行更新/评估任务。
 	//    - In the non-root motion case we need to dispatch notifies on the game thread (that were queued on a worker thread)
-	//    - 在非根运动情况下，我们需要在游戏线程上分派通知（在工作线程上排队）
+ // - 在非根运动情况下，我们需要在游戏线程上分派通知（在工作线程上排队）
 	//      when parallel tasks are completed.
-	//      当并行任务完成时。
+ // 当并行任务完成时。
 	if(GetSkelMeshComponent()->GetAnimInstance() == this)
 	{
 		for (UAnimInstance* LinkedInstance : GetSkelMeshComponent()->GetLinkedAnimInstances())
@@ -774,7 +771,7 @@ void UAnimInstance::PostUpdateAnimation()
 	}
 
 	// Early out here if we are not set to needing an update
-	// 如果我们不需要更新，请尽早出去
+ // 如果我们不需要更新，请尽早出去
 	if(!bNeedsUpdate)
 	{
 		return;
@@ -783,13 +780,13 @@ void UAnimInstance::PostUpdateAnimation()
 	bNeedsUpdate = false;
 
 	// acquire the proxy as we need to update
-	// 当我们需要更新时获取代理
+ // 当我们需要更新时获取代理
 	FAnimInstanceProxy& Proxy = GetProxyOnGameThread<FAnimInstanceProxy>();
 
 	// flip read/write index
-	// 翻转读/写索引
+ // 翻转读/写索引
 	// Do this first, as we'll be reading cached slot weights, and we want this to be up to date for this frame.
-	// 首先执行此操作，因为我们将读取缓存的槽权重，并且我们希望它对于该帧是最新的。
+ // 首先执行此操作，因为我们将读取缓存的槽权重，并且我们希望它对于该帧是最新的。
 	Proxy.FlipBufferWriteIndex();
 
 	Proxy.PostUpdate(this);
@@ -803,7 +800,7 @@ void UAnimInstance::PostUpdateAnimation()
 	}
 
 	// blend in any montage-blended root motion that we now have correct weights for
-	// 混合任何蒙太奇混合的根运动，我们现在有正确的权重
+ // 混合任何蒙太奇混合的根运动，我们现在有正确的权重
 	for(const FQueuedRootMotionBlend& RootMotionBlend : RootMotionBlendQueue)
 	{
 		const float RootMotionSlotWeight = GetSlotNodeGlobalWeight(RootMotionBlend.SlotName);
@@ -812,9 +809,9 @@ void UAnimInstance::PostUpdateAnimation()
 	}
 
 	// We may have just partially blended root motion, so make it up to 1 by
-	// 我们可能只是部分混合了根部运动，因此将其设为 1
+ // 我们可能只是部分混合了根部运动，因此将其设为 1
 	// blending in identity too
-	// 也融入了身份
+ // 也融入了身份
 	if (ExtractedRootMotion.bHasRootMotion)
 	{
 		ExtractedRootMotion.MakeUpToFullWeight();
@@ -823,7 +820,7 @@ void UAnimInstance::PostUpdateAnimation()
 #if WITH_EDITOR && 0
 	{
 		// Take a snapshot if the scrub control is locked to the end, we are playing, and we are the one being debugged
-		// 如果scrub控件锁定到最后，拍个快照，我们正在玩，我们就是被调试的
+  // 如果scrub控件锁定到最后，拍个快照，我们正在玩，我们就是被调试的
 		if (UAnimBlueprintGeneratedClass* AnimBlueprintClass = Cast<UAnimBlueprintGeneratedClass>(GetClass()))
 		{
 			if (UAnimBlueprint* Blueprint = Cast<UAnimBlueprint>(AnimBlueprintClass->ClassGeneratedBy))
@@ -844,27 +841,27 @@ void UAnimInstance::PostUpdateAnimation()
 void UAnimInstance::DispatchQueuedAnimEvents()
 {
 	// now trigger Notifies
-	// [翻译失败: now trigger Notifies]
+ // 现在触发通知
 	TriggerAnimNotifies(GetProxyOnGameThread<FAnimInstanceProxy>().GetDeltaSeconds());
 
 	// Trigger Montage end events after notifies. In case Montage ending ends abilities or other states, we make sure notifies are processed before montage events.
-	// [翻译失败: Trigger Montage end events after notifies. In case Montage ending ends abilities or other states, we make sure notifies are processed before montage events.]
+ // 通知后触发 Montage 结束事件。如果蒙太奇结束结束能力或其他状态，我们确保在蒙太奇事件之前处理通知。
 	TriggerQueuedMontageEvents();
 
 	// After queued Montage Events have been dispatched, it's now safe to delete invalid Montage Instances.
-	// 调度排队的 Montage 事件后，现在可以安全地删除无效的 Montage 实例。
+ // 调度排队的 Montage 事件后，现在可以安全地删除无效的 Montage 实例。
 	// And dispatch 'OnAllMontageInstancesEnded'
-	// 并调度“OnAllMontageInstancesEnded”
+ // 并调度“OnAllMontageInstancesEnded”
 	for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 	{
 		// Should never be null
-		// 永远不应该为空
+  // 永远不应该为空
 		FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
 		ensure(MontageInstance);
 		if (MontageInstance && !MontageInstance->IsValid())
 		{
 			// Make sure we've cleared our references before deleting memory
-			// 确保在删除内存之前我们已经清除了引用
+   // 确保在删除内存之前我们已经清除了引用
 			ClearMontageInstanceReferences(*MontageInstance);
 
 			delete MontageInstance;
@@ -886,13 +883,13 @@ void UAnimInstance::ClearQueuedAnimEvents(bool bShouldUpdateActiveAnimNotifiesSi
 	if (bShouldUpdateActiveAnimNotifiesSinceLastTick)
 	{
 		// Before clearing notify queue we need to ensure we record the notifies that were triggered last tick.
-		// 在清除通知队列之前，我们需要确保记录最后一次触发的通知。
+  // 在清除通知队列之前，我们需要确保记录最后一次触发的通知。
 		Proxy.UpdateActiveAnimNotifiesSinceLastTick(NotifyQueue);
 	}
 	else
 	{
 		// In the case this function is manually called multiple times a tick, we need to ensure we keep track of previous anim notifies properly.
-		// 如果这个函数在一个周期内被手动调用多次，我们需要确保正确跟踪以前的动画通知。
+  // 如果这个函数在一个周期内被手动调用多次，我们需要确保正确跟踪以前的动画通知。
 		Proxy.ActiveAnimNotifiesSinceLastTick.Append(NotifyQueue.AnimNotifies);
 	}
 
@@ -918,15 +915,15 @@ bool UAnimInstance::NeedsImmediateUpdate(float DeltaSeconds, bool bNeedsValidRoo
 		GIntraFrameDebuggingGameThread ||
 #if WITH_EDITOR
 		// Force the debugged object to run its anim graph on the game thread if it is being debugged
-		// 如果正在调试，则强制被调试对象在游戏线程上运行其动画图
+  // 如果正在调试，则强制被调试对象在游戏线程上运行其动画图
 		// Also force onto the game thread if breakpoints are set. This will force the anim BP to break even if
-		// [翻译失败: Also force onto the game thread if breakpoints are set. This will force the anim BP to break even if]
+  // 如果设置了断点，也强制进入游戏线程。这将迫使动画 BP 打破平衡
 		// the target object is not set for debug
-		// [翻译失败: the target object is not set for debug]
+  // 目标对象未设置用于调试
 		// This ensures that it uses the persistent ubergraph frame and debugging facilities are available like
-		// [翻译失败: This ensures that it uses the persistent ubergraph frame and debugging facilities are available like]
+  // 这确保它使用持久性 ubergraph 框架并且调试工具可用，例如
 		// watches, breakpoints etc.
-		// [翻译失败: watches, breakpoints etc.]
+  // 手表、断点等
 		(Blueprint && (Blueprint->GetObjectBeingDebugged() == this || FKismetDebugUtilities::BlueprintHasBreakpoints(Blueprint))) ||
 #endif
 		CVarUseParallelAnimUpdate.GetValueOnGameThread() == 0 ||
@@ -971,24 +968,24 @@ void UAnimInstance::ParallelEvaluateAnimation(bool bForceRefPose, const USkeleta
 
 	FMemMark Mark(FMemStack::Get());
 	// Push cached pose scope to constrain cached pose lifetime to within this evaluate pass only (as cached poses are
-	// [翻译失败: Push cached pose scope to constrain cached pose lifetime to within this evaluate pass only (as cached poses are]
+ // 推送缓存姿势范围以将缓存姿势生命周期限制在此评估通道内（因为缓存姿势是
 	// allocated with the above FMemMark)
-	// 分配有上述 FMemMark）
+ // 分配有上述 FMemMark）
 	UE::Anim::FCachedPoseScope CachedPoseScope;
 
 	if( !bForceRefPose )
 	{
 		// Create an evaluation context
-		// 创建评估上下文
+  // 创建评估上下文
 		FPoseContext EvaluationContext(&Proxy);
 		EvaluationContext.ResetToRefPose();
 
 		// Run the anim blueprint
-		// 运行动画蓝图
+  // 运行动画蓝图
 		Proxy.EvaluateAnimation(EvaluationContext);
 
 		// Move the curves
-		// 移动曲线
+  // 移动曲线
 		OutEvaluationData.OutCurve.CopyFrom(EvaluationContext.Curve);
 		OutEvaluationData.OutPose.CopyBonesFrom(EvaluationContext.Pose);
 
@@ -1091,7 +1088,7 @@ void OutputTickRecords(const TArray<FAnimTickRecord>& Records, UCanvas* Canvas, 
 		const FAnimTickRecord& Player = Records[PlayerIndex];
 
 		// Assuming highlight index is the group leader index
-		// 假设亮点索引是组领导者索引
+  // 假设亮点索引是组领导者索引
 		if (HighlightIndex != INDEX_NONE && Player.bIsExclusiveLeader && PlayerIndex != HighlightIndex)
 		{
 			DisplayDebugManager.SetLinearDrawColor(FLinearColor::Red);
@@ -1107,7 +1104,7 @@ void OutputTickRecords(const TArray<FAnimTickRecord>& Records, UCanvas* Canvas, 
 			PlayerIndex, *Player.SourceAsset->GetName(), *Player.SourceAsset->GetClass()->GetName(), Player.EffectiveBlendWeight*100.f);
 
 		// See if we have access to SequenceLength
-		// 看看我们是否有权访问 SequenceLength
+  // 看看我们是否有权访问 SequenceLength
 		if (UAnimSequenceBase* AnimSeqBase = Cast<UAnimSequenceBase>(Player.SourceAsset))
 		{
 			PlayerEntry += FString::Printf(TEXT(" P(%.2f/%.2f)"),
@@ -1120,7 +1117,7 @@ void OutputTickRecords(const TArray<FAnimTickRecord>& Records, UCanvas* Canvas, 
 		}
 
 		// Part of a sync group
-		// 同步组的一部分
+  // 同步组的一部分
 		if (HighlightIndex != INDEX_NONE)
 		{
 			FName PrevMarkerName = NAME_None;
@@ -1310,10 +1307,10 @@ void UAnimInstance::DisplayDebug(class UCanvas* Canvas, const FDebugDisplayInfo&
 				const int32 HalfStep = int32(DisplayDebugManager.GetMaxCharHeight() / 2);
 				DisplayDebugManager.ShiftYDrawPosition(float(HalfStep)); // Extra spacing to delimit different chains, CurrLineYBase now
 				// roughly represents middle of text line, so we can use it for line drawing
-				// 大致代表文本行的中间，所以我们可以用它来画线
+    // 大致代表文本行的中间，所以我们可以用它来画线
 
 				//Handle line drawing
-				//手柄线描
+    // 手柄线描
 				int32 VerticalLineIndex = Line.Indent - 1;
 				if (IndentLineStartCoord.IsValidIndex(VerticalLineIndex))
 				{
@@ -1321,18 +1318,18 @@ void UAnimInstance::DisplayDebug(class UCanvas* Canvas, const FDebugDisplayInfo&
 					IndentLineStartCoord[VerticalLineIndex] = FVector2D(DisplayDebugManager.GetXPos(), CurrLineYBase);
 
 					// If indent parent is not in same column, ignore line.
-					// 如果缩进父级不在同一列中，则忽略该行。
+     // 如果缩进父级不在同一列中，则忽略该行。
 					if (FMath::IsNearlyEqual(LineStartCoord.X, DisplayDebugManager.GetXPos()))
 					{
 						float EndX = DisplayDebugManager.GetXPos() + CurrIndent;
 						float StartX = EndX - AttachLineLength;
 
 						//horizontal line to node
-						//到节点的水平线
+      // 到节点的水平线
 						DrawDebugCanvas2DLine(Canvas, FVector(StartX, CurrLineYBase, 0.f), FVector(EndX, CurrLineYBase, 0.f), ActiveColor);
 
 						//vertical line
-						//垂线
+      // 垂线
 						DrawDebugCanvas2DLine(Canvas, FVector(StartX, LineStartCoord.Y, 0.f), FVector(StartX, CurrLineYBase, 0.f), ActiveColor);
 					}
 				}
@@ -1341,7 +1338,7 @@ void UAnimInstance::DisplayDebug(class UCanvas* Canvas, const FDebugDisplayInfo&
 			}
 
 			// Update our base position for subsequent line drawing
-			// 更新我们的基本位置以供后续画线
+   // 更新我们的基本位置以供后续画线
 			if (!IndentLineStartCoord.IsValidIndex(Line.Indent))
 			{
 				IndentLineStartCoord.AddZeroed(Line.Indent + 1 - IndentLineStartCoord.Num());
@@ -1360,7 +1357,7 @@ void UAnimInstance::DisplayDebug(class UCanvas* Canvas, const FDebugDisplayInfo&
 		FIndenter AnimIndent(Indent);
 
 		//Display Sync Groups
-		//显示同步组
+  // 显示同步组
 		const FAnimInstanceProxy::FSyncGroupMap& SyncGroupMap = GetProxyOnGameThread<FAnimInstanceProxy>().GetSyncGroupMapRead();
 		const TArray<FAnimTickRecord>& UngroupedActivePlayers = GetProxyOnGameThread<FAnimInstanceProxy>().GetUngroupedActivePlayersRead();
 
@@ -1603,15 +1600,15 @@ void UAnimInstance::AddCurveValue(const FName& CurveName, float Value, bool bMor
 void UAnimInstance::UpdateCurvesToComponents(USkeletalMeshComponent* Component /*= nullptr*/)
 {
 	// update curves to component
-	// 将曲线更新为组件
+ // 将曲线更新为组件
 	if (Component)
 	{
 		// this is only any thread because EndOfFrameUpdate update can restart render state
-		// 这只是任何线程，因为 EndOfFrameUpdate 更新可以重新启动渲染状态
+  // 这只是任何线程，因为 EndOfFrameUpdate 更新可以重新启动渲染状态
 		// and this needs to restart from worker thread
-		// 这需要从工作线程重新启动
+  // 这需要从工作线程重新启动
 		// EndOfFrameUpdate is done after all tick is updated, so in theory you shouldn't have
-		// EndOfFrameUpdate 在所有刻度更新后完成，所以理论上你不应该
+  // EndOfFrameUpdate 在所有刻度更新后完成，所以理论上你不应该
 		FAnimInstanceProxy& Proxy = GetProxyOnGameThread<FAnimInstanceProxy>();
 		Component->ApplyAnimationCurvesToComponent(&Proxy.GetAnimationCurves(EAnimCurveType::MaterialCurve), &Proxy.GetAnimationCurves(EAnimCurveType::MorphTargetCurve));
 	}
@@ -1684,7 +1681,7 @@ void UAnimInstance::TriggerAnimNotifies(float DeltaSeconds)
 	USkeletalMeshComponent* SkelMeshComp = GetSkelMeshComponent();
 
 	// Array that will replace the 'ActiveAnimNotifyState' at the end of this function.
-	// 将替换该函数末尾的“ActiveAnimNotifyState”的数组。
+ // 将替换该函数末尾的“ActiveAnimNotifyState”的数组。
 	TArray<FAnimNotifyEvent> NewActiveAnimNotifyState;
 	NewActiveAnimNotifyState.Reserve(NotifyQueue.AnimNotifies.Num());
 
@@ -1693,7 +1690,7 @@ void UAnimInstance::TriggerAnimNotifies(float DeltaSeconds)
 
 
 	// AnimNotifyState freshly added that need their 'NotifyBegin' event called.
-	// 新添加的 AnimNotifyState 需要调用其“NotifyBegin”事件。
+ // 新添加的 AnimNotifyState 需要调用其“NotifyBegin”事件。
 	TArray<const FAnimNotifyEvent *> NotifyStateBeginEvent;
 	TArray<const FAnimNotifyEventReference *> NotifyStateBeginEventReference;
 
@@ -1702,7 +1699,7 @@ void UAnimInstance::TriggerAnimNotifies(float DeltaSeconds)
 		if(const FAnimNotifyEvent* AnimNotifyEvent = NotifyQueue.AnimNotifies[Index].GetNotify())
 		{
 			// AnimNotifyState
-			// 动画通知状态
+   // 动画通知状态
 			if (AnimNotifyEvent->NotifyStateClass)
 			{
 				int32 ExistingItemIndex = INDEX_NONE;
@@ -1726,13 +1723,13 @@ void UAnimInstance::TriggerAnimNotifies(float DeltaSeconds)
 			}
 
 			// Trigger non 'state' AnimNotifies
-			// 触发非“状态”AnimNotify
+   // 触发非“状态”AnimNotify
 			TriggerSingleAnimNotify(NotifyQueue.AnimNotifies[Index]);
 		}
 	}
 
 	// Send end notification to AnimNotifyState not active anymore.
-	// 向不再活动的 AnimNotifyState 发送结束通知。
+ // 向不再活动的 AnimNotifyState 发送结束通知。
 	for (int32 Index = 0; Index < ActiveAnimNotifyState.Num(); ++Index)
 	{
 		const FAnimNotifyEvent& AnimNotifyEvent = ActiveAnimNotifyState[Index];
@@ -1741,7 +1738,7 @@ void UAnimInstance::TriggerAnimNotifies(float DeltaSeconds)
 		{
 #if WITH_EDITOR
 			// Prevent firing notifies in animation editors if requested
-			// 如果需要，防止在动画编辑器中触发通知
+   // 如果需要，防止在动画编辑器中触发通知
 			if((SkelMeshComp && !SkelMeshComp->IsA<UDebugSkelMeshComponent>()) || AnimNotifyEvent.NotifyStateClass->ShouldFireInEditor())
 #endif
 			{
@@ -1750,11 +1747,11 @@ void UAnimInstance::TriggerAnimNotifies(float DeltaSeconds)
 			}
 		}
 		// The NotifyEnd callback above may have triggered actor destruction and the tear down
-		// 上面的 NotifyEnd 回调可能触发了 actor 销毁和拆卸
+  // 上面的 NotifyEnd 回调可能触发了 actor 销毁和拆卸
 		// of this instance via UninitializeAnimation which empties ActiveAnimNotifyState.
-		// 该实例通过 UninitializeAnimation 清空 ActiveAnimNotifyState。
+  // 该实例通过 UninitializeAnimation 清空 ActiveAnimNotifyState。
 		// If that happened, we should stop iterating the ActiveAnimNotifyState array
-		// 如果发生这种情况，我们应该停止迭代 ActiveAnimNotifyState 数组
+  // 如果发生这种情况，我们应该停止迭代 ActiveAnimNotifyState 数组
 		if (ActiveAnimNotifyState.IsValidIndex(Index) == false)
 		{
 			ensureMsgf(false, TEXT("UAnimInstance::ActiveAnimNotifyState has been invalidated by NotifyEnd. AnimInstance: %s, Owning Component: %s, Owning Actor: %s "), *GetNameSafe(this), *GetNameSafe(GetOwningComponent()), *GetNameSafe(GetOwningActor()));
@@ -1771,7 +1768,7 @@ void UAnimInstance::TriggerAnimNotifies(float DeltaSeconds)
 		{
 #if WITH_EDITOR
 			// Prevent firing notifies in animation editors if requested
-			// 如果需要，防止在动画编辑器中触发通知
+   // 如果需要，防止在动画编辑器中触发通知
 			if((SkelMeshComp && !SkelMeshComp->IsA<UDebugSkelMeshComponent>()) || AnimNotifyEvent->NotifyStateClass->ShouldFireInEditor())
 #endif
 			{
@@ -1782,11 +1779,11 @@ void UAnimInstance::TriggerAnimNotifies(float DeltaSeconds)
 	}
 
 	// Switch our arrays.
-	// 切换我们的阵列。
+ // 切换我们的阵列。
 	ActiveAnimNotifyState = MoveTemp(NewActiveAnimNotifyState);
 	ActiveAnimNotifyEventReference = MoveTemp(NewActiveAnimNotifyEventReference);
 	// Tick currently active AnimNotifyState
-	// 勾选当前活动的 AnimNotifyState
+ // 勾选当前活动的 AnimNotifyState
 	for (int32 Index = 0; Index < ActiveAnimNotifyState.Num(); Index++)
 	{
 		const FAnimNotifyEvent& AnimNotifyEvent = ActiveAnimNotifyState[Index];
@@ -1795,7 +1792,7 @@ void UAnimInstance::TriggerAnimNotifies(float DeltaSeconds)
 		{
 #if WITH_EDITOR
 			// Prevent firing notifies in animation editors if requested
-			// 如果需要，防止在动画编辑器中触发通知
+   // 如果需要，防止在动画编辑器中触发通知
 			if((SkelMeshComp && !SkelMeshComp->IsA<UDebugSkelMeshComponent>()) || AnimNotifyEvent.NotifyStateClass->ShouldFireInEditor())
 #endif
 			{
@@ -1816,7 +1813,7 @@ void UAnimInstance::TriggerSingleAnimNotify(const FAnimNotifyEvent* AnimNotifyEv
 void UAnimInstance::TriggerSingleAnimNotify(FAnimNotifyEventReference& EventReference)
 {
 	// This is for non 'state' anim notifies.
-	// 这是针对非“状态”动画通知的。
+ // 这是针对非“状态”动画通知的。
 	const FAnimNotifyEvent* AnimNotifyEvent = EventReference.GetNotify();
 	if (AnimNotifyEvent && (AnimNotifyEvent->NotifyStateClass == NULL))
 	{
@@ -1829,12 +1826,12 @@ void UAnimInstance::TriggerSingleAnimNotify(FAnimNotifyEventReference& EventRefe
 		{
 #if WITH_EDITOR
 			// Prevent firing notifies in animation editors if requested
-			// 如果需要，防止在动画编辑器中触发通知
+   // 如果需要，防止在动画编辑器中触发通知
 			if(!GetSkelMeshComponent()->IsA<UDebugSkelMeshComponent>() || AnimNotifyEvent->Notify->ShouldFireInEditor())
 #endif
 			{
 				// Implemented notify: just call Notify. UAnimNotify will forward this to the event which will do the work.
-				// 实现通知：只需调用Notify即可。 UAnimNotify 会将其转发给执行该工作的事件。
+    // 实现通知：只需调用Notify即可。 UAnimNotify 会将其转发给执行该工作的事件。
 				TRACE_ANIM_NOTIFY(this, *AnimNotifyEvent, Event);
 				AnimNotifyEvent->Notify->Notify(GetSkelMeshComponent(), Cast<UAnimSequenceBase>(AnimNotifyEvent->Notify->GetOuter()), EventReference);
 			}
@@ -1842,7 +1839,7 @@ void UAnimInstance::TriggerSingleAnimNotify(FAnimNotifyEventReference& EventRefe
 		else if (AnimNotifyEvent->NotifyName != NAME_None)
 		{
 			// Custom Event based notifies. These will call a AnimNotify_* function on the AnimInstance.
-			// 基于自定义事件的通知。这些将调用 AnimInstance 上的 AnimNotify_* 函数。
+   // 基于自定义事件的通知。这些将调用 AnimInstance 上的 AnimNotify_* 函数。
 			FName FuncName = AnimNotifyEvent->GetNotifyEventName(EventReference.GetMirrorDataTable());
 
 			auto NotifyAnimInstance = [this, AnimNotifyEvent, FuncName](UAnimInstance* InAnimInstance)
@@ -1857,7 +1854,7 @@ void UAnimInstance::TriggerSingleAnimNotify(FAnimNotifyEventReference& EventRefe
 					if (Function)
 					{
 						// if parameter is none, add event
-						// 如果参数为无，则添加事件
+      // 如果参数为无，则添加事件
 						if (Function->NumParms == 0)
 						{
 							InAnimInstance->ProcessEvent(Function, nullptr);
@@ -1876,7 +1873,7 @@ void UAnimInstance::TriggerSingleAnimNotify(FAnimNotifyEventReference& EventRefe
 						else
 						{
 							// Actor has event, but with different parameters. Print warning
-							// Actor 有事件，但参数不同。打印警告
+       // Actor 有事件，但参数不同。打印警告
 							UE_LOG(LogAnimNotify, Warning, TEXT("Anim notifier named %s, but the parameter number does not match or not of the correct type"), *FuncName.ToString());
 						}
 					}
@@ -1913,7 +1910,7 @@ void UAnimInstance::EndNotifyStates()
 		{
 #if WITH_EDITOR
 			// Prevent firing notifies in animation editors if requested
-			// 如果需要，防止在动画编辑器中触发通知
+   // 如果需要，防止在动画编辑器中触发通知
 			if(!SkelMeshComp->IsA<UDebugSkelMeshComponent>() || NotifyState->ShouldFireInEditor())
 #endif
 			{
@@ -1927,7 +1924,7 @@ void UAnimInstance::EndNotifyStates()
 }
 
 //to debug montage weight
-//调试蒙太奇权重
+// 调试蒙太奇权重
 #define DEBUGMONTAGEWEIGHT 0
 
 float UAnimInstance::GetSlotNodeGlobalWeight(const FName& SlotNodeName) const
@@ -2035,9 +2032,9 @@ void UAnimInstance::Montage_UpdateWeight(float DeltaSeconds)
 	SCOPE_CYCLE_COUNTER(STAT_Montage_UpdateWeight);
 
 	// go through all montage instances, and update them
-	// 遍历所有蒙太奇实例并更新它们
+ // 遍历所有蒙太奇实例并更新它们
 	// and make sure their weight is updated properly
-	// 并确保他们的体重正确更新
+ // 并确保他们的体重正确更新
 	for (int32 I=0; I<MontageInstances.Num(); ++I)
 	{
 		if ( MontageInstances[I] )
@@ -2050,7 +2047,7 @@ void UAnimInstance::Montage_UpdateWeight(float DeltaSeconds)
 void UAnimInstance::Montage_Advance(float DeltaSeconds)
 {
 	// We're about to tick montages, queue their events to they're triggered after batched anim notifies.
-	// 我们将勾选蒙太奇，将其事件排队，以便在批量动画通知后触发它们。
+ // 我们将勾选蒙太奇，将其事件排队，以便在批量动画通知后触发它们。
 	bQueueMontageEvents = true;
 
 	if (MontageInstances.IsEmpty())
@@ -2061,14 +2058,14 @@ void UAnimInstance::Montage_Advance(float DeltaSeconds)
 	SCOPE_CYCLE_COUNTER(STAT_Montage_Advance);
 
 	// go through all montage instances, and update them
-	// 遍历所有蒙太奇实例并更新它们
+ // 遍历所有蒙太奇实例并更新它们
 	// and make sure their weight is updated properly
-	// 并确保他们的体重正确更新
+ // 并确保他们的体重正确更新
 	for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 	{
 		FAnimMontageInstance* const MontageInstance = MontageInstances[InstanceIndex];
 		// should never be NULL
-		// [翻译失败: should never be NULL]
+  // 永远不应该为 NULL
 		ensure(MontageInstance);
 		if (MontageInstance && IsValid(MontageInstance->Montage))
 		{
@@ -2076,11 +2073,11 @@ void UAnimInstance::Montage_Advance(float DeltaSeconds)
 			bool const bNoRootMotionExtraction = (RootMotionMode == ERootMotionMode::NoRootMotionExtraction);
 
 			// Extract root motion if we are using blend root motion (RootMotionFromEverything) or if we are set to extract root
-			// [翻译失败: Extract root motion if we are using blend root motion (RootMotionFromEverything) or if we are set to extract root]
+   // 如果我们使用混合根运动 (RootMotionFromEverything) 或者如果我们设置为提取根运动，则提取根运动
 			// motion AND we are the active root motion instance. This is so we can make root motion deterministic for networking when
-			// [翻译失败: motion AND we are the active root motion instance. This is so we can make root motion deterministic for networking when]
+   // 运动并且我们是活动的根运动实例。这样我们就可以在以下情况下使根运动具有确定性：
 			// we are not using RootMotionFromEverything
-			// 我们没有使用 RootMotionFromEverything
+   // 我们没有使用 RootMotionFromEverything
 			bool const bExtractRootMotion = !MontageInstance->IsRootMotionDisabled() && (bUsingBlendedRootMotion || (!bNoRootMotionExtraction && (MontageInstance == GetRootMotionMontageInstance())));
 
 			FRootMotionMovementParams LocalExtractedRootMotion;
@@ -2094,13 +2091,13 @@ void UAnimInstance::Montage_Advance(float DeltaSeconds)
 			MontageInstance->Advance(DeltaSeconds, RootMotionParams, bUsingBlendedRootMotion);
 
 			// If MontageInstances has been modified while executing MontageInstance->Advance(), MontageInstance is unsafe to
-			// [翻译失败: If MontageInstances has been modified while executing MontageInstance->Advance(), MontageInstance is unsafe to]
+   // 如果在执行 MontageInstance->Advance() 时 MontageInstances 被修改，则 MontageInstance 是不安全的
 			// access further. This happens for example if MontageInstance->Advance() triggers an anim notify in which the user
-			// [翻译失败: access further. This happens for example if MontageInstance->Advance() triggers an anim notify in which the user]
+   // 进一步访问。例如，如果 MontageInstance->Advance() 触发动画通知，其中用户
 			// destroys the owning actor which in turn calls UninitializeAnimation(), or when the anim notify causes any montage
-			// 销毁拥有的 Actor，进而调用 UninitializeAnimation()，或者当动画通知导致任何蒙太奇时
+   // 销毁拥有的 Actor，进而调用 UninitializeAnimation()，或者当动画通知导致任何蒙太奇时
 			// to stop or start playing. We just check here if the current MontageInstance is still safe to access.
-			// 停止或开始播放。我们只是在这里检查当前的 MontageInstance 是否仍然可以安全访问。
+   // 停止或开始播放。我们只是在这里检查当前的 MontageInstance 是否仍然可以安全访问。
 			if (!MontageInstances.IsValidIndex(InstanceIndex) || MontageInstances[InstanceIndex] != MontageInstance)
 			{
 				break;
@@ -2110,11 +2107,11 @@ void UAnimInstance::Montage_Advance(float DeltaSeconds)
 
 #if DO_CHECK && WITH_EDITORONLY_DATA && 0
 			// We need to re-check IsValid() here because Advance() could have terminated this Montage.
-			// 我们需要在这里重新检查 IsValid()，因为 Advance() 可能会终止此 Montage。
+   // 我们需要在这里重新检查 IsValid()，因为 Advance() 可能会终止此 Montage。
 			if (MontageInstance.IsValid())
 			{
 				// print blending time and weight and montage name
-				// 打印混合时间和重量以及蒙太奇名称
+    // 打印混合时间和重量以及蒙太奇名称
 				UE_LOG(LogAnimMontage, Warning, TEXT("%d. Montage (%s), DesiredWeight(%0.2f), CurrentWeight(%0.2f), BlendingTime(%0.2f)"),
 					I + 1, *MontageInstance->Montage->GetName(), MontageInstance->GetDesiredWeight(), MontageInstance->GetWeight(),
 					MontageInstance->GetBlendTime());
@@ -2131,7 +2128,7 @@ void UAnimInstance::RequestSlotGroupInertialization(FName InSlotGroupName, float
 	Request.BlendProfile = BlendProfile;
 
 	// Must add this on both the anim instance and proxy's map, as this could called after UAnimInstance::UpdateMontageEvaluationData.
-	// 必须将其添加到动画实例和代理的地图上，因为这可以在 UAnimInstance::UpdateMontageEvaluationData 之后调用。
+ // 必须将其添加到动画实例和代理的地图上，因为这可以在 UAnimInstance::UpdateMontageEvaluationData 之后调用。
 	SlotGroupInertializationRequestDataMap.FindOrAdd(InSlotGroupName) = Request;
 	GetProxyOnAnyThread<FAnimInstanceProxy>().GetSlotGroupInertializationRequestDataMap().FindOrAdd(InSlotGroupName) = Request;
 }
@@ -2141,7 +2138,7 @@ void UAnimInstance::ConditionalFlushCompletedMontages()
 	if (MontageInstances.IsEmpty())
 	{
 		// No montages, nothing to do.
-		// [翻译失败: No montages, nothing to do.]
+  // 没有蒙太奇，无事可做。
 		return;
 	}
 
@@ -2149,11 +2146,11 @@ void UAnimInstance::ConditionalFlushCompletedMontages()
 	check(MeshComp);
 
 	// If we ticked this frame, then montages are not paused
-	// [翻译失败: If we ticked this frame, then montages are not paused]
+ // 如果我们勾选此帧，则蒙太奇不会暂停
 	// If we don't tick animation, then montages are paused
-	// 如果我们不勾选动画，那么蒙太奇就会暂停
+ // 如果我们不勾选动画，那么蒙太奇就会暂停
 	// If we don't tick the pose, then montages are paused
-	// 如果我们不勾选姿势，那么蒙太奇就会暂停
+ // 如果我们不勾选姿势，那么蒙太奇就会暂停
 	const bool bTickedThisFrame = MeshComp->PoseTickedThisFrame();
 	const bool bShouldTickAnimation = MeshComp->ShouldTickAnimation();
 	const bool bShouldTickPose = MeshComp->ShouldTickPose();
@@ -2164,11 +2161,11 @@ void UAnimInstance::ConditionalFlushCompletedMontages()
 		uint32 PrevMontageFlushFrame = LastMontageFlushFrame;
 
 		// Don't care about roll over, just care about uniqueness (and 32-bits should give plenty).
-		// 不关心翻转，只关心唯一性（32 位应该足够了）。
+  // 不关心翻转，只关心唯一性（32 位应该足够了）。
 		LastMontageFlushFrame = static_cast<uint32>(GFrameCounter);
 
 		// If we already flushed montages this frame, then there is no need to do so again
-		// 如果我们已经刷新了该帧的蒙太奇，则无需再次执行此操作
+  // 如果我们已经刷新了该帧的蒙太奇，则无需再次执行此操作
 		const bool bFlushedMontagesThisFrame = LastMontageFlushFrame == PrevMontageFlushFrame;
 
 		if (!bFlushedMontagesThisFrame)
@@ -2181,11 +2178,11 @@ void UAnimInstance::ConditionalFlushCompletedMontages()
 					if (MontageInstance && MontageInstance->IsValid() && MontageInstance->IsStopped() && MontageInstance->GetBlend().IsComplete())
 					{
 						// Need this to trigger Montage ended events.
-						// [翻译失败: Need this to trigger Montage ended events.]
+      // 需要这个来触发蒙太奇结束事件。
 						MontageInstance->Terminate();
 
 						// UninitializeAnimation() empties the MontagesInstances array thus we need to exit early.
-						// [翻译失败: UninitializeAnimation() empties the MontagesInstances array thus we need to exit early.]
+      // UninitializeAnimation() 清空 MontagesInstances 数组，因此我们需要提前退出。
 						if (bUninitialized && MontageCVars::bEarlyOutMontageWhenUninitialized)
 						{
 							return;
@@ -2195,19 +2192,19 @@ void UAnimInstance::ConditionalFlushCompletedMontages()
 			}
 
 			// After triggering the Montage Blend Out Events, it's now safe to delete invalid Montage Instances.
-			// [翻译失败: After triggering the Montage Blend Out Events, it's now safe to delete invalid Montage Instances.]
+   // 触发蒙太奇混合事件后，现在可以安全地删除无效的蒙太奇实例。
 			// And dispatch 'OnAllMontageInstancesEnded'
-			// 并调度“OnAllMontageInstancesEnded”
+   // 并调度“OnAllMontageInstancesEnded”
 			for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 			{
 				// Should never be null
-				// 永远不应该为空
+    // 永远不应该为空
 				FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
 				ensure(MontageInstance);
 				if (MontageInstance && !MontageInstance->IsValid())
 				{
 					// Make sure we've cleared our references before deleting memory
-					// 确保在删除内存之前我们已经清除了引用
+     // 确保在删除内存之前我们已经清除了引用
 					ClearMontageInstanceReferences(*MontageInstance);
 
 					delete MontageInstance;
@@ -2229,9 +2226,9 @@ void UAnimInstance::RequestMontageInertialization(const UAnimMontage* Montage, c
 	if (Montage)
 	{
 		// Adds a new request or overwrites an existing one
-		// 添加新请求或覆盖现有请求
+  // 添加新请求或覆盖现有请求
 		// We always overwrite with the last request, instead of using the shortest one (differs from AnimNode_Inertialization), because we expect the last montage played/stopped to take precedence
-		// 我们总是用最后一个请求覆盖，而不是使用最短的请求（与 AnimNode_Inertialization 不同），因为我们希望最后一个播放/停止的蒙太奇优先
+  // 我们总是用最后一个请求覆盖，而不是使用最短的请求（与 AnimNode_Inertialization 不同），因为我们希望最后一个播放/停止的蒙太奇优先
 		SlotGroupInertializationRequestDataMap.FindOrAdd(Montage->GetGroupName()) = Request;
 	}
 }
@@ -2308,7 +2305,7 @@ void UAnimInstance::QueueMontageSectionChangedEvent(const FQueuedMontageSectionC
 void UAnimInstance::TriggerMontageEndedEvent(const FQueuedMontageEndedEvent& MontageEndedEvent)
 {
 	// Send end notifications for anim notify state when we are stopped
-	// 当我们停止时发送动画通知状态的结束通知
+ // 当我们停止时发送动画通知状态的结束通知
 	USkeletalMeshComponent* SkelMeshComp = GetOwningComponent();
 
 	if (SkelMeshComp != nullptr)
@@ -2320,7 +2317,7 @@ void UAnimInstance::TriggerMontageEndedEvent(const FQueuedMontageEndedEvent& Mon
 			UAnimMontage* NotifyMontage = Cast<UAnimMontage>(AnimNotifyEvent.NotifyStateClass->GetOuter());
 
 			// Grab the montage instance ID from the notify's event context
-			// 从通知的事件上下文中获取蒙太奇实例 ID
+   // 从通知的事件上下文中获取蒙太奇实例 ID
 			int32 EventReferenceMontageInstanceID = INDEX_NONE;
 			const UE::Anim::FAnimNotifyMontageInstanceContext* ActiveMontageContext = EventReference.GetContextData<UE::Anim::FAnimNotifyMontageInstanceContext>();
 			if (ActiveMontageContext)
@@ -2329,14 +2326,14 @@ void UAnimInstance::TriggerMontageEndedEvent(const FQueuedMontageEndedEvent& Mon
 			}
 
 			// Compare against the montage instance ID to prevent ending notify states from other instances of the same montage
-			// 与蒙太奇实例 ID 进行比较，以防止来自同一蒙太奇的其他实例的结束通知状态
+   // 与蒙太奇实例 ID 进行比较，以防止来自同一蒙太奇的其他实例的结束通知状态
 			if (NotifyMontage && (EventReferenceMontageInstanceID == MontageEndedEvent.MontageInstanceID))
 			{
 				if (ShouldTriggerAnimNotifyState(AnimNotifyEvent.NotifyStateClass))
 				{
 #if WITH_EDITOR
 					// Prevent firing notifies in animation editors if requested
-					// 如果需要，防止在动画编辑器中触发通知
+     // 如果需要，防止在动画编辑器中触发通知
 					if(!SkelMeshComp->IsA<UDebugSkelMeshComponent>() || AnimNotifyEvent.NotifyStateClass->ShouldFireInEditor())
 #endif
 					{
@@ -2354,13 +2351,13 @@ void UAnimInstance::TriggerMontageEndedEvent(const FQueuedMontageEndedEvent& Mon
 				else
 				{
 					// The NotifyEnd callback above may have triggered actor destruction and the tear down
-					// [翻译失败: The NotifyEnd callback above may have triggered actor destruction and the tear down]
+     // 上面的 NotifyEnd 回调可能触发了 actor 销毁和拆卸
 					// of this instance via UninitializeAnimation which empties ActiveAnimNotifyState.
-					// [翻译失败: of this instance via UninitializeAnimation which empties ActiveAnimNotifyState.]
+     // 该实例通过 UninitializeAnimation 清空 ActiveAnimNotifyState。
 					// If that happened, we should stop iterating the ActiveAnimNotifyState array and bail
-					// 如果发生这种情况，我们应该停止迭代 ActiveAnimNotifyState 数组并进行保释
+     // 如果发生这种情况，我们应该停止迭代 ActiveAnimNotifyState 数组并进行保释
 					// without attempting to send MontageEnded events.
-					// 而不尝试发送 MontageEnded 事件。
+     // 而不尝试发送 MontageEnded 事件。
 					return;
 				}
 			}
@@ -2380,11 +2377,11 @@ void UAnimInstance::TriggerMontageSectionChangedEvent(const FQueuedMontageSectio
 void UAnimInstance::TriggerQueuedMontageEvents()
 {
 	// We don't need to queue montage events anymore.
-	// 我们不再需要对蒙太奇事件进行排队。
+ // 我们不再需要对蒙太奇事件进行排队。
 	bQueueMontageEvents = false;
 
 	// Trigger Montage blending out before Ended events.
-	// 在结束事件之前触发蒙太奇混合。
+ // 在结束事件之前触发蒙太奇混合。
 	if (QueuedMontageBlendingOutEvents.Num() > 0)
 	{
 		for (const FQueuedMontageBlendingOutEvent& MontageBlendingOutEvent : QueuedMontageBlendingOutEvents)
@@ -2441,13 +2438,13 @@ UAnimMontage* UAnimInstance::PlaySlotAnimationAsDynamicMontage_WithBlendSettings
 	if (Asset && Asset->GetSkeleton())
 	{
 		// create asset using the information
-		// 使用信息创建资产
+  // 使用信息创建资产
 		UAnimMontage* NewMontage = UAnimMontage::CreateSlotAnimationAsDynamicMontage_WithBlendSettings(Asset, SlotNodeName, BlendInSettings, BlendOutSettings, InPlayRate, LoopCount, BlendOutTriggerTime);
 
 		if (NewMontage)
 		{
 			// if playing is successful, return the montage to allow more control if needed
-			// 如果播放成功，则返回蒙太奇以在需要时进行更多控制
+   // 如果播放成功，则返回蒙太奇以在需要时进行更多控制
 			float PlayTime = Montage_Play(NewMontage, InPlayRate, EMontagePlayReturnType::MontageLength, InTimeToStartMontageAt);
 			return PlayTime > 0.0f ? NewMontage : nullptr;
 		}
@@ -2459,32 +2456,33 @@ UAnimMontage* UAnimInstance::PlaySlotAnimationAsDynamicMontage_WithBlendSettings
 void UAnimInstance::StopSlotAnimation(float InBlendOutTime, FName SlotNodeName)
 {
 	// stop temporary montage
-	// 停止临时蒙太奇
+ // 停止临时蒙太奇
 	// when terminate (in the Montage_Advance), we have to lose reference to the temporary montage
-	// [翻译失败: when terminate (in the Montage_Advance), we have to lose reference to the temporary montage]
+ // 当终止时（在 Montage_Advance 中），我们必须失去对临时蒙太奇的引用
 	if (SlotNodeName != NAME_None)
 	{
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			// check if this is playing
-			// [翻译失败: check if this is playing]
+   // 检查这是否正在播放
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
 			// make sure what is active right now is transient that we created by request
-			// [翻译失败: make sure what is active right now is transient that we created by request]
+   // 确保现在活动的内容是我们根据请求创建的瞬态内容
 			if (MontageInstance && MontageInstance->IsActive() && MontageInstance->IsPlaying())
+/** 播放蒙太奇。返回蒙太奇的长度（以秒为单位）。如果播放失败则返回0.f。 */
 			{
 				UAnimMontage* CurMontage = MontageInstance->Montage;
 				if (CurMontage && CurMontage->GetOuter() == GetTransientPackage())
 				{
 					// Check each track, in practice there should only be one on these
-					// [翻译失败: Check each track, in practice there should only be one on these]
+     // 检查每个轨道，实际上这些轨道上应该只有一个
 					for (int32 SlotTrackIndex = 0; SlotTrackIndex < CurMontage->SlotAnimTracks.Num(); SlotTrackIndex++)
 					{
 						const FSlotAnimationTrack* AnimTrack = &CurMontage->SlotAnimTracks[SlotTrackIndex];
 						if (AnimTrack && AnimTrack->SlotName == SlotNodeName)
 						{
 							// Found it
-							// 找到了
+       // 找到了
 							MontageInstance->Stop(FAlphaBlend(InBlendOutTime));
 							break;
 						}
@@ -2496,7 +2494,7 @@ void UAnimInstance::StopSlotAnimation(float InBlendOutTime, FName SlotNodeName)
 	else
 	{
 		// Stop all
-		// 全部停止
+  // 全部停止
 		Montage_Stop(InBlendOutTime);
 	}
 }
@@ -2512,10 +2510,10 @@ bool UAnimInstance::IsPlayingSlotAnimation(const UAnimSequenceBase* Asset, FName
 	for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 	{
 		// check if this is playing
-		// 检查这是否正在播放
+  // 检查这是否正在播放
 		FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
 		// make sure what is active right now is transient that we created by request
-		// 确保现在活动的内容是我们根据请求创建的瞬态内容
+  // 确保现在活动的内容是我们根据请求创建的瞬态内容
 		if (MontageInstance && MontageInstance->IsActive() && MontageInstance->IsPlaying())
 		{
 			UAnimMontage* CurMontage = MontageInstance->Montage;
@@ -2569,11 +2567,11 @@ float UAnimInstance::Montage_PlayInternal(UAnimMontage* MontageToPlay, const FMo
 			if (bStopAllMontages)
 			{
 				// Enforce 'a single montage at once per group' rule
-				// 强制执行“每个组一次使用一个剪辑”规则
+    // 强制执行“每个组一次使用一个剪辑”规则
 				StopAllMontagesByGroupName(NewMontageGroupName, BlendInSettings);
 
 				// Early out since we might have called UninitializeAnimation() when trigger montage blending out events above.
-				// 早期，因为我们可能在触发蒙太奇混合上面的事件时调用了 UninitializeAnimation()。
+    // 早期，因为我们可能在触发蒙太奇混合上面的事件时调用了 UninitializeAnimation()。
 				if (bUninitialized && MontageCVars::bEarlyOutMontageWhenUninitialized)
 				{
 					return 0.0f;
@@ -2586,7 +2584,7 @@ float UAnimInstance::Montage_PlayInternal(UAnimMontage* MontageToPlay, const FMo
 			}
 
 			// Enforce 'a single root motion montage at once' rule.
-			// [翻译失败: Enforce 'a single root motion montage at once' rule.]
+   // 强制执行“一次单一根运动蒙太奇”规则。
 			if (MontageToPlay->bEnableRootMotionTranslation || MontageToPlay->bEnableRootMotionRotation)
 			{
 				FAnimMontageInstance* ActiveRootMotionMontageInstance = GetRootMotionMontageInstance();
@@ -2595,7 +2593,7 @@ float UAnimInstance::Montage_PlayInternal(UAnimMontage* MontageToPlay, const FMo
 					ActiveRootMotionMontageInstance->Stop(BlendInSettings);
 
 					// Early out since we might have called UninitializeAnimation() when trigger montage blending out events above.
-					// [翻译失败: Early out since we might have called UninitializeAnimation() when trigger montage blending out events above.]
+     // 早期，因为我们可能在触发蒙太奇混合上面的事件时调用了 UninitializeAnimation()。
 					if (bUninitialized && MontageCVars::bEarlyOutMontageWhenUninitialized)
 					{
 						return 0.0f;
@@ -2615,7 +2613,7 @@ float UAnimInstance::Montage_PlayInternal(UAnimMontage* MontageToPlay, const FMo
 			ActiveMontagesMap.Add(MontageToPlay, NewInstance);
 
 			// If we are playing root motion, set this instance as the one providing root motion.
-			// 如果我们正在播放根运动，请将此实例设置为提供根运动的实例。
+   // 如果我们正在播放根运动，请将此实例设置为提供根运动的实例。
 			if (MontageToPlay->HasRootMotion())
 			{
 				RootMotionMontageInstance = NewInstance;
@@ -2641,6 +2639,7 @@ float UAnimInstance::Montage_PlayInternal(UAnimMontage* MontageToPlay, const FMo
 /** Play a Montage. Returns Length of Montage in seconds. Returns 0.f if failed to play. */
 /** 播放蒙太奇。返回蒙太奇的长度（以秒为单位）。如果播放失败则返回0.f。 */
 float UAnimInstance::Montage_Play(UAnimMontage* MontageToPlay, float InPlayRate/*= 1.f*/, EMontagePlayReturnType ReturnValueType, float InTimeToStartMontageAt, bool bStopAllMontages /*= true*/)
+/** 播放蒙太奇。返回蒙太奇的长度（以秒为单位）。如果播放失败则返回0.f。 */
 {
 	FMontageBlendSettings BlendSettings;
 	if (MontageToPlay)
@@ -2685,7 +2684,7 @@ void UAnimInstance::Montage_StopInternal(TFunctionRef<FMontageBlendSettings(cons
 	else
 	{
 		// If no Montage reference, do it on all active ones.
-		// 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -2694,7 +2693,7 @@ void UAnimInstance::Montage_StopInternal(TFunctionRef<FMontageBlendSettings(cons
 				MontageInstance->Stop(AlphaBlendSelectorFunction(MontageInstance));
 
 				// UninitializeAnimation() empties the MontagesInstances array thus we need to exit early.
-				// [翻译失败: UninitializeAnimation() empties the MontagesInstances array thus we need to exit early.]
+    // UninitializeAnimation() 清空 MontagesInstances 数组，因此我们需要提前退出。
 				if (bUninitialized && MontageCVars::bEarlyOutMontageWhenUninitialized)
 				{
 					return;
@@ -2712,7 +2711,7 @@ void UAnimInstance::Montage_Stop(float InBlendOutTime, const UAnimMontage* Monta
 		if (const UAnimMontage* InstanceMontage = InMontageInstance->Montage)
 		{
 			//Grab all settings from the montage, except BlendTime
-			//[翻译失败: Grab all settings from the montage, except BlendTime]
+   // 从蒙太奇中获取除 BlendTime 之外的所有设置
 			BlendOutSettings.Blend = InstanceMontage->BlendOut;
 			BlendOutSettings.Blend.BlendTime = InBlendOutTime;
 			BlendOutSettings.BlendMode = InstanceMontage->BlendModeOut;
@@ -2733,7 +2732,7 @@ void UAnimInstance::Montage_StopWithBlendOut(const FAlphaBlendArgs& BlendOutArgs
 		if (const UAnimMontage* InstanceMontage = InMontageInstance->Montage)
 		{
 			//Grab all settings from the montage, except the FAlphaBlend
-			//[翻译失败: Grab all settings from the montage, except the FAlphaBlend]
+   // 从蒙太奇中获取除 FAlphaBlend 之外的所有设置
 			BlendOutSettings.Blend = BlendOutArgs;
 			BlendOutSettings.BlendMode = InstanceMontage->BlendModeOut;
 			BlendOutSettings.BlendProfile = InstanceMontage->BlendProfileOut;
@@ -2780,7 +2779,7 @@ void UAnimInstance::Montage_Pause(const UAnimMontage* Montage)
 	else
 	{
 		// If no Montage reference, do it on all active ones.
-		// [翻译失败: If no Montage reference, do it on all active ones.]
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -2805,7 +2804,7 @@ void UAnimInstance::Montage_Resume(const UAnimMontage* Montage)
 	else
 	{
 		// If no Montage reference, do it on all active ones.
-		// [翻译失败: If no Montage reference, do it on all active ones.]
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -2831,7 +2830,7 @@ void UAnimInstance::Montage_JumpToSection(FName SectionName, const UAnimMontage*
 	else
 	{
 		// If no Montage reference, do it on all active ones.
-		// [翻译失败: If no Montage reference, do it on all active ones.]
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -2858,7 +2857,7 @@ void UAnimInstance::Montage_JumpToSectionsEnd(FName SectionName, const UAnimMont
 	else
 	{
 		// If no Montage reference, do it on all active ones.
-		// [翻译失败: If no Montage reference, do it on all active ones.]
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -2886,7 +2885,7 @@ void UAnimInstance::Montage_SetNextSection(FName SectionNameToChange, FName Next
 		bool bFoundOne = false;
 
 		// If no Montage reference, do it on all active ones.
-		// 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -2917,7 +2916,7 @@ void UAnimInstance::Montage_SetPlayRate(const UAnimMontage* Montage, float NewPl
 	else
 	{
 		// If no Montage reference, do it on all active ones.
-		// 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -2942,7 +2941,7 @@ bool UAnimInstance::Montage_IsActive(const UAnimMontage* Montage) const
 	else
 	{
 		// If no Montage reference, return true if there is any active montage.
-		// 如果没有 Montage 引用，则如果有任何活动的 montage，则返回 true。
+  // 如果没有 Montage 引用，则如果有任何活动的 montage，则返回 true。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -2969,7 +2968,7 @@ bool UAnimInstance::Montage_IsPlaying(const UAnimMontage* Montage) const
 	else
 	{
 		// If no Montage reference, return true if there is any active playing montage.
-		// 如果没有蒙太奇引用，则如果有任何活动的播放蒙太奇，则返回 true。
+  // 如果没有蒙太奇引用，则如果有任何活动的播放蒙太奇，则返回 true。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -2996,7 +2995,7 @@ FName UAnimInstance::Montage_GetCurrentSection(const UAnimMontage* Montage) cons
 	else
 	{
 		// If no Montage reference, get first active one.
-		// 如果没有蒙太奇参考，则获取第一个活动的参考。
+  // 如果没有蒙太奇参考，则获取第一个活动的参考。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3023,7 +3022,7 @@ void UAnimInstance::Montage_SetEndDelegate(FOnMontageEnded& InOnMontageEnded, UA
 	else
 	{
 		// If no Montage reference, do it on all active ones.
-		// 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3048,7 +3047,7 @@ void UAnimInstance::Montage_SetBlendingOutDelegate(FOnMontageBlendingOutStarted&
 	else
 	{
 		// If no Montage reference, do it on all active ones.
-		// 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3074,7 +3073,7 @@ void UAnimInstance::Montage_SetBlendedInDelegate(FOnMontageBlendedInEnded& InOnM
 	else
 	{
 		// If no Montage reference, do it on all active ones.
-		// 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3099,7 +3098,7 @@ FOnMontageEnded* UAnimInstance::Montage_GetEndedDelegate(UAnimMontage* Montage)
 	else
 	{
 		// If no Montage reference, use first active one found.
-		// 如果没有蒙太奇参考，请使用找到的第一个活动参考。
+  // 如果没有蒙太奇参考，请使用找到的第一个活动参考。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3126,7 +3125,7 @@ FOnMontageBlendingOutStarted* UAnimInstance::Montage_GetBlendingOutDelegate(UAni
 	else
 	{
 		// If no Montage reference, use first active one found.
-		// 如果没有蒙太奇参考，请使用找到的第一个活动参考。
+  // 如果没有蒙太奇参考，请使用找到的第一个活动参考。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3153,7 +3152,7 @@ void UAnimInstance::Montage_SetSectionChangedDelegate(FOnMontageSectionChanged& 
 	else
 	{
 		// If no Montage reference, do it on all active ones.
-		// 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3178,7 +3177,7 @@ FOnMontageSectionChanged* UAnimInstance::Montage_GetSectionChangedDelegate(UAnim
 	else
 	{
 		// If no Montage reference, use first active one found.
-		// 如果没有蒙太奇参考，请使用找到的第一个活动参考。
+  // 如果没有蒙太奇参考，请使用找到的第一个活动参考。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3205,7 +3204,7 @@ void UAnimInstance::Montage_SetPosition(const UAnimMontage* Montage, float NewPo
 	else
 	{
 		// If no Montage reference, do it on all active ones.
-		// 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
+  // 如果没有蒙太奇参考，请在所有活动的参考上执行此操作。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3230,7 +3229,7 @@ float UAnimInstance::Montage_GetPosition(const UAnimMontage* Montage) const
 	else
 	{
 		// If no Montage reference, use first active one found.
-		// 如果没有蒙太奇参考，请使用找到的第一个活动参考。
+  // 如果没有蒙太奇参考，请使用找到的第一个活动参考。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			const FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3267,7 +3266,7 @@ float UAnimInstance::Montage_GetBlendTime(const UAnimMontage* Montage) const
 	else
 	{
 		// If no Montage reference, use first active one found.
-		// 如果没有蒙太奇参考，请使用找到的第一个活动参考。
+  // 如果没有蒙太奇参考，请使用找到的第一个活动参考。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			const FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3294,7 +3293,7 @@ float UAnimInstance::Montage_GetPlayRate(const UAnimMontage* Montage) const
 	else
 	{
 		// If no Montage reference, use first active one found.
-		// 如果没有蒙太奇参考，请使用找到的第一个活动参考。
+  // 如果没有蒙太奇参考，请使用找到的第一个活动参考。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			const FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3321,7 +3320,7 @@ float UAnimInstance::Montage_GetEffectivePlayRate(const UAnimMontage* Montage) c
 	else
 	{
 		// If no Montage reference, use first active one found.
-		// 如果没有蒙太奇参考，请使用找到的第一个活动参考。
+  // 如果没有蒙太奇参考，请使用找到的第一个活动参考。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			const FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3404,7 +3403,7 @@ int32 UAnimInstance::Montage_GetNextSectionID(UAnimMontage const* const Montage,
 	else
 	{
 		// If no Montage reference, use first active one found.
-		// 如果没有蒙太奇参考，请使用找到的第一个活动参考。
+  // 如果没有蒙太奇参考，请使用找到的第一个活动参考。
 		for (int32 InstanceIndex = 0; InstanceIndex < MontageInstances.Num(); InstanceIndex++)
 		{
 			FAnimMontageInstance* MontageInstance = MontageInstances[InstanceIndex];
@@ -3426,7 +3425,7 @@ bool UAnimInstance::IsAnyMontagePlaying() const
 UAnimMontage* UAnimInstance::GetCurrentActiveMontage() const
 {
 	// Start from end, as most recent instances are added at the end of the queue.
-	// 从末尾开始，因为最近的实例被添加到队列的末尾。
+ // 从末尾开始，因为最近的实例被添加到队列的末尾。
 	int32 const NumInstances = MontageInstances.Num();
 	for (int32 InstanceIndex = NumInstances - 1; InstanceIndex >= 0; InstanceIndex--)
 	{
@@ -3443,7 +3442,7 @@ UAnimMontage* UAnimInstance::GetCurrentActiveMontage() const
 FAnimMontageInstance* UAnimInstance::GetActiveMontageInstance() const
 {
 	// Start from end, as most recent instances are added at the end of the queue.
-	// 从末尾开始，因为最近的实例被添加到队列的末尾。
+ // 从末尾开始，因为最近的实例被添加到队列的末尾。
 	int32 const NumInstances = MontageInstances.Num();
 	for (int32 InstanceIndex = NumInstances - 1; InstanceIndex >= 0; InstanceIndex--)
 	{
@@ -3464,7 +3463,7 @@ void UAnimInstance::StopAllMontages(float BlendOut)
 		MontageInstances[Index]->Stop(FAlphaBlend(BlendOut), true);
 
 		// UninitializeAnimation() empties the MontagesInstances array thus we need to exit early.
-		// UninitializeAnimation() 清空 MontagesInstances 数组，因此我们需要提前退出。
+  // UninitializeAnimation() 清空 MontagesInstances 数组，因此我们需要提前退出。
 		if (bUninitialized && MontageCVars::bEarlyOutMontageWhenUninitialized)
 		{
 			return;
@@ -3489,7 +3488,7 @@ void UAnimInstance::StopAllMontagesByGroupName(FName InGroupName, const FMontage
 			MontageInstance->Stop(BlendOutSettings, true);
 
 			// UninitializeAnimation() empties the MontagesInstances array thus we need to exit early.
-			// UninitializeAnimation() 清空 MontagesInstances 数组，因此我们需要提前退出。
+   // UninitializeAnimation() 清空 MontagesInstances 数组，因此我们需要提前退出。
 			if (bUninitialized && MontageCVars::bEarlyOutMontageWhenUninitialized)
 			{
 				return;
@@ -3508,7 +3507,7 @@ void UAnimInstance::ClearMontageInstanceReferences(FAnimMontageInstance& InMonta
 	if (UAnimMontage* MontageStopped = InMontageInstance.Montage)
 	{
 		// Remove instance for Active List.
-		// 删除活动列表的实例。
+  // 删除活动列表的实例。
 		FAnimMontageInstance** AnimInstancePtr = ActiveMontagesMap.Find(MontageStopped);
 		if (AnimInstancePtr && (*AnimInstancePtr == &InMontageInstance))
 		{
@@ -3518,9 +3517,9 @@ void UAnimInstance::ClearMontageInstanceReferences(FAnimMontageInstance& InMonta
 	else
 	{
 		// If Montage ref is nullptr, it's possible the instance got terminated already and that is fine.
-		// 如果 Montage ref 为 nullptr，则实例可能已终止，这很好。
+  // 如果 Montage ref 为 nullptr，则实例可能已终止，这很好。
 		// Make sure it's been removed from our ActiveMap though
-		// 确保它已从我们的 ActiveMap 中删除
+  // 确保它已从我们的 ActiveMap 中删除
 		if (ActiveMontagesMap.FindKey(&InMontageInstance) != nullptr)
 		{
 			UE_LOG(LogAnimation, Warning, TEXT("%s: null montage found in the montage instance array!!"), *GetName());
@@ -3528,14 +3527,14 @@ void UAnimInstance::ClearMontageInstanceReferences(FAnimMontageInstance& InMonta
 	}
 
 	// Clear RootMotionMontageInstance
-	// 清除 RootMotionMontageInstance
+ // 清除 RootMotionMontageInstance
 	if (RootMotionMontageInstance == &InMontageInstance)
 	{
 		RootMotionMontageInstance = nullptr;
 	}
 
 	// Clear any active synchronization
-	// 清除所有活动同步
+ // 清除所有活动同步
 	InMontageInstance.MontageSync_StopFollowing();
 	InMontageInstance.MontageSync_StopLeading();
 }
@@ -3633,7 +3632,7 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 		if (NewClass && IAnimClassInterface::GetFromClass(NewClass) == nullptr)
 		{
 			// Invalid layer class (i.e passing in a native C++ class instead of an animation blueprint)
-			// 图层类无效（即传入本机 C++ 类而不是动画蓝图）
+   // 图层类无效（即传入本机 C++ 类而不是动画蓝图）
 			UE_LOG(LogAnimation, Warning, TEXT("Performing linked layer operations with an invalid layer class: %s"), *NewClass->GetName());
 			return;
 		}
@@ -3643,14 +3642,14 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 		MeshComp->ForEachAnimInstance([](UAnimInstance* InInstance)
 		{
 			// Make sure we have valid objects on all instances as initialization can route back
-			// 确保我们在所有实例上都有有效的对象，因为初始化可以路由回来
+   // 确保我们在所有实例上都有有效的对象，因为初始化可以路由回来
 			// out of linked instances into other graphs, including 'this'
-			// 从链接实例到其他图表，包括“this”
+   // 从链接实例到其他图表，包括“this”
 			InInstance->GetProxyOnAnyThread<FAnimInstanceProxy>().InitializeObjects(InInstance);
 		});
 
 		// Map of group name->nodes, per class, to run under that group instance
-		// 每个类的组名称->节点的映射，在该组实例下运行
+  // 每个类的组名称->节点的映射，在该组实例下运行
 		TMap<UClass*, TMap<FName, TArray<FAnimNode_LinkedAnimLayer*, TInlineAllocator<4>>, TInlineSetAllocator<4>>, TInlineSetAllocator<4>> LayerNodesToSet;
 
 		for(const FStructProperty* LayerNodeProperty : AnimBlueprintClass->GetLinkedAnimLayerNodeProperties())
@@ -3658,13 +3657,13 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 			FAnimNode_LinkedAnimLayer* Layer = LayerNodeProperty->ContainerPtrToValuePtr<FAnimNode_LinkedAnimLayer>(this);
 
 			// If the class is null, then reset to default (which can be null)
-			// [翻译失败: If the class is null, then reset to default (which can be null)]
+   // 如果类为空，则重置为默认值（可以为空）
 			UClass* ClassToEvaluate = NewClass != nullptr ? NewClass : Layer->InstanceClass.Get();
 
 			if(ClassToEvaluate != nullptr)
 			{
 				// Now check whether the layer is implemented by the class
-				// [翻译失败: Now check whether the layer is implemented by the class]
+    // 现在检查该层是否由该类实现
 				IAnimClassInterface* NewAnimClassInterface = IAnimClassInterface::GetFromClass(ClassToEvaluate);
 				if(const FAnimBlueprintFunction* FoundFunction = IAnimClassInterface::FindAnimBlueprintFunction(NewAnimClassInterface, Layer->Layer))
 				{
@@ -3680,7 +3679,7 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 			else
 			{
 				// Add null classes so we clear the node's instance below
-				// [翻译失败: Add null classes so we clear the node's instance below]
+    // 添加空类，以便我们清除下面节点的实例
 				UClass* ClassToSet = InClassSelectorFunction(NewClass, Layer);
 				TMap<FName, TArray<FAnimNode_LinkedAnimLayer*, TInlineAllocator<4>>, TInlineSetAllocator<4>>& ClassLayerNodesToSet = LayerNodesToSet.FindOrAdd(ClassToSet);
 				TArray<FAnimNode_LinkedAnimLayer*, TInlineAllocator<4>>& LayerNodes = ClassLayerNodesToSet.FindOrAdd(NAME_None);
@@ -3722,18 +3721,18 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 				if (FAnimSubsystem_SharedLinkedAnimLayers* SharedLinkedAnimLayers = FAnimSubsystem_SharedLinkedAnimLayers::GetFromMesh(MeshComp))
 				{
 					// Shared instances path
-					// 共享实例路径
+     // 共享实例路径
 					UClass* ClassToSet = ClassLayerNodesToSet.Key;
 					for (FAnimNode_LinkedAnimLayer* LayerNode : LayerPair.Value)
 					{
 						// Disallow setting the same class as this instance, which would create infinite recursion
-						// 禁止设置与此实例相同的类，这将创建无限递归
+      // 禁止设置与此实例相同的类，这将创建无限递归
 						if (ClassToSet != nullptr && ClassToSet != GetClass())
 						{
 							UAnimInstance* TargetInstance = LayerNode->GetTargetInstance<UAnimInstance>();
 
 							// Skip setting if the class is the same
-							// 如果班级相同则跳过设置
+       // 如果班级相同则跳过设置
 							if (TargetInstance == nullptr || ClassToSet != TargetInstance->GetClass())
 							{
 								bool bIsNewInstance;
@@ -3743,16 +3742,16 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 								if (bIsNewInstance)
 								{
 									// Unlink any layer nodes in the new linked instance, as they may have been hooked up to self in InitializeAnimation above.
-									// 取消链接新链接实例中的任何图层节点，因为它们可能已在上面的 InitializeAnimation 中连接到 self。
+         // 取消链接新链接实例中的任何图层节点，因为它们可能已在上面的 InitializeAnimation 中连接到 self。
 									UnlinkLayerNodesInInstance(LinkedInstance, LayerPair.Value);
 								}
 
 								// Mark function as linked
-								// 将函数标记为已链接
+        // 将函数标记为已链接
 								LayerNode->SetLinkedLayerInstance(this, LinkedInstance);
 
 								// Propagate notify flags. If any nodes have this set then we need to propagate to the group.
-								// 传播通知标志。如果任何节点有这个集合，那么我们需要传播到该组。
+        // 传播通知标志。如果任何节点有这个集合，那么我们需要传播到该组。
 								LinkedInstance->bPropagateNotifiesToLinkedInstances |= LayerNode->bPropagateNotifiesToLinkedInstances;
 								LinkedInstance->bReceiveNotifiesFromLinkedInstances |= LayerNode->bReceiveNotifiesFromLinkedInstances;
 
@@ -3762,7 +3761,7 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 									FAnimInstanceProxy& LinkedProxy = LinkedInstance->GetProxyOnAnyThread<FAnimInstanceProxy>();
 
 									// Initialize the correct parts of the linked instance
-									// 初始化链接实例的正确部分
+         // 初始化链接实例的正确部分
 									InitializeAndCacheBonesForLinkedRoot(LayerNode, ThisProxy, LinkedInstance, LinkedProxy);
 								}
 							}
@@ -3787,19 +3786,19 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 				else if (LayerPair.Key == NAME_None)
 				{
 					// Ungrouped path - each layer gets a separate instance
-					// 未分组的路径 - 每层都有一个单独的实例
+     // 未分组的路径 - 每层都有一个单独的实例
 					for (FAnimNode_LinkedAnimLayer* LayerNode : LayerPair.Value)
 					{
 						UClass* ClassToSet = ClassLayerNodesToSet.Key;
 
 						// Disallow setting the same class as this instance, which would create infinite recursion
-						// 禁止设置与此实例相同的类，这将创建无限递归
+      // 禁止设置与此实例相同的类，这将创建无限递归
 						if (ClassToSet != nullptr && ClassToSet != GetClass())
 						{
 							UAnimInstance* TargetInstance = LayerNode->GetTargetInstance<UAnimInstance>();
 
 							// Skip setting if the class is the same
-							// 如果班级相同则跳过设置
+       // 如果班级相同则跳过设置
 							if (TargetInstance == nullptr || ClassToSet != TargetInstance->GetClass())
 							{
 								UAnimInstance* NewLinkedInstance = NewObject<UAnimInstance>(MeshComp, ClassToSet);
@@ -3815,7 +3814,7 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 								}
 
 								// Unlink any layer nodes in the new linked instance, as they may have been hooked up to self in InitializeAnimation above.
-								// 取消链接新链接实例中的任何图层节点，因为它们可能已在上面的 InitializeAnimation 中连接到 self。
+        // 取消链接新链接实例中的任何图层节点，因为它们可能已在上面的 InitializeAnimation 中连接到 self。
 								UnlinkLayerNodesInInstance(NewLinkedInstance, LayerPair.Value);
 
 								LayerNode->SetLinkedLayerInstance(this, NewLinkedInstance);
@@ -3823,7 +3822,7 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 								if (!bInDeferSubGraphInitialization)
 								{
 									// Initialize the correct parts of the linked instance
-									// 初始化链接实例的正确部分
+         // 初始化链接实例的正确部分
 									if (LayerNode->LinkedRoot)
 									{
 										FAnimInstanceProxy& ThisProxy = GetProxyOnAnyThread<FAnimInstanceProxy>();
@@ -3855,24 +3854,24 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 				else
 				{
 					// Grouped path - each group gets an instance
-					// 分组路径 - 每个组都有一个实例
+     // 分组路径 - 每个组都有一个实例
 					// If the class is null, then reset to default (which can be null)
-					// 如果类为空，则重置为默认值（可以为空）
+     // 如果类为空，则重置为默认值（可以为空）
 					FAnimNode_LinkedAnimLayer* FirstLayerNode = LayerPair.Value[0];
 					UClass* ClassToSet = ClassLayerNodesToSet.Key;
 
 					// Disallow setting the same class as this instance, which would create infinite recursion
-					// 禁止设置与此实例相同的类，这将创建无限递归
+     // 禁止设置与此实例相同的类，这将创建无限递归
 					if (ClassToSet != nullptr && ClassToSet != GetClass())
 					{
 						UAnimInstance* TargetInstance = FirstLayerNode->GetTargetInstance<UAnimInstance>();
 
 						// Skip setting if the class is the same
-						// 如果班级相同则跳过设置
+      // 如果班级相同则跳过设置
 						if (TargetInstance == nullptr || ClassToSet != TargetInstance->GetClass())
 						{
 							// Create and add one linked instance for this group
-							// 为此组创建并添加一个链接实例
+       // 为此组创建并添加一个链接实例
 							UAnimInstance* NewLinkedInstance = NewObject<UAnimInstance>(MeshComp, ClassToSet);
 							NewLinkedInstance->bCreatedByLinkedAnimGraph = true;
 							NewLinkedInstance->InitializeAnimation();
@@ -3884,7 +3883,7 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 							}
 
 							// Unlink any layer nodes in the new linked instance, as they may have been hooked up to self in InitializeAnimation above.
-							// 取消链接新链接实例中的任何图层节点，因为它们可能已在上面的 InitializeAnimation 中连接到 self。
+       // 取消链接新链接实例中的任何图层节点，因为它们可能已在上面的 InitializeAnimation 中连接到 self。
 							UnlinkLayerNodesInInstance(NewLinkedInstance, LayerPair.Value);
 
 							for(FAnimNode_LinkedAnimLayer* LayerNode : LayerPair.Value)
@@ -3892,7 +3891,7 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 								LayerNode->SetLinkedLayerInstance(this, NewLinkedInstance);
 
 								// Propagate notify flags. If any nodes have this set then we need to propagate to the group.
-								// 传播通知标志。如果任何节点有这个集合，那么我们需要传播到该组。
+        // 传播通知标志。如果任何节点有这个集合，那么我们需要传播到该组。
 								NewLinkedInstance->bPropagateNotifiesToLinkedInstances |= LayerNode->bPropagateNotifiesToLinkedInstances;
 								NewLinkedInstance->bReceiveNotifiesFromLinkedInstances |= LayerNode->bReceiveNotifiesFromLinkedInstances;
 							}
@@ -3903,7 +3902,7 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 								FAnimInstanceProxy& LinkedProxy = NewLinkedInstance->GetProxyOnAnyThread<FAnimInstanceProxy>();
 
 								// Initialize the correct parts of the linked instance
-								// 初始化链接实例的正确部分
+        // 初始化链接实例的正确部分
 								for (FAnimNode_LinkedAnimLayer* LayerNode : LayerPair.Value)
 								{
 									if (LayerNode->LinkedRoot)
@@ -3919,7 +3918,7 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 					else
 					{
 						// Clear the node's instance - we didnt find a class to use
-						// 清除节点的实例 - 我们没有找到要使用的类
+      // 清除节点的实例 - 我们没有找到要使用的类
 						for (FAnimNode_LinkedAnimLayer* LayerNode : LayerPair.Value)
 						{
 							LayerNode->SetLinkedLayerInstance(this, nullptr);
@@ -3942,19 +3941,19 @@ void UAnimInstance::PerformLinkedLayerOverlayOperation(TSubclassOf<UAnimInstance
 
 #if DO_CHECK
 		// Verify required bones are consistent now we may have spawned a new instance.
-		// 验证所需的骨骼是否一致，现在我们可能已经生成了一个新实例。
+  // 验证所需的骨骼是否一致，现在我们可能已经生成了一个新实例。
 		// If required bones arrays for linked instances are not built to the same LOD, then when running the anim graph
-		// 如果链接实例所需的骨骼数组未构建到相同的 LOD，则在运行动画图时
+  // 如果链接实例所需的骨骼数组未构建到相同的 LOD，则在运行动画图时
 		// we can get problems/asserts trying to blend curves/poses of differing sizes (see FORT-354970, for example).
-		// [翻译失败: we can get problems/asserts trying to blend curves/poses of differing sizes (see FORT-354970, for example).]
+  // 尝试混合不同大小的曲线/姿势时，我们可能会遇到问题/断言（例如，请参见 FORT-354970）。
 		// If required bones are flagged for update we are assuming that RefreshBoneTransforms will end up rectifying
-		// 如果所需的骨骼被标记为更新，我们假设 RefreshBoneTransforms 最终将进行纠正
+  // 如果所需的骨骼被标记为更新，我们假设 RefreshBoneTransforms 最终将进行纠正
 		// any inconsistencies.
-		// 任何不一致之处。
+  // 任何不一致之处。
 		// We also skip this check during re-instancing as main & linked instances may get their re-initialization in
-		// 我们还在重新实例期间跳过此检查，因为主实例和链接实例可能会在以下位置重新初始化：
+  // 我们还在重新实例期间跳过此检查，因为主实例和链接实例可能会在以下位置重新初始化：
 		// a random order depending on what is being compiled.
-		// 随机顺序取决于正在编译的内容。
+  // 随机顺序取决于正在编译的内容。
 		if(!GIsReinstancing && MeshComp->GetAnimInstance() && MeshComp->bRequiredBonesUpToDate)
 		{
 			const int32 RootLOD = MeshComp->GetAnimInstance()->GetRequiredBones().GetCalculatedForLOD();
@@ -3979,13 +3978,13 @@ void UAnimInstance::LinkAnimClassLayers(TSubclassOf<UAnimInstance> InClass)
 		if(InResolvedClass != nullptr)
 		{
 			// If we have a valid resolved class, use that as an overlay
-			// [翻译失败: If we have a valid resolved class, use that as an overlay]
+   // 如果我们有一个有效的解析类，请将其用作覆盖层
 			return InResolvedClass;
 		}
 		else
 		{
 			// Otherwise use the default (which can be null)
-			// [翻译失败: Otherwise use the default (which can be null)]
+   // 否则使用默认值（可以为空）
 			return InLayerNode->InstanceClass.Get();
 		}
 	};
@@ -4008,13 +4007,13 @@ void UAnimInstance::UnlinkAnimClassLayers(TSubclassOf<UAnimInstance> InClass)
 		if (InResolvedClass != nullptr && InLayerNode->GetTargetInstance<UAnimInstance>()->GetClass() == InResolvedClass)
 		{
 			// Reset to default if the classes match
-			// 如果类别匹配，则重置为默认值
+   // 如果类别匹配，则重置为默认值
 			return InLayerNode->InstanceClass.Get();
 		}
 		else
 		{
 			// No change
-			// 没有变化
+   // 没有变化
 			return InLayerNode->GetTargetInstance<UAnimInstance>()->GetClass();
 		}
 	};
@@ -4033,13 +4032,13 @@ void UAnimInstance::InitializeGroupedLayers(bool bInDeferSubGraphInitialization)
 		if(InResolvedClass != nullptr)
 		{
 			// If we have a valid resolved class, use that as an overlay
-			// 如果我们有一个有效的解析类，请将其用作覆盖层
+   // 如果我们有一个有效的解析类，请将其用作覆盖层
 			return InResolvedClass;
 		}
 		else
 		{
 			// Otherwise use the default (which can be null)
-			// 否则使用默认值（可以为空）
+   // 否则使用默认值（可以为空）
 			return InLayerNode->InstanceClass.Get();
 		}
 	};
@@ -4311,14 +4310,14 @@ float UAnimInstance::CalculateDirection(const FVector& Velocity, const FRotator&
 		FVector NormalizedVel = Velocity.GetSafeNormal2D();
 
 		// get a cos(alpha) of forward vector vs velocity
-		// 获取前向矢量与速度的 cos(alpha)
+  // 获取前向矢量与速度的 cos(alpha)
 		float ForwardCosAngle = FVector::DotProduct(ForwardVector, NormalizedVel);
 		// now get the alpha and convert to degree
-		// 现在获取 alpha 并转换为度数
+  // 现在获取 alpha 并转换为度数
 		float ForwardDeltaDegree = FMath::RadiansToDegrees(FMath::Acos(ForwardCosAngle));
 
 		// depending on where right vector is, flip it
-		// 根据正确向量的位置，翻转它
+  // 根据正确向量的位置，翻转它
 		float RightCosAngle = FVector::DotProduct(RightVector, NormalizedVel);
 		if (RightCosAngle < 0)
 		{
@@ -4336,9 +4335,9 @@ void UAnimInstance::AddReferencedObjects(UObject* InThis, FReferenceCollector& C
 	UAnimInstance* This = CastChecked<UAnimInstance>(InThis);
 
 	// go through all montage instances, and update them
-	// 遍历所有蒙太奇实例并更新它们
+ // 遍历所有蒙太奇实例并更新它们
 	// and make sure their weight is updated properly
-	// 并确保他们的体重正确更新
+ // 并确保他们的体重正确更新
 	for (int32 I=0; I<This->MontageInstances.Num(); ++I)
 	{
 		if( This->MontageInstances[I] )
@@ -4348,7 +4347,7 @@ void UAnimInstance::AddReferencedObjects(UObject* InThis, FReferenceCollector& C
 	}
 
 	// the queued montage events also reference montage, and we want to keep those montages around if they are queued to trigger
-	// 排队的蒙太奇事件也引用蒙太奇，如果它们排队等待触发，我们希望保留这些蒙太奇
+ // 排队的蒙太奇事件也引用蒙太奇，如果它们排队等待触发，我们希望保留这些蒙太奇
 	for (int32 I = 0; I < This->QueuedMontageBlendingOutEvents.Num(); ++I)
 	{
 		Collector.AddReferencedObject(This->QueuedMontageBlendingOutEvents[I].Montage);
@@ -4415,9 +4414,9 @@ void UAnimInstance::UpdateMontageEvaluationData()
 		if (Comp && Comp->GetAnimInstance() != this)
 		{
 			// If we're using the main instance's montage eval data
-			// 如果我们使用主实例的蒙太奇评估数据
+   // 如果我们使用主实例的蒙太奇评估数据
 			// and we're not the main instance, then skip updating this instance's montage eval data
-			// 并且我们不是主实例，然后跳过更新该实例的蒙太奇评估数据
+   // 并且我们不是主实例，然后跳过更新该实例的蒙太奇评估数据
 			return;
 		}
 	}
@@ -4430,9 +4429,9 @@ void UAnimInstance::UpdateMontageEvaluationData()
 	for (FAnimMontageInstance* MontageInstance : MontageInstances)
 	{
 		// although montage can advance with 0.f weight, it is fine to filter by weight here
-		// 虽然蒙太奇可以以 0.f 权重前进，但这里按权重过滤就可以了
+  // 虽然蒙太奇可以以 0.f 权重前进，但这里按权重过滤就可以了
 		// because we don't want to evaluate them if 0 weight
-		// 因为如果权重为 0，我们不想评估它们
+  // 因为如果权重为 0，我们不想评估它们
 		if (MontageInstance->Montage && MontageInstance->GetWeight() > ZERO_ANIMWEIGHT_THRESH)
 		{
 			UE_LOG(LogAnimMontage, Verbose, TEXT("UpdateMontageEvaluationData : AnimMontage: %s,  (DesiredWeight:%0.2f, Weight:%0.2f)"),
@@ -4456,9 +4455,9 @@ void UAnimInstance::UpdateMontageEvaluationData()
 	Proxy.GetSlotGroupInertializationRequestDataMap() = SlotGroupInertializationRequestDataMap;
 
 	// Reset inertialization requests every frame.
-	// 每帧重置惯性化请求。
+ // 每帧重置惯性化请求。
 	// If the request is missed by the graph (i.e. the slot node is not relevant), we assume what brought it back to relevancy will handle the blend instead.
-	// 如果图表错过了请求（即槽节点不相关），我们假设使其恢复相关性的将处理混合。
+ // 如果图表错过了请求（即槽节点不相关），我们假设使其恢复相关性的将处理混合。
 	SlotGroupInertializationRequestDataMap.Reset();
 }
 
@@ -4824,7 +4823,7 @@ void UAnimInstance::HandleObjectsReinstanced(const TMap<UObject*, UObject*>& Old
 			{
 				TRACE_OBJECT_LIFETIME_BEGIN(this);
 				// Minimally reinit proxy (i.e. dont call per-node initialization) unless we are in an editor preview world (i.e. we are in the anim BP editor)
-				// 至少重新初始化代理（即不调用每个节点初始化），除非我们处于编辑器预览世界中（即我们处于动画 BP 编辑器中）
+    // 至少重新初始化代理（即不调用每个节点初始化），除非我们处于编辑器预览世界中（即我们处于动画 BP 编辑器中）
 				UWorld* World = GetWorld();
 				if(World && World->WorldType == EWorldType::EditorPreview)
 				{
@@ -4845,9 +4844,9 @@ void UAnimInstance::HandleObjectsReinstanced(const TMap<UObject*, UObject*>& Old
 		}
 
 		// Forward to custom property-based nodes even if it wasnt this object that was reinstanced, as they may reference different objects that may
-		// 即使不是重新实例化的对象，也会转发到基于自定义属性的节点，因为它们可能引用不同的对象
+  // 即使不是重新实例化的对象，也会转发到基于自定义属性的节点，因为它们可能引用不同的对象
 		// also have been reinstanced
-		// 也已被重新实例化
+  // 也已被重新实例化
 		if(IAnimClassInterface* AnimClassInterface = IAnimClassInterface::GetFromClass(GetClass()))
 		{
 			for(const FStructProperty* NodeProperty : AnimClassInterface->GetAnimNodeProperties())

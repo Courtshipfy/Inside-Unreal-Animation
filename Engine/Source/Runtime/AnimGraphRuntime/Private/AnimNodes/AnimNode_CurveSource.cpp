@@ -20,13 +20,13 @@ FAnimNode_CurveSource::FAnimNode_CurveSource()
 void FAnimNode_CurveSource::PreUpdate(const UAnimInstance* AnimInstance)
 {
 	// re-bind to our named curve source in pre-update
-	// 在预更新中重新绑定到我们命名的曲线源
+ // 在预更新中重新绑定到我们命名的曲线源
 	// we do this here to allow re-binding of the source without reinitializing the whole
-	// 我们在这里这样做是为了允许重新绑定源而无需重新初始化整个
+ // 我们在这里这样做是为了允许重新绑定源而无需重新初始化整个
 	// anim graph. If the source goes away (e.g. if an audio component is destroyed) or the
-	// 动画图。如果源消失（例如，如果音频组件被破坏）或
+ // 动画图。如果源消失（例如，如果音频组件被破坏）或
 	// binding changes then we can re-bind to a new object
-	// 绑定更改然后我们可以重新绑定到新对象
+ // 绑定更改然后我们可以重新绑定到新对象
 	if (CurveSource.GetObject() == nullptr || Cast<ICurveSourceInterface>(CurveSource.GetObject())->Execute_GetBindingName(CurveSource.GetObject()) != SourceBinding)
 	{
 		ICurveSourceInterface* PotentialCurveSource = nullptr;
@@ -48,7 +48,7 @@ void FAnimNode_CurveSource::PreUpdate(const UAnimInstance* AnimInstance)
 		if (Actor)
 		{
 			// check if our actor implements our interface
-			// 检查我们的参与者是否实现了我们的接口
+   // 检查我们的参与者是否实现了我们的接口
 			if (IsSpecifiedCurveSource(Actor, SourceBinding, CurveSource))
 			{
 				return;
@@ -123,7 +123,7 @@ void FAnimNode_CurveSource::Update_AnyThread(const FAnimationUpdateContext& Cont
 {
 	DECLARE_SCOPE_HIERARCHICAL_COUNTER_ANIMNODE(Update_AnyThread)
 	// Evaluate any BP logic plugged into this node
-	// 评估插入此节点的任何 BP 逻辑
+ // 评估插入此节点的任何 BP 逻辑
 	GetEvaluateGraphExposedInputs().Execute(Context);
 	SourcePose.Update(Context);
 }

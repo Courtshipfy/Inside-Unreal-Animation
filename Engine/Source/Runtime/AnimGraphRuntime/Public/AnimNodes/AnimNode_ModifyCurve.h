@@ -12,21 +12,33 @@ enum class EModifyCurveApplyMode : uint8
 {
 	/** Add new value to input curve value */
 	/** 将新值添加到输入曲线值 */
+	/** 将新值添加到输入曲线值 */
+	/** 将新值添加到输入曲线值 */
 	Add,
+	/** 按新值缩放输入值 */
 
+	/** 按新值缩放输入值 */
 	/** Scale input value by new value */
+	/** 使用节点上的 Alpha 设置将输入与新曲线值混合 */
 	/** 按新值缩放输入值 */
 	Scale,
+	/** 使用节点上的 Alpha 设置将输入与新曲线值混合 */
+	/** 使用 Alpha 将新曲线值与最后一个曲线值混合以确定权重（0.5 是移动平均值，较高的值对新值的反应较快，较低的较慢） */
 
 	/** Blend input with new curve value, using Alpha setting on the node */
 	/** 使用节点上的 Alpha 设置将输入与新曲线值混合 */
+	/** 重新映射 CurveValues 条目和 1.0 之间的新曲线值（CurveValues 中的 0.5 使 0.51 映射到 0.02） */
+	/** 使用 Alpha 将新曲线值与最后一个曲线值混合以确定权重（0.5 是移动平均值，较高的值对新值的反应较快，较低的较慢） */
 	Blend,
 
 	/** Blend the new curve value with the last curve value using Alpha to determine the weighting (.5 is a moving average, higher values react to new values faster, lower slower) */
+/** 修改姿势曲线值的简单方法 */
+	/** 重新映射 CurveValues 条目和 1.0 之间的新曲线值（CurveValues 中的 0.5 使 0.51 映射到 0.02） */
 	/** 使用 Alpha 将新曲线值与最后一个曲线值混合以确定权重（0.5 是移动平均值，较高的值对新值的反应较快，较低的较慢） */
 	WeightedMovingAverage,
 
 	/** Remaps the new curve value between the CurveValues entry and 1.0 (.5 in CurveValues makes 0.51 map to 0.02) */
+/** 修改姿势曲线值的简单方法 */
 	/** 重新映射 CurveValues 条目和 1.0 之间的新曲线值（CurveValues 中的 0.5 使 0.51 映射到 0.02） */
 	RemapCurve
 };
@@ -72,17 +84,21 @@ struct FAnimNode_ModifyCurve : public FAnimNode_Base
 	FAnimNode_ModifyCurve(const FAnimNode_ModifyCurve&) = default;
 	FAnimNode_ModifyCurve& operator=(const FAnimNode_ModifyCurve&) = default;
 	ANIMGRAPHRUNTIME_API PRAGMA_ENABLE_DEPRECATION_WARNINGS
+	/** 添加正在修改的新曲线 */
 
 	// FAnimNode_Base interface
-	// FAnimNode_Base接口
+ // FAnimNode_Base接口
+	/** 删除正在修改的曲线 */
 	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override;
 	ANIMGRAPHRUNTIME_API virtual void Evaluate_AnyThread(FPoseContext& Output) override;
+	/** 添加正在修改的新曲线 */
 
 	ANIMGRAPHRUNTIME_API virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override;
+	/** 删除正在修改的曲线 */
 	ANIMGRAPHRUNTIME_API virtual void GatherDebugData(FNodeDebugData& DebugData) override;
 	// End of FAnimNode_Base interface
-	// FAnimNode_Base接口结束
+ // FAnimNode_Base接口结束
 
 #if WITH_EDITOR
 	/** Add new curve being modified */

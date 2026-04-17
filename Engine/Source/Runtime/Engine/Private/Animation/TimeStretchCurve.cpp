@@ -18,22 +18,22 @@ void FTimeStretchCurve::Reset()
 void FTimeStretchCurve::BakeFromFloatCurve(const FFloatCurve& TimeStretchCurve, float InSequenceLength)
 {
 	// Figure out how many steps this is going to take, 
-	// 计算出这将采取多少步，
+ // 计算出这将采取多少步，
 	// as we want to sample this curve with a fixed time step, across the whole length of the animation.
-	// 因为我们想要在动画的整个长度上以固定的时间步长对该曲线进行采样。
+ // 因为我们想要在动画的整个长度上以固定的时间步长对该曲线进行采样。
 	const float DesiredSamplingRate = FMath::Clamp(SamplingRate, 1.f, 240.f);
 	const int32 NumTimeStretchCurveSegments = FMath::Max(FMath::FloorToInt(InSequenceLength * DesiredSamplingRate), 1);
 
 	// Find actual SamplingTimeStep based on number of NumSegments.
-	// 根据 NumSegments 的数量查找实际的 SamplingTimeStep。
+ // 根据 NumSegments 的数量查找实际的 SamplingTimeStep。
 	// We want to cover the entire SequenceLength with fixed time steps. 
-	// 我们希望用固定的时间步长覆盖整个 SequenceLength。
+ // 我们希望用固定的时间步长覆盖整个 SequenceLength。
 	// So we can't exactly matching the sampling rate.
-	// 所以我们无法完全匹配采样率。
+ // 所以我们无法完全匹配采样率。
 	const float SamplingTimeStep = InSequenceLength / (float)NumTimeStretchCurveSegments;
 
 	// Sample curve at given time steps.
-	// 给定时间步长的样本曲线。
+ // 给定时间步长的样本曲线。
 	float MaxValue = 0.f;
 	for (int32 SegmentIndex = 0; SegmentIndex < NumTimeStretchCurveSegments; SegmentIndex++)
 	{
@@ -48,7 +48,7 @@ void FTimeStretchCurve::BakeFromFloatCurve(const FFloatCurve& TimeStretchCurve, 
 	}
 
 	// If Max Value is near zero, we have no valid time stretching curve.
-	// 如果最大值接近零，则我们没有有效的时间拉伸曲线。
+ // 如果最大值接近零，则我们没有有效的时间拉伸曲线。
 	if (MaxValue < UE_KINDA_SMALL_NUMBER)
 	{
 		Reset();
@@ -56,16 +56,16 @@ void FTimeStretchCurve::BakeFromFloatCurve(const FFloatCurve& TimeStretchCurve, 
 	}
 
 	// Normalize Samples.
-	// 标准化样本。
+ // 标准化样本。
 	for (FTimeStretchCurveMarker& CurrMarker : Markers)
 	{
 		CurrMarker.Alpha /= MaxValue;
 	}
 
 	// Optimize TimeStretchMarkers (Remove near value keys)
-	// 优化 TimeStretchMarkers（删除接近值的键）
+ // 优化 TimeStretchMarkers（删除接近值的键）
 	// Don't trim last marker, we need it to describe the end of the animation.
-	// 不要修剪最后一个标记，我们需要它来描述动画的结束。
+ // 不要修剪最后一个标记，我们需要它来描述动画的结束。
 	{
 		const int32 NumSegments = Markers.Num();
 		int32 MarkerIndex = 0;
@@ -87,9 +87,9 @@ void FTimeStretchCurve::BakeFromFloatCurve(const FFloatCurve& TimeStretchCurve, 
 		Markers.Shrink();
 
 		// We need to have more than 2 markers to do anything interesting.
-		// 我们需要有两个以上的标记才能做任何有趣的事情。
+  // 我们需要有两个以上的标记才能做任何有趣的事情。
 		// 2 markers means start and end, and a constant value of 1.
-		// 2个标记表示开始和结束，常量值为1。
+  // 2个标记表示开始和结束，常量值为1。
 		if (Markers.Num() <= 2)
 		{
 			Reset();
@@ -98,24 +98,24 @@ void FTimeStretchCurve::BakeFromFloatCurve(const FFloatCurve& TimeStretchCurve, 
 	}
 
 	// Cache upper and lowers bounds.
-	// 缓存上限和下限。
+ // 缓存上限和下限。
 	// This is basically the most scaling we can get out of the curve, 
-	// 这基本上是我们可以从曲线中得到的最大缩放比例，
+ // 这基本上是我们可以从曲线中得到的最大缩放比例，
 	// and therefore the shortest or longest play back time we can get without using uniform scaling.
-	// 因此，我们可以在不使用统一缩放的情况下获得最短或最长的播放时间。
+ // 因此，我们可以在不使用统一缩放的情况下获得最短或最长的播放时间。
 	{
 		// No uniform scaling
-		// [翻译失败: No uniform scaling]
+  // 没有统一的缩放比例
 		const float U = 1.f;
 
 		// We don't want S to get too big or we risk running into precision issues.
-		// [翻译失败: We don't want S to get too big or we risk running into precision issues.]
+  // 我们不希望 S 变得太大，否则我们可能会遇到精度问题。
 		const float S_Max = 100.f;
 
 		// We don't want to get too close to -1 here, for precision issues
-		// [翻译失败: We don't want to get too close to -1 here, for precision issues]
+  // 由于精度问题，我们不想在这里太接近 -1
 		// And a value of -1 means animation play back is paused.
-		// 值为-1 表示动画播放暂停。
+  // 值为-1 表示动画播放暂停。
 		const float S_Min = -1.f + 0.01f;
 
 		float P_Target_Min = 0.f;
@@ -140,7 +140,7 @@ void FTimeStretchCurve::BakeFromFloatCurve(const FFloatCurve& TimeStretchCurve, 
 			Sum_dT_i_by_C_i[(uint8)ETimeStretchCurveMapping::T_Original] += dT_Original_i * C_i;
 
 			// Cache lower bound
-			// 缓存下限
+   // 缓存下限
 			{
 				const float PlayRate_TargetMin_i = (U * (1.f + S_Max * C_i));
 				P_Target_Min += dT_Original_i / PlayRate_TargetMin_i;
@@ -152,7 +152,7 @@ void FTimeStretchCurve::BakeFromFloatCurve(const FFloatCurve& TimeStretchCurve, 
 			}
 
 			// Cache upper bound
-			// 缓存上限
+   // 缓存上限
 			{
 				const float PlayRate_TargetMax_i = (U * (1.f + S_Min * C_i));
 				P_Target_Max += dT_Original_i / PlayRate_TargetMax_i;
@@ -171,9 +171,9 @@ void FTimeStretchCurve::BakeFromFloatCurve(const FFloatCurve& TimeStretchCurve, 
 	}
 
 	// Validate our cached data. 
-	// 验证我们的缓存数据。
+ // 验证我们的缓存数据。
 	// If we don't have valid data, abort.
-	// 如果我们没有有效数据，则中止。
+ // 如果我们没有有效数据，则中止。
 	bool bHasValidData = true;
 	{
 		const FTimeStretchCurveMarker& LastMarker = Markers.Last();
@@ -183,16 +183,16 @@ void FTimeStretchCurve::BakeFromFloatCurve(const FFloatCurve& TimeStretchCurve, 
 		const float T_TargetMax = LastMarker.Time[(uint8)ETimeStretchCurveMapping::T_TargetMax];
 
 		// Cached target bounds should not be zero, or we can't remap them in 'ConditionallyUpdateCachedData'
-		// 缓存的目标边界不应为零，否则我们无法在“ConditionallyUpdateCachedData”中重新映射它们
+  // 缓存的目标边界不应为零，否则我们无法在“ConditionallyUpdateCachedData”中重新映射它们
 		// to our desired target time.
-		// 到我们想要的目标时间。
+  // 到我们想要的目标时间。
 		if (FMath::IsNearlyZero(T_TargetMin) || FMath::IsNearlyZero(T_TargetMax))
 		{
 			bHasValidData = false;
 		}
 
 		// Similarly, if our bounds are too close to T_Original, we can't do our remapping either.
-		// 同样，如果我们的边界太接近 T_Original，我们也无法进行重新映射。
+  // 同样，如果我们的边界太接近 T_Original，我们也无法进行重新映射。
 		if (FMath::IsNearlyEqual(T_Original, T_TargetMin) || FMath::IsNearlyEqual(T_Original, T_TargetMax))
 		{
 			bHasValidData = false;
@@ -208,7 +208,7 @@ void FTimeStretchCurve::BakeFromFloatCurve(const FFloatCurve& TimeStretchCurve, 
 void FTimeStretchCurveInstance::InitializeFromPlayRate(float InPlayRate, const FTimeStretchCurve& TimeStretchCurve)
 {
 	// This is set to true at the end, if initialization is successful.
-	// 如果初始化成功，则最后设置为 true。
+ // 如果初始化成功，则最后设置为 true。
 	bHasValidData = false;
 	if (!TimeStretchCurve.IsValid() || FMath::IsNearlyZero(InPlayRate))
 	{
@@ -219,9 +219,9 @@ void FTimeStretchCurveInstance::InitializeFromPlayRate(float InPlayRate, const F
 	T_Target = T_Original / FMath::Abs(InPlayRate);
 
 	// See if T_Target falls in a range we have already mapped.
-	// 看看 T_Target 是否落在我们已经映射的范围内。
+ // 看看 T_Target 是否落在我们已经映射的范围内。
 	// If not, we need uniform scaling U to help us out.
-	// 如果没有，我们需要统一缩放 U 来帮助我们解决这个问题。
+ // 如果没有，我们需要统一缩放 U 来帮助我们解决这个问题。
 	float Alpha;
 	float U;
 	ETimeStretchCurveMapping CachedBoundType;
@@ -235,7 +235,7 @@ void FTimeStretchCurveInstance::InitializeFromPlayRate(float InPlayRate, const F
 		if (T_Target < T_TargetMin)
 		{
 			// Make sure we don't divide by zero. This should not have been allowed at curve creation time.
-			// 确保我们不除以零。在曲线创建时不应允许这样做。
+   // 确保我们不除以零。在曲线创建时不应允许这样做。
 			check(!FMath::IsNearlyZero(T_TargetMin));
 			U = T_Target / T_TargetMin;
 			Alpha = 1.f;
@@ -243,7 +243,7 @@ void FTimeStretchCurveInstance::InitializeFromPlayRate(float InPlayRate, const F
 		else
 		{
 			// Make sure we don't divide by zero. This should not have been allowed at curve creation time.
-			// 确保我们不除以零。在曲线创建时不应允许这样做。
+   // 确保我们不除以零。在曲线创建时不应允许这样做。
 			check(!FMath::IsNearlyEqual(T_Original, T_TargetMin));
 			U = 1.f;
 			Alpha = (T_Original - T_Target) / (T_Original - T_TargetMin);
@@ -257,7 +257,7 @@ void FTimeStretchCurveInstance::InitializeFromPlayRate(float InPlayRate, const F
 		if (T_Target > T_TargetMax)
 		{
 			// Make sure we don't divide by zero. This should not have been allowed at curve creation time.
-			// 确保我们不除以零。在曲线创建时不应允许这样做。
+   // 确保我们不除以零。在曲线创建时不应允许这样做。
 			check(!FMath::IsNearlyZero(T_TargetMax));
 			U = T_Target / T_TargetMax;
 			Alpha = 1.f;
@@ -265,7 +265,7 @@ void FTimeStretchCurveInstance::InitializeFromPlayRate(float InPlayRate, const F
 		else
 		{
 			// Make sure we don't divide by zero. This should not have been allowed at curve creation time.
-			// 确保我们不除以零。在曲线创建时不应允许这样做。
+   // 确保我们不除以零。在曲线创建时不应允许这样做。
 			check(!FMath::IsNearlyEqual(T_Original, T_TargetMax));
 			U = 1.f;
 			Alpha = (T_Target - T_Original) / (T_TargetMax - T_Original);
@@ -294,7 +294,7 @@ void FTimeStretchCurveInstance::InitializeFromPlayRate(float InPlayRate, const F
 		}
 
 		// Set to end exactly, no precision error.
-		// 设定准确结束，无精度误差。
+  // 设定准确结束，无精度误差。
 		P_Marker_Target[LastMarkerIndex] = T_Target;
 	}
 
@@ -338,7 +338,7 @@ void FTimeStretchCurveInstance::InitializeFromPlayRate(float InPlayRate, const F
 	}
 
 	// Sanity check we're not dealing with bad numbers.
-	// 健全性检查我们没有处理错误的数字。
+ // 健全性检查我们没有处理错误的数字。
 	check(FMath::IsFinite(S) && !FMath::IsNaN(S));
 	check(FMath::IsFinite(U) && !FMath::IsNaN(U));
 
@@ -367,7 +367,7 @@ void FTimeStretchCurveInstance::InitializeFromPlayRate(float InPlayRate, const F
 		}
 
 		// Set exact end time.
-		// 设置准确的结束时间。
+  // 设置准确的结束时间。
 		P_Marker_Original[LastMarkerIndex] = T_Original;
 	}
 
@@ -400,9 +400,9 @@ void FTimeStretchCurveInstance::InitializeFromPlayRate(float InPlayRate, const F
 		}
 
 		// We need more than 2 markers to do anything interesting.
-		// 我们需要 2 个以上的标记才能做任何有趣的事情。
+  // 我们需要 2 个以上的标记才能做任何有趣的事情。
 		// Since 2 markers would be a constant curve of 1.
-		// 因为 2 个标记将是一条恒定曲线 1。
+  // 因为 2 个标记将是一条恒定曲线 1。
 		if (P_Marker_Original.Num() <= 2)
 		{
 			return;
@@ -410,7 +410,7 @@ void FTimeStretchCurveInstance::InitializeFromPlayRate(float InPlayRate, const F
 	}
 
 	// Successful initialization
-	// 初始化成功
+ // 初始化成功
 	bHasValidData = true;
 }
 
@@ -419,7 +419,7 @@ void FTimeStretchCurveInstance::UpdateMarkerIndexForPosition(int32& InOutMarkerI
 	check(bHasValidData);
 
 	// If maker is invalid, binary search new match
-	// 如果maker无效，则二分查找新的匹配
+ // 如果maker无效，则二分查找新的匹配
 	if ((InOutMarkerIndex < 0) || (InOutMarkerIndex > (InMarkerPositions.Num() - 2)))
 	{
 		InOutMarkerIndex = BinarySearchMarkerIndex(InPosition, InMarkerPositions);
@@ -427,18 +427,18 @@ void FTimeStretchCurveInstance::UpdateMarkerIndexForPosition(int32& InOutMarkerI
 	}
 
 	// Then, test if we're still with the same marker, then we don't need to perform any work.
-	// 然后，测试我们是否仍然使用相同的标记，然后我们不需要执行任何工作。
+ // 然后，测试我们是否仍然使用相同的标记，然后我们不需要执行任何工作。
 	if (IsValidMarkerForPosition(InOutMarkerIndex, InPosition, InMarkerPositions))
 	{
 		return;
 	}
 
 	// Otherwise do a binary search.
-	// 否则进行二分查找。
+ // 否则进行二分查找。
 	// @todo binary search will take at most Log2(N) steps.
-	// @todo 二分搜索最多需要 Log2(N) 步骤。
+ // @todo 二分搜索最多需要 Log2(N) 步骤。
 	// Since animation tends to move linearly we could check ahead, to see if linear search would be more efficient.
-	// 由于动画倾向于线性移动，我们可以提前检查，看看线性搜索是否会更有效。
+ // 由于动画倾向于线性移动，我们可以提前检查，看看线性搜索是否会更有效。
 	InOutMarkerIndex = BinarySearchMarkerIndex(InPosition, InMarkerPositions);
 }
 
@@ -499,7 +499,7 @@ int32 FTimeStretchCurveInstance::BinarySearchMarkerIndex(float InPosition, const
 	}
 
 	// Verify the marker we found is the right one
-	// 验证我们找到的标记是否正确
+ // 验证我们找到的标记是否正确
 	ensure(MarkerIndex != INDEX_NONE);
 	ensure(AreValidMarkerBookendsForPosition(InPosition, P_CurrMarker, P_NextMarker));
 
@@ -514,7 +514,7 @@ float FTimeStretchCurveInstance::Convert_P_Original_To_Target(int32 InMarkerInde
 	const float P_NextMarker_Original = P_Marker_Original[InMarkerIndex + 1];
 
 	// Note: (P_NextMarker_Original - P_CurrMarker_Original) has been verified to be non zero in 'ConditionallyUpdateTimeStretchCurveCachedData'
-	// 注意：（P_NextMarker_Original - P_CurrMarker_Original）已在“ConditionallyUpdateTimeStretchCurveCachedData”中验证为非零
+ // 注意：（P_NextMarker_Original - P_CurrMarker_Original）已在“ConditionallyUpdateTimeStretchCurveCachedData”中验证为非零
 	const float Alpha = (In_P_Original - P_CurrMarker_Original) / (P_NextMarker_Original - P_CurrMarker_Original);
 
 	ensure(Alpha >= 0.f);
@@ -535,7 +535,7 @@ float FTimeStretchCurveInstance::Convert_P_Target_To_Original(int32 InMarkerInde
 	const float P_NextMarker_Target = P_Marker_Target[InMarkerIndex + 1];
 
 	// Note: (P_NextMarker_Target - P_CurrMarker_Target) has been verified to be non zero in 'ConditionallyUpdateTimeStretchCurveCachedData'
-	// 注意：（P_NextMarker_Target - P_CurrMarker_Target）已在“ConditionallyUpdateTimeStretchCurveCachedData”中验证为非零
+ // 注意：（P_NextMarker_Target - P_CurrMarker_Target）已在“ConditionallyUpdateTimeStretchCurveCachedData”中验证为非零
 	const float Alpha = (In_P_Target - P_CurrMarker_Target) / (P_NextMarker_Target - P_CurrMarker_Target);
 
 	ensure(Alpha >= 0.f);
