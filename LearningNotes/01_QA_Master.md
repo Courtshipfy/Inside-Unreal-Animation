@@ -196,4 +196,109 @@ Evaluate("5*4")
 
 ---
 
+---
+
+## Q4: 什么情况下动画会强制在主线程立即更新（而不是并行更新）？
+
+### **背景描述**
+在 `UAnimInstance::NeedsImmediateUpdate()` 函数中，有一个复杂的条件判断来决定动画是否需要在主线程立即更新。理解这些条件对于优化动画性能和调试至关重要。
+
+### **核心解答**
+这个函数返回 `true`（需要立即更新）的条件有 **8 个**，满足任意一个就会强制在主线程立即更新：
+
+#### 1. **Root Motion 需求**
+```cpp
+(bNeedsValidRootMotion && RootMotionMode == ERootMotionMode::RootMotionFromEverything)
+```
+- 需要有效的 Root Motion 且模式是"从所有动画提取"
+- Root Motion 涉及角色位置移动，必须在主线程处理以保证与物理系统同步
+
+#### 2. **不能并行执行**
+```cpp
+!CanRunParallelWork()
+```
+- 动画实例自身判断不支持并行（可能有线程不安全的操作）
+- 例如：访问了外部 UObject、调用了非线程安全的函数等
+
+#### 3. **帧内调试模式**
+```cpp
+GIntraFrameDebuggingGameThread
+```
+- 全局调试标志开启
+- 用于引擎级别的帧内调试
+
+#### 4. **编辑器调试中**（仅编辑器）
+```cpp
+#if WITH_EDITOR
+(Blueprint && (Blueprint->GetObjectBeingDebugged() == this || 
+               FKismetDebugUtilities::BlueprintHasBreakpoints(Blueprint)))
+#endif
+```
+- 当前实例正在被调试 **或** 蓝图设置了断点
+- 确保断点、监视变量等调试功能可用
+- 使用持久化的 Ubergraph Frame 以支持调试设施
+
+#### 5. **并行更新 CVar 关闭**
+```cpp
+CVarUseParallelAnimUpdate.GetValueOnGameThread() == 0
+```
+- 控制台变量 `a.ParallelAnimUpdate` 禁用了并行更新
+- 可通过控制台命令全局控制
+
+#### 6. **并行评估 CVar 关闭**
+```cpp
+CVarUseParallelAnimationEvaluation.GetValueOnGameThread() == 0
+```
+- 控制台变量 `a.ParallelAnimEvaluation` 禁用了并行评估
+- 评估（Evaluation）是动画计算的核心阶段
+
+#### 7. **实例禁用多线程**
+```cpp
+!bUseParallelUpdateAnimation
+```
+- 这个实例的多线程标志被关闭
+- 受引擎全局设置 `bAllowMultiThreadedAnimationUpdate` 和实例设置 `bUseMultiThreadedAnimationUpdate` 影响
+- 可通过 CVar `a.ForceParallelAnimUpdate` 强制开启
+
+#### 8. **时间增量为 0**
+```cpp
+DeltaSeconds == 0.0f
+```
+- 游戏暂停或时间静止时
+- 此时不需要更新动画状态
+
+### **完整代码**
+```cpp
+bool UAnimInstance::NeedsImmediateUpdate(float DeltaSeconds, bool bNeedsValidRootMotion) const
+{
+    const bool bUseParallelUpdateAnimation = 
+        (GetDefault<UEngine>()->bAllowMultiThreadedAnimationUpdate && bUseMultiThreadedAnimationUpdate) ||
+        (CVarForceUseParallelAnimUpdate.GetValueOnGameThread() != 0);
+
+#if WITH_EDITOR
+    UAnimBlueprintGeneratedClass* GeneratedClass = Cast<UAnimBlueprintGeneratedClass>(GetClass());
+    UBlueprint* Blueprint = GeneratedClass ? Cast<UBlueprint>(GeneratedClass->ClassGeneratedBy) : nullptr;
+#endif
+
+    return
+        (bNeedsValidRootMotion && RootMotionMode == ERootMotionMode::RootMotionFromEverything) ||
+        !CanRunParallelWork() ||
+        GIntraFrameDebuggingGameThread ||
+#if WITH_EDITOR
+        (Blueprint && (Blueprint->GetObjectBeingDebugged() == this || 
+                       FKismetDebugUtilities::BlueprintHasBreakpoints(Blueprint))) ||
+#endif
+        CVarUseParallelAnimUpdate.GetValueOnGameThread() == 0 ||
+        CVarUseParallelAnimationEvaluation.GetValueOnGameThread() == 0 ||
+        !bUseParallelUpdateAnimation ||
+        DeltaSeconds == 0.0f;
+}
+```
+
+### **总结**
+简单说：**Root Motion、调试、配置禁用、暂停**任何一个都会强制立即更新。这是一个"安全优先"的设计，确保在需要精确控制或调试时，动画系统不会因为多线程而产生不可预测的行为。
+
+---
+
 *（后续疑问请在此下方继续记录...）*
+
